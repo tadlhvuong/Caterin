@@ -1,0 +1,42 @@
+﻿@* @using HKMain.Areas.Admin.Models
+@model RegisterViewModel
+@{
+    var culture = CultureInfo.CurrentCulture.Name;
+    ViewData["Title"] = _localizer["RegisterText"];
+}
+<div class="card-body">
+    <form href="/admin/@culture/@_localizer["AccountUrl"]/@_localizer["RegisterUrl"]" method="post">
+        <div asp-validation-summary="All"></div>
+        <div class="input-group mb-3">
+            <input asp-for="Email" type="email" class="form-control" placeholder="Email">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input asp-for="Password" type="password" class="form-control" localize-att-placeholder="PasswordText">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input asp-for="ConfirmPassword" type="password" class="form-control" localize-att-placeholder="RetypePasswordText">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-block" >RegisterText</button>
+            </div>
+        </div>
+    </form>
+    <partial name="_LoginEx">
+        <a href="/admin/@culture/@_localizer["AccountUrl"]/@_localizer["LoginUrl"]" >LoginText</a>
+</div> *@

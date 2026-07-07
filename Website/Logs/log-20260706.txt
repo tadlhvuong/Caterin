@@ -1,0 +1,94 @@
+[2026-07-06 09:42:27 INF] () Application starting
+[2026-07-06 09:42:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 09:42:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 09:42:28 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 09:42:28 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 09:42:28 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 09:44:25 INF] () Application starting
+[2026-07-06 09:44:25 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 09:44:25 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 09:44:25 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 09:44:25 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 09:44:25 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 09:44:46 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-06 09:44:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-06 09:47:27 INF] () Application starting
+[2026-07-06 09:47:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 09:47:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 09:47:27 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 09:47:27 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 09:47:27 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 09:47:42 INF] () Application starting
+[2026-07-06 09:47:42 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 09:47:42 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 09:47:42 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 09:47:42 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 09:47:42 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 09:47:49 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-06 09:47:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-06 09:48:18 INF] () Application starting
+[2026-07-06 09:48:18 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 09:48:18 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 09:48:18 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 09:48:18 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 09:48:18 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 14:32:21 INF] () Application starting
+[2026-07-06 14:32:21 INF] () Application starting
+[2026-07-06 14:32:21 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 14:32:21 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 14:32:21 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 14:32:21 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 14:32:21 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 14:32:36 INF] () Application starting
+[2026-07-06 14:32:36 INF] () Application starting
+[2026-07-06 14:32:36 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 14:32:36 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 14:32:36 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 14:32:36 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 14:32:36 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 14:33:01 INF] () Application starting
+[2026-07-06 14:33:01 INF] () mbvH5Hw5D8RjxQ89GL8wSWCoutCzvj4tA1IgbhOFQcx2QFdds1yQqiAQgJkPQTCh2x+AwHEV1mr03syWYf5vNw==
+[2026-07-06 14:33:01 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 14:33:01 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 14:33:01 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 14:33:01 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 14:33:01 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 14:53:08 INF] () Application starting
+[2026-07-06 14:53:08 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-06 14:53:08 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-06 14:53:08 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-06 14:53:08 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-06 14:53:08 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-06 14:53:14 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-06 14:53:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-06 14:53:16 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-06 14:53:16 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-06 14:53:16 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-06 14:53:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json

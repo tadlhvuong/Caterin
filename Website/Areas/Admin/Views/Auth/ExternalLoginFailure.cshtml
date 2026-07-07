@@ -1,0 +1,15 @@
+﻿@model string
+@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<section class="content">
+    <div class="ml-2 mr-2">
+        <div class="error-content">
+            <h3><i class="fas fa-exclamation-triangle text-danger"></i><localize>LoginErrorText</localize></h3>
+
+            <p>
+                @Model <br /> <a href="/admin/auth/login" class="btn btn-primary mt-xl">LoginText</a>.
+            </p>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,14 @@
+﻿@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<section class="content">
+    <div class="error-page" style="width: 100%;">
+        <div class="error-content" style="margin-left: 20px;">
+            <h3><i class="fas fa-exclamation-triangle text-danger"></i> @ViewData["Title"]</h3>
+
+            <p>
+                <localize>DeniedAccessContentText</localize> <a href="/admin/auth/login" >LoginText</a>.
+            </p>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,24 @@
+﻿@using Website.Areas.Admin.Models
+@model ExternalLoginConfirmationViewModel
+@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<div class="card-body">
+    <p class="login-box-msg">Logoin</p>
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <form href="/admin/Account/ExternalLoginConfirmation?returnUrl=@ViewBag.ReturnUrl" method="post">
+        <div class="input-group mb-3">
+            <input asp-for="Email" type="email" class="form-control" placeholder="Email">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-block" >ConfirmText</button>
+            </div>
+        </div>
+    </form>
+</div>

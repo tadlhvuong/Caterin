@@ -1,0 +1,1009 @@
+[2026-07-02 08:25:51 INF] () Application starting
+[2026-07-02 08:25:52 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:25:52 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:25:52 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:25:52 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:25:52 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:25:52 ERR] (Shared.Services.Authentication.RoutePermissionService) RoutePermission Sync Failed
+System.InvalidOperationException: Route 'Home/Index' chưa khai báo PermissionActionAttribute.
+   at Shared.Services.Authentication.RoutePermissionService.ProcessEndpoint(RouteEndpoint endpoint, Dictionary`2 permissionLookup, Dictionary`2 routeLookup, HashSet`1 scannedRoutes) in F:\project\Caterin\Shared\Services\Authentication\RoutePermissionService.cs:line 95
+   at Shared.Services.Authentication.RoutePermissionService.SyncAsync(CancellationToken cancellationToken) in F:\project\Caterin\Shared\Services\Authentication\RoutePermissionService.cs:line 54
+[2026-07-02 08:25:55 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:25:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:28:48 INF] () Application starting
+[2026-07-02 08:28:48 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:28:48 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:28:48 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:28:48 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:28:48 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:28:48 WRN] (Shared.Services.Authentication.RoutePermissionService) Permission 'products.update' not found for route admin/product/edit/{id}
+[2026-07-02 08:28:48 WRN] (Shared.Services.Authentication.RoutePermissionService) Permission 'products.update' not found for route admin/product/edit/{id}
+[2026-07-02 08:31:10 INF] () Application starting
+[2026-07-02 08:31:10 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:31:10 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:31:11 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:31:11 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:31:11 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:31:15 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:31:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:31:25 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:31:25 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:31:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:32:08 INF] () Application starting
+[2026-07-02 08:32:08 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:32:08 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:32:08 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:32:08 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:32:08 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:32:24 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:32:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:36:40 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:37:42 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:37:43 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:37:43 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:37:43 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:37:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:37:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:37:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:37:45 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:37:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:37:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:37:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:47:50 INF] () Application starting
+[2026-07-02 08:47:50 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:47:50 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:47:50 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:47:50 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:47:50 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:48:29 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:49:26 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 08:49:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:49:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 08:49:28 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 08:49:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 08:50:10 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:55:18 INF] () Application starting
+[2026-07-02 08:55:18 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:55:18 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:55:18 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:55:18 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:55:18 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:55:21 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:55:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:55:23 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 08:55:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 08:55:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 08:55:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 08:55:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 08:55:24 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 08:55:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:55:32 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin/dashboard
+[2026-07-02 08:55:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin/dashboard
+[2026-07-02 08:55:48 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:55:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:55:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 08:56:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:56:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 08:56:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:56:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 08:56:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:56:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 08:56:20 INF] () Application starting
+[2026-07-02 08:56:21 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 08:56:21 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 08:56:21 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 08:56:21 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 08:56:21 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 08:56:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:56:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 08:56:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 08:56:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:03:06 INF] () Application starting
+[2026-07-02 09:03:06 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:03:06 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:03:06 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:03:06 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:03:06 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:03:11 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:03:11 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:03:15 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:03:16 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:03:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:04:58 INF] () Application starting
+[2026-07-02 09:04:58 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:04:59 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:04:59 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:04:59 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:04:59 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:05:09 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:05:15 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:05:47 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:05:50 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:05:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:06:06 INF] () Application starting
+[2026-07-02 09:06:06 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:06:06 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:06:06 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:06:06 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:06:06 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:06:32 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:06:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:06:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:06:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:06:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:06:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:06:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:06:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:06:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:06:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:06:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:06:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:07:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin/dashboard
+[2026-07-02 09:10:02 INF] () Application starting
+[2026-07-02 09:10:03 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:10:03 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:10:03 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:10:03 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:10:03 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:10:24 INF] () Application starting
+[2026-07-02 09:10:24 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:10:24 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:10:25 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:10:25 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:10:25 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:10:46 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:10:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:10:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:10:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:10:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:10:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:10:53 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:10:54 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:10:54 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:10:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:10:56 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:11:17 INF] () Application starting
+[2026-07-02 09:11:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:11:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:11:17 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:11:17 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:11:17 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:12:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 09:12:47 INF] () Application starting
+[2026-07-02 09:12:47 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:12:48 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:12:48 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:12:48 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:12:48 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:13:10 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:13:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 401, OriginalPath: /admin
+[2026-07-02 09:13:33 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:13:56 INF] () Application starting
+[2026-07-02 09:13:56 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:13:56 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:13:56 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:13:56 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:13:56 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:14:09 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:14:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:14:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:14:16 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:14:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:14:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:14:21 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:14:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:14:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:14:28 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:14:41 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:14:54 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:14:56 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:14:56 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:15:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:15:13 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:15:20 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:15:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:15:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:15:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:15:26 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:15:28 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:15:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:15:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:15:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:15:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:15:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:15:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:15:32 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:15:32 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:15:32 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:15:33 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:15:51 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:16:18 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:16:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:16:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:16:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:16:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:16:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:16:25 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:16:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:16:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:16:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:16:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:16:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:16:54 INF] () Application starting
+[2026-07-02 09:16:54 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:16:54 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:16:54 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:16:54 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:16:54 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:17:44 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:17:55 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:17:55 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:18:27 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:18:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:18:30 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:18:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:18:34 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:18:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:18:41 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:19:14 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:19:14 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:19:17 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:19:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:19:43 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:32:40 INF] () Application starting
+[2026-07-02 09:32:41 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:32:41 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:32:41 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:32:41 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:32:41 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:33:45 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:39:00 INF] () Application starting
+[2026-07-02 09:39:00 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:39:00 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:39:00 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:39:00 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:39:00 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:39:03 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:39:03 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:39:08 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:39:08 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:39:10 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:39:10 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:39:10 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:39:10 WRN] (Shared.Middlewares.PermissionMiddleware) Route 'admin/dashboard' has no permission mapping.
+[2026-07-02 09:39:10 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 403, OriginalPath: /admin/dashboard
+[2026-07-02 09:39:10 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:43:34 INF] () Application starting
+[2026-07-02 09:43:34 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:43:34 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:43:34 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:43:34 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:43:34 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:44:23 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:44:24 WRN] (Shared.Middlewares.PermissionMiddleware) Route 'admin/dashboard' has no permission mapping.
+[2026-07-02 09:44:27 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 403, OriginalPath: /admin/dashboard
+[2026-07-02 09:44:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:45:20 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:54:17 WRN] (Shared.Middlewares.PermissionMiddleware) Route 'admin/dashboard' has no permission mapping.
+[2026-07-02 09:54:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 403, OriginalPath: /admin/dashboard
+[2026-07-02 09:54:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:54:22 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 09:54:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 09:54:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 09:54:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 09:54:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 09:54:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 09:54:23 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 09:54:31 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 09:55:32 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:56:05 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 09:56:32 WRN] (Shared.Middlewares.PermissionMiddleware) Route 'admin/dashboard' has no permission mapping.
+[2026-07-02 09:56:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 403, OriginalPath: /admin/dashboard
+[2026-07-02 09:56:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 09:57:53 INF] () Application starting
+[2026-07-02 09:57:53 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 09:57:53 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 09:57:53 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 09:57:53 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 09:57:53 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 09:58:04 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:10:17 INF] () Application starting
+[2026-07-02 10:10:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:10:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:10:17 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:10:17 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:10:17 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:10:18 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 10:10:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 10:10:27 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 10:10:32 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:10:58 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:11:00 ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Dashboard' was not found. Searched locations: ["/Areas/Admin/Views/Home/Dashboard.cshtml","/Areas/Admin/Views/Shared/Dashboard.cshtml","/Views/Shared/Dashboard.cshtml"]
+[2026-07-02 10:11:00 ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Dashboard' was not found. The following locations were searched:
+/Areas/Admin/Views/Home/Dashboard.cshtml
+/Areas/Admin/Views/Shared/Dashboard.cshtml
+/Views/Shared/Dashboard.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Program.<>c.<<<Main>$>b__0_3>d.MoveNext() in F:\project\Caterin\Website\Program.cs:line 194
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.PermissionMiddleware.InvokeAsync(HttpContext context, ICurrentUserService currentUser, IRoutePermissionCache routeCache, IPermissionService permissionService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\PermissionMiddleware.cs:line 97
+   at Shared.Middlewares.AdminAccessMiddleware.InvokeAsync(HttpContext context, IPermissionService permissionService, ICurrentUserService currentUser, IUserValidationService userValidationService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\AdminAccessMiddleware.cs:line 71
+   at Shared.Middlewares.UserValidationMiddleware.InvokeAsync(HttpContext context, IUserValidationService validationService) in F:\project\Caterin\Shared\Middlewares\UserValidationMiddleware.cs:line 49
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.RefreshTokenMiddleware.InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService) in F:\project\Caterin\Shared\Middlewares\RefreshTokenMiddleware.cs:line 48
+   at Shared.Middlewares.SecurityHeadersMiddleware.<>c.<<UseSecurityHeaders>b__0_0>d.MoveNext() in F:\project\Caterin\Shared\Middlewares\SecurityHeadersMiddleware.cs:line 27
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[2026-07-02 10:11:00 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:11:27 INF] () Application starting
+[2026-07-02 10:11:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:11:27 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:11:27 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:11:27 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:11:27 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:11:30 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:11:30 ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Dashboard' was not found. Searched locations: ["/Areas/Admin/Views/Home/Dashboard.cshtml","/Areas/Admin/Views/Shared/Dashboard.cshtml","/Views/Shared/Dashboard.cshtml"]
+[2026-07-02 10:11:30 ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Dashboard' was not found. The following locations were searched:
+/Areas/Admin/Views/Home/Dashboard.cshtml
+/Areas/Admin/Views/Shared/Dashboard.cshtml
+/Views/Shared/Dashboard.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Program.<>c.<<<Main>$>b__0_3>d.MoveNext() in F:\project\Caterin\Website\Program.cs:line 194
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.PermissionMiddleware.InvokeAsync(HttpContext context, ICurrentUserService currentUser, IRoutePermissionCache routeCache, IPermissionService permissionService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\PermissionMiddleware.cs:line 97
+   at Shared.Middlewares.AdminAccessMiddleware.InvokeAsync(HttpContext context, IPermissionService permissionService, ICurrentUserService currentUser, IUserValidationService userValidationService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\AdminAccessMiddleware.cs:line 71
+   at Shared.Middlewares.UserValidationMiddleware.InvokeAsync(HttpContext context, IUserValidationService validationService) in F:\project\Caterin\Shared\Middlewares\UserValidationMiddleware.cs:line 49
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.RefreshTokenMiddleware.InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService) in F:\project\Caterin\Shared\Middlewares\RefreshTokenMiddleware.cs:line 48
+   at Shared.Middlewares.SecurityHeadersMiddleware.<>c.<<UseSecurityHeaders>b__0_0>d.MoveNext() in F:\project\Caterin\Shared\Middlewares\SecurityHeadersMiddleware.cs:line 27
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[2026-07-02 10:11:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:12:20 INF] () Application starting
+[2026-07-02 10:12:20 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:12:20 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:12:20 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:12:20 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:12:20 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:12:20 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:12:20 ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Dashboard' was not found. Searched locations: ["/Areas/Admin/Views/Home/Dashboard.cshtml","/Areas/Admin/Views/Shared/Dashboard.cshtml","/Views/Shared/Dashboard.cshtml"]
+[2026-07-02 10:12:20 ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Dashboard' was not found. The following locations were searched:
+/Areas/Admin/Views/Home/Dashboard.cshtml
+/Areas/Admin/Views/Shared/Dashboard.cshtml
+/Views/Shared/Dashboard.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Program.<>c.<<<Main>$>b__0_3>d.MoveNext() in F:\project\Caterin\Website\Program.cs:line 194
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.PermissionMiddleware.InvokeAsync(HttpContext context, ICurrentUserService currentUser, IRoutePermissionCache routeCache, IPermissionService permissionService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\PermissionMiddleware.cs:line 97
+   at Shared.Middlewares.AdminAccessMiddleware.InvokeAsync(HttpContext context, IPermissionService permissionService, ICurrentUserService currentUser, IUserValidationService userValidationService, ISecurityLogger securityLogger) in F:\project\Caterin\Shared\Middlewares\AdminAccessMiddleware.cs:line 71
+   at Shared.Middlewares.UserValidationMiddleware.InvokeAsync(HttpContext context, IUserValidationService validationService) in F:\project\Caterin\Shared\Middlewares\UserValidationMiddleware.cs:line 49
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Shared.Middlewares.RefreshTokenMiddleware.InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService) in F:\project\Caterin\Shared\Middlewares\RefreshTokenMiddleware.cs:line 48
+   at Shared.Middlewares.SecurityHeadersMiddleware.<>c.<<UseSecurityHeaders>b__0_0>d.MoveNext() in F:\project\Caterin\Shared\Middlewares\SecurityHeadersMiddleware.cs:line 27
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+[2026-07-02 10:12:20 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:13:22 INF] () Application starting
+[2026-07-02 10:13:22 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:13:22 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:13:22 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:13:22 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:13:22 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:13:22 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:13:22 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:13:39 INF] () Application starting
+[2026-07-02 10:13:39 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:13:39 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:13:40 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:13:40 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:13:40 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:13:40 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:13:40 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:18:11 INF] () Application starting
+[2026-07-02 10:18:11 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:18:11 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:18:11 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:18:11 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:18:11 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:18:18 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/dashboard' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/details/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/create/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/create/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/delete/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/delete/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/edit/{id}' has no permission mapping.
+[2026-07-02 10:18:18 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/edit/{id}' has no permission mapping.
+[2026-07-02 10:18:18 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:38:55 INF] () Application starting
+[2026-07-02 10:38:55 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:38:55 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:38:55 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:38:55 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:38:55 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:39:06 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 10:39:06 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 10:51:57 INF] () Application starting
+[2026-07-02 10:51:57 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:51:57 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:51:57 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:51:57 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:51:57 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:52:23 INF] () Application starting
+[2026-07-02 10:52:23 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 10:52:23 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 10:52:23 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 10:52:23 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 10:52:23 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 10:52:29 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 10:52:30 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 10:53:16 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 10:54:37 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/dashboard' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/details/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/create/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/create/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/delete/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/delete/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/edit/{id}' route permission
+[2026-07-02 10:54:45 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/edit/{id}' route permission
+[2026-07-02 10:55:26 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/dashboard' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/details/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/create/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/create/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/delete/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/delete/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'GET:admin/product/edit/{id}' route permission
+[2026-07-02 10:55:29 WRN] (Shared.Services.Caches.RoutePermissionCache) Route 'POST:admin/product/edit/{id}' route permission
+[2026-07-02 10:55:35 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:20:22 INF] () Application starting
+[2026-07-02 11:20:22 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 11:20:22 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 11:20:22 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 11:20:22 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 11:20:22 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 11:20:34 INF] () Application starting
+[2026-07-02 11:20:34 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 11:20:34 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 11:20:34 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 11:20:34 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 11:20:34 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 11:20:37 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:20:37 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:20:46 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:20:46 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:20:46 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:20:46 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:20:49 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:20:49 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:20:52 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:20:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:21:30 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:21:30 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:21:30 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:21:31 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:21:50 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0xE3' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:21:50 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:21:50 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:26:05 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:26:05 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:28:14 INF] () Application starting
+[2026-07-02 11:28:14 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 11:28:14 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 11:28:14 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 11:28:14 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 11:28:14 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 11:28:17 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:28:17 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:28:24 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:28:26 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:28:33 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:28:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:28:44 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0xAF' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:28:44 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:28:44 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:28:53 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:28:59 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:29:00 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:29:02 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:29:09 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0xF3' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:29:09 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:29:09 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:30:51 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:30:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:30:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:30:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:30:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:30:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:30:52 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:30:54 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:30:56 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:30:57 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:30:57 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:37:17 INF] () Application starting
+[2026-07-02 11:37:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
+[2026-07-02 11:37:17 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
+[2026-07-02 11:37:17 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+[2026-07-02 11:37:17 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+[2026-07-02 11:37:17 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website
+[2026-07-02 11:37:21 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0xE7' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:37:23 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0xE7' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:37:23 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:37:24 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js
+[2026-07-02 11:37:31 INF] (Shared.Services.Authentication.AuthService) User root login success
+[2026-07-02 11:37:34 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:37:35 INF] (Shared.Middlewares.AdminAccessMiddleware) User b76e0154-bcf4-45b8-908f-ada45d3345b3 login success
+[2026-07-02 11:37:36 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:38:51 WRN] (Shared.Configurations.JWT.JwtBearerEventHandler) JWT authentication failed.
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException: IDX14100: JWT is not well formed, there are no dots (.).
+The token needs to be in JWS or JWE Compact Serialization Format. (JWS): 'EncodedHeader.EndcodedPayload.EncodedSignature'. (JWE): 'EncodedProtectedHeader.EncodedEncryptedKey.EncodedInitializationVector.EncodedCiphertext.EncodedAuthenticationTag'.
+ ---> System.ArgumentException: IDX14102: Unable to decode the header '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]' as Base64Url encoded string.
+ ---> System.Text.Json.JsonReaderException: '0x87' is an invalid start of a value. LineNumber: 0 | BytePositionInLine: 0.
+   at System.Text.Json.ThrowHelper.ThrowJsonReaderException(Utf8JsonReader& json, ExceptionResource resource, Byte nextByte, ReadOnlySpan`1 bytes)
+   at System.Text.Json.Utf8JsonReader.ConsumeValue(Byte marker)
+   at System.Text.Json.Utf8JsonReader.ReadFirstToken(Byte first)
+   at System.Text.Json.Utf8JsonReader.ReadSingleSegment()
+   at System.Text.Json.Utf8JsonReader.Read()
+   at Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives.IsReaderAtTokenType(Utf8JsonReader& reader, JsonTokenType tokenType, Boolean advanceReader)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(Byte[] bytes, Int32 length)
+   at Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Decode[T](String input, Int32 offset, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(String rawString, Int32 startIndex, Int32 length, Func`3 action)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   --- End of inner exception stack trace ---
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadToken(String encodedJson)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebToken..ctor(String jwtEncodedString)
+   at Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadToken(String token, TokenValidationParameters validationParameters)
+   --- End of inner exception stack trace ---
+[2026-07-02 11:38:51 INF] (Website.Areas.Admin.Controllers.AuthController) Page: Login Admin
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/css/bootstrap.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/fontawesome-free/css/all.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/flag-icon-css/css/flag-icons.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/icheck-bootstrap/icheck-bootstrap.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/customize.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /css/admin/adminlte.min.css
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/bootstrap/js/bootstrap.bundle.min.js
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /plugins/jquery/jquery.min.js
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /.well-known/appspecific/com.chrome.devtools.json
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/adminlte.min.js
+[2026-07-02 11:38:51 ERR] (CATERIN.Controllers.HomeController) Unexpected Status Code: 404, OriginalPath: /js/admin/redirectUrlCulture.js

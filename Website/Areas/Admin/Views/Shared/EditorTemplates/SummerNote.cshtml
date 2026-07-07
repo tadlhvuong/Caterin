@@ -1,0 +1,57 @@
+﻿@model string
+@{
+    var fieldName = ViewData.TemplateInfo.HtmlFieldPrefix;
+}
+<textarea class="summernote form-control" id="@fieldName" name="@fieldName">@Model</textarea>
+
+@if (Context.Items["SummerNoteRendered"] == null)
+{
+    <script src="~/js/jquery.min.js"></script>
+    <script src="~/js/admin/summernote.min.js"></script>
+    <script src="~/js/admin/summernote-vi-VN.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.summernote').summernote({
+                lang: 'vi-VN',
+                height: 300,
+                dialogsInBody: true,
+                maximumImageFileSize: 2097152,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['family', ['fontname']],
+                    ['size', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'image', 'video']],
+                    ['view', ['fullscreen', 'codeview']]
+                ],
+                buttons: {
+                    image: function () {
+                        var ui = $.summernote.ui;
+                        var button = ui.button({
+                            contents: '<i class="fa fa-image" />',
+                            tooltip: "Image Manager",
+                            click: function (e) {
+                                e.preventDefault();
+                                $("#modalContent").load("/admin/Media/FileBrowser?note=" + "@fieldName", function () {
+                                    $("#modalContainer").modal({ keyboard: true }, "show");
+                                });
+                            }
+                        });
+                        return button.render();
+                    }
+                },
+                callbacks: {
+                    onPaste: function (e) {
+                        var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
+                        e.preventDefault();
+                        document.execCommand('insertText', false, bufferText);
+                    }
+                }
+            });
+        });
+    </script>
+    Context.Items["SummerNoteRendered"] = true;
+}

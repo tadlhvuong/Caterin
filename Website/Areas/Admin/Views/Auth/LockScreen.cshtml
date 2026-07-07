@@ -1,0 +1,58 @@
+﻿@* @using HKMain.Areas.Admin.Models
+@model LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = _localizer["LockScreenText"];
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+<link rel="stylesheet" href="~/css/admin/adminlte.min.css">
+<link rel="stylesheet" href="~/css/admin/customize.min.css" asp-append-version="true">
+<div class="hold-transition lockscreen">
+    <div class="lockscreen-wrapper" style="margin-top: auto; padding-top: 10%;">
+        <div class="lockscreen-logo">
+            <a href="/admin/@culture/@_localizer["AccountUrl"]/@_localizer["LoginUrl"]"><b>Admin</b> HKProject</a>
+        </div>
+        <div class="lockscreen-name">@Model.UserName</div>
+        <div class="lockscreen-item">
+            <div class="lockscreen-image">
+                <img src="~/img/default-avatar-male.webp" alt="User Image">
+            </div>
+            <form href="/admin/@culture/@_localizer["AccountUrl"]/@_localizer["LockScreenUrl"]" method="post" class="lockscreen-credentials">
+                @Html.AntiForgeryToken()
+                <input asp-for="UserName" value="@Model.UserName" type="hidden" />
+                <input asp-for="ReturnUrl" value="@Model.ReturnUrl" type="hidden" />
+                <div class="input-group">
+                    <input asp-for="Password" type="password" class="form-control" localize-att-placeholder="PasswordText">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn">
+                            <i class="fas fa-arrow-right text-muted"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="help-block text-center">
+                <div asp-validation-summary="All"></div>
+        </div>
+        <div class="text-center">
+            @await Html.PartialAsync("_LoginEx", new ExternalLoginListViewModel { ReturnUrl = Model.ReturnUrl })
+            <a href="/admin/@culture/@_localizer["AccountUrl"]/@_localizer["LoginUrl"]" >OthersAccountText</a>
+        </div>
+        <div class="lockscreen-footer text-center">
+            Copyright &copy; 2024 <b><a href="mailto:tadlhvuong@gmail.com" class="text-black">tadlhvuong@gmail.com</a></b><br>
+            All rights reserved
+        </div>
+    </div>
+</div>
+
+<script src="~/plugins/jquery/jquery.min.js"></script>
+<script src="~/plugins/bootstrap5/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/admin/redirectUrlCulture.js"></script>
+<script>
+    var refresh = window.localStorage.getItem('refresh');
+    if (refresh === null) {
+        window.location.reload();
+        window.localStorage.setItem('refresh', "1");
+    }
+</script> *@

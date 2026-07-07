@@ -1,0 +1,45 @@
+﻿@using Website.Areas.Admin.Models
+@model LoginViewModel
+@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<div class="card-body">
+    <form asp-area="Admin" asp-controller="Auth" asp-action="Login" method="post" autocomplete="off">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="input-group mb-3">
+            <input asp-for="Email" type="text" class="form-control" localize-att-placeholder="UserNameOrEmailText">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-user"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input asp-for="Password" type="password" class="form-control" localize-att-placeholder="PasswordText">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-7">
+                <div class="icheck-primary">
+                    <input asp-for="RememberMe" type="checkbox">
+                    <label asp-for="RememberMe" ></label>
+                </div>
+            </div>
+            <div class="col-5">
+                <button type="submit" class="btn btn-primary btn-block" >LoginText</button>
+            </div>
+        </div>
+    </form>
+    @await Html.PartialAsync("_LoginEx", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
+    <p class="mb-1">
+        <a href="/admin/Account/ForgotPassword" >ForgotPasswordText</a>
+    </p>
+    <p class="mb-0">
+        <a href="/adminAccount/Register" >RegisterText</a>
+    </p>
+</div>

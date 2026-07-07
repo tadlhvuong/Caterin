@@ -1,0 +1,69 @@
+﻿@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Admin | @ViewData["Title"] </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="robots" content="index,follow">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <meta name="description" content="Admin HKProject. Contact us: tadlhvuongproject@gmail.com" />
+    <meta name="revisit-after" content="1 days" />
+    <meta name="google" content=”nositelinkssearchbox” />
+    <meta property="og:locale" content="@CultureInfo.CurrentCulture.Name" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="@ViewData["Title"]"/>
+    <meta property="og:description" content="@ViewData["Description"]" />
+    <meta property="og:image" content="@ViewData["Image"]" />
+    <meta property="og:url" content="@ViewData["Url"]" />
+    <meta property="og:site_name" content="@ViewData["Name"]" />
+
+   @*  <link rel="stylesheet" href="~/plugins/flag-icon-css/css/flag-icons.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/plugins/sweetalert2/sweetalert2.css" rel="stylesheet" type="text/css" /> *@
+    @* <link rel="stylesheet" href="~/css/tagify.css"> *@
+    @RenderSection("Styles", false)
+    @* <link rel="stylesheet" href="~/css/admin/adminlte.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/css/admin/customize.min.css" asp-append-version="true" rel="stylesheet" type="text/css" /> *@
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+    @* <partial name="_AdminModal" />
+    <input type="hidden" id="hideCulture" value="@culture" />
+    <div class="wrapper">
+        <partial name="_Preload">
+            <partial name="_Navbar">
+                <partial name="_Sidebar">
+                    @RenderBody()
+                    <partial name="_Footer" >
+    </div> *@
+    @RenderBody()
+    @* <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/plugins/jquery-validation/jquery.validate.min.js"></script>
+    <script src="~/plugins/jquery-validation/additional-methods.min.js"></script> 
+    <script src="~/plugins/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <script src="~/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+    <script src="~/plugins/select2/js/select2.full.min.js"></script>
+    <script src="~/plugins/toastr/toastr.min.js"></script>
+    <script src="~/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/js/tagify.js"></script> *@
+   @*  <script>
+        window.localStorage.removeItem('refresh')
+        $("body").overlayScrollbars({});
+        var c_g = '@CultureInfo.CurrentCulture.Name';
+    </script> *@
+    @RenderSection("Scripts", false)
+   @*  <script src="~/js/admin/adminlte.min.js"></script>
+    <script src="~/js/admin/adminhk.js"></script>
+    <script src="~/js/admin/redirectUrlCulture.js"></script> *@
+</body>
+</html>

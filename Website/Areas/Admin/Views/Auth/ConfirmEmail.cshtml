@@ -1,0 +1,14 @@
+﻿@using Website.Areas.Admin.Models
+@{
+    var culture = CultureInfo.CurrentCulture.Name;
+}
+<section class="content">
+    <div class="ml-2 mr-2">
+        <div class="error-content">
+            <h3 style="color: green;"><i class="icon fas fa-check"></i> <b >VerifyAccountTitleText</b></h3>
+            <p>
+                <localize>VerifyAccountContentText</localize> <a class="btn btn-primary" href="/admin/auth/login">LoginText</a>
+            </p>
+        </div>
+    </div>
+</section>

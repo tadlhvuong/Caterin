@@ -1,0 +1,15 @@
+﻿<environment include="Development">
+    <script src="~/plugins/toastr/toastr.js"></script>
+    <script src="~/plugins/sweetalert2/sweetalert2.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"
+            asp-fallback-src="~/plugins/toastr/toastr.min.js"
+            integrity="sha384-VDls8ImYGI8SwVxpmjX2Bn27U2TcNodzTNROTusVEWO55+lmL+H9NczoQJk6mwZR" crossorigin="anonymous">
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.14.5/sweetalert2.min.js"
+            asp-fallback-src="~/plugins/sweetalert2/sweetalert2.min.js"
+            integrity="sha384-ueC9FHE/gdG6Xjlev9kT8QDLO/Yskgm0nfhNXN+N1odFWNO4nxt2I0gz5PsbkJs2" crossorigin="anonymous">
+    </script>
+</environment>

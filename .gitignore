@@ -23,6 +23,7 @@ TestResults/
 
 ## Logs
 *.[Ll]og
+*.[Ll]ogs
 
 ## Node
 node_modules/

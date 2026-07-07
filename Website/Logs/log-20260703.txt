@@ -1,6 +1,0 @@
-[2026-07-03 14:10:09 INF] () Application starting
-[2026-07-03 14:10:10 INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7152
-[2026-07-03 14:10:10 INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5186
-[2026-07-03 14:10:10 INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
-[2026-07-03 14:10:10 INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
-[2026-07-03 14:10:10 INF] (Microsoft.Hosting.Lifetime) Content root path: F:\project\Caterin\Website

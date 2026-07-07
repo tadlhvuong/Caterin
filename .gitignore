@@ -22,7 +22,7 @@ publish/
 TestResults/
 
 ## Logs
-*.log
+*.[Ll]og
 
 ## Node
 node_modules/

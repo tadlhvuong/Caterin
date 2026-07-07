@@ -1,0 +1,31 @@
+## Build
+bin/
+obj/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider
+.idea/
+
+## VS Code
+.vscode/
+
+## Publish
+publish/
+
+## Test
+TestResults/
+
+## Logs
+*.log
+
+## Node
+node_modules/
+
+## Secrets (nếu có)
+appsettings.Development.json

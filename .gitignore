@@ -30,3 +30,4 @@ node_modules/
 
 ## Secrets (nếu có)
 appsettings.Development.json
+/Website/Logs

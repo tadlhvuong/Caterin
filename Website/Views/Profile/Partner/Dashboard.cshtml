@@ -1,0 +1,1427 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@section Styles{
+    <style>
+        .partner-level-card {
+            background: #fff;
+            border-radius: 28px;
+            padding: 48px;
+            border: 1px solid #edf0f6;
+            box-shadow: 0 20px 50px rgba(0,0,0,.05);
+        }
+
+        .partner-progress {
+            position: relative;
+        }
+
+        .partner-progress-bar {
+            height: 10px;
+            border-radius: 30px;
+            background: #edf0f6;
+            overflow: hidden;
+        }
+
+        .partner-progress-value {
+            width: 68%;
+            height: 100%;
+            border-radius: 30px;
+            background: linear-gradient(90deg,#2eb84c,#67d36f);
+        }
+
+        .partner-progress-percent {
+            margin-top: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .partner-level-line {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+            .partner-level-line::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 18px;
+                height: 2px;
+                background: #ddd;
+                z-index: 0;
+            }
+
+        .level {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #d9d9d9;
+            margin: auto;
+        }
+
+        .level.active .dot {
+            background: #28a745;
+        }
+
+        .level.current .dot {
+            width: 24px;
+            height: 24px;
+            border: 5px solid #d9f7dd;
+            background: #28a745;
+        }
+
+        .level span {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .level small {
+            color: #888;
+        }
+
+        .next-level-box {
+            background: #f8fff8;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px dashed #8CC63F;
+        }
+
+            .next-level-box h1 {
+                color: #28a745;
+                font-size: 42px;
+                margin: 10px 0;
+            }
+    </style>
+}
+<section class="dashboard-partner py-80">
+
+    <div class="container container-lg">
+
+        <div class="rounded-24 bg-main-600 p-40 text-white">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <span class="text-white-50">
+
+                        Partner Dashboard
+
+                    </span>
+
+                    <h2 class="text-white mt-12">
+
+                        Xin chào, Nguyễn Văn A 👋
+
+                    </h2>
+
+                    <p class="mt-16 mb-32 opacity-75">
+
+                        Chào mừng bạn quay trở lại chương trình Đối tác Caterin.
+
+                    </p>
+
+                    <div class="flex flex-wrap gap-16">
+
+                        <span class="badge bg-white text-main-600 px-24 py-12">
+
+                            Gold Partner
+
+                        </span>
+
+                        <span class="badge bg-warning px-24 py-12">
+
+                            Mã giới thiệu: CAT12345
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4 text-center">
+
+                    <img src="/images/partner/dashboard.png"
+                         class="img-fluid">
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="row g-4">
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-16 p-32">
+
+                    <h3 class="text-main-600">
+
+                        5.280.000đ
+
+                    </h3>
+
+                    <p>
+
+                        Hoa hồng tháng này
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="border rounded-16 p-32">
+
+                    <h3>
+
+                        2.100.000đ
+
+                    </h3>
+
+                    <p>
+
+                        Đang chờ duyệt
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="border rounded-16 p-32">
+
+                    <h3>
+
+                        126
+
+                    </h3>
+
+                    <p>
+
+                        Đơn thành công
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <div class="border rounded-16 p-32">
+
+                    <h3>
+
+                        58
+
+                    </h3>
+
+                    <p>
+
+                        Khách hàng
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-40">
+
+            <h4>
+
+                Link giới thiệu của bạn
+
+            </h4>
+
+            <div class="input-group mt-24">
+
+                <input class="common-input"
+                       value="https://caterin.vn/?ref=CAT12345">
+
+                <button class="btn btn-main">
+
+                    Copy
+
+                </button>
+
+            </div>
+
+            <div class="mt-32">
+
+                <img src="/images/partner/qrcode.png"
+                     width="160">
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="row g-4">
+
+            <div class="col-lg-3">
+
+                <a class="border rounded-16 p-32 d-block text-center">
+
+                    <i class="ph-fill ph-link text-main-600 text-5xl"></i>
+
+                    <h5 class="mt-20">
+
+                        Tạo Link
+
+                    </h5>
+
+                </a>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <a class="border rounded-16 p-32 d-block text-center">
+
+                    <i class="ph-fill ph-images text-main-600 text-5xl"></i>
+
+                    <h5>
+
+                        Banner
+
+                    </h5>
+
+                </a>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <a class="border rounded-16 p-32 d-block text-center">
+
+                    <i class="ph-fill ph-wallet text-main-600 text-5xl"></i>
+
+                    <h5>
+
+                        Rút tiền
+
+                    </h5>
+
+                </a>
+
+            </div>
+
+            <div class="col-lg-3">
+
+                <a class="border rounded-16 p-32 d-block text-center">
+
+                    <i class="ph-fill ph-headset text-main-600 text-5xl"></i>
+
+                    <h5>
+
+                        Hỗ trợ
+
+                    </h5>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="flex-between mb-32">
+
+                <div>
+
+                    <h4 class="mb-8">
+
+                        Lịch sử hoa hồng
+
+                    </h4>
+
+                    <p class="text-gray-500 mb-0">
+
+                        Theo dõi các khoản hoa hồng từ đơn hàng giới thiệu.
+
+                    </p>
+
+                </div>
+
+                <a href="#"
+                   class="btn btn-outline-main">
+
+                    Xem tất cả
+
+                </a>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Ngày</th>
+
+                            <th>Mã đơn</th>
+
+                            <th>Khách hàng</th>
+
+                            <th>Giá trị đơn</th>
+
+                            <th>Hoa hồng</th>
+
+                            <th>Trạng thái</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>12/07/2026</td>
+
+                            <td>#DH10235</td>
+
+                            <td>Nguyễn Văn A</td>
+
+                            <td>1.250.000đ</td>
+
+                            <td class="text-main-600 fw-semibold">
+
+                                +125.000đ
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    Đã thanh toán
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>11/07/2026</td>
+
+                            <td>#DH10220</td>
+
+                            <td>Trần Thị B</td>
+
+                            <td>980.000đ</td>
+
+                            <td class="text-main-600 fw-semibold">
+
+                                +98.000đ
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-warning">
+
+                                    Đang xử lý
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>09/07/2026</td>
+
+                            <td>#DH10198</td>
+
+                            <td>Lê Minh C</td>
+
+                            <td>650.000đ</td>
+
+                            <td class="text-main-600 fw-semibold">
+
+                                +65.000đ
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-secondary">
+
+                                    Chờ duyệt
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="flex-between mb-32">
+
+                <div>
+
+                    <h4 class="mb-8">
+
+                        Đơn hàng gần đây
+
+                    </h4>
+
+                    <p class="text-gray-500 mb-0">
+
+                        Các đơn hàng phát sinh từ liên kết giới thiệu của bạn.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Mã đơn</th>
+
+                            <th>Khách hàng</th>
+
+                            <th>Ngày đặt</th>
+
+                            <th>Tổng tiền</th>
+
+                            <th>Hoa hồng</th>
+
+                            <th>Trạng thái</th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>#DH10235</td>
+
+                            <td>Nguyễn Văn A</td>
+
+                            <td>12/07/2026</td>
+
+                            <td>1.250.000đ</td>
+
+                            <td>125.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    Hoàn thành
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a href="#"
+                                   class="btn btn-sm btn-outline-main">
+
+                                    Chi tiết
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>#DH10220</td>
+
+                            <td>Trần Thị B</td>
+
+                            <td>11/07/2026</td>
+
+                            <td>980.000đ</td>
+
+                            <td>98.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-warning">
+
+                                    Đang giao
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a href="#"
+                                   class="btn btn-sm btn-outline-main">
+
+                                    Chi tiết
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>#DH10198</td>
+
+                            <td>Lê Minh C</td>
+
+                            <td>09/07/2026</td>
+
+                            <td>650.000đ</td>
+
+                            <td>65.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-secondary">
+
+                                    Chờ xác nhận
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a href="#"
+                                   class="btn btn-sm btn-outline-main">
+
+                                    Chi tiết
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="mb-40">
+
+                <h4 class="mb-8">
+
+                    Tài liệu Marketing
+
+                </h4>
+
+                <p class="text-gray-500 mb-0">
+
+                    Tải xuống banner, catalogue và các tài liệu hỗ trợ bán hàng.
+
+                </p>
+
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="border rounded-16 p-24 text-center h-full">
+
+                        <i class="ph-fill ph-image text-main-600 text-6xl mb-24"></i>
+
+                        <h6>
+
+                            Banner Facebook
+
+                        </h6>
+
+                        <p class="text-gray-500 small">
+
+                            PNG • 1200×628
+
+                        </p>
+
+                        <a href="#"
+                           class="btn btn-outline-main w-100">
+
+                            <i class="ph ph-download-simple me-8"></i>
+
+                            Tải xuống
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="border rounded-16 p-24 text-center h-full">
+
+                        <i class="ph-fill ph-video text-main-600 text-6xl mb-24"></i>
+
+                        <h6>
+
+                            Video TikTok
+
+                        </h6>
+
+                        <p class="text-gray-500 small">
+
+                            MP4
+
+                        </p>
+
+                        <a href="#"
+                           class="btn btn-outline-main w-100">
+
+                            Tải xuống
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="border rounded-16 p-24 text-center h-full">
+
+                        <i class="ph-fill ph-file-pdf text-main-600 text-6xl mb-24"></i>
+
+                        <h6>
+
+                            Catalogue
+
+                        </h6>
+
+                        <p class="text-gray-500 small">
+
+                            PDF
+
+                        </p>
+
+                        <a href="#"
+                           class="btn btn-outline-main w-100">
+
+                            Tải xuống
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+
+                    <div class="border rounded-16 p-24 text-center h-full">
+
+                        <i class="ph-fill ph-package text-main-600 text-6xl mb-24"></i>
+
+                        <h6>
+
+                            Ảnh sản phẩm
+
+                        </h6>
+
+                        <p class="text-gray-500 small">
+
+                            ZIP
+
+                        </p>
+
+                        <a href="#"
+                           class="btn btn-outline-main w-100">
+
+                            Tải xuống
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<div class="alert alert-success rounded-16">
+
+    🎉 Chúc mừng!
+
+    Bạn đã đạt mốc Gold Partner.
+
+    Chiết khấu hiện tại: 12%
+
+</div>
+
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="partner-level-card">
+
+            <div class="row align-items-center">
+
+                <!-- LEFT -->
+
+                <div class="col-lg-8">
+
+                    <span class="partner-level-subtitle">
+
+                        🚀 NEXT LEVEL
+
+                    </span>
+
+                    <h2 class="mt-16">
+
+                        Gold Partner
+
+                    </h2>
+
+                    <p class="text-gray-500 mt-16">
+
+                        Bạn chỉ còn một chút nữa để mở khóa
+                        <strong>Platinum Partner</strong>
+
+                    </p>
+
+                    <!-- Progress -->
+
+                    <div class="partner-progress mt-40">
+
+                        <div class="partner-progress-bar">
+
+                            <div class="partner-progress-value"></div>
+
+                        </div>
+
+                        <div class="partner-progress-percent">
+
+                            68%
+
+                        </div>
+
+                    </div>
+
+                    <!-- Timeline -->
+
+                    <div class="partner-level-line mt-40">
+
+                        <div class="level active">
+
+                            <div class="dot"></div>
+
+                            <span>Bronze</span>
+
+                            <small>0đ</small>
+
+                        </div>
+
+                        <div class="level active">
+
+                            <div class="dot"></div>
+
+                            <span>Silver</span>
+
+                            <small>20M</small>
+
+                        </div>
+
+                        <div class="level current">
+
+                            <div class="dot"></div>
+
+                            <span>Gold</span>
+
+                            <small>50M</small>
+
+                        </div>
+
+                        <div class="level">
+
+                            <div class="dot"></div>
+
+                            <span>Platinum</span>
+
+                            <small>100M</small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- RIGHT -->
+
+                <div class="col-lg-4">
+
+                    <div class="next-level-box">
+
+                        <h5>
+
+                            Chỉ còn
+
+                        </h5>
+
+                        <h1>
+
+                            31.5M
+
+                        </h1>
+
+                        <p>
+
+                            để nâng lên
+
+                            <strong>
+
+                                Platinum
+
+                            </strong>
+
+                        </p>
+
+                        <hr>
+
+                        <ul>
+
+                            <li>
+
+                                ✔ Hoa hồng 12%
+
+                            </li>
+
+                            <li>
+
+                                ✔ Thưởng doanh số
+
+                            </li>
+
+                            <li>
+
+                                ✔ Banner độc quyền
+
+                            </li>
+
+                            <li>
+
+                                ✔ Hỗ trợ Marketing
+
+                            </li>
+
+                        </ul>
+
+                        <a class="btn btn-main w-100 mt-32">
+
+                            Xem quyền lợi
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="flex-between flex-wrap gap-16 mb-32">
+
+                <div>
+
+                    <h4 class="mb-8">
+                        Doanh thu & Hoa hồng 30 ngày gần nhất
+                    </h4>
+
+                    <p class="text-gray-500 mb-0">
+                        Theo dõi hiệu quả kinh doanh từ các đơn hàng giới thiệu.
+                    </p>
+
+                </div>
+
+                <select class="common-input w-auto">
+
+                    <option>30 ngày</option>
+
+                    <option>90 ngày</option>
+
+                    <option>12 tháng</option>
+
+                </select>
+
+            </div>
+
+            <canvas id="partnerRevenueChart"
+                    height="110"></canvas>
+
+        </div>
+
+    </div>
+
+</section>
+
+@section Scripts{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <script>
+                const ctx = document.getElementById('partnerRevenueChart');
+
+        new Chart(ctx, {
+
+            type: 'line',
+
+            data: {
+
+                labels: [
+                    '1','5','10','15','20','25','30'
+                ],
+
+                datasets: [
+
+                    {
+
+                        label: 'Doanh thu',
+
+                        data: [12,18,16,28,26,35,42],
+
+                        borderColor:'#22c55e',
+
+                        backgroundColor:'rgba(34,197,94,.15)',
+
+                        tension:.4,
+
+                        fill:true
+
+                    },
+
+                    {
+
+                        label:'Hoa hồng',
+
+                        data:[1.2,1.8,1.6,2.8,2.6,3.5,4.2],
+
+                        borderColor:'#3b82f6',
+
+                        tension:.4
+
+                    }
+
+                ]
+
+            }
+
+        });
+    </script>
+}
+
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="mb-32">
+
+                <h4>
+
+                    Thông báo mới
+
+                </h4>
+
+            </div>
+
+            <div class="d-flex flex-column gap-20">
+
+                <div class="border rounded-16 p-24">
+
+                    <div class="flex-between">
+
+                        <div>
+
+                            <span class="badge bg-danger mb-12">
+
+                                HOT
+
+                            </span>
+
+                            <h6>
+
+                                Thưởng thêm 3% hoa hồng tháng 7
+
+                            </h6>
+
+                            <p class="text-gray-500 mb-0">
+
+                                Áp dụng cho tất cả đơn hàng hoàn thành từ
+                                01/07 - 31/07.
+
+                            </p>
+
+                        </div>
+
+                        <small class="text-gray-400">
+
+                            Hôm nay
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="border rounded-16 p-24">
+
+                    <div class="flex-between">
+
+                        <div>
+
+                            <span class="badge bg-success mb-12">
+
+                                NEW
+
+                            </span>
+
+                            <h6>
+
+                                Bộ Banner Summer 2026
+
+                            </h6>
+
+                            <p class="text-gray-500 mb-0">
+
+                                Đã cập nhật trong Marketing Center.
+
+                            </p>
+
+                        </div>
+
+                        <small>
+
+                            2 ngày trước
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="border rounded-16 p-24">
+
+                    <div class="flex-between">
+
+                        <div>
+
+                            <span class="badge bg-primary mb-12">
+
+                                EVENT
+
+                            </span>
+
+                            <h6>
+
+                                Flash Sale 7.7
+
+                            </h6>
+
+                            <p class="text-gray-500 mb-0">
+
+                                Hoa hồng nhân đôi cho một số sản phẩm.
+
+                            </p>
+
+                        </div>
+
+                        <small>
+
+                            5 ngày trước
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border border-gray-100 rounded-24 p-32">
+
+            <div class="flex-between mb-32">
+
+                <div>
+
+                    <h4>
+
+                        Bảng xếp hạng Partner
+
+                    </h4>
+
+                    <p class="text-gray-500 mb-0">
+
+                        Top đối tác có doanh số cao nhất tháng.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Hạng</th>
+
+                            <th>Đối tác</th>
+
+                            <th>Doanh số</th>
+
+                            <th>Hoa hồng</th>
+
+                            <th>Cấp độ</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>🥇</td>
+
+                            <td>Nguyễn Văn A</td>
+
+                            <td>125.000.000đ</td>
+
+                            <td>12.500.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-warning">
+
+                                    Platinum
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>🥈</td>
+
+                            <td>Trần Thị B</td>
+
+                            <td>118.000.000đ</td>
+
+                            <td>11.800.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-secondary">
+
+                                    Gold
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>🥉</td>
+
+                            <td>Lê Văn C</td>
+
+                            <td>96.000.000đ</td>
+
+                            <td>9.600.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    Gold
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>4</td>
+
+                            <td>Phạm Văn D</td>
+
+                            <td>82.000.000đ</td>
+
+                            <td>8.200.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-primary">
+
+                                    Silver
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>5</td>
+
+                            <td>Hoàng Văn E</td>
+
+                            <td>78.000.000đ</td>
+
+                            <td>7.800.000đ</td>
+
+                            <td>
+
+                                <span class="badge bg-primary">
+
+                                    Silver
+
+                                </span>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

@@ -1,0 +1,83 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="breadcrumb mb-0 py-26 bg-main-50">
+    <div class="container container-lg">
+        <div class="breadcrumb-wrapper flex-between flex-wrap gap-16">
+            <h6 class="mb-0">My Account</h6>
+            <ul class="flex items-center gap-8 flex-wrap">
+                <li class="text-sm">
+                    <a href="index.html"
+                       class="text-gray-900 flex items-center gap-8 hover-text-main-600">
+                        <i class="ph ph-house"></i> Home
+                    </a>
+                </li>
+                <li class="flex items-center"><i class="ph ph-caret-right"></i></li>
+                <li class="text-sm text-main-600">Account</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<section class="account py-80">
+    <div class="container container-lg">
+        <form action="#">
+            <div class="row g-4">
+                <div class="2xl:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+                    <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40">
+                        <h6 class="text-xl mb-32">Register</h6>
+                        <div class="mb-24">
+                            <label for="usernameTwo"
+                                   class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Username <span class="text-danger">*</span>
+                            </label> <input class="common-input"
+                                            id="usernameTwo" placeholder="Write a username">
+                        </div>
+                        <div class="mb-24">
+                            <label for="emailTwo"
+                                   class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Email address <span class="text-danger">*</span>
+                            </label> <input type="email" class="common-input"
+                                            id="emailTwo" placeholder="Enter Email Address">
+                        </div>
+                        <div class="mb-24">
+                            <label for="enter-password"
+                                   class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Password <span class="text-danger">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="password" class="common-input" id="enter-password"
+                                       placeholder="Enter Password" value="password"> <span class="toggle-password absolute top-[50%] right-0 me-16 translate-y-[-50%] cursor-pointer ph ph-eye-slash"
+                                                                                            id="#enter-password"></span>
+                            </div>
+                        </div>
+                        <div class="my-48">
+                            <p class="text-gray-500">
+                                Your personal data will be used to process your order, support
+                                your experience throughout this website, and for other purposes described in our <a href="index.html" class="text-main-600 text-decoration-underline">
+                                    privacy
+                                    policy
+                                </a> .
+                            </p>
+                        </div>
+                        <div class="mt-48">
+                            <div class="row g-4">
+                                <div class="2xl:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+                                    <button type="submit" class="btn btn-main py-18 px-40">Register</button>
+
+                                </div>
+                                <div class="2xl:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+                                    <a asp-controller="Account" asp-action="Login"
+                                       class="text-main-600 font-[600] ms-4">
+                                        Đăng nhập
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>

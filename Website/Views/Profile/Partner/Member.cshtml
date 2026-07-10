@@ -1,0 +1,628 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="row g-4">
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-24 p-32 h-full">
+
+                    <span class="text-gray-500">
+                        Tổng khách hàng
+                    </span>
+
+                    <h2 class="text-main-600 mt-12">
+                        158
+                    </h2>
+
+                    <small class="text-success">
+
+                        +12 tháng này
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-24 p-32">
+
+                    <span class="text-gray-500">
+
+                        Đã mua hàng
+
+                    </span>
+
+                    <h2 class="mt-12">
+
+                        126
+
+                    </h2>
+
+                    <small>
+
+                        79.7%
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-24 p-32">
+
+                    <span class="text-gray-500">
+
+                        Khách VIP
+
+                    </span>
+
+                    <h2 class="mt-12">
+
+                        18
+
+                    </h2>
+
+                    <small>
+
+                        Mua từ 5 đơn
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+
+                <div class="border rounded-24 p-32">
+
+                    <span class="text-gray-500">
+
+                        Doanh thu tạo ra
+
+                    </span>
+
+                    <h2 class="mt-12">
+
+                        256.8M
+
+                    </h2>
+
+                    <small class="text-main-600">
+
+                        Lifetime
+
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-32">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-8">
+
+                    <h4>
+
+                        Link giới thiệu
+
+                    </h4>
+
+                    <p class="text-gray-500">
+
+                        Chia sẻ liên kết này để khách hàng đăng ký hoặc mua hàng.
+
+                    </p>
+
+                    <input class="common-input"
+                           readonly
+                           value="https://caterin.vn/?ref=CAT12345">
+
+                </div>
+
+                <div class="col-lg-4 text-end">
+
+                    <button class="btn btn-main">
+
+                        Copy Link
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+@* Thêm QRcode *@
+<section class="pb-40">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-24">
+
+            <div class="row g-3">
+
+                <div class="col-lg-4">
+
+                    <input class="common-input"
+                           placeholder="Tên hoặc SĐT">
+
+                </div>
+
+                <div class="col-lg-3">
+
+                    <select class="common-input">
+
+                        <option>
+
+                            Tất cả
+
+                        </option>
+
+                        <option>
+
+                            Đã mua
+
+                        </option>
+
+                        <option>
+
+                            Chưa mua
+
+                        </option>
+
+                        <option>
+
+                            VIP
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-lg-3">
+
+                    <select class="common-input">
+
+                        <option>
+
+                            Sắp xếp mới nhất
+
+                        </option>
+
+                        <option>
+
+                            Doanh thu cao nhất
+
+                        </option>
+
+                        <option>
+
+                            Hoa hồng cao nhất
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-lg-2">
+
+                    <button class="btn btn-main w-100">
+
+                        Lọc
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-32">
+
+            <h4 class="mb-32">
+
+                Danh sách khách hàng
+
+            </h4>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Khách hàng</th>
+
+                            <th>Ngày tham gia</th>
+
+                            <th>Đơn hàng</th>
+
+                            <th>Doanh thu</th>
+
+                            <th>Hoa hồng</th>
+
+                            <th>Trạng thái</th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>
+
+                                <div class="d-flex align-items-center">
+
+                                    <img src="/images/user/user1.jpg"
+                                         class="rounded-circle me-12"
+                                         width="42">
+
+                                    <div>
+
+                                        <strong>
+
+                                            Nguyễn Văn A
+
+                                        </strong>
+
+                                        <br>
+
+                                        <small>
+
+                                            0909xxxxxx
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                12/07/2026
+
+                            </td>
+
+                            <td>
+
+                                6
+
+                            </td>
+
+                            <td>
+
+                                8.500.000đ
+
+                            </td>
+
+                            <td class="text-main-600 fw-semibold">
+
+                                850.000đ
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    VIP
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a class="btn btn-sm btn-outline-main">
+
+                                    Chi tiết
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>
+
+                                <div class="d-flex align-items-center">
+
+                                    <img src="/images/user/user2.jpg"
+                                         class="rounded-circle me-12"
+                                         width="42">
+
+                                    <div>
+
+                                        <strong>
+
+                                            Trần Thị B
+
+                                        </strong>
+
+                                        <br>
+
+                                        <small>
+
+                                            0988xxxxxx
+
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                            <td>
+
+                                10/07/2026
+
+                            </td>
+
+                            <td>
+
+                                2
+
+                            </td>
+
+                            <td>
+
+                                2.300.000đ
+
+                            </td>
+
+                            <td class="text-main-600">
+
+                                230.000đ
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-primary">
+
+                                    Đang hoạt động
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <a class="btn btn-sm btn-outline-main">
+
+                                    Chi tiết
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-32">
+
+            <div class="flex-between mb-32">
+
+                <h4>
+
+                    Khách hàng mới theo tháng
+
+                </h4>
+
+                <select class="common-input w-auto">
+
+                    <option>
+
+                        2026
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <canvas id="customerChart"
+                    height="120"></canvas>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pb-80">
+
+    <div class="container container-lg">
+
+        <div class="border rounded-24 p-32">
+
+            <h4 class="mb-32">
+
+                Top khách hàng mang lại doanh thu
+
+            </h4>
+
+            <div class="row g-4">
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-20 p-24">
+
+                        <h6>
+
+                            🥇 Nguyễn Văn A
+
+                        </h6>
+
+                        <p>
+
+                            Doanh thu
+
+                            <strong>
+
+                                15.200.000đ
+
+                            </strong>
+
+                        </p>
+
+                        <p>
+
+                            Hoa hồng
+
+                            <span class="text-main-600">
+
+                                1.520.000đ
+
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-20 p-24">
+
+                        <h6>
+
+                            🥈 Trần Thị B
+
+                        </h6>
+
+                        <p>
+
+                            Doanh thu
+
+                            <strong>
+
+                                12.800.000đ
+
+                            </strong>
+
+                        </p>
+
+                        <p>
+
+                            Hoa hồng
+
+                            <span class="text-main-600">
+
+                                1.280.000đ
+
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-4">
+
+                    <div class="border rounded-20 p-24">
+
+                        <h6>
+
+                            🥉 Lê Văn C
+
+                        </h6>
+
+                        <p>
+
+                            Doanh thu
+
+                            <strong>
+
+                                11.600.000đ
+
+                            </strong>
+
+                        </p>
+
+                        <p>
+
+                            Hoa hồng
+
+                            <span class="text-main-600">
+
+                                1.160.000đ
+
+                            </span>
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

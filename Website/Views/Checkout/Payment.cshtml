@@ -1,0 +1,504 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<section class="checkout payment-page py-80">
+    <div class="container container-lg">
+
+        <!-- Page Header -->
+        <div class="border border-gray-100 rounded-8 px-30 py-20 mb-40 bg-main-50">
+            <div class="flex-between flex-wrap gap-16">
+                <div>
+                    <h5 class="mb-8">Thanh toán đơn hàng</h5>
+                    <span class="text-gray-600">
+                        Vui lòng kiểm tra lại thông tin đơn hàng trước khi hoàn tất thanh toán.
+                    </span>
+                </div>
+
+                <div class="text-end">
+                    <span class="text-gray-500 text-sm">
+                        Mã đơn hàng
+                    </span>
+
+                    <div class="text-main-600 font-[700]">
+                        #OD24070025
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- LEFT -->
+            <div class="2xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto xl:w-7/12">
+
+                <!-- Shipping Information -->
+                <div class="border border-gray-100 rounded-8 p-24 mb-32">
+
+                    <div class="flex-between mb-24">
+
+                        <h5 class="mb-0">
+                            Thông tin giao hàng
+                        </h5>
+
+                        <a href="/checkout"
+                           class="text-main-600 font-[600]">
+                            Thay đổi
+                        </a>
+
+                    </div>
+
+                    <div class="row gy-24">
+
+                        <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+
+                            <span class="text-gray-500 text-sm d-block mb-4">
+                                Người nhận
+                            </span>
+
+                            <div class="font-[600]">
+                                Nguyễn Văn A
+                            </div>
+
+                        </div>
+
+                        <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+
+                            <span class="text-gray-500 text-sm d-block mb-4">
+                                Số điện thoại
+                            </span>
+
+                            <div class="font-[600]">
+                                0988 888 888
+                            </div>
+
+                        </div>
+
+                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
+
+                            <span class="text-gray-500 text-sm d-block mb-4">
+                                Địa chỉ nhận hàng
+                            </span>
+
+                            <div class="font-[600]">
+                                123 Nguyễn Huệ,
+                                Phường Bến Nghé,
+                                Quận 1,
+                                TP. Hồ Chí Minh
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- Payment Method -->
+                <div class="border border-gray-100 rounded-8 p-24">
+
+                    <h5 class="mb-8">
+                        Phương thức thanh toán
+                    </h5>
+
+                    <p class="text-gray-500 mb-32">
+                        Chọn phương thức thanh toán phù hợp với bạn.
+                    </p>
+
+                    <!-- COD -->
+
+                    <div class="payment-item border rounded-8 px-20 mb-20">
+
+                        <div class="form-check common-check common-radio py-20 mb-0">
+
+                            <input class="form-check-input"
+                                   type="radio"
+                                   checked
+                                   name="payment"
+                                   id="cod">
+
+                            <label class="form-check-label flex-grow"
+                                   for="cod">
+
+                                <div class="flex-between">
+
+                                    <div>
+
+                                        <div class="font-[600]">
+                                            Thanh toán khi nhận hàng
+                                        </div>
+
+                                        <span class="text-gray-500 text-sm">
+                                            Thanh toán bằng tiền mặt khi nhận được hàng.
+                                        </span>
+
+                                    </div>
+
+                                    <i class="ph-fill ph-money text-main-600 text-2xl"></i>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Bank -->
+
+                    <div class="payment-item border rounded-8 px-20 mb-20">
+
+                        <div class="form-check common-check common-radio py-20 mb-0">
+
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="payment"
+                                   id="bank">
+
+                            <label class="form-check-label flex-grow"
+                                   for="bank">
+
+                                <div class="flex-between">
+
+                                    <div>
+
+                                        <div class="font-[600]">
+                                            Chuyển khoản ngân hàng
+                                        </div>
+
+                                        <span class="text-gray-500 text-sm">
+                                            Thanh toán qua Internet Banking hoặc Mobile Banking.
+                                        </span>
+
+                                    </div>
+
+                                    <i class="ph-fill ph-bank text-main-600 text-2xl"></i>
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <!-- VNPay -->
+
+                    <div class="payment-item border rounded-8 px-20 mb-20">
+
+                        <div class="form-check common-check common-radio py-20 mb-0">
+
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="payment"
+                                   id="vnpay">
+
+                            <label class="form-check-label flex-grow"
+                                   for="vnpay">
+
+                                <div class="flex-between">
+
+                                    <div>
+
+                                        <div class="font-[600]">
+                                            VNPay
+                                        </div>
+
+                                        <span class="text-gray-500 text-sm">
+                                            Thanh toán bằng ATM, Visa, MasterCard, QRCode.
+                                        </span>
+
+                                    </div>
+
+                                    <img src="/images/payment/vnpay.png"
+                                         width="64"
+                                         alt="VNPay">
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Momo -->
+
+                    <div class="payment-item border rounded-8 px-20">
+
+                        <div class="form-check common-check common-radio py-20 mb-0">
+
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="payment"
+                                   id="momo">
+
+                            <label class="form-check-label flex-grow"
+                                   for="momo">
+
+                                <div class="flex-between">
+
+                                    <div>
+
+                                        <div class="font-[600]">
+                                            Ví MoMo
+                                        </div>
+
+                                        <span class="text-gray-500 text-sm">
+                                            Thanh toán nhanh bằng ví điện tử MoMo.
+                                        </span>
+
+                                    </div>
+
+                                    <img src="/images/payment/momo.png"
+                                         width="42"
+                                         alt="MoMo">
+
+                                </div>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div class="2xl:w-4/12 flex-grow-0 flex-shrink-0 basis-auto xl:w-5/12">
+
+                <div class="checkout-sidebar">
+
+                    <div class="bg-color-three rounded-8 p-24 text-center">
+                        <span class="text-gray-900 text-xl font-[600]">
+                            Đơn hàng của bạn
+                        </span>
+                    </div>
+
+                    <div class="border border-gray-100 rounded-8 px-24 py-32 mt-24">
+
+                        <!-- Product -->
+
+                        <div class="mb-24 pb-24 border-b border-gray-100">
+
+                            <div class="flex items-center gap-16">
+
+                                <img src="/images/product/product-img1.png"
+                                     class="rounded-8"
+                                     width="72"
+                                     alt="Product">
+
+                                <div class="flex-grow">
+
+                                    <h6 class="text-md mb-4">
+                                        Nước rửa chén Gạo Caterin
+                                    </h6>
+
+                                    <span class="text-gray-500">
+                                        2 x 65.000đ
+                                    </span>
+
+                                </div>
+
+                                <span class="font-[700]">
+                                    130.000đ
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-24 pb-24 border-b border-gray-100">
+
+                            <div class="flex items-center gap-16">
+
+                                <img src="/images/product/product-img2.png"
+                                     class="rounded-8"
+                                     width="72"
+                                     alt="Product">
+
+                                <div class="flex-grow">
+
+                                    <h6 class="text-md mb-4">
+                                        Nước rửa tay Gạo Caterin
+                                    </h6>
+
+                                    <span class="text-gray-500">
+                                        1 x 89.000đ
+                                    </span>
+
+                                </div>
+
+                                <span class="font-[700]">
+                                    89.000đ
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-32">
+
+                            <a href="/cart"
+                               class="text-main-600 font-[500]">
+                                ← Chỉnh sửa giỏ hàng
+                            </a>
+
+                        </div>
+
+                        <!-- Summary -->
+
+                        <div class="border-top pt-24">
+
+                            <div class="flex-between mb-16">
+
+                                <span class="text-gray-600">
+                                    Tạm tính
+                                </span>
+
+                                <span class="font-[600]">
+                                    219.000đ
+                                </span>
+
+                            </div>
+
+                            <div class="flex-between mb-16">
+
+                                <span class="text-gray-600">
+                                    Phí vận chuyển
+                                </span>
+
+                                <span class="font-[600] text-success-600">
+                                    Miễn phí
+                                </span>
+
+                            </div>
+
+                            <div class="flex-between mb-16">
+
+                                <span class="text-gray-600">
+                                    Voucher
+                                </span>
+
+                                <span class="font-[600] text-danger-600">
+                                    -20.000đ
+                                </span>
+
+                            </div>
+
+                            <div class="flex-between mb-16">
+
+                                <span class="text-gray-600">
+                                    Thuế VAT
+                                </span>
+
+                                <span class="font-[600]">
+                                    0đ
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="border-top pt-24 mt-24">
+
+                            <div class="flex-between">
+
+                                <span class="text-xl font-[700]">
+                                    Tổng thanh toán
+                                </span>
+
+                                <span class="text-main-600 text-2xl font-[700]">
+                                    199.000đ
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Security -->
+
+                    <div class="border border-gray-100 rounded-8 p-20 mt-24">
+
+                        <div class="flex items-start gap-12">
+
+                            <i class="ph-fill ph-shield-check text-main-600 text-xl mt-4"></i>
+
+                            <div>
+
+                                <h6 class="mb-8">
+                                    Thanh toán an toàn
+                                </h6>
+
+                                <p class="text-gray-500 text-sm mb-0">
+
+                                    Mọi thông tin thanh toán được mã hóa và bảo mật.
+                                    Caterin cam kết không lưu thông tin thẻ của khách hàng.
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Policy -->
+
+                    <div class="mt-24">
+
+                        <div class="form-check common-check mb-16">
+
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="agree">
+
+                            <label class="form-check-label"
+                                   for="agree">
+
+                                Tôi đã đọc và đồng ý với
+
+                                <a href="#"
+                                   class="text-main-600">
+
+                                    Điều khoản mua hàng
+
+                                </a>
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <button class="btn btn-main py-18 w-full rounded-8 mt-32">
+
+                        <i class="ph-fill ph-lock-key-open me-8"></i>
+
+                        Thanh toán ngay
+
+                    </button>
+
+                    <div class="text-center mt-24">
+
+                        <a href="/checkout"
+                           class="text-main-600 font-[600]">
+
+                            ← Quay lại thông tin giao hàng
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>

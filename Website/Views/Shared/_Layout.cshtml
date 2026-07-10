@@ -2,49 +2,629 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CATERIN</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @* <link rel="stylesheet" href="~/CATERIN.styles.css" asp-append-version="true" /> *@
+    <link rel="shortcut icon" href="~/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2/src/regular/style.css">
+    <link href="~/css/app.min.css" rel="stylesheet" asp-append-version="true">
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">CATERIN</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
+    <div class="preloader fixed inset-0 z-[9999] flex justify-center items-center bg-white">
+        <img src="~/images/Demos/preloader.gif" alt="Image">
+    </div>
+    <div class="overlay"></div>
+    <div class="side-overlay"></div>
+    <div class="progress-wrap fixed right-[36px] bottom-[36px] h-[46px] w-[46px] leading-[46px] cursor-pointer block rounded-[50px] shadow-inset z-[10000] opacity-0 invisible translate-y-[15px] transition-all duration-200 ease-linear bg-transparent max-lg:right-[24px] max-lg:bottom-[24px] max-lg:h-[40px] max-lg:w-[40px] max-lg:leading-[40px] hover:scale-[1.06] after:absolute after:font-[900] after:text-center after:w-[46px] after:h-[46px] after:leading-[46px] after:text-[18px] after:left-0 after:top-0 after:cursor-pointer after:block after:content-['\e08e'] after:font-phospor after:z-[1] after:transition-all after:duration-200 after:ease-linear after:text-main max-lg:after:h-[40px] max-lg:after:w-[40px] max-lg:after:leading-[40px]">
+        <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+        </svg>
+    </div>
+    <partial name="_Partial_Header-mb" />
+    <div class="header-top bg-main-600 flex-between">
+        <div class="container container-lg">
+            <div class="flex-between flex-wrap gap-8">
+                <ul class="flex items-center flex-wrap hidden lg:flex">
+                    <li class="border-right-item">
+                        <a asp-controller="Home" asp-action="PartnerCenter"
+                           class="text-white text-sm hover-text-decoration-underline">Đồng hàng cùng Caterin</a>
+                    </li>
+                    <li class="border-right-item">
+                          <span class="text-white text-sm mr-1">kết nối: </span>
+                        <a class="text-white text-sm hover-text-decoration-underline mx-2 cursor-pointer"><span class="text-sm flex"><img width="16" src="~/images/Default/icon/icon-fb.png" alt="Fanpage Caterin" title="Fanpage Caterin" /></span></a>
+                        <a class="text-white text-sm hover-text-decoration-underline mx-2 cursor-pointer"><span class="text-sm flex"><img width="16" src="~/images/Default/icon/icon-shopee.webp" alt="Shopee Caterin" title="Shopee Caterin" /></span></a>
+                              
+                    </li>
+                </ul>
+                <ul class="header-top__right flex items-center flex-wrap">
+                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
+                        <a href="javascript:void(0)" class="text-white text-sm py-8">Help Center</a>
+                        <ul class="on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
+                            <li class="nav-submenu__item">
+                                <a href="index.html"
+                                   class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <span class="text-sm flex"><i class="ph ph-headset"></i></span> Call Center
+                                </a>
+                            </li>
+                            <li class="nav-submenu__item">
+                                <a href="index.html"
+                                   class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <span class="text-sm flex"><i class="ph ph-chat-circle-dots"></i></span> Live Chat
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
+                        <a href="javascript:void(0)" class="selected-text text-white text-sm py-8">Eng</a>
+                        <ul class="selectable-text-list on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag1.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> English
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag2.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> Japan
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag3.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> French
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag4.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> Germany
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag6.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> Bangladesh
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag5.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> South Korea
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
+                        <a href="javascript:void(0)" class="selected-text text-white text-sm py-8">USD</a>
+                        <ul class="selectable-text-list on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag1.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> USD
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag2.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> Yen
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag3.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> Franc
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag4.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> EURO
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag6.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> BDT
+                                </a>
+                            </li>
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
+                                    <img src="~/images/Demos/flag5.png" alt="Image"
+                                         class="w-16 h-12 rounded-4 border border-gray-100"> WON
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="border-right-item">
+                        <a asp-controller="Account" asp-action="Login"
+                           class="text-white text-sm py-8 flex items-center gap-6">
+                            <span class="icon text-md flex">
+                                <i class="ph ph-user-circle"></i>
+                            </span><span class="hover-text-decoration-underline">My Account</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </nav>
+        </div>
+    </div>
+    <header class="header-middle bg-color-one border-b border-gray-100">
+        <div class="container container-lg">
+            <nav class="header-inner flex-between">
+                <div class="logo">
+                    <a asp-controller="Home" asp-action=""><img src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin"></a>
+                </div>
+                <form action="#" class="flex items-center flex-wrap form-location-wrapper">
+                    <div class="search-category flex h-48 select-border-r-0 radius-end-0 search-form ">
+                        <select class="js-example-basic-single border border-gray-200 border-r-0 hidden md:flex" name="state">
+                            <option value="1" selected="selected" disabled="disabled">Tất cả</option>
+                            <option value="1">Nước rửa tay</option>
+                            <option value="2">Nước rửa chén</option>
+                            <option value="3">Nước lau sàn</option>
+                            <option value="4">Nước lau kính</option>
+                            <option value="5">Tẩy rửa tác động sâu</option>
+                        </select>
+                        <div class="search-form__wrapper relative">
+                            <input class="search-form__input common-input py-13 ps-16 pe-18 !rounded-tr-[50rem] !rounded-br-[50rem] pe-44"
+                                   placeholder="Search for a product or brand"> <button type="submit"
+                                                                                        class="w-32 h-32 bg-main-600 rounded-[50%] flex items-center justify-center text-xl text-white absolute top-[50%] translate-y-[-50%] right-0 me-8">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </div>
+                    @* <div class="location-box bg-white flex items-center gap-8 py-6 px-16 rounded-[50rem] border border-gray-100">
+                        <span class="text-gray-900 text-xl sm:flex hidden"><i class="ph ph-map-pin"></i></span>
+                        <div class="line-height-1">
+                            <span class="text-gray-600 text-xs">Your Location</span>
+                            <div class="line-height-1">
+                                <select class="js-example-basic-single border border-gray-200 border-r-0" name="state">
+                                    <option value="1">Alabama</option>
+                                    <option value="1">Alaska</option>
+                                    <option value="1">Arizona</option>
+                                    <option value="1">Delaware</option>
+                                    <option value="1">Florida</option>
+                                    <option value="1">Georgia</option>
+                                    <option value="1">Hawaii</option>
+                                    <option value="1">Indiana</option>
+                                    <option value="1">Marzland</option>
+                                    <option value="1">Nevada</option>
+                                    <option value="1">New Jersey</option>
+                                    <option value="1">New Mexico</option>
+                                    <option value="1">New York</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div> *@
+                </form>
+                @* <form action="#" class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
+
+                    <!-- Search -->
+                    <div class="search-category flex h-12">
+                        <select class="js-example-basic-single border border-gray-200 border-r-0">
+                            <option selected disabled>Tất cả</option>
+                            <option>Nước rửa tay</option>
+                            <option>Nước rửa chén</option>
+                            <option>Nước lau sàn</option>
+                            <option>Nước lau kính</option>
+                            <option>Tẩy rửa tác động sâu</option>
+                        </select>
+
+                        <div class="search-form__wrapper relative flex-1">
+                            <input class="search-form__input common-input py-3 ps-4 pe-12 w-full rounded-r-full"
+                                   placeholder="Search for a product or brand">
+
+                            <button type="submit"
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-main-600 text-white flex items-center justify-center">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Badge -->
+                    <div class="flex justify-center items-center gap-2 text-main-700 font-medium">
+                        <i class="ph ph-seal-check text-xl"></i>
+                        <span>Chính hãng</span>
+                    </div>
+
+                    <!-- Badge -->
+                    <div class="flex justify-center items-center gap-2 text-main-two-700 font-medium">
+                        <i class="ph ph-truck text-xl"></i>
+                        <span>Giao toàn quốc</span>
+                    </div>
+
+                </form> *@
+                <div class="header-right items-center xl:block hidden">
+                    <div class="flex items-center flex-wrap gap-12">
+                        @* <button type="button"
+                                class="search-icon flex items-center xl:hidden flex gap-4 item-hover">
+                            <span class="text-2xl text-gray-700 flex relative item-hover__text">
+                                <i class="ph ph-magnifying-glass"></i>
+                            </span>
+                        </button> *@ 
+                        <a asp-controller="Wishlist" asp-action="Index"
+                                     class="flex items-center gap-4 item-hover">
+                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
+                                <i class="ph ph-heart"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
+                            </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Wishlist</span>
+                        </a>
+                        <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-4 item-hover">
+                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
+                                <i class="ph ph-shopping-cart-simple"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
+                            </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Cart</span>
+                        </a>
+                        @* <a asp-controller="Profile" asp-action="Index" class="flex items-center gap-4 item-hover !block">
+                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
+                                <i class="ph ph-user"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
+                            </span><span class="text-md text-gray-500 item-hover__text xl:block hidden">Tài khoản</span>
+                        </a> *@
+                    </div>
+                </div>
+            </nav>
+        </div>
     </header>
-    <div class="container">
+    <header class="header bg-white border-b border-gray-100">
+        <div class="w-full">
+            <nav class="header-inner flex justify-between gap-8">
+                <div class="flex items-center menu-category-wrapper">
+                    <div class="category on-hover-item">
+                        <button type="button"
+                                class="category__button flex items-center gap-8 font-[500] p-16 border-r border-l border-gray-100 text-heading">
+                            <span class="icon text-2xl sm:flex hidden"><i class="ph ph-dots-nine"></i></span> <span class="md:flex hidden">All</span> Categories <span class="arrow-icon text-xl flex">
+                                <i class="ph ph-caret-down"></i>
+                            </span>
+                        </button>
+                        <div class="responsive-dropdown on-hover-dropdown common-dropdown nav-submenu p-0 submenus-submenu-wrapper">
+                            <button type="button"
+                                    class="close-responsive-dropdown rounded-[50%] text-xl absolute right-0 inset-block-start-0 mt-4 me-8 xl:hidden flex">
+                                <i class="ph ph-x"></i>
+                            </button>
+                            <div class="logo px-16 xl:hidden block">
+                                <a asp-controller="Home" asp-action="Index" class="link text-center">
+
+                                   <img width="150px" src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin">
+                                </a>
+                            </div>
+                            <ul class="scroll-sm p-0 py-8 w-300 max-h-400 overflow-y-auto">
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-carrot"></i></span> <span>
+                                            Hot Deals
+                                            &amp; Combo
+                                        </span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Hot Deals &amp; Combo</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a asp-controller="Product" asp-action="Filter" asp-route-key="hotdeal">Hot Deals</a></li>
+                                            <li><a asp-controller="Product" asp-action="Filter" asp-route-key="combo">Combo</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span>
+                                        <span>Nước rửa tay</span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước rửa tay</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a href="shop.html">Nước rửa tay hương sen</a></li>
+                                            <li><a href="shop.html">Nước rửa tay hương táo-kiwi</a></li>
+                                            <li><a href="shop.html">Nước rửa tay hương gạo</a></li>
+                                            <li><a href="shop.html">Nước rửa tay chai 450g</a></li>
+                                            <li><a href="shop.html">Nước rửa tay can 2kg</a></li>
+                                            <li><a href="shop.html">Nước rửa tay can 5kg</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
+                                            Nước rửa chén
+                                        </span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước rửa chén</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a href="shop.html">Nước rửa chén hương cam quế</a></li>
+                                            <li><a href="shop.html">Nước rửa chén hương gạo</a></li>
+                                            <li><a href="shop.html">Nước rửa chén hương sả chanh</a></li>
+                                            <li><a href="shop.html">Nước rửa chén chai 950g</a></li>
+                                            <li><a href="shop.html">Nước rửa chén can 2kg</a></li>
+                                            <li><a href="shop.html">Nước rửa chén can 5kg</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
+                                            Nước lau sàn
+                                        </span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước lau sàn</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a href="shop.html">Nước lau sàn hương lavender</a></li>
+                                            <li><a href="shop.html">Nước lau sàn hương ylang</a></li>
+                                            <li><a href="shop.html">Nước lau sàn hương hoa hạ</a></li>
+                                            <li><a href="shop.html">Nước lau sàn chai 950g</a></li>
+                                            <li><a href="shop.html">Nước lau sàn can 5kg</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
+                                            Nước lau kính
+                                        </span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước lau kính</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a href="shop.html">Nước lau kính chai 700g</a></li>
+                                            <li><a href="shop.html">Nước lau kính can 5kg</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                                <li class="has-submenus-submenu">
+                                    <a href="javascript:void(0)"
+                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
+                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
+                                            Chất tẩy rửa tác động sâu
+                                        </span> <span class="icon text-md flex ms-auto">
+                                            <i class="ph ph-caret-right"></i>
+                                        </span>
+                                    </a>
+                                    <div class="submenus-submenu py-16">
+                                        <h6 class="text-lg px-16 submenus-submenu__title">Chất tẩy rửa tác động sâu</h6>
+                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
+                                            <li><a href="shop.html">Chất tẩy rửa tác động sâu chai 900g</a></li>
+                                            <li><a href="shop.html">Chất tẩy rửa tác động sâu can 5kg</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="header-menu xl:block hidden text-heading">
+                        <ul class="nav-menu flex items-center">
+                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Index" class="nav-menu__link">Trang chủ</a></li>
+                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Index" class="nav-menu__link">Đăng ký đại lý</a></li>
+                            <li class="on-hover-item nav-menu__item has-submenu">
+                                <a href="javascript:void(0)"
+                                   class="nav-menu__link">Sản phẩm</a>
+                                <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Product" asp-action="Index"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Tất cả</a>
+                                    </li>
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nrt"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                            Nước rửa tay
+                                        </a>
+                                    </li>
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nrc"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                            Nước rửa chén
+                                        </a>
+                                    </li>
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nls"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                            Nước lau sàn
+                                        </a>
+                                    </li>
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nlk"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                            Nước lau kính
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="on-hover-item nav-menu__item has-submenu">
+                                <a href="javascript:void(0)"
+                                   class="nav-menu__link">Tin tức & Sự kiện</a>
+                                <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Blog" asp-action="Index"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Tin tức</a>
+                                    </li>
+                                    <li class="common-dropdown__item nav-submenu__item">
+                                        <a asp-controller="Blog" asp-action="News"
+                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                            Sự kiện
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Contact" class="nav-menu__link">Liên hệ</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="header-right flex items-center">
+                    <a href="tel:0931424207"
+                       class="bg-main-600 text-white p-12 h-full hover-bg-main-800 flex items-center gap-8 text-lg xl:flex hidden">
+                        <div class="flex text-32"><i class="ph ph-phone-call"></i></div>+84 - 931 424 207
+                    </a>
+                    <div class="me-16 xl:hidden block">
+                        <div class="flex items-center flex-wrap gap-12">
+                            <a href="cart.html"
+                                         class="flex items-center gap-4 item-hover">
+                                <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
+                                    <i class="ph ph-heart"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
+                                </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Wishlist</span>
+                            </a><a href="cart.html" class="flex items-center gap-4 item-hover">
+                                <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
+                                    <i class="ph ph-shopping-cart-simple"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
+                                </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Cart</span>
+                            </a>
+                        </div>
+                    </div><button type="button" class="toggle-mobileMenu xl:hidden ms-3n text-gray-800 text-4xl flex">
+                        <i class="ph ph-list"></i>
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container py-40">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - CATERIN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <partial name="_Footer" />
+
+    <div class="bottom-footer bg-main-600 text-light-600 py-8">
+        <div class="container container-lg">
+            <div class="bottom-footer__inner flex-between flex-wrap gap-16 py-16">
+                <p class="bottom-footer__text wow fadeInLeftBig">
+                    Caterin - An toàn cho mọi nhà &copy; 2026. All Rights Reserved
+                </p>
+                <div class="flex items-center gap-8 flex-wrap wow fadeInRightBig">
+                    <span class="text-sm">
+                        Chúng tôi chấp nhận
+                    </span> <img src="~/images/Demos/payment-method.png" alt="Image">
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- Overlay -->
+    <div class="popup-overlay" id="promoPopup">
+        <div class="promo-popup">
+
+            <button class="popup-close" id="closePopup">
+                <i class="ph ph-x"></i>
+            </button>
+
+            <div class="promo-left">
+                <img src="/images/Default/popup-products.png" alt="Caterin">
+            </div>
+
+            <div class="promo-right">
+
+                <span class="promo-tag">
+                    🎉 Chào mừng bạn đến với Caterin
+                </span>
+
+                <h2>
+                    Nhận ngay Voucher
+                    <span>30.000đ</span>
+                </h2>
+
+                <p>
+                    Áp dụng cho đơn hàng từ <b>299.000đ</b>.
+                    Khám phá ngay các sản phẩm chăm sóc gia đình
+                    an toàn và chất lượng.
+                </p>
+
+                <div class="promo-buttons">
+                    <a href="/shop" class="btn-main">
+                        Mua ngay
+                    </a>
+
+                    <button class="btn-secondary" id="laterBtn">
+                        Để sau
+                    </button>
+                </div>
+
+                <label class="popup-checkbox">
+                    <input type="checkbox" id="hideToday">
+                    Không hiển thị lại hôm nay
+                </label>
+
+            </div>
+
+        </div>
+    </div>
+    <script>
+                const popup = document.getElementById("promoPopup");
+
+        const hideToday = document.getElementById("hideToday");
+
+        if (!localStorage.getItem("hidePromo")) {
+
+            setTimeout(() => {
+
+                popup.classList.add("show");
+
+            }, 1800);
+
+        }
+
+        function closePopup() {
+
+            popup.classList.remove("show");
+
+            if (hideToday.checked) {
+
+                const tomorrow = new Date();
+
+                tomorrow.setHours(23,59,59,999);
+
+                localStorage.setItem(
+                    "hidePromo",
+                    tomorrow.getTime()
+                );
+
+            }
+
+        }
+
+        document.getElementById("closePopup")
+        .addEventListener("click", closePopup);
+
+        document.getElementById("laterBtn")
+        .addEventListener("click", closePopup);
+
+        const hideTime = localStorage.getItem("hidePromo");
+
+        if(hideTime){
+
+            if(Date.now() > hideTime){
+
+                localStorage.removeItem("hidePromo");
+
+            }
+
+        }
+
+    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2"></script>
+    <script defer="defer" src="~/js/app.bundle.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

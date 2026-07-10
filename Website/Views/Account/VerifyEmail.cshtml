@@ -1,0 +1,184 @@
+﻿@using Website.Models.Account
+@using Website.Models.Enum
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model VerifyEmailViewModel
+
+@section Styles{
+    <style>
+        .verify-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .verify-icon i {
+                font-size: 40px;
+            }
+
+        .verify-pending {
+            background: #EEF8FF;
+            color: #0D6EFD;
+        }
+
+        .verify-success {
+            background: #EFFAF2;
+            color: #16A34A;
+        }
+
+        .verify-warning {
+            background: #FFF8E8;
+            color: #F59E0B;
+        }
+
+        .verify-danger {
+            background: #FFF1F2;
+            color: #DC2626;
+        }
+
+        .email-preview {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 22px;
+            border-radius: 999px;
+            background: #F8F9FA;
+            font-weight: 600;
+            color: #374151;
+        }
+    </style>
+}
+
+@{
+    var icon = "ph-envelope-simple";
+    var iconBg = "verify-pending";
+    var title = "";
+    var description = "";
+    var showOpenMail = false;
+    var showResend = false;
+    var showLogin = false;
+
+    switch (Model.Status)
+    {
+        case VerifyEmailStatus.Pending:
+            icon = "ph-envelope-simple";
+            iconBg = "verify-pending";
+            title = "Xác thực địa chỉ Email";
+            description = "Chúng tôi đã gửi email xác thực đến địa chỉ bên dưới. Vui lòng kiểm tra hộp thư và nhấn vào liên kết để kích hoạt tài khoản.";
+            showOpenMail = true;
+            showResend = true;
+            showLogin = true;
+            break;
+
+        case VerifyEmailStatus.Success:
+            icon = "ph-check-circle";
+            iconBg = "verify-success";
+            title = "Xác thực thành công";
+            description = "Email của bạn đã được xác thực thành công. Bây giờ bạn có thể đăng nhập và sử dụng đầy đủ các tính năng.";
+            showLogin = true;
+            break;
+
+        case VerifyEmailStatus.Expired:
+            icon = "ph-clock-countdown";
+            iconBg = "verify-warning";
+            title = "Liên kết đã hết hạn";
+            description = "Liên kết xác thực đã hết hạn. Vui lòng yêu cầu gửi lại email xác thực.";
+            showResend = true;
+            showLogin = true;
+            break;
+
+        case VerifyEmailStatus.Invalid:
+            icon = "ph-warning-circle";
+            iconBg = "verify-danger";
+            title = "Không thể xác thực";
+            description = "Liên kết xác thực không hợp lệ hoặc đã được sử dụng.";
+            showResend = true;
+            showLogin = true;
+            break;
+    }
+}
+
+<section class="account py-80">
+    <div class="container container-lg">
+
+        <div class="row justify-content-center">
+
+            <div class="col-xl-5 col-lg-6 col-md-8">
+
+                <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-32 py-48">
+
+                    <div class="text-center">
+
+                        <div class="verify-icon @iconBg mx-auto mb-32">
+                            <i class="ph-fill @icon"></i>
+                        </div>
+
+                        <span class="text-main-600 text-sm font-[600] d-block mb-12">
+                            Verify Email
+                        </span>
+
+                        <h3 class="mb-16">
+                            @title
+                        </h3>
+
+                        <p class="text-gray-500 mb-24">
+                            @description
+                        </p>
+
+                        @if (Model.Status == VerifyEmailStatus.Pending && !string.IsNullOrWhiteSpace(Model.Email))
+                        {
+                            <div class="email-preview mb-32">
+                                @Model.Email
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Message))
+                        {
+                            <div class="alert alert-info rounded-12 mb-24">
+                                @Model.Message
+                            </div>
+                        }
+
+                        @if (showOpenMail)
+                        {
+                            <a href="https://mail.google.com"
+                               target="_blank"
+                               class="btn btn-main py-18 w-100">
+                                Mở Gmail
+                            </a>
+                        }
+
+                        @if (showResend)
+                        {
+                            <a asp-action="ResendVerificationEmail"
+                               class="btn btn-outline-main py-18 w-100 mt-16">
+                                Gửi lại Email xác thực
+                            </a>
+                        }
+
+                        @if (showLogin)
+                        {
+                            <div class="mt-32">
+                                <a asp-action="Login"
+                                   class="text-main-600 font-[600]">
+                                    ← Quay lại đăng nhập
+                                </a>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>

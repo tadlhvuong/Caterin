@@ -1,0 +1,365 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@section Styles{
+    <style>
+        .order-progress {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+        }
+
+            .order-progress::before {
+                content: "";
+                position: absolute;
+                left: 8%;
+                right: 8%;
+                top: 18px;
+                height: 3px;
+                background: #E5E7EB;
+            }
+
+            .order-progress .step {
+                position: relative;
+                z-index: 2;
+                text-align: center;
+                width: 25%;
+            }
+
+                .order-progress .step i {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 50%;
+                    background: #E5E7EB;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: auto;
+                    font-size: 22px;
+                }
+
+            .order-progress .completed i,
+            .order-progress .active i {
+                background: var(--main-600);
+                color: #fff;
+            }
+
+        .product-row + .product-row {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+    </style>
+}
+
+<div class="border border-gray-100 rounded-16 px-32 py-24 mb-32">
+
+    <div class="flex-between flex-wrap gap-16">
+
+        <div>
+
+            <a asp-action="Orders"
+               class="text-main-600 mb-12 inline-block">
+
+                ← Quay lại đơn hàng
+
+            </a>
+
+            <h4 class="mb-8">
+
+                Đơn hàng #CT240700012
+
+            </h4>
+
+            <span class="text-gray-500">
+
+                Đặt ngày 09/07/2026
+
+            </span>
+
+        </div>
+
+        <span class="badge bg-success-600 px-24 py-12 rounded-pill">
+
+            Đã giao
+
+        </span>
+
+    </div>
+
+</div>
+
+@* shipping *@
+<div class="border border-gray-100 rounded-16 p-32 mb-32">
+
+    <h5 class="mb-24">
+
+        Thông tin giao hàng
+
+    </h5>
+
+    <div class="row">
+
+        <div class="md:w-4/12 mb-20">
+
+            <span class="text-gray-500">
+
+                Người nhận
+
+            </span>
+
+            <h6>
+
+                Nguyễn Văn A
+
+            </h6>
+
+        </div>
+
+        <div class="md:w-4/12 mb-20">
+
+            <span class="text-gray-500">
+
+                Điện thoại
+
+            </span>
+
+            <h6>
+
+                0988888888
+
+            </h6>
+
+        </div>
+
+        <div class="md:w-4/12">
+
+            <span class="text-gray-500">
+
+                Thanh toán
+
+            </span>
+
+            <h6>
+
+                COD
+
+            </h6>
+
+        </div>
+
+        <div class="w-full mt-20">
+
+            <span class="text-gray-500">
+
+                Địa chỉ
+
+            </span>
+
+            <h6>
+
+                123 Nguyễn Huệ,
+                Quận 1,
+                TP.HCM
+
+            </h6>
+
+        </div>
+
+    </div>
+
+</div>
+
+@* Timeline *@
+<div class="border border-gray-100 rounded-16 p-32 mb-32">
+
+    <h5 class="mb-32">
+
+        Trạng thái đơn hàng
+
+    </h5>
+
+    <div class="order-progress">
+
+        <div class="step completed">
+
+            <i class="ph-fill ph-check-circle"></i>
+
+            <span>Đặt hàng</span>
+
+        </div>
+
+        <div class="step completed">
+
+            <i class="ph-fill ph-package"></i>
+
+            <span>Xác nhận</span>
+
+        </div>
+
+        <div class="step completed">
+
+            <i class="ph-fill ph-truck"></i>
+
+            <span>Đang giao</span>
+
+        </div>
+
+        <div class="step active">
+
+            <i class="ph-fill ph-house"></i>
+
+            <span>Đã giao</span>
+
+        </div>
+
+    </div>
+
+</div>
+
+@* product *@
+<div class="border border-gray-100 rounded-16 p-32 mb-32">
+
+    <h5 class="mb-24">
+
+        Sản phẩm
+
+    </h5>
+
+    <div class="product-row">
+
+        <div class="flex items-center gap-20">
+
+            <img src="/images/product/product-img1.png"
+                 width="90"
+                 class="rounded-8">
+
+            <div class="flex-grow">
+
+                <h6>
+
+                    Nước rửa chén Gạo Caterin
+
+                </h6>
+
+                <span class="text-gray-500">
+
+                    950ml
+
+                </span>
+
+            </div>
+
+            <div>
+
+                x2
+
+            </div>
+
+            <div>
+
+                65.000đ
+
+            </div>
+
+            <div class="font-[700]">
+
+                130.000đ
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@* payment summary *@
+<div class="border border-gray-100 rounded-16 p-32">
+
+    <h5 class="mb-24">
+
+        Thanh toán
+
+    </h5>
+
+    <div class="flex-between mb-16">
+
+        <span>Tạm tính</span>
+
+        <span>219.000đ</span>
+
+    </div>
+
+    <div class="flex-between mb-16">
+
+        <span>Phí vận chuyển</span>
+
+        <span>25.000đ</span>
+
+    </div>
+
+    <div class="flex-between mb-16">
+
+        <span>Voucher</span>
+
+        <span class="text-danger-600">
+
+            -20.000đ
+
+        </span>
+
+    </div>
+
+    <div class="border-top mt-24 pt-24">
+
+        <div class="flex-between">
+
+            <h5>
+
+                Tổng cộng
+
+            </h5>
+
+            <h4 class="text-main-600">
+
+                224.000đ
+
+            </h4>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="mt-40 flex-between flex-wrap gap-16">
+
+    <a href="#"
+       class="btn btn-outline-main">
+
+        <i class="ph ph-download-simple me-8"></i>
+
+        Tải hóa đơn
+
+    </a>
+
+    <div class="flex gap-16">
+
+        <button class="btn btn-outline-main">
+
+            Mua lại
+
+        </button>
+
+        <button class="btn btn-main">
+
+            Liên hệ hỗ trợ
+
+        </button>
+
+    </div>
+
+</div>

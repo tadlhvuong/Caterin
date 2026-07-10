@@ -17,8 +17,42 @@ namespace CATERIN.Controllers
         {
             return View();
         }
+        public IActionResult About()
+        {
+            return View();
+        }
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        public IActionResult Terms()
+        {
+            return View();
+        }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        public IActionResult ShippingPolicy()
+        {
+            return View();
+        }
+        public IActionResult ReturnRefundPolicy()
+        {
+            return View();
+        }
+        public IActionResult PaymentPolicy()
+        {
+            return View();
+        }
+        public IActionResult FAQ()
+        {
+            return View();
+        }
+        public IActionResult PartnerCenter()
         {
             return View();
         }

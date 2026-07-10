@@ -1,0 +1,120 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<section class="order-success py-80">
+
+    <div class="container container-lg">
+
+        <div class="row justify-content-center">
+
+            <div class="col-xl-6 col-lg-7">
+
+                <div class="border border-gray-100 rounded-16 p-48 text-center">
+
+                    <!-- Icon -->
+
+                    <div class="success-icon mx-auto mb-32">
+
+                        <i class="ph-fill ph-check-circle"></i>
+
+                    </div>
+
+                    <span class="text-main-600 text-sm font-[600] d-block mb-12">
+
+                        Thank You
+
+                    </span>
+
+                    <h3 class="mb-16">
+
+                        Đặt hàng thành công
+
+                    </h3>
+
+                    <p class="text-gray-500 mb-40">
+
+                        Cảm ơn bạn đã mua sắm tại Caterin.
+                        Chúng tôi sẽ xác nhận đơn hàng và giao đến bạn trong thời gian sớm nhất.
+
+                    </p>
+
+                    <div class="bg-main-50 rounded-12 p-24 mb-32">
+
+                        <div class="flex-between mb-16">
+
+                            <span>Mã đơn hàng</span>
+
+                            <strong>#CT240700012</strong>
+
+                        </div>
+
+                        <div class="flex-between mb-16">
+
+                            <span>Ngày đặt</span>
+
+                            <strong>09/07/2026</strong>
+
+                        </div>
+
+                        <div class="flex-between mb-16">
+
+                            <span>Thanh toán</span>
+
+                            <strong>COD</strong>
+
+                        </div>
+
+                        <div class="flex-between">
+
+                            <span>Tổng tiền</span>
+
+                            <strong class="text-main-600">
+
+                                345.000đ
+
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-sm-6">
+
+                            <a asp-controller="Order"
+                               asp-action="Detail"
+                               asp-route-id="CT240700012"
+                               class="btn btn-main w-100 py-18">
+
+                                Theo dõi đơn hàng
+
+                            </a>
+
+                        </div>
+
+                        <div class="col-sm-6">
+
+                            <a asp-controller="Home"
+                               asp-action="Index"
+                               class="btn btn-outline-main w-100 py-18">
+
+                                Tiếp tục mua sắm
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

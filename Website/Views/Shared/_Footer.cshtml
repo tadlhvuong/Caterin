@@ -1,0 +1,171 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<footer class="footer bg-color-one py-80">
+    <img src="~/images/Default/footer-bg.webp" alt="BG" class="body-bottom-bg">
+    <div class="container">
+        <div class="footer-item-wrapper flex items-start flex-wrap pb-16">
+            <div class="footer-item" data-aos="fade-up" data-aos-duration="200">
+                <div class="footer-item__logo">
+                    <a asp-controller="Home" asp-action=""><img src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin"></a>
+                </div>
+                <p class="mb-24">Caterin shop - An toàn cho mọi nhà.</p>
+                <div class="flex items-center gap-16 mb-16">
+                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
+                        <i class="ph-fill ph-map-pin"></i>
+                    </span> <span class="text-md text-gray-900">
+                        36 Vân Côi, P. Tân Sơn Nhất, Tp. Hồ Chí Minh
+                    </span>
+                </div>
+                <div class="flex items-center gap-16 mb-16">
+                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
+                        <i class="ph-fill ph-phone-call"></i>
+                    </span>
+                    <div class="flex items-center gap-16 flex-wrap">
+                        <a href="tel:0931424207"
+                           class="text-md text-gray-900 hover-text-main-600">+84 931 424 207</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-16 mb-16">
+                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
+                        <i class="ph-fill ph-envelope"></i>
+                    </span> <a href="mailto:anphapharm@gmail.com"
+                               class="text-md text-gray-900 hover-text-main-600">anphapharm@gmail.com</a>
+                </div>
+            </div>
+            <div class="footer-item" data-aos="fade-up" data-aos-duration="400">
+                <h6 class="footer-item__title">Thông tin</h6>
+                <ul class="footer-menu">
+                    <li class="mb-16">
+                        <a asp-controller="Home" asp-action="Contact" class="text-gray-600 hover-text-main-600">
+                            Liên hệ
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a asp-controller="Home" asp-action="ShippingPolicy" class="text-gray-600 hover-text-main-600">
+                           Chính sách giao hàng
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a asp-controller="Home" asp-action="ReturnRefundPolicy" class="text-gray-600 hover-text-main-600">
+                            Chính sách đổi trả
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a asp-controller="Home" asp-action="Terms" class="text-gray-600 hover-text-main-600">
+                            Điều khoản sử dụng
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a asp-controller="Home" asp-action="FAQ" class="text-gray-600 hover-text-main-600">
+                            Câu hỏi thường gặp
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-item" data-aos="fade-up" data-aos-duration="1000">
+                <h6 class="footer-item__title">Danh mục</h6>
+                <ul class="footer-menu">
+                    <li class="mb-16">
+                        <a href="shop.html" class="text-gray-600 hover-text-main-600">Nước rửa tay</a>
+                    </li>
+                    <li class="mb-16">
+                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                            Nước rửa chén
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                            Nước lau sàn
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                            Nước lau kính
+                        </a>
+                    </li>
+                    <li class="mb-16">
+                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                            Chất tẩy rửa tác động sâu
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="footer-item" data-aos="fade-up" data-aos-duration="1200">
+                <h6 class="">Mua sắm mọi lúc mọi nơi</h6>
+                <ul class="flex items-center gap-16">
+                    <li>
+                        <a href="https://www.facebook.com"
+                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
+                            <img width="44" src="~/images/Default/icon/icon-fb-white.png" />
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.shopee.com/caterin_vietnam"
+                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
+                            <img width="44" src="~/images/Default/icon/icon-shopee-white.webp" />
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.tiktok.com"
+                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
+                            <img width="44" src="~/images/Default/icon/icon-tiktok-white.webp" />
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://www.linkedin.com"
+                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
+                            <img width="44" src="~/images/Default/icon/icon-in-white.png" />
+                        </a>
+                    </li>
+                </ul>
+                <form action="#" class="relative mt-40 wow fadeInUp">
+                    <input class="form-control block w-full p-[0.375rem_0.75rem] text-base leading-6 placeholder:text-[#495057] bg-white bg-clip-padding border border-[#ced4da] transition-all duration-150 ease-in-out focus:text-[#495057] focus:bg-white focus:border-main focus:outline-0 focus:shadow-none common-input !rounded-[50rem] text-white py-22 px-16 pe-144"
+                           placeholder="Email của bạn..."> <button type="submit"
+                                                                        class="btn btn-main-two !rounded-[50rem] !absolute top-[50%] translate-y-[-50%] right-0 mr-[10px]">
+                        Theo dõi
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="footer-bottom-wrapper flex justify-between">
+
+            <div class="footer-company">
+                <h6>CÔNG TY CỔ PHẦN TNHH ANPHAPHARM</h6>
+
+                <p>
+                    Giấy chứng nhận đăng ký doanh nghiệp số
+                    <strong>0309.......</strong> do Sở KH&ĐT TP. Hồ Chí Minh cấp.
+                </p>
+
+                <p>
+                    Địa chỉ: 36 Vân Côi, P. Tân Sơn Nhất,
+                    TP. Hồ Chí Minh.
+                </p>
+
+                <p>
+                    Nhà máy đạt tiêu chuẩn sản xuất mỹ phẩm theo quy định.
+                </p>
+            </div>
+
+            <div class="footer-certificates">
+
+                <a href="#">
+                    <img src="/images/Default/logo-bct.png"
+                         alt="Đã thông báo Bộ Công Thương">
+                </a>
+
+                <a href="#">
+                    <img src="/images/Default/logo-dmca.png"
+                         alt="DMCA Protected">
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</footer>

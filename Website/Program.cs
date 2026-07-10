@@ -37,7 +37,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
 var services = builder.Services;
 var configuration = builder.Configuration;
 

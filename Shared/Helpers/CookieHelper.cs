@@ -4,14 +4,14 @@ namespace Shared.Helpers;
 
 public static class CookieHelper
 {
-    public static CookieOptions AccessToken()
+    public static CookieOptions AccessToken(int exprired)
     {
         return new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddMinutes(15)
+            Expires = DateTime.UtcNow.AddMinutes(exprired)
         };
     }
 

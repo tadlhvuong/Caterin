@@ -1,22 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
-using Shared.Data.Entities.Identity.Log;
 using Shared.DTOs.Auth;
 using Shared.Enums;
 using Shared.Helpers;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Log;
 using Shared.Requests;
-using Shared.Responses;
-using Shared.Services.Log;
-using System.Text.RegularExpressions;
 using Website.Areas.Admin.Models;
 
 namespace Website.Areas.Admin.Controllers
@@ -50,9 +45,9 @@ namespace Website.Areas.Admin.Controllers
         }
 
         [HttpGet("login")]
-        public async Task<IActionResult> Login(string? returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
-            _logger.LogInformation("Page: Login Admin");
+            _logger.LogInformation("Page: Login");
             if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction("Index", "Home", new { Area = "Admin" });
@@ -82,21 +77,14 @@ namespace Website.Areas.Admin.Controllers
 
             if (!result.Success)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    result.Message);
+                ModelState.AddModelError(string.Empty, result.Message);
 
                 return View(model);
             }
 
-            Response.Cookies.Append(
-                "access_token",
-                result.AccessToken!,
-                CookieHelper.AccessToken());
+            Response.Cookies.Append("access_token", result.AccessToken!, CookieHelper.AccessToken(_jwtSettings.AccessTokenExpirationMinutes));
 
-            Response.Cookies.Append(
-                "refresh_token",
-                result.RefreshToken!,
+            Response.Cookies.Append("refresh_token", result.RefreshToken!,
                 CookieHelper.RefreshToken(_jwtSettings.RefreshTokenExpirationDays));
 
             if (!string.IsNullOrWhiteSpace(

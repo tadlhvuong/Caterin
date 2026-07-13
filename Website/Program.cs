@@ -157,8 +157,6 @@ app.UseMiddleware<RefreshTokenMiddleware>();
 
 app.UseAuthentication();
 
-//app.UseMiddleware<CurrentUserMiddleware>();
-
 app.UseMiddleware<UserValidationMiddleware>();
 
 app.UseMiddleware<AdminAccessMiddleware>();

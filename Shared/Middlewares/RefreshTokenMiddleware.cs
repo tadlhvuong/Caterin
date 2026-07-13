@@ -62,7 +62,7 @@ public sealed class RefreshTokenMiddleware
             {
                 context.Items["token_refreshed"] = true;
                 context.Response.Cookies.Append(
-                    "access_token", result.AccessToken, CookieHelper.AccessToken());
+                    "access_token", result.AccessToken, CookieHelper.AccessToken(_jwtSettings.AccessTokenExpirationMinutes));
 
 
                 context.Response.Cookies.Append(

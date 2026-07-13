@@ -1,0 +1,289 @@
+﻿@using Shared.DTOs
+@model OrderItemDto
+@{
+    Layout = null;
+}
+
+<div class="border border-gray-100 rounded-16 px-32 py-40">
+
+    <!-- Header -->
+    <div class="flex-between flex-wrap gap-16 mb-40">
+
+        <div>
+            <h4 class="mb-8">Đơn hàng của tôi</h4>
+            <div class="flex flex-wrap gap-12 mb-32">
+                <a class="btn btn-main btn-sm">Tất cả</a>
+                <a class="btn btn-outline-main btn-sm">Chờ thanh toán</a>
+                <a class="btn btn-outline-main btn-sm">Đang xử lý</a>
+                <a class="btn btn-outline-main btn-sm">Đang giao</a>
+                <a class="btn btn-outline-main btn-sm">Đã giao</a>
+                <a class="btn btn-outline-main btn-sm">Đã hủy</a>
+            </div>
+            <p class="text-gray-500 mb-0">
+                Theo dõi trạng thái các đơn hàng của bạn.
+            </p>
+        </div>
+
+        <div style="max-width:280px;width:100%;">
+            <input class="common-input"
+                   placeholder="Tìm theo mã đơn hàng...">
+        </div>
+
+    </div>
+
+    <!-- Order -->
+
+    <div class="border border-gray-100 rounded-16 p-24 mb-24">
+
+        <div class="flex-between flex-wrap gap-16 mb-24">
+
+            <div>
+
+                <div class="text-sm text-gray-500 mb-8">
+                    Mã đơn hàng
+                </div>
+
+                <h6 class="mb-0">
+                    #CT240700012
+                </h6>
+
+            </div>
+
+            <div class="text-end">
+
+                <span class="badge bg-success-600 px-20 py-8 rounded-pill">
+                    Đã giao
+                </span>
+
+                <div class="text-gray-500 text-sm mt-8">
+                    09/07/2026
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="border-top pt-24">
+
+            <div class="flex items-center gap-20">
+
+                <img src="/images/product/product-img1.png"
+                     width="72"
+                     class="rounded-8"
+                     alt="">
+
+                <div class="flex-grow">
+
+                    <h6 class="mb-4">
+
+                        Nước rửa chén Gạo Caterin
+
+                    </h6>
+
+                    <span class="text-gray-500">
+
+                        x2
+
+                    </span>
+
+                </div>
+
+                <div class="font-[700]">
+
+                    130.000đ
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="border-top pt-20 mt-20">
+
+            <div class="flex-between flex-wrap gap-16">
+
+                <div>
+
+                    <span class="text-gray-500">
+
+                        Tổng thanh toán
+
+                    </span>
+
+                    <h5 class="text-main-600 mt-8">
+
+                        245.000đ
+
+                    </h5>
+
+                </div>
+
+                <div class="flex gap-12 flex-wrap">
+
+                    <a href="#"
+                       class="btn btn-outline-main">
+
+                        Mua lại
+
+                    </a>
+
+                    <a href="#"
+                       class="btn btn-main">
+
+                        Xem chi tiết
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Order -->
+
+    <div class="border border-gray-100 rounded-16 p-24 mb-24">
+
+        <div class="flex-between flex-wrap gap-16 mb-24">
+
+            <div>
+
+                <div class="text-sm text-gray-500 mb-8">
+                    Mã đơn hàng
+                </div>
+
+                <h6 class="mb-0">
+                    #CT240700011
+                </h6>
+
+            </div>
+
+            <div class="text-end">
+
+                <span class="badge bg-warning-600 px-20 py-8 rounded-pill">
+                    Đang giao
+                </span>
+
+                <div class="text-gray-500 text-sm mt-8">
+                    07/07/2026
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="border-top pt-24">
+
+            <div class="flex items-center gap-20">
+
+                <img src="/images/product/product-img2.png"
+                     width="72"
+                     class="rounded-8"
+                     alt="">
+
+                <div class="flex-grow">
+
+                    <h6 class="mb-4">
+
+                        Combo An Khang
+
+                    </h6>
+
+                    <span class="text-gray-500">
+
+                        3 sản phẩm
+
+                    </span>
+
+                </div>
+
+                <div class="font-[700]">
+
+                    499.000đ
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="border-top pt-20 mt-20">
+
+            <div class="flex-between flex-wrap gap-16">
+
+                <div>
+
+                    <span class="text-gray-500">
+
+                        Tổng thanh toán
+
+                    </span>
+
+                    <h5 class="text-main-600 mt-8">
+
+                        499.000đ
+
+                    </h5>
+
+                </div>
+
+                <div class="flex gap-12 flex-wrap">
+
+                    <button class="btn btn-outline-danger">
+
+                        Hủy đơn
+
+                    </button>
+
+                    <a href="#"
+                       class="btn btn-main">
+
+                        Theo dõi
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Pagination -->
+
+    <div class="mt-40">
+
+        <ul class="pagination flex-center flex-wrap">
+
+            <li>
+                <a href="#">
+                    <i class="ph ph-caret-left"></i>
+                </a>
+            </li>
+
+            <li>
+                <a href="#" class="active">1</a>
+            </li>
+
+            <li>
+                <a href="#">2</a>
+            </li>
+
+            <li>
+                <a href="#">3</a>
+            </li>
+
+            <li>
+                <a href="#">
+                    <i class="ph ph-caret-right"></i>
+                </a>
+            </li>
+
+        </ul>
+
+    </div>
+
+</div>

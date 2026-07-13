@@ -1,0 +1,51 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+<div class="2xl:w-3/12 xl:w-4/12 flex-grow-0 flex-shrink-0 basis-auto">
+    <div class="border border-gray-100 rounded-16 overflow-hidden">
+        <div class="bg-main-50 text-center py-40">
+            <img src="~/images/Default/default-user.png"
+                 class="rounded-circle mb-20"
+                 width="90"
+                 alt="Avatar">
+
+            <h5 class="mb-8">
+                @User.Identity.Name
+            </h5>
+
+            <span class="text-gray-500">
+                Email
+            </span>
+
+        </div>
+
+        <div class="py-16">
+
+            <button class="account-menu" hx-get="/profile/personal-info" hx-target="#profile-content" hx-push-url="/profile?tab=personal">
+                Hồ sơ
+            </button>
+
+            <button class="account-menu" hx-get="/profile/orders"
+                    hx-target="#profile-content"
+                    hx-push-url="/profile?tab=orders">
+                Đơn hàng
+            </button>
+
+            <button class="account-menu" hx-get="/profile/addresses" hx-target="#profile-content" hx-push-url="/profile?tab=addresses">
+                Địa chỉ
+            </button>
+
+            <button class="account-menu" hx-get="/profile/change-password" hx-target="#profile-content" hx-push-url="/profile?tab=password">
+                Đổi mật khẩu
+            </button>
+
+            <a asp-controller="Account" asp-action="Logout" class="account-menu text-danger-600">
+                <i class="ph ph-sign-out"></i>
+                Đăng xuất
+            </a>
+        </div>
+    </div>
+</div>

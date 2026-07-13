@@ -1,6 +1,5 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Website.Areas.Admin.Models
+@model LoginViewModel
 @{
     ViewData["Title"] = "Login";
 }
@@ -55,87 +54,15 @@
         </div>
     </div>
 </div>
-@* <section class="account py-80">
-    <div class="container container-lg">
-        <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-11">
-                <div class="row g-0 rounded-24 overflow-hidden border border-gray-100 account-card">
-                    <div class="col-lg-4 bg-white mx-auto">
-                        <div class="px-40 py-48">
-                            <span class="text-main-600 text-sm font-[600] mb-12 block">
-                                Welcome Back 👋
-                            </span>
-                            <h3 class="mb-12">
-                                Đăng nhập tài khoản
-                            </h3>
-                            <p class="text-gray-500 mb-40">
-                                Đăng nhập để theo dõi đơn hàng, quản lý địa chỉ giao hàng và nhận ưu đãi thành viên.
-                            </p>
-                            <form asp-controller="Auth" asp-action="Login">
-                                <div class="mb-24">
-                                    <label class="text-neutral-900 text-lg mb-8 font-[500]">
-                                        Email hoặc tên đăng nhập
-                                    </label>
-
-                                    <input class="common-input" placeholder="Nhập email hoặc tên đăng nhập">
-                                </div>
-                                <div class="mb-20">
-                                    <label class="text-neutral-900 text-lg mb-8 font-[500]">
-                                        Mật khẩu
-                                    </label>
-                                    <div class="position-relative">
-                                        <input type="password"
-                                               class="common-input"
-                                               placeholder="Nhập mật khẩu">
-
-                                        <span class="toggle-password ph ph-eye-slash"></span>
-                                    </div>
-                                </div>
-                                <div class="flex-between mb-32 flex-wrap gap-12">
-                                    <div class="form-check common-check">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               id="remember">
-                                        <label class="form-check-label"
-                                               for="remember">
-                                            Ghi nhớ đăng nhập
-                                        </label>
-                                    </div>
-                                    <a asp-controller="Account" asp-action="ForgotPassword"
-                                       class="text-main-600 text-sm font-[500]">
-                                        Quên mật khẩu?
-                                    </a>
-                                </div>
-                                <button type="submit"
-                                        class="btn btn-main py-18 w-100">
-                                    Đăng nhập
-                                </button>
-                            </form>
-                            <div class="text-center mt-32">
-                                <span class="text-gray-500">
-                                    Chưa có tài khoản?
-                                </span>
-                                <a asp-controller="Account" asp-action="Register"
-                                   class="text-main-600 font-[600] ms-4">
-                                    Đăng ký ngay
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
- *@
 <section class="account py-80">
-    <div class="container container-lg">
-        <form action="#">
-            <div class="row g-4">
-                <div class="2xl:w-6/12 flex-grow-0 flex-shrink-0 basis-auto pe-xl-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
+                <form asp-controller="Account" asp-action="Login" method="post" autocomplete="on">
+                    @Html.AntiForgeryToken()
                     <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40 h-full">
                         <span class="text-main-600 text-sm font-[600] mb-12 block">
-                            Welcome Back 👋
+                            Kính chào quý khách 👋
                         </span>
                         <h3 class="mb-12">
                             Đăng nhập tài khoản
@@ -144,38 +71,33 @@
                             Đăng nhập để theo dõi đơn hàng, quản lý địa chỉ giao hàng và nhận ưu đãi thành viên.
                         </p>
                         <div class="mb-24">
-                            <label for="username"
-                                   class="text-neutral-900 text-lg mb-8 font-[500]">
-                                Username or email address <span class="text-danger">*</span>
-                            </label> <input class="common-input" id="username"
-                                            placeholder="First Name">
+                            
+                            <label asp-for="Email" class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Email <span class="text-danger-600">*</span>
+                            </label> 
+                            <input class="common-input" asp-for="Email" title="Nhập email đăng nhập" placeholder="Email ....">
                         </div>
                         <div class="mb-24">
-                            <label for="password"
+                            <label asp-for="Password"
                                    class="text-neutral-900 text-lg mb-8 font-[500]">Password</label>
                             <div class="relative">
-                                <input type="password" class="common-input" id="password"
-                                       placeholder="Enter Password" value="password"> <span class="toggle-password absolute top-[50%] right-0 me-16 translate-y-[-50%] cursor-pointer ph ph-eye-slash"
+                                <input type="password" class="common-input" asp-for="Password" placeholder="Enter Password" value="password">
+                                    <span class="toggle-password absolute top-[50%] right-0 me-16 translate-y-[-50%] cursor-pointer ph ph-eye-slash"
                                                                                             id="#password"></span>
                             </div>
                         </div>
+                        <div asp-validation-summary="All" class="text-danger-600"></div>
                         <div class="mb-24 mt-48">
                             <div class="flex items-center flex-wrap gap-24">
-
-                                <!-- Group 1 -->
                                 <button type="submit" class="btn btn-main py-18 px-40">
-                                    Log in
+                                    Đăng nhập
                                 </button>
-
-                                <!-- Group 2 -->
                                 <div class="form-check common-check">
-                                    <input class="form-check-input" type="checkbox" value="" id="remember">
-                                    <label class="form-check-label flex-grow" for="remember">
-                                        Remember me
+                                    <input class="form-check-input" type="checkbox" value="" asp-for="RememberMe" />
+                                    <label class="form-check-label flex-grow" asp-for="RememberMe">
+                                        Ghi nhớ mật khẩu
                                     </label>
                                 </div>
-
-                                <!-- Group 3 -->
                                 <div class="ms-auto">
                                     <a asp-controller="Account"
                                        asp-action="ForgotPassword"
@@ -199,9 +121,8 @@
                             <span class="text-center">Đăng nhập chỉ 1 giây</span>
                         </div>
                         <div class="row g-3 mt-8">
-
                             <div class="col-md-6">
-                                <form asp-action="ExternalLogin" method="post">
+                                <form asp-controller="Account" asp-action="ExternalLogin" method="post">
                                     <button type="submit"
                                             name="provider"
                                             value="Google"
@@ -209,15 +130,14 @@
 
                                         <img src="~/images/Default/icon/icon-google.png"
                                              alt="Google">
-
-                                        <span>Tiếp tục với Google</span>
+                                        <span class="text-gray-600">Tiếp tục với Google</span>
 
                                     </button>
                                 </form>
                             </div>
 
                             <div class="col-md-6">
-                                <form asp-action="ExternalLogin" method="post">
+                                <form asp-controller="Account" asp-action="ExternalLogin" method="post">
                                     <button type="submit"
                                             name="provider"
                                             value="Facebook"
@@ -226,17 +146,197 @@
                                         <img src="~/images/Default/icon/icon-fb.png"
                                              alt="Facebook">
 
-                                        <span>Tiếp tục với Facebook</span>
+                                        <span class="text-gray-600">Tiếp tục với Facebook</span>
 
                                     </button>
                                 </form>
                             </div>
-
                         </div>
-                      
+                    </div>
+                </form>
+             </div>
+            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto"
+                 data-aos="fade-up" data-aos-duration="600">
+                <div class="p-16 border border-gray-100 hover-border-main-600 rounded-16 relative transition-2">
+                    <div class="p-16 bg-main-50 rounded-16 mb-32">
+                        <h6 class="underlined-line relative mb-0 pb-16 inline-block">Featured Products</h6>
+                    </div>
+                    <div class="short-product-list arrow-style-two">
+                        <div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img1.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img2.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img3.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img4.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img1.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img2.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16 mb-40">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img3.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-16">
+                                <div class="w-90 h-90 rounded-12 border border-gray-100 flex-shrink-0">
+                                    <a href="product-details.html" class="link">
+                                        <img src="~/images/Demos/short-product-img4.png" alt="Image">
+                                    </a>
+                                </div>
+                                <div class="product-card__content mt-12">
+                                    <div class="flex items-center gap-6">
+                                        <span class="text-xs font-[700] text-gray-500">4.8</span> <span class="text-15 font-[700] text-warning-600 flex">
+                                            <i class="ph-fill ph-star"></i>
+                                        </span> <span class="text-xs font-[700] text-gray-500">(17k)</span>
+                                    </div>
+                                    <h6 class="title text-lg font-[600] mt-8 mb-8">
+                                        <a href="product-details.html"
+                                           class="link text-line-1">Taylor Farms Broccoli Florets Vegetables</a>
+                                    </h6>
+                                    <div class="product-card__price flex items-center gap-8">
+                                        <span class="text-heading text-md font-[600] block">$1500.00</span> <span class="text-gray-400 text-md font-[600] block">$1500.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </section>

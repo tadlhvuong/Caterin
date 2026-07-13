@@ -18,7 +18,7 @@ namespace Shared.UserValidation.Sevices
             AppUser user,
             CancellationToken cancellationToken = default)
         {
-            if (context.Scenario == UserValidationScenario.Login)
+            if (context.Scenario is UserValidationScenario.Login or UserValidationScenario.RefreshToken)
                 return Task.FromResult(UserValidationResult.Success());
 
             if (context.Principal == null)

@@ -1,270 +1,515 @@
-﻿@* @using Shared.Common
+﻿@using Shared.Common
 
 @{
-    var culture = CultureInfo.CurrentCulture.Name;
-    var avatar = string.IsNullOrEmpty(Common.GetUserAvatar(this.User)) ? "/img/default-avatar-male.webp" : Common.GetUserAvatar(this.User);
+    Layout = null;
 }
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
-    <a href="/admin/@culture" class="brand-link">
-        <img src="~/img/hk_logo.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light">Admin HKProject</span>
-    </a>
-    <div class="sidebar">
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-            <div class="image">
-                <img src="@avatar" class="img-circle elevation-2" alt="Avatar User @User.Identity.Name">
-            </div>
-            <div class="info">
-                <a title="@User.Identity.Name" href="/admin/Member/Details/@User.GetUserId()" class="d-block">@User.Identity.Name</a>
-            </div>
-            <div class="info pull-right">
-                <a title="vi-VN" href="/admin/@culture/base/set-language?cltr=vi&returnUrl=@Context.Request.Path"><span class="flag-icon flag-icon-vn @(culture.Equals("vi") ? "overlay" : "")" alt="icon flag vi-VN"></span></a>
-                <a title="en-US" href="/admin/@culture/base/set-language?cltr=en&returnUrl=@Context.Request.Path"><span class="flag-icon flag-icon-us @(culture.Equals("en") ?  "overlay" : "")" alt="icon flag en-US"></span></a>
-            </div>
-        </div>
-        <div class="form-inline">
-            <div class="input-group" data-widget="sidebar-search">
-                <input class="form-control form-control-sidebar" type="search" placeholder="@ViewData["SearchMenuSidebar"]" aria-label="Search">
-                <div class="input-group-append">
-                    <button class="btn btn-sidebar" localize-att-title="SearchSidebar">
-                        <i class="fas fa-search fa-fw"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <nav class="mt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column nav-child-indent" data-widget="treeview" role="menu" data-accordion="false">
-                <li class="nav-item">
-                    <a href="/admin/@culture" localize-att-title="Dashboard" class="nav-link @(Html.IsActive("Home") ? "active" : "")">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>
-                            <localize>Dashboard</localize>
-                        </p>
-                        <span class="badge badge-info right">2</span>
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+    <div class="app-brand demo">
+        <a href="index.html" class="app-brand-link">
+            <img src="~/images/Default/logo-caterin.png" height="22" alt="logo caterin">
+        </a>
+
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+            <i class="ti menu-toggle-icon d-none d-xl-block align-middle"></i>
+            <i class="ti ti-x d-block d-xl-none ti-md align-middle"></i>
+        </a>
+    </div>
+
+    <div class="menu-inner-shadow"></div>
+
+    <ul class="menu-inner py-1">
+        <!-- Dashboards -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Dashboards">Dashboards</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-smart-home"></i>
+                <div data-i18n="Dashboards">Dashboards</div>
+                <div class="badge bg-danger rounded-pill ms-auto">5</div>
+             </a>
+        </li>
+        <!-- Dashboards end -->
+
+
+        <!-- Order -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Order">Order</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-shopping-cart"></i>
+                <div data-i18n="Order">Order</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Order List">Order List</div>
                     </a>
                 </li>
-                <li class="nav-item @(Html.IsActive("Member") ? "menu-open" : "")">
-                    <a href="" localize-att-title="MemberSidebar" class="nav-link @(Html.IsActive("Member") ? "active" : "")">
-                        <i class="nav-icon fas fa-users"></i>
-                        <p>
-                            <localize>MemberText</localize>
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer["MemberUrl"]" class="nav-link @(Html.IsActive("Member", "Index") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>ListMember</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer["MemberUrl"]/@_localizer.GetLocalizedString("DetailsUrl")/@User.GetUserId()" class="nav-link @(Html.IsActive("Member", "Edit") ? "active" : "") @(Html.IsActive("Member", "Details") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>ViewText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer["MemberUrl"]/@_localizer["RolesUrl"]" class="nav-link @(Html.IsActive("Member", "Roles") ? "active" : "") @(Html.IsActive("Member", "Roles") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>RoleNameText</localize></p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/@culture/@_localizer.GetLocalizedString("ChatUrl")" localize-att-title="Chat" class="nav-link @(Html.IsActive("Chat") ? "active" : "")">
-                        <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>
-                            <localize>ChatText</localize>
-                        </p>
-                        <span class="badge badge-info right">2</span>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Order Details">Order Details</div>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="/admin/@culture/@_localizer.GetLocalizedString("CalendarUrl")" class="nav-link @(Html.IsActive("Calendar") ? "active" : "")">
-                        <i class="nav-icon fas fa-calendar-alt"></i>
-                        <p>
-                            <localize>Calendar</localize>
-                            <span class="badge badge-info right">2</span>
-                        </p>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Product" asp-action="Create" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-truck-return"></i>
+                <div data-i18n="Return">Return</div>
+            </a>
+        </li>
+        <!-- Order end -->
+
+        <!-- Product -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Products">Products</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-package"></i>
+                <div data-i18n="List">List</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Product List">Product List</div>
                     </a>
                 </li>
-                <li class="nav-item @(Html.IsActive("Media") ? "menu-open" : "")">
-                    <a href="" class="nav-link @(Html.IsActive("Media") ? "active" : "")">
-                        <i class="nav-icon far fa-image"></i>
-                        <p>
-                            <localize>GalleryText</localize>
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("MediaUrl")/@_localizer.GetLocalizedString("FileManagerUrl")" class="nav-link @(Html.IsActive("Media", "FileManager") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p >GeneralAlbumText</p>
-                            </a>
-                        </li>
-                        @if(User.IsInRole("Admin") || User.IsInRole("Manager"))
-                        {
-                            <li class="nav-item">
-                                <a href="/admin/@culture/@_localizer.GetLocalizedString("MediaUrl")/@_localizer.GetLocalizedString("AlbumListUrl")" class="nav-link @(Html.IsActive("Media", "AlbumList") ? "active" : "")">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Album</p>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </li>
-                <li class="nav-item @(Html.IsActive("Product") ? "menu-open" : "")">
-                    <a href="" class="nav-link @(Html.IsActive("Product") ? "active" : "")">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>
-                            <localize>ProductText</localize>
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("ProductUrl")" class="nav-link @(Html.IsActive("Product", "Index") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>ProductListText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("ProductUrl")/@_localizer.GetLocalizedString("EditUrl")" class="nav-link @(Html.IsActive("Product", "Edit") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>EditText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("ProductUrl")/@_localizer.GetLocalizedString("CategoryUrl")" class="nav-link @(Html.IsActive("Product", "Category") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>CategoryText</localize></p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item @(Html.IsActive("Order") ? "menu-open" : "")">
-                    <a href="#" class="nav-link @(Html.IsActive("Order") ? "active" : "")">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>
-                            <localize>OrderText</localize>
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("OrderUrl")" class="nav-link @(Html.IsActive("Order", "Index") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>ListText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("OrderUrl")/@_localizer.GetLocalizedString("OrderCreateUrl")" class="nav-link @(Html.IsActive("Order", "Create") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>CreateText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("OrderUrl")/@_localizer.GetLocalizedString("EditUrl")" class="nav-link @(Html.IsActive("Order", "Edit") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>EditText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("OrderUrl")/Shipping" class="nav-link @(Html.IsActive("Order", "Shipping") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>Shipping</localize></p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item @(Html.IsActive("Setting") ? "menu-open" : "")">
-                    <a href="#" class="nav-link @(Html.IsActive("Setting") ? "active" : "")">
-                        <i class="nav-icon fas fa-shopping-cart"></i>
-                        <p>
-                            <localize>Setting</localize>
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/@_localizer.GetLocalizedString("GeneralUrl")" class="nav-link @(Html.IsActive("Setting", "General") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>GeneralText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/payment" class="nav-link @(Html.IsActive("Setting", "Payment") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>PaymentText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/checkout" class="nav-link @(Html.IsActive("Setting", "Checkout") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>CheckoutText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/@_localizer.GetLocalizedString("DeliveryUrl")" class="nav-link @(Html.IsActive("Setting", "Delivery") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>DeliveryText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/@_localizer.GetLocalizedString("LocationUrl")" class="nav-link @(Html.IsActive("Setting", "Location") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>LocationText</localize></p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="/admin/@culture/@_localizer.GetLocalizedString("SettingUrl")/@_localizer.GetLocalizedString("NotificationUrl")" class="nav-link @(Html.IsActive("Setting", "Notification") ? "active" : "")">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p><localize>NotificationText</localize></p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-item">
-                    <a href="pages/kanban.html" class="nav-link">
-                        <i class="nav-icon fas fa-columns"></i>
-                        <p>
-                            Kanban Board
-                        </p>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Create" class="menu-link">
+                        <div data-i18n="Add">Add</div>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon far fa-envelope"></i>
-                        <p>
-                            Mailbox
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="CategoryList" class="menu-link">
+                        <div data-i18n="Category List">Category List</div>
                     </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="pages/mailbox/mailbox.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Inbox</p>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="CategoryList" class="menu-link">
+                        <div data-i18n="Stock">Stock</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-users"></i>
+                <div data-i18n="Customer">Customer</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-ecommerce-customer-all.html" class="menu-link">
+                        <div data-i18n="All Customers">All Customers</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="Customer Details">Customer Details</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item">
+                            <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                                <div data-i18n="Overview">Overview</div>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="pages/mailbox/compose.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Compose</p>
+                        <li class="menu-item">
+                            <a href="app-ecommerce-customer-details-security.html" class="menu-link">
+                                <div data-i18n="Security">Security</div>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="pages/mailbox/read-mail.html" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Read</p>
+                        <li class="menu-item">
+                            <a href="app-ecommerce-customer-details-billing.html" class="menu-link">
+                                <div data-i18n="Address & Billing">Address & Billing</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="app-ecommerce-customer-details-notifications.html" class="menu-link">
+                                <div data-i18n="Notifications">Notifications</div>
                             </a>
                         </li>
                     </ul>
                 </li>
             </ul>
-        </nav>
-    </div>
-</aside> *@
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-star"></i>
+                <div data-i18n="Manage Reviews">Manage Reviews</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-ecommerce-customer-all.html" class="menu-link">
+                        <div data-i18n="Reviews">Reviews</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                        <div data-i18n="Chat">Chat</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-customer-details-overview.html" class="menu-link">
+                        <div data-i18n="Email">Email</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Product end -->
+        <!-- Parner -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Parner">Parner</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-heart-handshake"></i>
+                <div data-i18n="Partner">Partner</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Distributor">Distributor</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Create" class="menu-link">
+                        <div data-i18n="Collaborator">Collaborator</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Parner end -->
+        <!-- Marketing -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Marketing">Marketing</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-speakerphone"></i>
+                <div data-i18n="Marketing">Marketing</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Vourcher">Vourcher</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Flash Sale">Flash Sale</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Create" class="menu-link">
+                        <div data-i18n="Khuyến mãi">Khuyến mãi</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-world-search"></i>
+                <div data-i18n="SEO">SEO</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Blog">Blog</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Index" class="menu-link">
+                        <div data-i18n="Deta">Blog</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-controller="Product" asp-action="Create" class="menu-link">
+                        <div data-i18n="Category List">Category List</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Product" asp-action="Index" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-bell"></i>
+                <div data-i18n="Notifications">Notifications</div>
+            </a>
+        </li>
+        <!-- Marketing end -->
+
+        <!-- Report -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Finance">Finance</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-chart-bar"></i>
+                <div data-i18n="Revenue">Revenue</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-cash-banknote-off"></i>
+                <div data-i18n="Refunds">Refunds</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-file-dollar"></i>
+                <div data-i18n="Invoice">Invoice</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-invoice-list.html" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-preview.html" class="menu-link">
+                        <div data-i18n="Preview">Preview</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-edit.html" class="menu-link">
+                        <div data-i18n="Edit">Edit</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-add.html" class="menu-link">
+                        <div data-i18n="Add">Add</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-credit-card"></i>
+                <div data-i18n="Payment">Payment</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-building-bank"></i>
+                <div data-i18n="Bank Accounts">Bank Accounts</div>
+            </a>
+        </li>
+        <!-- Report end -->
+        <!-- Blog -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Blog">Blog</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-news"></i>
+                <div data-i18n="Blog">Blog</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-invoice-add.html" class="menu-link">
+                        <div data-i18n="Add">Add</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-list.html" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-invoice-preview.html" class="menu-link">
+                        <div data-i18n="Category List">Category List</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Blog end -->
+        <!-- CMS -->
+        <li class="menu-header small">
+            <span class="menu-header-text">CMS</span>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-photo"></i>
+                <div data-i18n="Banner">Banner</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-slideshow"></i>
+                <div data-i18n="Slider">Slider</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-window"></i>
+                <div data-i18n="Popup">Popup</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-file-description"></i>
+                <div data-i18n="Page">Page</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-sitemap"></i>
+                <div data-i18n="Menu">Menu</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-layout-navbar"></i>
+                <div data-i18n="Footer">Footer</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-help-circle"></i>
+                <div data-i18n="FAQ">FAQ</div>
+            </a>
+        </li>
+        <!-- CMS end -->
+        <!-- Account -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="Account">Account</span>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-users"></i>
+                <div data-i18n="Users">Users</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-user-list.html" class="menu-link">
+                        <div data-i18n="List">List</div>
+                    </a>
+                </li>
+
+                <li class="menu-item">
+                    <a href="javascript:void(0);" class="menu-link menu-toggle">
+                        <div data-i18n="View">View</div>
+                    </a>
+                    <ul class="menu-sub">
+                        <li class="menu-item">
+                            <a href="app-user-view-account.html" class="menu-link">
+                                <div data-i18n="Account">Account</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="app-user-view-security.html" class="menu-link">
+                                <div data-i18n="Security">Security</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="app-user-view-billing.html" class="menu-link">
+                                <div data-i18n="Billing & Plans">Billing & Plans</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="app-user-view-notifications.html" class="menu-link">
+                                <div data-i18n="Notifications">Notifications</div>
+                            </a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="app-user-view-connections.html" class="menu-link">
+                                <div data-i18n="Connections">Connections</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-settings"></i>
+                <div data-i18n="Roles & Permissions">Roles & Permissions</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-access-roles.html" class="menu-link">
+                        <div data-i18n="Roles">Roles</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-access-permission.html" class="menu-link">
+                        <div data-i18n="Permission">Permission</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Account end -->
+
+        <!-- Setting -->
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="settings">Settings</span>
+        </li>
+
+        <!-- Logistic -->
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-truck"></i>
+                <div data-i18n="Logistics">Logistics</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-logistics-dashboard.html" class="menu-link">
+                        <div data-i18n="Dashboard">Dashboard</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-logistics-fleet.html" class="menu-link">
+                        <div data-i18n="Fleet">Fleet</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Logistic end -->
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-settings"></i>
+                <div data-i18n="settings">settings</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-detail.html" class="menu-link">
+                        <div data-i18n="Account">Account</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-detail.html" class="menu-link">
+                        <div data-i18n="store details">store details</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-payments.html" class="menu-link">
+                        <div data-i18n="payments">payments</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-checkout.html" class="menu-link">
+                        <div data-i18n="checkout">checkout</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-shipping.html" class="menu-link">
+                        <div data-i18n="shipping & delivery">shipping & delivery</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-locations.html" class="menu-link">
+                        <div data-i18n="locations">locations</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-ecommerce-settings-notifications.html" class="menu-link">
+                        <div data-i18n="notifications">notifications</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Setting end -->
+
+    </ul>
+</aside>

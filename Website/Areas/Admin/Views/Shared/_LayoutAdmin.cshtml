@@ -3,7 +3,7 @@
 }
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
 <!DOCTYPE html>
-<html>
+<html lang="en" data-assets-path="assets/" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact">
 <head>
     <meta charset="utf-8" />
     <title>Admin | @ViewData["Title"] </title>
@@ -22,18 +22,45 @@
     <meta property="og:url" content="@ViewData["Url"]" />
     <meta property="og:site_name" content="@ViewData["Name"]" />
 
-   @*  <link rel="stylesheet" href="~/plugins/flag-icon-css/css/flag-icons.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/plugins/sweetalert2/sweetalert2.css" rel="stylesheet" type="text/css" /> *@
-    @* <link rel="stylesheet" href="~/css/tagify.css"> *@
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+          rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="~/admin/assets/vendor/fonts/fontawesome.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/fonts/tabler-icons.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/fonts/flag-icons.css" />
+
+    <!-- Core CSS -->
+
+    <link rel="stylesheet" href="~/admin/assets/vendor/css/rtl/core.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/css/rtl/theme-default.css" />
+
+    <link rel="stylesheet" href="~/admin/assets/css/demo.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/node-waves/node-waves.css" />
+
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/typeahead-js/typeahead.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/responsive.bootstrap5.min.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.css" />
+
+    <!-- Page CSS -->
+    <!-- Helpers -->
+    <script src="~/admin/assets/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+    <script src="~/admin/assets/js/config.js"></script>
     @RenderSection("Styles", false)
-    @* <link rel="stylesheet" href="~/css/admin/adminlte.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="~/css/admin/customize.min.css" asp-append-version="true" rel="stylesheet" type="text/css" /> *@
 </head>
-<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<body>
     @* <partial name="_AdminModal" />
     <input type="hidden" id="hideCulture" value="@culture" />
     <div class="wrapper">
@@ -43,27 +70,66 @@
                     @RenderBody()
                     <partial name="_Footer" >
     </div> *@
-    @RenderBody()
-    @* <script src="~/plugins/jquery/jquery.min.js"></script>
-    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/plugins/jquery-validation/jquery.validate.min.js"></script>
-    <script src="~/plugins/jquery-validation/additional-methods.min.js"></script> 
-    <script src="~/plugins/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script src="~/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
-    <script src="~/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
-    <script src="~/plugins/select2/js/select2.full.min.js"></script>
-    <script src="~/plugins/toastr/toastr.min.js"></script>
-    <script src="~/plugins/sweetalert2/sweetalert2.all.min.js"></script>
-    <script src="~/js/tagify.js"></script> *@
-   @*  <script>
-        window.localStorage.removeItem('refresh')
-        $("body").overlayScrollbars({});
-        var c_g = '@CultureInfo.CurrentCulture.Name';
-    </script> *@
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+
+            <!-- Menu -->
+            <partial name="_SideBar" />
+            <!-- / Menu -->
+
+            <div class="layout-page">
+
+                <!-- Navbar -->
+                <partial name="_Navbar" />
+                <!-- / Navbar -->
+
+                <!-- Content -->
+                <div class="content-wrapper">
+                    @RenderBody()
+
+                    <!-- Footer -->
+                    <partial name="_Footer" />
+                    <!-- / Footer -->
+
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- / Content -->
+            </div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+
+        <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+        <div class="drag-target"></div>
+    </div>
+    <script src="~/admin/assets/vendor/libs/jquery/jquery.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/bootstrap.bundle.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.responsive.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/responsive.bootstrap5.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.buttons.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.js"></script>
+
+    <script src="~/admin/assets/vendor/libs/popper/popper.js"></script>
+    <script src="~/admin/assets/vendor/libs/node-waves/node-waves.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/hammer/hammer.min.js"></script>
+    @* <script src="~/admin/assets/vendor/libs/i18n/i18n.js"></script> *@
+    @* <script src="https://cdn.jsdelivr.net/npm/i18n@0.15.3/index.min.js"></script> *@
+    <script src="~/admin/assets/vendor/libs/i18n/i18next.min.js"></script>
+    <script src="~/admin/assets//vendor/libs/i18n/i18nextHttpBackend.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/typeahead-js/typeahead.bundle.min.js"></script>
+    <script src="~/admin/assets/vendor/js/menu.js"></script>
+
+    <!-- endbuild -->
+    <!-- Vendors JS -->
+    <script src="~/admin/assets/vendor/libs/apex-charts/apexcharts.min.js"></script>
+    <!-- Main JS -->
+    <script src="~/admin/assets/js/main.js"></script>
+
+    <!-- Page JS -->
     @RenderSection("Scripts", false)
-   @*  <script src="~/js/admin/adminlte.min.js"></script>
-    <script src="~/js/admin/adminhk.js"></script>
-    <script src="~/js/admin/redirectUrlCulture.js"></script> *@
 </body>
 </html>

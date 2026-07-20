@@ -10,10 +10,12 @@ namespace Shared.Helpers
 {
     public static class MvcExtensions
     {
-        public static bool IsActive(this IHtmlHelper html, string controller = null, string action = null)
+        public static bool IsActive(this IHtmlHelper html, string? controller = null, string? action = null, string? area = null)
         {
-            string currentAction = (string)html.ViewContext.RouteData.Values["action"];
-            string currentController = (string)html.ViewContext.RouteData.Values["controller"];
+            var route = html.ViewContext.RouteData.Values;
+            var currentAction = route["action"]?.ToString();
+            var currentController = route["controller"]?.ToString();
+            var currentArea = route["area"]?.ToString();
 
             if (string.IsNullOrEmpty(controller))
                 controller = currentController;
@@ -21,8 +23,38 @@ namespace Shared.Helpers
             if (string.IsNullOrEmpty(action))
                 action = currentAction;
 
-            return controller == currentController && action == currentAction;
+            if (string.IsNullOrEmpty(area))
+                area = currentArea;
+            return controller == currentController && action == currentAction && area == currentArea;
+            //return controller == currentController && action == currentAction;
         }
+        public static bool IsActiveTab(this IHtmlHelper html, string tab)
+        {
+            var currentTab = html.ViewContext.HttpContext.Request.Query["tab"].ToString();
+
+            if (string.IsNullOrEmpty(currentTab))
+                currentTab = "personal";
+
+            return string.Equals(currentTab, tab, StringComparison.OrdinalIgnoreCase);
+        }
+        //public static string IsActive(this IHtmlHelper html,
+        //string? controller = null,
+        //string? action = null,
+        //string? area = null)
+        //{
+        //    var route = html.ViewContext.RouteData.Values;
+
+        //    var currentController = route["controller"]?.ToString();
+        //    var currentAction = route["action"]?.ToString();
+        //    var currentArea = route["area"]?.ToString();
+
+        //    bool active =
+        //        (controller == null || controller == currentController) &&
+        //        (action == null || action == currentAction) &&
+        //        (area == null || area == currentArea);
+
+        //    return active ? "active" : "";
+        //}
 
         public static IHtmlContent GetHtml(this TagBuilder tagBuilder)
         {

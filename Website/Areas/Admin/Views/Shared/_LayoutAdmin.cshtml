@@ -3,10 +3,11 @@
 }
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
 <!DOCTYPE html>
-<html lang="en" data-assets-path="assets/" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact">
+<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-assets-path="/admin/assets/" data-style="light" dir="ltr"
+      data-theme="theme-default">
 <head>
     <meta charset="utf-8" />
-    <title>Admin | @ViewData["Title"] </title>
+    <title data-i18n="@ViewData["Title"]"></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="robots" content="index,follow">
@@ -52,6 +53,8 @@
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/responsive.bootstrap5.min.css" />
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.css" />
 
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/select2/select2.min.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/form-validation/form-validation.min.css" />
     <!-- Page CSS -->
     <!-- Helpers -->
     <script src="~/admin/assets/vendor/js/helpers.js"></script>
@@ -105,12 +108,14 @@
     </div>
     <script src="~/admin/assets/vendor/libs/jquery/jquery.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.7"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.responsive.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/responsive.bootstrap5.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.buttons.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/datatables-bs5/buttons.print.min.js"></script>
 
     <script src="~/admin/assets/vendor/libs/popper/popper.js"></script>
     <script src="~/admin/assets/vendor/libs/node-waves/node-waves.min.js"></script>
@@ -123,6 +128,14 @@
     <script src="~/admin/assets/vendor/libs/typeahead-js/typeahead.bundle.min.js"></script>
     <script src="~/admin/assets/vendor/js/menu.js"></script>
 
+    <script src="~/admin/assets/vendor/libs/moment/moment.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/select2/select2.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/form-validation/form-validation.min.js"></script>
+    @* <script src="~/admin/assets/vendor/libs/form-validation/popular.js"></script>
+    <script src="~/admin/assets/vendor/libs/form-validation/bootstrap5.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/form-validation/auto-focus.min.js"></script> *@
+    <script src="~/admin/assets/vendor/libs/cleavejs/cleave.min.js"></script>
+    <script src="~/admin/assets/vendor/libs/cleavejs/cleave-phone.i18n.js"></script>
     <!-- endbuild -->
     <!-- Vendors JS -->
     <script src="~/admin/assets/vendor/libs/apex-charts/apexcharts.min.js"></script>

@@ -252,7 +252,29 @@ if (document.getElementById('layout-menu')) {
       currentLanguageEle.click();
     }
     i18nList.forEach(function (item) {
-      item.innerHTML = i18next.t(item.dataset.i18n);
+        const value = i18next.t(item.dataset.i18n);
+
+        switch (item.tagName.toUpperCase()) {
+            case 'TITLE':
+                document.title = value + " | Admin";
+                break;
+
+            case 'INPUT':
+                item.placeholder = value;
+                break;
+
+            case 'TEXTAREA':
+                item.placeholder = value;
+                break;
+
+            case 'OPTION':
+                item.textContent = value;
+                break;
+
+            default:
+                item.innerHTML = value;
+                break;
+        }
     });
   }
 

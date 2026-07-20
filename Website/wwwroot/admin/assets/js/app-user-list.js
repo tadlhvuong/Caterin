@@ -188,11 +188,11 @@ $(function () {
       ],
       order: [[2, 'desc']],
       dom:
-        '<"row"' +
+        '<"row m-0"' +
         '<"col-md-2"<"ms-n2"l>>' +
-        '<"col-md-10"<"dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-6 mb-md-0 mt-n6 mt-md-0"fB>>' +
+        '<"col-md-10"<"dt-action-buttons d-flex align-items-center justify-content-end"fB>>' +
         '>t' +
-        '<"row"' +
+        '<"row m-0"' +
         '<"col-sm-12 col-md-6"i>' +
         '<"col-sm-12 col-md-6"p>' +
         '>',
@@ -474,8 +474,9 @@ $(function () {
   // Filter form control to default size
   // ? setTimeout used for multilingual table initialization
   setTimeout(() => {
-    $('.dataTables_filter .form-control').removeClass('form-control-sm');
-    $('.dataTables_length .form-select').removeClass('form-select-sm');
+      $('.dt-length .form-select').removeClass('form-select-sm');
+      $('.dt-search .form-control').removeClass('form-control-sm');
+      
   }, 300);
 });
 
@@ -494,40 +495,40 @@ $(function () {
     });
   }
   // Add New User Form Validation
-  const fv = FormValidation.formValidation(addNewUserForm, {
-    fields: {
-      userFullname: {
-        validators: {
-          notEmpty: {
-            message: 'Please enter fullname '
-          }
-        }
-      },
-      userEmail: {
-        validators: {
-          notEmpty: {
-            message: 'Please enter your email'
-          },
-          emailAddress: {
-            message: 'The value is not a valid email address'
-          }
-        }
-      }
-    },
-    plugins: {
-      trigger: new FormValidation.plugins.Trigger(),
-      bootstrap5: new FormValidation.plugins.Bootstrap5({
-        // Use this for enabling/changing valid/invalid class
-        eleValidClass: '',
-        rowSelector: function (field, ele) {
-          // field is the field name & ele is the field element
-          return '.mb-6';
-        }
-      }),
-      submitButton: new FormValidation.plugins.SubmitButton(),
-      // Submit the form when all fields are valid
-      // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
-      autoFocus: new FormValidation.plugins.AutoFocus()
-    }
-  });
+  //const fv = FormValidation.formValidation(addNewUserForm, {
+  //  fields: {
+  //    userFullname: {
+  //      validators: {
+  //        notEmpty: {
+  //          message: 'Please enter fullname '
+  //        }
+  //      }
+  //    },
+  //    userEmail: {
+  //      validators: {
+  //        notEmpty: {
+  //          message: 'Please enter your email'
+  //        },
+  //        emailAddress: {
+  //          message: 'The value is not a valid email address'
+  //        }
+  //      }
+  //    }
+  //  },
+  //  plugins: {
+  //    trigger: new FormValidation.plugins.trigger(),
+  //    bootstrap5: new FormValidation.plugins.Bootstrap5({
+  //      // Use this for enabling/changing valid/invalid class
+  //      eleValidClass: '',
+  //      rowSelector: function (field, ele) {
+  //        // field is the field name & ele is the field element
+  //        return '.mb-6';
+  //      }
+  //    }),
+  //    submitButton: new FormValidation.plugins.SubmitButton(),
+  //    // Submit the form when all fields are valid
+  //    // defaultSubmit: new FormValidation.plugins.DefaultSubmit(),
+  //    autoFocus: new FormValidation.plugins.AutoFocus()
+  //  }
+  //});
 })();

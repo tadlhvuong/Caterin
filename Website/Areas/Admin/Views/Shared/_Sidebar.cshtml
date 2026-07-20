@@ -22,7 +22,7 @@
         <li class="menu-header small">
             <span class="menu-header-text" data-i18n="Dashboards">Dashboards</span>
         </li>
-        <li class="menu-item">
+        <li class="menu-item @(Html.IsActive("Home", "", "Admin") ? "active" : "")">
             <a asp-controller="Home" asp-action="Dashboard" asp-area="Admin" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-smart-home"></i>
                 <div data-i18n="Dashboards">Dashboards</div>
@@ -375,49 +375,21 @@
         <li class="menu-header small">
             <span class="menu-header-text" data-i18n="Account">Account</span>
         </li>
-        <li class="menu-item">
+        <li class="menu-item @(Html.IsActive("User", "", "Admin") ? "open" : "")">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-users"></i>
                 <div data-i18n="Users">Users</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="app-user-list.html" class="menu-link">
+                <li class="menu-item @(Html.IsActive("User", "", "Admin") ? "active" : "")">
+                    <a asp-controller="User" asp-action="UserList" class="menu-link">
                         <div data-i18n="List">List</div>
                     </a>
                 </li>
-
-                <li class="menu-item">
-                    <a href="javascript:void(0);" class="menu-link menu-toggle">
-                        <div data-i18n="View">View</div>
+                <li class="menu-item @(Html.IsActive("User", "Details", "Admin") ? "active" : "")">
+                    <a asp-controller="User" asp-action="Details" asp-route-id="@User.GetUserId()" asp-area="Admin" class="menu-link">
+                        <div data-i18n="Account">Account</div>
                     </a>
-                    <ul class="menu-sub">
-                        <li class="menu-item">
-                            <a href="app-user-view-account.html" class="menu-link">
-                                <div data-i18n="Account">Account</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="app-user-view-security.html" class="menu-link">
-                                <div data-i18n="Security">Security</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="app-user-view-billing.html" class="menu-link">
-                                <div data-i18n="Billing & Plans">Billing & Plans</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="app-user-view-notifications.html" class="menu-link">
-                                <div data-i18n="Notifications">Notifications</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="app-user-view-connections.html" class="menu-link">
-                                <div data-i18n="Connections">Connections</div>
-                            </a>
-                        </li>
-                    </ul>
                 </li>
             </ul>
         </li>
@@ -428,12 +400,12 @@
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a href="app-access-roles.html" class="menu-link">
+                    <a asp-controller="RolePermission" asp-action="Role" class="menu-link">
                         <div data-i18n="Roles">Roles</div>
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a href="app-access-permission.html" class="menu-link">
+                    <a asp-controller="RolePermission" asp-action="Role" class="menu-link">
                         <div data-i18n="Permission">Permission</div>
                     </a>
                 </li>

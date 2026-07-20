@@ -201,17 +201,16 @@ pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
-    Task.Run(async () =>
+    _ = Task.Run(async () =>
     {
         using var scope = app.Services.CreateScope();
 
-        var sync =  scope.ServiceProvider.GetRequiredService<IRoutePermissionService>();
+        var service = scope.ServiceProvider.GetRequiredService<IRoutePermissionService>();
 
-        await sync.SyncAsync();
+        await service.SyncAsync();
     });
 });
 //app.Run();
-
 
 try
 {

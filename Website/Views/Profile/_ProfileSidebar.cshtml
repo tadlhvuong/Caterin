@@ -1,4 +1,5 @@
-﻿@*
+﻿@using Shared.Helpers
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -24,17 +25,19 @@
 
         <div class="py-16">
 
-            <button class="account-menu" hx-get="/profile/personal-info" hx-target="#profile-content" hx-push-url="/profile?tab=personal">
+            <button class="account-menu" hx-get="/profile/personal-info"
+                    hx-target="#profile-content" hx-push-url="/profile?tab=personal" data-tab="personal">
                 Hồ sơ
             </button>
 
             <button class="account-menu" hx-get="/profile/orders"
                     hx-target="#profile-content"
-                    hx-push-url="/profile?tab=orders">
+                    hx-push-url="/profile?tab=orders" data-tab="orders">
                 Đơn hàng
             </button>
 
-            <button class="account-menu" hx-get="/profile/addresses" hx-target="#profile-content" hx-push-url="/profile?tab=addresses">
+            <button class="account-menu" hx-get="/profile/addresses" hx-target="#profile-content"
+                    hx-push-url="/profile?tab=addresses" data-tab="addresses">
                 Địa chỉ
             </button>
 

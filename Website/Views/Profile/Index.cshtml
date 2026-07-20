@@ -43,7 +43,6 @@
     <div class="container container-lg">
         <div class="row g-4">
             <partial name="_ProfileSidebar" />
-
             <div id="profile-content"
                  hx-get="/profile/@url" hx-trigger="load" 
                  class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
@@ -53,3 +52,16 @@
     </div>
 
 </section>
+
+@section Scripts {
+    <script>
+            document.body.addEventListener("htmx:afterRequest", function (e) {
+            const url = new URL(window.location.href);
+            const currentTab = url.searchParams.get("tab") || "personal";
+
+            document.querySelectorAll("[data-tab]").forEach(el => {
+                el.classList.toggle("active", el.dataset.tab === currentTab);
+            });
+        });
+    </script>
+}

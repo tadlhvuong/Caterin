@@ -1,0 +1,46 @@
+﻿@using Website.Areas.Admin.Models
+@model UserDetailsViewModel
+@{
+    Layout = null;
+    // var currentTab = (ViewData["CurrentTab"] as string ?? "personal").ToLower();
+}
+
+<!-- User Pills -->
+<div class="nav-align-top">
+    <ul class="nav nav-pills flex-column flex-md-row flex-wrap mb-6 row-gap-2">
+        <li class="nav-item">
+            @* <a class="nav-link active" hx-get="/admin/user/details-personal" hx-target="#tab-content" hx-push-url="/admin/user/user-details/@id?tab=details-personal" data-i18n="Account"><i class="ti ti-user-check ti-sm me-1_5"></i>Account</a> *@
+            <a class="nav-link"
+               hx-get="/admin/user/details-personal/@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=personal" data-tab="personal" data-i18n="Personal">
+                Account
+            </a>
+        </li>
+        <li class="nav-item">
+            @* <a class="nav-link" hx-get="/admin/user/details-security" hx-target="#tab-content" hx-push-url="/admin/user/user-details/@id?tab=security" data-i18n="Security">
+                <i class="ti ti-lock ti-sm me-1_5"></i>Security</a> *@
+
+            <a class="nav-link"
+               hx-get="/admin/user/details-security/@Model"
+               hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model?tab=security" data-tab="security" data-i18n="Security">
+                Security
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/admin/user/details-billing" 
+            hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=billing" data-tab="billing" data-i18n="Billing"><i class="ti ti-bookmark ti-sm me-1_5"></i>Billing & Plans</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/admin/user/details-notification" hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=notification" data-tab="notification" data-i18n="Notification"><i class="ti ti-bell ti-sm me-1_5"></i>Notifications</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" hx-get="/admin/user/details-connection" hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=connection" data-tab="connection" data-i18n="Connection"><i class="ti ti-link ti-sm me-1_5"></i>Connections</a>
+        </li>
+    </ul>
+</div>
+<!--/ User Pills -->

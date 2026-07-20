@@ -4,6 +4,7 @@ using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Product;
 using Shared.Enums;
+using Shared.Interfaces.Log;
 using Shared.Services.Log;
 
 namespace Website.Areas.Admin.Controllers
@@ -14,10 +15,10 @@ namespace Website.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly ILogger<ProductController> _logger;
-        private readonly ActivityLogger _activityLogger;
+        private readonly IActivityLogger _activityLogger;
 
         private readonly AppDbContext _dbContext;
-        public ProductController(ILogger<ProductController> logger, ActivityLogger activityLogger, AppDbContext dbContext) 
+        public ProductController(ILogger<ProductController> logger, IActivityLogger activityLogger, AppDbContext dbContext) 
         {
             _logger = logger;
             _activityLogger = activityLogger;

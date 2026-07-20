@@ -1,0 +1,142 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+
+<!-- Change Password -->
+<div class="card mb-6">
+    <h5 class="card-header">Change Password</h5>
+    <div class="card-body">
+        <form id="formChangePassword" method="GET" onsubmit="return false">
+            <div class="alert alert-warning alert-dismissible" role="alert">
+                <h5 class="alert-heading mb-1">Ensure that these requirements are met</h5>
+                <span>Minimum 8 characters long, uppercase & symbol</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div class="row gx-6">
+                <div class="mb-4 col-12 col-sm-6 form-password-toggle">
+                    <label class="form-label" for="newPassword">New Password</label>
+                    <div class="input-group input-group-merge">
+                        <input class="form-control"
+                               type="password"
+                               id="newPassword"
+                               name="newPassword"
+                               placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                        <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                    </div>
+                </div>
+
+                <div class="mb-4 col-12 col-sm-6 form-password-toggle">
+                    <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                    <div class="input-group input-group-merge">
+                        <input class="form-control"
+                               type="password"
+                               name="confirmPassword"
+                               id="confirmPassword"
+                               placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                        <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary me-2">Change Password</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!--/ Change Password -->
+<!-- Two-steps verification -->
+<div class="card mb-6">
+    <div class="card-header">
+        <h5 class="mb-0">Two-steps verification</h5>
+        <span class="card-subtitle mt-0">Keep your account secure with authentication step.</span>
+    </div>
+    <div class="card-body pt-0">
+        <h6 class="mb-1">SMS</h6>
+        <div class="mb-4">
+            <div class="d-flex w-100 action-icons">
+                <input id="defaultInput"
+                       class="form-control me-4"
+                       type="text"
+                       placeholder="+1(968) 945-8832" />
+                <a href="javascript:;"
+                   class="btn btn-icon btn-text-secondary"
+                   data-bs-target="#enableOTP"
+                   data-bs-toggle="modal">
+                    <i class="ti ti-edit ti-md"></i>
+                </a>
+                <a href="javascript:;" class="btn btn-icon btn-text-secondary">
+                    <i class="ti ti-trash ti-md"></i>
+                </a>
+            </div>
+        </div>
+        <p class="mb-0">
+            Two-factor authentication adds an additional layer of security to your account by requiring more
+            than just a password to log in.
+            <a href="javascript:void(0);" class="text-primary">Learn more.</a>
+        </p>
+    </div>
+</div>
+<!--/ Two-steps verification -->
+<!-- Recent Devices -->
+<div class="card mb-6">
+    <h5 class="card-header">Recent Devices</h5>
+    <div class="table-responsive table-border-bottom-0">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th class="text-truncate">Browser</th>
+                    <th class="text-truncate">Device</th>
+                    <th class="text-truncate">Location</th>
+                    <th class="text-truncate">Recent Activities</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-truncate">
+                        <i class="ti ti-brand-windows ti-md text-info me-4"></i>
+                        <span class="text-heading">Chrome on Windows</span>
+                    </td>
+                    <td class="text-truncate">HP Spectre 360</td>
+                    <td class="text-truncate">Switzerland</td>
+                    <td class="text-truncate">10, July 2021 20:07</td>
+                </tr>
+                <tr>
+                    <td class="text-truncate">
+                        <i class="ti ti-device-mobile ti-md text-danger me-4"></i>
+                        <span class="text-heading">Chrome on iPhone</span>
+                    </td>
+                    <td class="text-truncate">iPhone 12x</td>
+                    <td class="text-truncate">Australia</td>
+                    <td class="text-truncate">13, July 2021 10:10</td>
+                </tr>
+                <tr>
+                    <td class="text-truncate">
+                        <i class="ti ti-brand-android ti-md text-success me-4"></i>
+                        <span class="text-heading">Chrome on Android</span>
+                    </td>
+                    <td class="text-truncate">Oneplus 9 Pro</td>
+                    <td class="text-truncate">Dubai</td>
+                    <td class="text-truncate">14, July 2021 15:15</td>
+                </tr>
+                <tr>
+                    <td class="text-truncate">
+                        <i class="ti ti-brand-apple ti-md me-4"></i>
+                        <span class="text-heading">Chrome on MacOS</span>
+                    </td>
+                    <td class="text-truncate">Apple iMac</td>
+                    <td class="text-truncate">India</td>
+                    <td class="text-truncate">16, July 2021 16:17</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--/ Recent Devices -->
+@section Scripts {
+
+    <script src="~/admin/assets/js/modal-enable-otp.js"></script>
+    <script src="~/admin/assets/js/app-user-view-security.js"></script>
+}

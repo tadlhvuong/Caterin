@@ -10,6 +10,7 @@ namespace Shared.Interfaces.IdentityServices
 {
     public interface IRoutePermissionCache
     {
+        Task EnsureInitializedAsync();
         bool TryGetPermission(string route, string method, out RoutePermissionCacheItem permission);
         Task ReloadAsync();
     }

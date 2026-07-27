@@ -65,21 +65,7 @@ namespace Website.Areas.Admin.Controllers
                 return NotFound();
             }
             return View(vm);
-            //return View(modelId);
         }
-        //[HttpGet("details-content/{id?}")]
-        //[PermissionAction(ActionType.View)]
-        //public IActionResult DetailsContent(Guid id, string tab)
-        //{
-        //    return tab switch
-        //    {
-        //        "security" => PartialView("_Security"),
-        //        "billing" => PartialView("_Billing"),
-        //        "notification" => PartialView("_Notification"),
-        //        "connection" => PartialView("_Connection"),
-        //        _ => PartialView("_Personal")
-        //    };
-        //}
         [HttpGet("details-personal/{id?}")]
         [PermissionAction(ActionType.View)]
         public IActionResult DetailsPersonal(Guid id)

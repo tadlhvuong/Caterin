@@ -45,10 +45,14 @@
                 Đổi mật khẩu
             </button>
 
-            <a asp-controller="Account" asp-action="Logout" class="account-menu text-danger-600">
-                <i class="ph ph-sign-out"></i>
-                Đăng xuất
-            </a>
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="account-menu text-danger-600">
+                    <i class="ph ph-sign-out"></i>
+                    Đăng xuất
+                </button>
+
+            </form>
         </div>
     </div>
 </div>

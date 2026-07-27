@@ -45,9 +45,9 @@ public class RefreshTokenConfiguration
         builder.Property(x => x.RevokedAt)
             .HasColumnType("timestamp with time zone");
 
-        builder.HasOne(x => x.User)
-            .WithMany()
-            .HasForeignKey(x => x.UserId)
+        builder.Property(x => x.Lifetime).HasColumnType("interval").IsRequired();
+
+        builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(x => x.TokenHash)

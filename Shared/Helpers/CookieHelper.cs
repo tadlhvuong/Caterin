@@ -15,14 +15,14 @@ public static class CookieHelper
         };
     }
 
-    public static CookieOptions RefreshToken(int exprired)
+    public static CookieOptions RefreshToken(DateTime expiresAt)
     {
         return new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddDays(exprired)
+            Expires = new DateTimeOffset(expiresAt)
         };
     }
 }

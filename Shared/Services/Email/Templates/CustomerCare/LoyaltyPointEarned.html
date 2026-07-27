@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bạn vừa nhận được điểm thưởng - {{SiteName}}</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f5f5f5;padding:40px 0;">
+
+        <tr>
+            <td align="center">
+
+
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+
+                    <tr>
+                        <td align="center">
+
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="padding-top:32px;">
+
+
+                            <h2 style="margin:0 0 20px;color:#222;">
+                                🎉 Bạn vừa nhận được điểm thưởng
+                            </h2>
+
+
+                            <p>
+                                Xin chào <strong>{{CustomerName}}</strong>,
+                            </p>
+
+
+                            <p>
+                                Cảm ơn bạn đã đồng hành cùng
+                                <strong>{{SiteName}}</strong>.
+                            </p>
+
+
+                            <p>
+                                Bạn vừa được cộng điểm vào chương trình
+                                <strong>Khách Hàng Thân Thiết</strong>.
+                            </p>
+
+
+
+                            <div style="
+    background:#f0fff0;
+    border-radius:8px;
+    padding:25px;
+    text-align:center;
+    margin:30px 0;
+">
+
+
+                                <p style="margin:0;color:#555;">
+                                    Điểm thưởng nhận được
+                                </p>
+
+
+                                <p style="
+    font-size:32px;
+    font-weight:bold;
+    color:#28a745;
+    margin:15px 0;">
+
+                                    +{{EarnedPoints}} điểm
+
+                                </p>
+
+
+                                <p style="margin:0;color:#555;">
+
+                                    Tổng điểm hiện tại:
+                                    <strong>{{CurrentPoints}}</strong> điểm
+
+                                </p>
+
+
+                            </div>
+
+
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="
+       background:#f8f8f8;
+       border-radius:6px;
+       padding:20px;
+       margin:25px 0;">
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+
+                                        <strong>Lý do cộng điểm:</strong>
+                                        {{PointReason}}
+
+                                    </td>
+                                </tr>
+
+
+                            </table>
+
+
+
+                            <p>
+                                Bạn có thể sử dụng điểm thưởng để đổi các ưu đãi hấp dẫn
+                                hoặc nhận voucher dành riêng cho thành viên.
+                            </p>
+
+
+
+                            <div style="text-align:center;margin:35px 0;">
+
+
+                                <a href="{{RewardUrl}}"
+                                   style="
+   display:inline-block;
+   background:#28a745;
+   color:#ffffff;
+   text-decoration:none;
+   padding:14px 32px;
+   border-radius:6px;
+   font-weight:bold;">
+
+                                    Đổi điểm nhận thưởng
+
+                                </a>
+
+
+                            </div>
+
+
+
+                            <p style="text-align:center;">
+
+                                Hoặc tiếp tục mua sắm để tích lũy thêm nhiều điểm hơn.
+
+                            </p>
+
+
+
+                            <div style="text-align:center;margin:20px 0;">
+
+                                <a href="{{ShoppingUrl}}"
+                                   style="
+   color:#28a745;
+   text-decoration:none;
+   font-weight:bold;">
+
+                                    Mua sắm ngay
+
+                                </a>
+
+                            </div>
+
+
+
+                            <hr style="
+margin:35px 0;
+border:none;
+border-top:1px solid #e5e5e5;">
+
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+
+
+                        </td>
+                    </tr>
+
+
+                </table>
+
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

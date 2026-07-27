@@ -1,0 +1,202 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Cảm ơn đánh giá của bạn - {{SiteName}}</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f5f5f5;padding:40px 0;">
+
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+
+                    <tr>
+                        <td align="center">
+
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="padding-top:32px;">
+
+
+                            <h2 style="margin:0 0 20px;color:#222;">
+                                Cảm ơn bạn đã đánh giá sản phẩm
+                            </h2>
+
+
+                            <p>
+                                Xin chào <strong>{{UserName}}</strong>,
+                            </p>
+
+
+                            <p>
+                                Cảm ơn bạn đã dành thời gian chia sẻ cảm nhận về sản phẩm
+                                <strong>{{ProductName}}</strong>
+                                tại <strong>{{SiteName}}</strong>.
+                            </p>
+
+
+                            <p>
+                                Đánh giá của bạn là nguồn động lực rất lớn giúp chúng tôi
+                                cải thiện sản phẩm và mang đến trải nghiệm tốt hơn cho khách hàng.
+                            </p>
+
+
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="background:#f8f8f8;
+              border-radius:6px;
+              padding:20px;
+              margin:25px 0;">
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+
+                                        <strong>Sản phẩm:</strong>
+                                        {{ProductName}}
+
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+
+                                        <strong>Mã đơn hàng:</strong>
+                                        {{OrderCode}}
+
+                                    </td>
+                                </tr>
+
+
+                            </table>
+
+
+
+                            <h3 style="color:#222;">
+                                Quà cảm ơn dành cho bạn
+                            </h3>
+
+
+                            <p>
+                                Nhằm tri ân sự ủng hộ của bạn, chúng tôi gửi tặng một ưu đãi
+                                cho lần mua sắm tiếp theo:
+                            </p>
+
+
+
+                            <div style="background:#f0fff0;
+            border-radius:8px;
+            padding:20px;
+            text-align:center;
+            margin:25px 0;">
+
+
+                                <p style="margin:0;color:#555;">
+                                    Mã ưu đãi
+                                </p>
+
+
+                                <p style="font-size:24px;
+          font-weight:bold;
+          color:#28a745;
+          margin:10px 0;">
+
+                                    {{VoucherCode}}
+
+                                </p>
+
+
+                                <p style="margin:0;color:#555;">
+
+                                    Giảm {{VoucherValue}}
+
+                                </p>
+
+
+                                <p style="margin-top:10px;color:#777;">
+
+                                    Hạn sử dụng: {{VoucherExpireDate}}
+
+                                </p>
+
+
+                            </div>
+
+
+
+                            <div style="text-align:center;margin:35px 0;">
+
+                                <a href="{{ReviewUrl}}"
+                                   style="display:inline-block;
+          background:#28a745;
+          color:#ffffff;
+          text-decoration:none;
+          padding:14px 32px;
+          border-radius:6px;
+          font-weight:bold;">
+
+                                    Mua sắm tiếp
+
+                                </a>
+
+                            </div>
+
+
+
+                            <p>
+                                Chúng tôi rất mong tiếp tục được phục vụ bạn trong những lần mua sắm
+                                tiếp theo.
+                            </p>
+
+
+                            <hr style="margin:35px 0;
+           border:none;
+           border-top:1px solid #e5e5e5;">
+
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+
+
+                        </td>
+                    </tr>
+
+
+                </table>
+
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

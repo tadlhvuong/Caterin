@@ -25,9 +25,15 @@ namespace Website.Areas.Admin.Models
         public string Provider { get; set; }
 
         public string ReturnUrl { get; set; }
+        public bool RememberMe { get; set; } = false;
     }
     public class RegisterViewModel
     {
+        [Required(ErrorMessage = "{0} not null")]
+        [StringLength(50, MinimumLength = 3)]
+        [Display(Name = "UserName")]
+        public string UserName { get; set; }
+
         [Required(ErrorMessage = "{0} not null")]
         [EmailAddress(ErrorMessage = "{0} invalid")]
         [DataType(DataType.EmailAddress)]
@@ -54,7 +60,7 @@ namespace Website.Areas.Admin.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
-    public class MemberResetPasswordModel
+    public class ResetPasswordViewModel
     {
         [Required(ErrorMessage = "{0} not null")]
         [StringLength(100, ErrorMessage = "{0} must be at least {2} characters", MinimumLength = 6)]
@@ -65,15 +71,16 @@ namespace Website.Areas.Admin.Models
         [Required(ErrorMessage = "{0} not null")]
         [DataType(DataType.Password)]
         [Display(Name = "ConfirmPassword")]
-        [Compare("Password", ErrorMessage = "NotMatchConfirmPass")]
+        [Compare("Password", ErrorMessage = "Mật khẩu không giống nhau")]
         public string ConfirmPassword { get; set; }
 
-        public string Code { get; set; }
+        public string Token { get; set; }
         public string UserId { get; set; }
     }
     public class ExternalLoginListViewModel
     {
         public string? ReturnUrl { get; set; }
+        public bool RememberMe { get; set; } = false;
     }
     public class ExternalLoginConfirmationViewModel
     {

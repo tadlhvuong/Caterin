@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Shared.Common
 {
@@ -11,6 +12,68 @@ namespace Shared.Common
         //static DateTime utcStart = new DateTime(1970, 1, 1);
         public static readonly char[] LineDelimiters = new char[] { '\r', '\n' };
 
+        public static float RandomF()
+        {
+            return (float)(2 * rdm.NextDouble() - 1);
+        }
+
+        public static int Random()
+        {
+            return rdm.Next(0, int.MaxValue);
+        }
+
+        public static int Random(int maxValue)
+        {
+            return rdm.Next(0, maxValue);
+        }
+
+        public static int Random(int minValue, int maxValue)
+        {
+            return rdm.Next(minValue, maxValue);
+        }
+
+        public static string Random_Mix(int _size)
+        {
+            byte[] res = new byte[_size];
+            byte achar = 0;
+            for (int i = 0; i < _size; i++)
+            {
+                do
+                {
+                    achar = (byte)(rdm.Next(64) + 48);
+                } while (((achar < 50) || (achar > 57)) && ((achar < 65) || (achar > 90) || (achar == 73) || (achar == 79)));
+                res[i] = achar;
+            }
+
+            return Encoding.ASCII.GetString(res);
+        }
+
+        public static string Random_Num(int _size)
+        {
+            byte[] res = new byte[_size];
+            byte achar = 0;
+            for (int i = 0; i < _size; i++)
+            {
+                do
+                {
+                    achar = (byte)(rdm.Next(64) + 48);
+                } while ((achar < 48) || (achar > 57));
+                res[i] = achar;
+            }
+
+            return Encoding.ASCII.GetString(res);
+        }
+        public static class OtpGenerator
+        {
+            public static string Generate(int length = 6)
+            {
+                int max = (int)Math.Pow(10, length);
+
+                int number = RandomNumberGenerator.GetInt32(max);
+
+                return number.ToString($"D{length}");
+            }
+        }
         public static string GetUserId(this ClaimsPrincipal principal)
         {
             if (principal == null)
@@ -44,6 +107,22 @@ namespace Shared.Common
             return route
                 .Trim('/')
                 .ToLowerInvariant();
+        }
+
+        public static string NormalizeVietnamese(string orgText)
+        {
+            string newText = orgText.Normalize(NormalizationForm.FormD);
+
+            Regex regex = new Regex("\\p{IsCombiningDiacriticalMarks}+");
+            newText = regex.Replace(newText, String.Empty).Replace('\u0111', 'd').Replace('\u0110', 'D').Replace('\u0020', '-');
+            newText = Regex.Replace(newText, "[^0-9a-zA-Z_-]+", "");
+            return newText;
+        }
+        public static string ConvertEmailToName(string email)
+        {
+            var index = email.IndexOf('@');
+            var usernmae = email.Substring(0, index);
+            return email.Substring(0, index);
         }
 
         public static string GET_IP()

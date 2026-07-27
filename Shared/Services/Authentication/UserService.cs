@@ -69,11 +69,11 @@ namespace Shared.Services.Authentication
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new Exception("Tài khoản không tồn tại.");
 
             role = role.Trim();
             if (!await _roleManager.RoleExistsAsync(role))
-                throw new Exception($"Role '{role}' not found.");
+                throw new Exception($"Role '{role}' không tồn tại.");
 
             if (await _userManager.IsInRoleAsync(user, role))
                 return;
@@ -92,9 +92,7 @@ namespace Shared.Services.Authentication
 
             await IncreasePermissionVersionInternalAsync(user, SecurityActionType.RoleAssigned);
 
-            await _securityLogger.LogAsync(SecurityActionType.RoleAssigned,
-                true,
-                $"Assigned role {role} to user {userId}");
+            await _securityLogger.LogAsync(SecurityActionType.RoleAssigned, true, $"Role {role}: thêm cho tài khoản {userId}");
 
             await InvalidateUserCache(userId);
         }
@@ -114,14 +112,13 @@ namespace Shared.Services.Authentication
 
             await IncreasePermissionVersionInternalAsync(user, SecurityActionType.RoleRemoved);
             await InvalidateUserCache(userId);
-            await _securityLogger.LogAsync(SecurityActionType.RoleRemoved, true,
-                $"Removed role {role} from user {userId}");
+            await _securityLogger.LogAsync(SecurityActionType.RoleRemoved, true, $"Xóa role {role}: từ tài khoản {userId}");
         }
         public async Task ReplaceRolesAsync(string userId, IEnumerable<string> roles, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new Exception("Tài khoản không tồn tại.");
 
             var currentRoles = await _userManager.GetRolesAsync(user);
             //var targetMaxLevel = await GetMaxRoleLevel(roles);
@@ -130,13 +127,13 @@ namespace Shared.Services.Authentication
             //    throw new UnauthorizedAccessException();
             var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
             if (!removeResult.Succeeded)
-                throw new Exception("Failed to remove roles.");
+                throw new Exception("Xóa role không thành công.");
 
             roles = roles.Select(r => r.Trim()).Distinct();
             foreach (var role in roles)
             {
                 if (!await _roleManager.RoleExistsAsync(role))
-                    throw new Exception($"Role '{role}' not found.");
+                    throw new Exception($"Role '{role}': không tồn tại.");
 
                 var addResult = await _userManager.AddToRolesAsync(user, roles);
             }
@@ -148,14 +145,14 @@ namespace Shared.Services.Authentication
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new Exception("Tài khoản không tồn tại.");
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
 
             if (!result.Succeeded)
-                throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
+                throw new Exception($"Đổi mật khẩu lỗi: {string.Join(", ", result.Errors.Select(x => x.Description))}");
 
             await IncreasePermissionVersionInternalAsync(user, SecurityActionType.ResetPassword);
             await _userManager.UpdateSecurityStampAsync(user);
@@ -175,8 +172,7 @@ namespace Shared.Services.Authentication
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(SecurityActionType.Lock, true,
-                $"PermissionVersion increased for user {user.Id} lock");
+            await _securityLogger.LogAsync(SecurityActionType.Lock, true, $"Tăng version quyền hạn khi tạm khóa tài khoản: {user.Id} ");
         }
         public async Task UnlockAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -190,8 +186,7 @@ namespace Shared.Services.Authentication
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(SecurityActionType.UnLock, true,
-                $"PermissionVersion increased for user {user.Id} UnLock");
+            await _securityLogger.LogAsync(SecurityActionType.UnLock, true, $"Tăng version quyền hạn khi mở khóa tài khoản: {user.Id} ");
         }
         public async Task DisableAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -204,9 +199,7 @@ namespace Shared.Services.Authentication
 
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
-
-            await _securityLogger.LogAsync(SecurityActionType.Disable, true,
-                $"PermissionVersion increased for user {user.Id} Disabled");
+            await _securityLogger.LogAsync(SecurityActionType.Disable, true, $"Tăng version quyền hạn khi vô hiệu hóa tài khoản: {user.Id} ");
         }
         public async Task EnableAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -221,15 +214,13 @@ namespace Shared.Services.Authentication
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(SecurityActionType.Enable, true,
-                $"PermissionVersion increased for user {user.Id} Enabled");
+            await _securityLogger.LogAsync(SecurityActionType.Enable, true, $"Tăng version quyền hạn khi mở hoạt động tài khoản: {user.Id} ");
         }
 
         public async Task IncreasePermissionVersionAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                throw new Exception("User not found.");
+            if (user == null) return;
 
             await IncreasePermissionVersionInternalAsync(user, SecurityActionType.PermissionChanged);
         }
@@ -262,8 +253,7 @@ namespace Shared.Services.Authentication
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(action,true,
-                $"PermissionVersion increased for user {user.Id}");
+            await _securityLogger.LogAsync(action, true, $"Tăng version quyền hạn cho tài khoản: {user.Id} ");
         }
         private async Task InvalidateUserCache(string userId)
         {

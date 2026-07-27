@@ -7,15 +7,29 @@ using System.Threading.Tasks;
 
 namespace Shared.Requests
 {
-public class RegisterRequest
+    public sealed class RegisterRequest
     {
-        public string UserName { get; set; }
+        [Required]
+        [EmailAddress]
+        [MaxLength(256)]
+        public string Email { get; set; } = string.Empty;
 
-        public string FullName { get; set; }
+        [Required]
+        [MinLength(3)]
+        [MaxLength(50)]
+        public string UserName { get; set; } = string.Empty;
 
-        public string Email { get; set; }
+        [Phone]
+        [MaxLength(20)]
         public string? PhoneNumber { get; set; }
 
-        public string Password { get; set; }
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

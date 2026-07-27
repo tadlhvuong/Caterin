@@ -1,45 +1,94 @@
 ﻿@using Website.Areas.Admin.Models
 @model LoginViewModel
 @{
-    var culture = CultureInfo.CurrentCulture.Name;
+    ViewData["Title"] = "Đăng nhập";
 }
-<div class="card-body">
-    <form asp-area="Admin" asp-controller="Auth" asp-action="Login" method="post" autocomplete="off">
-        @Html.AntiForgeryToken()
-        <div asp-validation-summary="All" class="text-danger"></div>
-        <div class="input-group mb-3">
-            <input asp-for="Email" type="text" class="form-control" localize-att-placeholder="UserNameOrEmailText">
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-user"></span>
-                </div>
-            </div>
+
+@section Styles {
+    <style type="text/css">
+        .validation-summary-errors {
+            color: red;
+        }
+    </style>
+}
+
+<h4 class="mb-1">Trang quản trị CATERIN! 👋</h4>
+<p class="mb-6">Đăng nhập tài khoản có quyền hạn quản lý</p>
+
+<form class="mb-4" asp-controller="Auth" asp-action="Login" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-6">
+        <label asp-for="Email" class="form-label">Email or Username</label>
+        <input type="text"
+               class="form-control"
+               asp-for="Email"
+               placeholder="Nhập email"
+               autofocus />
+    </div>
+    <div class="mb-6 form-password-toggle">
+        <label class="form-label" asp-for="Password">Password</label>
+        <div class="input-group input-group-merge">
+            <input type="password"
+                   asp-for="Password"
+                   class="form-control"
+                   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                   aria-describedby="password" />
+            <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
         </div>
-        <div class="input-group mb-3">
-            <input asp-for="Password" type="password" class="form-control" localize-att-placeholder="PasswordText">
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-lock"></span>
-                </div>
+    </div>
+    <div class="my-8">
+        <div class="d-flex justify-content-between">
+            <div class="form-check mb-0 ms-2">
+                <input class="form-check-input" type="checkbox" asp-for="RememberMe" />
+                <label class="form-check-label" asp-for="RememberMe"> Remember Me </label>
             </div>
+            <a asp-area="Admin" asp-controller="Auth" asp-action="ForgotPassword">
+                <p class="mb-0">Quên mật khẩu?</p>
+            </a>
         </div>
-        <div class="row">
-            <div class="col-7">
-                <div class="icheck-primary">
-                    <input asp-for="RememberMe" type="checkbox">
-                    <label asp-for="RememberMe" ></label>
-                </div>
-            </div>
-            <div class="col-5">
-                <button type="submit" class="btn btn-primary btn-block" >LoginText</button>
-            </div>
-        </div>
-    </form>
-    @await Html.PartialAsync("_LoginEx", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-    <p class="mb-1">
-        <a href="/admin/Account/ForgotPassword" >ForgotPasswordText</a>
-    </p>
-    <p class="mb-0">
-        <a href="/adminAccount/Register" >RegisterText</a>
-    </p>
+    </div>
+    <div class="mb-6">
+        <button class="btn btn-primary d-grid w-100" type="submit">Đăng nhập</button>
+    </div>
+</form>
+
+<p class="text-center">
+    <span>Bạn chưa có tài khoản?</span>
+    <a href="/admin/auth/register">
+        <span>Tạo tài khoản mới</span>
+    </a>
+</p>
+
+<div class="divider my-6">
+    <div class="divider-text">or</div>
 </div>
+@await Html.PartialAsync("_LoginEx", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl, RememberMe = Model.RememberMe })
+
+        @section Scripts{
+            <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+            const rememberMe = document.getElementById("RememberMe");
+                const facebookRememberMe = document.getElementById("facebookRememberMe");
+        const googleRememberMe = document.getElementById("googleRememberMe");
+
+        function syncRememberMe() {
+            facebookRememberMe.value = rememberMe.checked;
+            googleRememberMe.value = rememberMe.checked;
+        }
+
+            function syncRememberMe() {
+                facebookRememberMe.value = rememberMe.checked;
+                googleRememberMe.value = rememberMe.checked;
+                console.log(facebookRememberMe.value );
+                console.log(googleRememberMe.value );
+            }
+
+            // Giá trị ban đầu
+            syncRememberMe();
+
+            // Khi người dùng thay đổi checkbox
+            rememberMe.addEventListener("change", syncRememberMe);
+        });
+            </script>
+        }

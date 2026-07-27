@@ -43,6 +43,27 @@
                 </ul>
             </li>
             <!--/ Language -->
+            <!-- Style Switcher -->
+            <li class="nav-item dropdown-style-switcher dropdown">
+                <a class="nav-link btn btn-text-secondary btn-icon rounded-pill dropdown-toggle hide-arrow"
+                   href="javascript:void(0);"
+                   data-bs-toggle="dropdown">
+                    <i class="ti ti-md"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-styles">
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="light">
+                            <span class="align-middle"><i class="ti ti-sun ti-md me-3"></i>Light</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="javascript:void(0);" data-theme="dark">
+                            <span class="align-middle"><i class="ti ti-moon-stars ti-md me-3"></i>Dark</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <!-- / Style Switcher-->
             <!-- Quick links  -->
             <li class="nav-item dropdown-shortcuts navbar-dropdown dropdown">
                 <a class="nav-link btn btn-text-secondary btn-icon rounded-pill btn-icon dropdown-toggle hide-arrow"
@@ -440,11 +461,17 @@
                         </a>
                     </li>
                     <li>
-                        <div class="d-grid px-2 pt-2 pb-1">
-                            <a class="btn btn-sm btn-danger d-flex" href="auth-login-cover.html" target="_blank">
+                        <div class="d-flex justify-content-center">
+                           @*  <a asp-controller="Auth" asp-action="Logout" class="btn btn-sm btn-danger d-flex">
                                 <small class="align-middle">Logout</small>
                                 <i class="ti ti-logout ms-2 ti-14px"></i>
-                            </a>
+                            </a> *@
+                            <form asp-controller="Auth" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger d-flex">
+                                    <small class="align-middle">Logout</small><i class="ti ti-logout ms-2 ti-14px"></i>
+                                </button>
+                            </form>
                         </div>
                     </li>
                 </ul>

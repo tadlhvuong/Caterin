@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đơn hàng đã bị hủy - {{SiteName}}</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f5f5f5;padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+                    <tr>
+                        <td align="center">
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="padding-top:32px;">
+
+                            <h2 style="margin:0 0 20px;color:#222;">
+                                Đơn hàng đã được hủy
+                            </h2>
+
+
+                            <p>
+                                Xin chào <strong>{{UserName}}</strong>,
+                            </p>
+
+
+                            <p>
+                                Chúng tôi xin thông báo đơn hàng của bạn tại
+                                <strong>{{SiteName}}</strong>
+                                đã được hủy.
+                            </p>
+
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="background:#f8f8f8;
+                                          border-radius:6px;
+                                          padding:20px;
+                                          margin:25px 0;">
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Mã đơn hàng:</strong>
+                                        {{OrderCode}}
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Ngày đặt:</strong>
+                                        {{OrderDate}}
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Trạng thái:</strong>
+                                        {{OrderStatus}}
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Tổng giá trị:</strong>
+                                        {{TotalAmount}}
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Lý do hủy:</strong>
+                                        {{CancelReason}}
+                                    </td>
+                                </tr>
+
+                            </table>
+
+
+                            <p>
+                                Nếu bạn đã yêu cầu hủy đơn hàng, bạn có thể bỏ qua
+                                email này.
+                            </p>
+
+
+                            <p>
+                                Nếu bạn không thực hiện việc hủy đơn,
+                                vui lòng liên hệ với chúng tôi để được hỗ trợ kiểm tra.
+                            </p>
+
+
+                            <div style="text-align:center;margin:35px 0;">
+                                <a href="{{OrderDetailUrl}}"
+                                   style="display:inline-block;
+                                          background:#28a745;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          padding:14px 32px;
+                                          border-radius:6px;
+                                          font-weight:bold;">
+                                    Xem chi tiết đơn hàng
+                                </a>
+                            </div>
+
+
+                            <p>
+                                Chúng tôi rất mong có cơ hội phục vụ bạn trong
+                                những đơn hàng tiếp theo.
+                            </p>
+
+
+                            <hr style="margin:35px 0;
+                                       border:none;
+                                       border-top:1px solid #e5e5e5;">
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

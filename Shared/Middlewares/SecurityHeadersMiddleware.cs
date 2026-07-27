@@ -28,12 +28,13 @@ namespace Shared.Middlewares
                    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
                    "img-src 'self'  https://*.googleapis.com https://*.gstatic.com data: https:; " +
                    "font-src 'self' https://fonts.gstatic.com https:; " +
-                   "connect-src 'self'; " +
+                    "connect-src 'self' https://accounts.google.com https://oauth2.googleapis.com; " +
                    "object-src 'none';" +
                    "frame-ancestors 'none'; " +
-                   "form-action 'self';" +
+                    "form-action 'self' https://accounts.google.com;  https://www.facebook.com;" +
                    "upgrade-insecure-requests;" +
                    "block-all-mixed-content;";
+
                 context.Response.Headers["Permissions-Policy"] = 
                     "geolocation=(self), " +
                     "camera=(), " +

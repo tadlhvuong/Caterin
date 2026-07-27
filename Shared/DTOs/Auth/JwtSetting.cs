@@ -17,5 +17,6 @@ namespace Shared.DTOs.Auth
         public int AccessTokenExpirationMinutes { get; set; }
 
         public int RefreshTokenExpirationDays { get; set; }
+        public int RefreshTokenRememberExpirationDays { get; set; }
     }
 }

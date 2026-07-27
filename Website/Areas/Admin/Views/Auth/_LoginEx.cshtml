@@ -1,11 +1,38 @@
-﻿@{
-    var culture = CultureInfo.CurrentCulture.Name;
+﻿@using Website.Areas.Admin.Models
+@model ExternalLoginListViewModel
+@{
 }
 <div class="social-auth-links d-flex justify-content-between">
-    <a href="/admin/Account/ExternalLogin?Provider=Facebook" class="btn btn-primary">
-        <i class="fab fa-facebook mr-2"></i> Facebook
-    </a>
-    <a href="/admin/Account/ExternalLogin?Provider=Google" class="btn btn-danger">
-        <i class="fab fa-google-plus mr-2"></i>  Google+
-    </a>
+    <form asp-area="Admin"
+          asp-controller="Auth"
+          asp-action="ExternalLogin"
+          method="post"
+          class="w-100 me-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="provider" value="Facebook" />
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <input type="hidden" id="facebookRememberMe" name="rememberMe" value="false" />
+
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="fab fa-facebook me-2"></i>
+            Facebook
+        </button>
+    </form>
+
+    <form asp-area="Admin"
+          asp-controller="Auth"
+          asp-action="ExternalLogin"
+          method="post"
+          class="w-100 ms-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="provider" value="Google" />
+        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+        <input type="hidden" id="googleRememberMe" name="rememberMe" value="false" />
+
+        <button type="submit" class="btn btn-danger w-100">
+            <i class="fab fa-google me-2"></i>
+            Google
+        </button>
+    </form>
+
 </div>

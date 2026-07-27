@@ -964,6 +964,9 @@ namespace Shared.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<TimeSpan>("Lifetime")
+                        .HasColumnType("interval");
+
                     b.Property<string>("ReplacedByTokenHash")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");

@@ -1,0 +1,84 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Email đã được xác thực</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation"
+                       width="600"
+                       cellspacing="0"
+                       cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+                    <tr>
+                        <td align="center">
+                            <img src="{{LogoUrl}}" alt="{{SiteName}}" width="180">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+
+                            <h2 style="color:#28a745;margin-top:32px;">
+                                🎉 Email đã được xác thực
+                            </h2>
+
+                            <p>
+                                Xin chào <strong>{{UserName}}</strong>,
+                            </p>
+
+                            <p>
+                                Chúc mừng! Địa chỉ email của bạn đã được xác thực thành công.
+                            </p>
+
+                            <p>
+                                Tài khoản của bạn hiện đã được kích hoạt và có thể sử dụng đầy đủ các chức năng của
+                                <strong>{{SiteName}}</strong>.
+                            </p>
+
+                            <div style="text-align:center;margin:35px 0;">
+                                <a href="{{LoginUrl}}"
+                                   style="display:inline-block;
+              background:#28a745;
+              color:#ffffff;
+              text-decoration:none;
+              padding:14px 34px;
+              border-radius:6px;
+              font-weight:bold;">
+                                    Đăng nhập ngay
+                                </a>
+                            </div>
+
+                            <p>
+                                Nếu bạn không phải là người thực hiện xác thực này, vui lòng liên hệ với chúng tôi ngay để được hỗ trợ.
+                            </p>
+
+                            <hr style="margin:35px 0;border:none;border-top:1px solid #e5e5e5;">
+
+                            <p style="margin-bottom:5px;">
+                                Trân trọng,
+                            </p>
+
+                            <strong>{{SiteName}}</strong>
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

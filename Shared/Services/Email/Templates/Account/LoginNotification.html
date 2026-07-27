@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo đăng nhập - {{SiteName}}</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f5f5f5;padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+                    <tr>
+                        <td align="center">
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="padding-top:32px;">
+
+                            <h2 style="margin:0 0 20px;color:#222;">
+                                Thông báo đăng nhập mới
+                            </h2>
+
+
+                            <p>
+                                Xin chào <strong>{{UserName}}</strong>,
+                            </p>
+
+
+                            <p>
+                                Tài khoản của bạn tại
+                                <strong>{{SiteName}}</strong>
+                                vừa được đăng nhập thành công.
+                            </p>
+
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="background:#f8f8f8;
+                                          border-radius:6px;
+                                          padding:20px;
+                                          margin:25px 0;">
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Thời gian:</strong>
+                                        {{LoginTime}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Thiết bị:</strong>
+                                        {{DeviceName}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Trình duyệt:</strong>
+                                        {{Browser}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Địa chỉ IP:</strong>
+                                        {{IpAddress}}
+                                    </td>
+                                </tr>
+
+                            </table>
+
+
+                            <p>
+                                Nếu đây là bạn, bạn có thể bỏ qua email này.
+                            </p>
+
+
+                            <p>
+                                Nếu bạn không thực hiện đăng nhập này,
+                                tài khoản của bạn có thể đã bị truy cập trái phép.
+                                Vui lòng đổi mật khẩu ngay để bảo vệ tài khoản.
+                            </p>
+
+
+                            <div style="text-align:center;margin:35px 0;">
+                                <a href="{{LoginUrl}}"
+                                   style="display:inline-block;
+                                          background:#28a745;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          padding:14px 32px;
+                                          border-radius:6px;
+                                          font-weight:bold;">
+                                    Kiểm tra tài khoản
+                                </a>
+                            </div>
+
+
+                            <hr style="margin:35px 0;
+                                       border:none;
+                                       border-top:1px solid #e5e5e5;">
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

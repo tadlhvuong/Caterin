@@ -1,14 +1,6 @@
 ﻿@{
-    var culture = CultureInfo.CurrentCulture.Name;
 }
-<section class="content">
-    <div class="error-page" style="width: 100%;">
-        <div class="error-content" style="margin-left: 20px;">
-            <h3><i class="fas fa-exclamation-triangle text-danger"></i> @ViewData["Title"]</h3>
-
-            <p>
-                <localize>DeniedAccessContentText</localize> <a href="/admin/auth/login" >LoginText</a>.
-            </p>
-        </div>
-    </div>
-</section>
+<h1 class="mb-2 mx-2" style="line-height: 6rem; font-size: 6rem">401</h1>
+<h4 class="mb-2 mx-2">Bạn không được phép truy cập! 🔐</h4>
+<p class="mb-6 mx-2">Bạn không có quyền truy cập trang này. Hãy quay về trang chủ!</p>
+<a href="/home" class="btn btn-primary">Back to home</a>

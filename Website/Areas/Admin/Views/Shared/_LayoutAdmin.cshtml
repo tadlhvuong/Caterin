@@ -3,8 +3,8 @@
 }
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-assets-path="/admin/assets/" data-style="light" dir="ltr"
-      data-theme="theme-default">
+<html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-assets-path="/admin/assets/" data-style="light"
+      data-theme="theme-default" data-bs-theme="light">
 <head>
     <meta charset="utf-8" />
     <title data-i18n="@ViewData["Title"]"></title>
@@ -38,8 +38,8 @@
 
     <!-- Core CSS -->
 
-    <link rel="stylesheet" href="~/admin/assets/vendor/css/rtl/core.css" />
-    <link rel="stylesheet" href="~/admin/assets/vendor/css/rtl/theme-default.css" />
+    <link id="core-css" rel="stylesheet" href="~/admin/assets/vendor/css/core.css" />
+    <link id="theme-css" rel="stylesheet" href="~/admin/assets/vendor/css/theme-default.css" />
 
     <link rel="stylesheet" href="~/admin/assets/css/demo.css" />
 
@@ -140,6 +140,7 @@
     <!-- Vendors JS -->
     <script src="~/admin/assets/vendor/libs/apex-charts/apexcharts.min.js"></script>
     <!-- Main JS -->
+    <script src="~/admin/assets/js/config.js"></script>
     <script src="~/admin/assets/js/main.js"></script>
 
     <!-- Page JS -->

@@ -10,6 +10,9 @@
         ChangePassword,
         ResetPassword,
 
+        ConfirmEmail,
+        ConfirmPhone,
+
         JwtIssued,
         JwtRevoked,
 
@@ -30,6 +33,5 @@
         UnLock,
         Enable,
         Disable,
-
     }
 }

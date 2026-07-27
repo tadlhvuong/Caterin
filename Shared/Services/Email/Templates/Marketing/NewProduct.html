@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{Title}} - {{SiteName}}</title>
+</head>
+
+
+<body style="
+margin:0;
+padding:0;
+background:#f5f5f5;
+font-family:Arial,Helvetica,sans-serif;">
+
+
+    <table role="presentation"
+           width="100%"
+           cellspacing="0"
+           cellpadding="0"
+           style="
+       background:#f5f5f5;
+       padding:40px 0;">
+
+
+        <tr>
+            <td align="center">
+
+
+                <table role="presentation"
+                       width="600"
+                       cellspacing="0"
+                       cellpadding="0"
+                       style="
+       background:#ffffff;
+       border-radius:8px;
+       padding:40px;">
+
+
+
+                    <tr>
+                        <td align="center">
+
+
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+
+
+                        </td>
+                    </tr>
+
+
+
+
+                    <tr>
+                        <td style="padding-top:30px;">
+
+
+
+                            <h2 style="
+margin:0 0 20px;
+color:#222;
+text-align:center;">
+
+                                {{Title}}
+
+                            </h2>
+
+
+
+
+                            <p>
+                                Xin chào <strong>{{CustomerName}}</strong>,
+                            </p>
+
+
+
+
+                            <p>
+                                Chúng tôi rất vui được giới thiệu sản phẩm mới từ
+                                <strong>{{SiteName}}</strong>.
+                            </p>
+
+
+
+
+                            <img src="{{BannerUrl}}"
+                                 alt="{{CampaignName}}"
+                                 width="100%"
+                                 style="
+     border-radius:8px;
+     margin:20px 0;">
+
+
+
+
+
+                            <p style="
+font-size:16px;
+line-height:1.6;
+color:#555;">
+
+                                {{Description}}
+
+                            </p>
+
+
+
+
+
+                            <h3 style="
+color:#222;
+margin-top:30px;">
+
+                                Sản phẩm mới
+
+                            </h3>
+
+
+
+
+
+                            <!-- Product Item Loop -->
+                            {{#Products}}
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="
+       margin:20px 0;
+       background:#f8f8f8;
+       border-radius:8px;">
+
+
+                                <tr>
+
+                                    <td width="160"
+                                        style="padding:15px;">
+
+
+                                        <img src="{{ImageUrl}}"
+                                             width="140"
+                                             alt="{{Name}}"
+                                             style="
+     border-radius:6px;">
+
+
+                                    </td>
+
+
+
+                                    <td style="
+padding:15px;">
+
+
+                                        <h3 style="
+margin:0 0 10px;
+color:#222;">
+
+                                            {{Name}}
+
+                                        </h3>
+
+
+
+                                        <p style="
+margin:0 0 10px;
+color:#555;">
+
+                                            {{Description}}
+
+                                        </p>
+
+
+
+                                        <p style="
+font-weight:bold;
+color:#28a745;">
+
+                                            {{Price}}
+
+                                        </p>
+
+
+
+                                    </td>
+
+                                </tr>
+
+
+                            </table>
+
+                            {{/Products}}
+
+
+
+
+
+
+
+                            <div style="
+text-align:center;
+margin:35px 0;">
+
+
+                                <a href="{{ActionUrl}}"
+                                   style="
+   display:inline-block;
+   background:#28a745;
+   color:#ffffff;
+   text-decoration:none;
+   padding:14px 32px;
+   border-radius:6px;
+   font-weight:bold;">
+
+                                    {{ActionText}}
+
+                                </a>
+
+
+                            </div>
+
+
+
+
+
+                            {{#VoucherCode}}
+
+                            <div style="
+background:#f0fff0;
+border-radius:8px;
+padding:20px;
+text-align:center;
+margin:25px 0;">
+
+
+                                <p>
+                                    Ưu đãi dành cho bạn
+                                </p>
+
+
+                                <p style="
+font-size:24px;
+font-weight:bold;
+color:#28a745;">
+
+                                    {{VoucherCode}}
+
+                                </p>
+
+
+                                <p>
+                                    {{VoucherValue}}
+                                </p>
+
+
+                            </div>
+
+                            {{/VoucherCode}}
+
+
+
+
+
+
+
+                            <hr style="
+margin:35px 0;
+border:none;
+border-top:1px solid #e5e5e5;">
+
+
+
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="
+margin-top:20px;
+color:#777;">
+
+                                Hotline: {{SupportPhone}}
+
+                            </p>
+
+
+
+
+                        </td>
+                    </tr>
+
+
+                </table>
+
+
+            </td>
+        </tr>
+
+
+    </table>
+
+
+</body>
+</html>

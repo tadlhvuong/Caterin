@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đặt hàng thành công - {{SiteName}}</title>
+</head>
+
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f5f5f5;padding:40px 0;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0"
+                       style="background:#ffffff;border-radius:8px;padding:40px;">
+
+                    <tr>
+                        <td align="center">
+                            <img src="{{LogoUrl}}"
+                                 alt="{{SiteName}}"
+                                 width="180">
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <td style="padding-top:32px;">
+
+                            <h2 style="margin:0 0 20px;color:#222;">
+                                Đặt hàng thành công
+                            </h2>
+
+
+                            <p>
+                                Xin chào <strong>{{CustomerName}}</strong>,
+                            </p>
+
+
+                            <p>
+                                Cảm ơn bạn đã mua hàng tại
+                                <strong>{{SiteName}}</strong>.
+                            </p>
+
+
+                            <p>
+                                Đơn hàng của bạn đã được tiếp nhận và đang được
+                                xử lý.
+                            </p>
+
+
+                            <table width="100%"
+                                   cellspacing="0"
+                                   cellpadding="0"
+                                   style="background:#f8f8f8;
+                                          border-radius:6px;
+                                          padding:20px;
+                                          margin:25px 0;">
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Mã đơn hàng:</strong>
+                                        {{OrderCode}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Ngày đặt:</strong>
+                                        {{OrderDate}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Thanh toán:</strong>
+                                        {{PaymentMethod}}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding:8px 0;color:#555;">
+                                        <strong>Trạng thái:</strong>
+                                        {{PaymentStatus}}
+                                    </td>
+                                </tr>
+
+                            </table>
+
+
+                            <h3 style="color:#222;">
+                                Thông tin giao hàng
+                            </h3>
+
+
+                            <p style="color:#555;">
+                                {{ShippingAddress}}
+                            </p>
+
+
+                            <h3 style="color:#222;">
+                                Tổng thanh toán
+                            </h3>
+
+
+                            <p style="font-size:20px;
+                                      font-weight:bold;
+                                      color:#28a745;">
+                                {{TotalAmount}}
+                            </p>
+
+
+                            <div style="text-align:center;margin:35px 0;">
+                                <a href="{{OrderDetailUrl}}"
+                                   style="display:inline-block;
+                                          background:#28a745;
+                                          color:#ffffff;
+                                          text-decoration:none;
+                                          padding:14px 32px;
+                                          border-radius:6px;
+                                          font-weight:bold;">
+                                    Xem đơn hàng
+                                </a>
+                            </div>
+
+
+                            <p>
+                                Chúng tôi sẽ cập nhật cho bạn khi đơn hàng được
+                                chuẩn bị, giao hàng và hoàn tất.
+                            </p>
+
+
+                            <p>
+                                Nếu cần hỗ trợ về đơn hàng, vui lòng liên hệ
+                                với chúng tôi.
+                            </p>
+
+
+                            <hr style="margin:35px 0;
+                                       border:none;
+                                       border-top:1px solid #e5e5e5;">
+
+
+                            <p style="margin:0;">
+                                Trân trọng,
+                            </p>
+
+
+                            <p style="margin:6px 0 0;">
+                                <strong>{{SiteName}}</strong>
+                            </p>
+
+
+                            <p style="margin-top:20px;color:#777;">
+                                Hotline: {{SupportPhone}}
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Data.Entities.Identity;
 using Shared.DTOs;
@@ -6,6 +7,7 @@ using Shared.DTOs.Profile;
 using Shared.Interfaces.IdentityServices;
 namespace Website.Controllers
 {
+    [Authorize]
     [Route("profile")]
     public class ProfileController : Controller
     {

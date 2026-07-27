@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -81,11 +82,39 @@ services.AddIdentity<AppUser, AppRole>(options =>
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.AllowedForNewUsers = true;
-})
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
 
-//services.Configure<JwtSetting>(builder.Configuration.GetSection("JwtSetting"));
+    options.Tokens.EmailConfirmationTokenProvider = "EmailConfirmation";
+}).AddEntityFrameworkStores<AppDbContext>()
+    .AddTokenProvider<EmailConfirmationTokenProvider<AppUser>>("EmailConfirmation")
+    .AddDefaultTokenProviders();
+services.AddAuthentication()
+    .AddGoogle(options =>
+    {
+        options.ClientId = configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
+        options.SaveTokens = true;
+
+        options.ClaimActions.MapJsonKey("picture", "picture");
+    })
+    .AddFacebook(options =>
+    {
+        options.AppId = configuration["Authentication:Facebook:AppId"]!;
+        options.AppSecret = configuration["Authentication:Facebook:AppSecret"]!;
+
+        options.SaveTokens = true;
+    });
+//setup timelife confirm email: 24h
+services.Configure<EmailConfirmationTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(24);
+});
+
+//setup timelife confirm còn lại như change pass, reset pass: 15'
+services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromMinutes(15);
+});
+
 services.AddOptions<JwtSetting>().Bind(builder.Configuration.GetSection("JwtSetting"))
     .Validate(s => !string.IsNullOrWhiteSpace(s.SecretKey), "Jwt SecretKey missing").ValidateOnStart();
 
@@ -98,6 +127,7 @@ services.AddScoped<ICurrentUserService, CurrentUserService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IMenuService, MenuService>();
 services.AddScoped<IEmailSender, EmailSender>();
+services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 
 services.AddScoped<IRoutePermissionService, RoutePermissionService>();
 services.AddScoped<IRoutePermissionCache, RoutePermissionCache>();
@@ -107,6 +137,7 @@ services.AddScoped<IPermissionVersionValidator, PermissionVersionValidator>();
 services.AddScoped<Shared.UserValidation.Interface.ISecurityStampValidator, Shared.UserValidation.Sevices.SecurityStampValidator>();
 services.AddScoped<IUserValidationService, UserValidationService>();
 services.AddScoped<IUserStatusValidator, UserStatusValidator>();
+
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)
@@ -124,16 +155,16 @@ if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
     app.UseDeveloperExceptionPage();
-
 }
 else
 {
     //app.UseExceptionHandler("/Home/Error");
 
-    app.UseExceptionHandler("/StatusCode/500");
+    //app.UseExceptionHandler("/StatusCode/500");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseExceptionHandler("/StatusCode/500");
 app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
 var options = new ForwardedHeadersOptions
 {
@@ -151,7 +182,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseSecurityHeaders();
+//app.UseSecurityHeaders();
 
 app.UseMiddleware<RefreshTokenMiddleware>();
 

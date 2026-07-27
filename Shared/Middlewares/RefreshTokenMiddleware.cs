@@ -26,16 +26,16 @@ public sealed class RefreshTokenMiddleware
         _logger = logger;
     }
 
+    //Access token  hết hạn chạy để lấy lại token từ dựa vào refresh token
     public async Task InvokeAsync(
         HttpContext context,
         IJwtService jwtService,
         IAuthService authService)
     {
         var accessToken = context.Request.Cookies["access_token"];
-
         var refreshToken = context.Request.Cookies["refresh_token"];
 
-        // Không login
+        // Không có refresh token thì quay lại login
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
             await _next(context);
@@ -48,6 +48,7 @@ public sealed class RefreshTokenMiddleware
             await _next(context);
             return;
         }
+        //checkpoint đã refresh ở request này. reponse tự về xóa
         if (context.Items.ContainsKey("token_refreshed"))
         {
             await _next(context);
@@ -61,13 +62,10 @@ public sealed class RefreshTokenMiddleware
             if (result.Success)
             {
                 context.Items["token_refreshed"] = true;
-                context.Response.Cookies.Append(
-                    "access_token", result.AccessToken, CookieHelper.AccessToken(_jwtSettings.AccessTokenExpirationMinutes));
-
-
-                context.Response.Cookies.Append(
-                    "refresh_token", result.RefreshToken, 
-                    CookieHelper.RefreshToken(_jwtSettings.RefreshTokenExpirationDays));
+                context.Response.Cookies.Append("access_token", result.AccessToken, 
+                    CookieHelper.AccessToken(_jwtSettings.AccessTokenExpirationMinutes));
+                context.Response.Cookies.Append( "refresh_token", result.RefreshToken, 
+                    CookieHelper.RefreshToken(result.ExpireAt));
             }
             else
             {
@@ -78,8 +76,8 @@ public sealed class RefreshTokenMiddleware
         catch (Exception ex)
         {
             _logger.LogError(ex, "Refresh token failed");
-        }
 
+        }
         await _next(context);
     }
 }

@@ -6,12 +6,46 @@ using System.Threading.Tasks;
 
 namespace Shared.Responses
 {
-    public class ServiceResult
+    public sealed class ServiceResult
     {
-        public bool Success { get; set; }
-        public string? Message { get; set; }
+        public bool Succeeded { get; init; }
 
-        public static ServiceResult Ok() => new() { Success = true };
-        public static ServiceResult Fail(string msg) => new() { Success = false, Message = msg };
+        public object? Data { get; init; }
+
+        public IReadOnlyList<string> Errors { get; init; } = [];
+
+        public static ServiceResult Success(object? data = null)
+            => new()
+            {
+                Succeeded = true,
+                Data = data
+            };
+
+        public static ServiceResult Fail(params string[] errors)
+            => new()
+            {
+                Succeeded = false,
+                Errors = errors
+            };
+
+        public static ServiceResult Fail(IEnumerable<string> errors)
+            => new()
+            {
+                Succeeded = false,
+                Errors = errors.ToList()
+            };
+
+        //public static ServiceResult Success<T>(T data)
+        //=> new()
+        //{
+        //    Succeeded = true,
+        //    Data = data
+        //};
+        //public static ServiceResult Fail<T>(params string[] errors)
+        //    => new()
+        //    {
+        //        Succeeded = false,
+        //        Errors = errors.ToList()
+        //    };
     }
 }

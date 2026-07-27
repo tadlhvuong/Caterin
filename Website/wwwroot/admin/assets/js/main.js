@@ -6,13 +6,7 @@
 
 window.isRtl = window.Helpers.isRtl();
 window.isDarkStyle = window.Helpers.isDarkStyle();
-let menu,
-  animate,
-  isHorizontalLayout = false;
-
-if (document.getElementById('layout-menu')) {
-  isHorizontalLayout = document.getElementById('layout-menu').classList.contains('menu-horizontal');
-}
+let menu, animate = false;
 
 (function () {
   setTimeout(function () {
@@ -41,17 +35,11 @@ if (document.getElementById('layout-menu')) {
   let layoutMenuEl = document.querySelectorAll('#layout-menu');
   layoutMenuEl.forEach(function (element) {
     menu = new Menu(element, {
-      orientation: isHorizontalLayout ? 'horizontal' : 'vertical',
-      closeChildren: isHorizontalLayout ? true : false,
-      // ? This option only works with Horizontal menu
-      showDropdownOnHover: localStorage.getItem('templateCustomizer-' + templateName + '--ShowDropdownOnHover') // If value(showDropdownOnHover) is set in local storage
-        ? localStorage.getItem('templateCustomizer-' + templateName + '--ShowDropdownOnHover') === 'true' // Use the local storage value
-        : window.templateCustomizer !== undefined // If value is set in config.js
-          ? window.templateCustomizer.settings.defaultShowDropdownOnHover // Use the config.js value
-          : true // Use this if you are not using the config.js and want to set value directly from here
+      orientation: 'vertical',
+      closeChildren: false,
     });
     // Change parameter to true if you want scroll animation
-    window.Helpers.scrollToActive((animate = false));
+    window.Helpers.scrollToActive((animate = true));
     window.Helpers.mainMenu = menu;
   });
 
@@ -64,16 +52,15 @@ if (document.getElementById('layout-menu')) {
       // Enable menu state with local storage support if enableMenuLocalStorage = true from config.js
       if (config.enableMenuLocalStorage && !window.Helpers.isSmallScreen()) {
         try {
-          localStorage.setItem(
-            'templateCustomizer-' + templateName + '--LayoutCollapsed',
-            String(window.Helpers.isCollapsed())
+            localStorage.setItem('isCollapsedSidebar', String(window.Helpers.isCollapsed())
           );
           // Update customizer checkbox state on click of menu toggler
-          let layoutCollapsedCustomizerOptions = document.querySelector('.template-customizer-layouts-options');
-          if (layoutCollapsedCustomizerOptions) {
-            let layoutCollapsedVal = window.Helpers.isCollapsed() ? 'collapsed' : 'expanded';
-            layoutCollapsedCustomizerOptions.querySelector(`input[value="${layoutCollapsedVal}"]`).click();
-          }
+          //  let layoutCollapsedCustomizerOptions = document.querySelector('.template-customizer-layouts-options');
+          //  console.log(layoutCollapsedCustomizerOptions);
+          //if (layoutCollapsedCustomizerOptions) {
+          //  let layoutCollapsedVal = window.Helpers.isCollapsed() ? 'collapsed' : 'expanded';
+          //  layoutCollapsedCustomizerOptions.querySelector(`input[value="${layoutCollapsedVal}"]`).click();
+          //}
         } catch (e) {}
       }
     });
@@ -90,12 +77,12 @@ if (document.getElementById('layout-menu')) {
   window.Helpers.swipeOut('#layout-menu', function (e) {
     if (window.Helpers.isSmallScreen()) window.Helpers.setCollapsed(true);
   });
-
   // Display in main menu when menu scrolls
   let menuInnerContainer = document.getElementsByClassName('menu-inner'),
     menuInnerShadow = document.getElementsByClassName('menu-inner-shadow')[0];
   if (menuInnerContainer.length > 0 && menuInnerShadow) {
-    menuInnerContainer[0].addEventListener('ps-scroll-y', function () {
+      menuInnerContainer[0].addEventListener('ps-scroll-y', function () {
+          console.log(this.querySelector('.ps__thumb-y').offsetTop);
       if (this.querySelector('.ps__thumb-y').offsetTop) {
         menuInnerShadow.style.display = 'block';
       } else {
@@ -105,14 +92,7 @@ if (document.getElementById('layout-menu')) {
   }
 
   // Update light/dark image based on current style
-  function switchImage(style) {
-    if (style === 'system') {
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        style = 'dark';
-      } else {
-        style = 'light';
-      }
-    }
+function switchImage(style) {
     const switchImagesList = [].slice.call(document.querySelectorAll('[data-app-' + style + '-img]'));
     switchImagesList.map(function (imageEl) {
       const setImage = imageEl.getAttribute('data-app-' + style + '-img');
@@ -124,58 +104,30 @@ if (document.getElementById('layout-menu')) {
   let styleSwitcher = document.querySelector('.dropdown-style-switcher');
 
   // Active class on style switcher dropdown items
-  const activeStyle = document.documentElement.getAttribute('data-style');
-
+    const activeStyle = document.documentElement.getAttribute('data-style');
+    console.log(window.templateCustomizer?.settings?.defaultStyle);
   // Get style from local storage or use 'system' as default
-  let storedStyle =
-    localStorage.getItem('templateCustomizer-' + templateName + '--Style') || //if no template style then use Customizer style
-    (window.templateCustomizer?.settings?.defaultStyle ?? 'light'); //!if there is no Customizer then use default style as light
+    let storedStyle = localStorage.getItem("currentStyle") || "light"; //!if there is no Customizer then use default style as light
+    setStyle(storedStyle);
+    // Set style on click of style switcher item if template customizer is enabled
+    if (styleSwitcher) {
 
-  // Set style on click of style switcher item if template customizer is enabled
-  if (window.templateCustomizer && styleSwitcher) {
-    let styleSwitcherItems = [].slice.call(styleSwitcher.children[1].querySelectorAll('.dropdown-item'));
-    styleSwitcherItems.forEach(function (item) {
-      item.classList.remove('active');
-      item.addEventListener('click', function () {
-        let currentStyle = this.getAttribute('data-theme');
-        if (currentStyle === 'light') {
-          window.templateCustomizer.setStyle('light');
-        } else if (currentStyle === 'dark') {
-          window.templateCustomizer.setStyle('dark');
-        } else {
-          window.templateCustomizer.setStyle('system');
-        }
-      });
+        let styleSwitcherItems = styleSwitcher.querySelectorAll(".dropdown-item");
 
-      if (item.getAttribute('data-theme') === activeStyle) {
-        // Add 'active' class to the item if it matches the activeStyle
-        item.classList.add('active');
-      }
-    });
+        styleSwitcherItems.forEach(item => {
 
-    // Update style switcher icon based on the stored style
+            item.addEventListener("click", function () {
 
-    const styleSwitcherIcon = styleSwitcher.querySelector('i');
+                const style = this.dataset.theme;
 
-    if (storedStyle === 'light') {
-      styleSwitcherIcon.classList.add('ti-sun');
-      new bootstrap.Tooltip(styleSwitcherIcon, {
-        title: 'Light Mode',
-        fallbackPlacements: ['bottom']
-      });
-    } else if (storedStyle === 'dark') {
-      styleSwitcherIcon.classList.add('ti-moon-stars');
-      new bootstrap.Tooltip(styleSwitcherIcon, {
-        title: 'Dark Mode',
-        fallbackPlacements: ['bottom']
-      });
-    } else {
-      styleSwitcherIcon.classList.add('ti-device-desktop-analytics');
-      new bootstrap.Tooltip(styleSwitcherIcon, {
-        title: 'System Mode',
-        fallbackPlacements: ['bottom']
-      });
-    }
+                setStyle(style);
+
+                styleSwitcherItems.forEach(x => x.classList.remove("active"));
+                this.classList.add("active");
+
+            });
+
+        });
   }
 
   // Run switchImage function based on the stored style
@@ -226,20 +178,10 @@ if (document.getElementById('layout-menu')) {
           i18next.changeLanguage(currentLanguage, (err, t) => {
               window.templateCustomizer ? window.templateCustomizer.setLang(currentLanguage) : '';
               document.documentElement.lang = currentLanguage;
-              directionChange(textDirection);
               if (err) return console.log('something went wrong loading', err);
           localize();
         });
       });
-    }
-    function directionChange(textDirection) {
-      if (textDirection === 'rtl') {
-        if (localStorage.getItem('templateCustomizer-' + templateName + '--Rtl') !== 'true')
-          window.templateCustomizer ? window.templateCustomizer.setRtl(true) : '';
-      } else {
-        if (localStorage.getItem('templateCustomizer-' + templateName + '--Rtl') === 'true')
-          window.templateCustomizer ? window.templateCustomizer.setRtl(false) : '';
-      }
     }
   }
 
@@ -403,7 +345,7 @@ if (document.getElementById('layout-menu')) {
   //------------------------------------------------------------------
 
   // If current layout is horizontal OR current window screen is small (overlay menu) than return from here
-  if (isHorizontalLayout || window.Helpers.isSmallScreen()) {
+  if (window.Helpers.isSmallScreen()) {
     return;
   }
 
@@ -422,9 +364,9 @@ if (document.getElementById('layout-menu')) {
   if (typeof config !== 'undefined') {
     if (config.enableMenuLocalStorage) {
       try {
-        if (localStorage.getItem('templateCustomizer-' + templateName + '--LayoutCollapsed') !== null)
+          if (localStorage.getItem('isCollapsedSidebar') !== null)
           window.Helpers.setCollapsed(
-            localStorage.getItem('templateCustomizer-' + templateName + '--LayoutCollapsed') === 'true',
+              localStorage.getItem('isCollapsedSidebar') === 'true',
             false
           );
       } catch (e) {}
@@ -687,4 +629,74 @@ if (typeof $ !== 'undefined') {
       });
     }
   });
+}
+
+function setStyle(style) {
+
+    const coreCss = document.getElementById("core-css");
+    const themeCss = document.getElementById("theme-css");
+
+    if (!coreCss || !themeCss)
+        return;
+
+    if (style === "system") {
+        style = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+    }
+
+    if (style === "dark") {
+
+        coreCss.href = assetsPath + "vendor/css/core-dark.css";
+        themeCss.href = assetsPath + "vendor/css/theme-default-dark.css";
+
+    } else {
+
+        coreCss.href = assetsPath + "vendor/css/core.css";
+        themeCss.href = assetsPath + "vendor/css/theme-default.css";
+
+    }
+
+    updateStyleIcon(style);
+    document.documentElement.setAttribute("data-style", style);
+    localStorage.setItem("currentStyle", style);
+}
+
+function updateStyleIcon(style) {
+
+    const icon = document.querySelector(".dropdown-style-switcher  > a > i");
+    console.log(icon);
+    if (!icon) return;
+
+    icon.classList.remove(
+        "ti-sun",
+        "ti-moon-stars",
+    );
+
+    let title = "";
+
+    switch (style) {
+
+        case "dark":
+            icon.classList.add("ti-moon-stars");
+            title = "Dark Mode";
+            break;
+
+        default:
+            icon.classList.add("ti-sun");
+            title = "Light Mode";
+            break;
+    }
+
+    // Bootstrap Tooltip
+    const tooltip = bootstrap.Tooltip.getInstance(icon);
+
+    if (tooltip) {
+        tooltip.dispose();
+    }
+
+    new bootstrap.Tooltip(icon, {
+        title: title,
+        fallbackPlacements: ["bottom"]
+    });
 }

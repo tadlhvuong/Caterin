@@ -38,31 +38,34 @@ namespace Shared.Services.Authentication
             _userValidationService = userValidationService;
         }
 
-        public async Task<string> CreateAsync(string userId,
+
+        /// <inheritdoc />
+        public async Task<RefreshTokenResult> CreateAsync(string userId, TimeSpan lifeTime,
         CancellationToken cancellationToken = default)
         {
             var refreshToken = _jwtService.GenerateRefreshToken();
 
             var http = _httpContextAccessor.HttpContext;
-
-            var entity = new RefreshToken
+            var now = DateTime.UtcNow;
+            var result = new RefreshToken
             {
                 UserId = userId,
                 TokenHash = CommonHelper.Hash(refreshToken),
-                CreatedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                CreatedAt = now,
+                ExpiredAt = now.Add(lifeTime),
+                Lifetime = lifeTime,
                 UserAgent = http?.Request.Headers.UserAgent,
                 IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
                 IsRevoked = false
             };
-            _dbcontext.RefreshTokens.Add(entity);
+            _dbcontext.RefreshTokens.Add(result);
             await _dbcontext.SaveChangesAsync(cancellationToken);
 
-            return refreshToken;
+            return new RefreshTokenResult { RefreshToken = refreshToken, ExpireAt = result.ExpiredAt };
         }
 
-        public async Task<RefreshToken?> GetByTokenAsync(string refreshToken,
-        CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             var tokenHash = CommonHelper.Hash(refreshToken);
 
@@ -70,6 +73,7 @@ namespace Shared.Services.Authentication
                 .FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
         }
 
+        /// <inheritdoc />
         public async Task<RotateTokenResult> RotateAsync(RefreshToken oldToken,
         CancellationToken cancellationToken = default)
         {
@@ -77,12 +81,14 @@ namespace Shared.Services.Authentication
             oldToken.RevokedAt = DateTime.UtcNow;
             var refreshToken = _jwtService.GenerateRefreshToken();
             var http = _httpContextAccessor.HttpContext;
+            var now = DateTime.UtcNow;
             var newToken = new RefreshToken
             {
                 UserId = oldToken.UserId,
                 TokenHash = CommonHelper.Hash(refreshToken),
                 CreatedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
+                ExpiredAt = now.Add(oldToken.Lifetime),
+                Lifetime = oldToken.Lifetime,
                 UserAgent = http?.Request.Headers.UserAgent,
                 IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
                 IsRevoked = false
@@ -102,8 +108,8 @@ namespace Shared.Services.Authentication
             };
         }
 
-        public async Task RevokeAsync(RefreshToken refreshToken,
-        CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task RevokeAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
         {
             refreshToken.IsRevoked = true;
             refreshToken.RevokedAt = DateTime.UtcNow;
@@ -111,12 +117,10 @@ namespace Shared.Services.Authentication
             await _dbcontext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task RevokeAllUserTokensAsync(
-        string userId,
-        CancellationToken cancellationToken = default)
+        /// <inheritdoc />
+        public async Task RevokeAllUserTokensAsync(string userId, CancellationToken cancellationToken = default)
         {
-            var tokens = await _dbcontext.RefreshTokens.Where(x => x.UserId == userId && !x.IsRevoked)
-                .ToListAsync(cancellationToken);
+            var tokens = await _dbcontext.RefreshTokens.Where(x => x.UserId == userId && !x.IsRevoked).ToListAsync(cancellationToken);
 
             foreach (var token in tokens)
             {

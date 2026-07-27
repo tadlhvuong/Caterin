@@ -24,6 +24,7 @@ namespace Shared.Data.Entities.Identity
         public string? RevokedById { get; set; }
         public DateTime CreatedAt { get; set; }
         public AppUser User { get; set; } = null!;
+        public TimeSpan Lifetime { get; set; }
 
     }
 }

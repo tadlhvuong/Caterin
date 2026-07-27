@@ -32,10 +32,9 @@ namespace Shared.Middlewares
                 return;
             }
 
-
             if (!context.User.Identity?.IsAuthenticated ?? true)
             {
-                if (path.StartsWithSegments("/admin/auth"))
+                if (path.StartsWithSegments("/admin/auth") )
                 {
                     await _next(context);
                     return;
@@ -45,6 +44,7 @@ namespace Shared.Middlewares
             }
 
             var userId = currentUser.UserId;
+            var userName = currentUser.UserName;
             if (string.IsNullOrEmpty(userId)) 
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized; 
@@ -60,10 +60,25 @@ namespace Shared.Middlewares
 
             if (!await userValidationService.HasAdminAccessAsync(validationContext))
             {
+                //đã đăng nhập và không có quyền system.access thì sẽ bỏ qua để không lặp lại
+                if (path.StartsWithSegments("/admin/auth/access-denied"))
+                {
+                    await _next(context);
+                    return;
+                }
+
                 await securityLogger.LogAsync(SecurityActionType.AdminAccessDenied, false,
                     "User tried to access Admin area.");
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 _logger.LogWarning("User {UserId} tried to access Admin area ", userId);
+                if (context.Request.Path.StartsWithSegments("/api"))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                }
+                else
+                {
+                    context.Response.Redirect("/admin/auth/access-denied");
+                }
                 return;
             }
 

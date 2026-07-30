@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Page User List
  */
 
@@ -22,10 +22,16 @@ $(function () {
   var dt_user_table = $('.datatables-users'),
     select2 = $('.select2'),
     userView = 'app-user-view-account.html',
+    //statusObj = {
+    //  1: { title: 'Pending', class: 'bg-label-warning' },
+    //  2: { title: 'Active', class: 'bg-label-success' },
+    //  3: { title: 'Inactive', class: 'bg-label-secondary' }
+    //};
     statusObj = {
-      1: { title: 'Pending', class: 'bg-label-warning' },
-      2: { title: 'Active', class: 'bg-label-success' },
-      3: { title: 'Inactive', class: 'bg-label-secondary' }
+        0: { title: 'Chờ kích hoạt', class: 'bg-label-info' },
+        1: { title: 'Hoạt động', class: 'bg-label-success' },
+        2: { title: 'Đình chỉ"', class: 'bg-label-warning' },
+        3: { title: 'Đã xóa', class: 'bg-label-danger' },
     };
 
   if (select2.length) {
@@ -39,17 +45,39 @@ $(function () {
   // Users datatable
   if (dt_user_table.length) {
     var dt_user = dt_user_table.DataTable({
-      ajax: assetsPath + 'json/user-list.json', // JSON file to add data
+        processing: true,
+        serverSide: true,
+        ajax: function (data, callback) {
+
+            $.ajax({
+                url: '/admin/user/list',
+                type: 'GET',
+                data: {
+                    page: Math.floor(data.start / data.length) + 1,
+                    pageSize: data.length,
+                    keyword: data.search.value,
+                    status: $('#FilterStatus').val(),
+                    role: $('#UserRole').val()
+                },
+                success: function (res) {
+                    console.log(res.items);
+                    callback({
+                        data: res.items,
+                        recordsTotal: res.totalCount,
+                        recordsFiltered: res.totalCount
+                    });
+                }
+            });
+        },
       columns: [
         // columns according to JSON
         { data: 'id' },
         { data: 'id' },
-        { data: 'full_name' },
-        { data: 'role' },
-        { data: 'current_plan' },
+        { data: 'fullName' },
+        { data: 'roles' },
         { data: 'billing' },
         { data: 'status' },
-        { data: 'action' }
+          { data: 'action ' }
       ],
       columnDefs: [
         {
@@ -80,7 +108,7 @@ $(function () {
           targets: 2,
           responsivePriority: 4,
           render: function (data, type, full, meta) {
-            var $name = full['full_name'],
+            var $name = full['fullName'],
               $email = full['email'],
               $image = full['avatar'];
             if ($image) {
@@ -92,7 +120,7 @@ $(function () {
               var stateNum = Math.floor(Math.random() * 6);
               var states = ['success', 'danger', 'warning', 'info', 'primary', 'secondary'];
               var $state = states[stateNum],
-                $name = full['full_name'],
+                  $name = full['fullName'],
                 $initials = $name.match(/\b\w/g) || [];
               $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
               $output = '<span class="avatar-initial rounded-circle bg-label-' + $state + '">' + $initials + '</span>';
@@ -119,41 +147,47 @@ $(function () {
             return $row_output;
           }
         },
-        {
-          // User Role
-          targets: 3,
-          render: function (data, type, full, meta) {
-            var $role = full['role'];
-            var roleBadgeObj = {
-              Subscriber: '<i class="ti ti-crown ti-md text-primary me-2"></i>',
-              Author: '<i class="ti ti-edit ti-md text-warning me-2"></i>',
-              Maintainer: '<i class="ti ti-user ti-md text-success me-2"></i>',
-              Editor: '<i class="ti ti-chart-pie ti-md text-info me-2"></i>',
-              Admin: '<i class="ti ti-device-desktop ti-md text-danger me-2"></i>'
-            };
-            return (
-              "<span class='text-truncate d-flex align-items-center text-heading'>" +
-              roleBadgeObj[$role] +
-              $role +
-              '</span>'
-            );
-          }
-        },
+          {
+              targets: 3,
+              render: function (data, type, full) {
+
+                  const roleBadgeObj = {
+                      System: '<i class="ti ti-shield ti-md text-danger me-2"></i>',
+                      Admin: '<i class="ti ti-shield ti-md text-danger me-2"></i>',
+                      Manager: '<i class="ti ti-briefcase ti-md text-primary me-2"></i>',
+                      Maintainer: '<i class="ti ti-user ti-md text-success me-2"></i>',
+                      Editor: '<i class="ti ti-edit ti-md text-warning me-2"></i>',
+                      Subscriber: '<i class="ti ti-crown ti-md text-info me-2"></i>'
+                  };
+
+                  if (!data || data.length === 0) {
+                      return '<span class="text-muted">No role</span>';
+                  }
+
+                  return data.map(function (role) {
+                      return `
+        <div class="d-flex align-items-center">
+          ${roleBadgeObj[role] ?? '<i class="ti ti-user ti-md text-secondary me-2"></i>'}
+          <span class="text-heading">${role}</span>
+        </div>
+      `;
+                  }).join('');
+              }
+          },
         {
           // Plans
           targets: 4,
           render: function (data, type, full, meta) {
-            var $plan = full['current_plan'];
+            var $plan = full['billing'];
 
             return '<span class="text-heading">' + $plan + '</span>';
           }
         },
         {
           // User Status
-          targets: 6,
+          targets: 5,
           render: function (data, type, full, meta) {
             var $status = full['status'];
-
             return (
               '<span class="badge ' +
               statusObj[$status].class +
@@ -391,80 +425,56 @@ $(function () {
       },
       initComplete: function () {
         // Adding role filter once table initialized
-        this.api()
-          .columns(3)
-          .every(function () {
-            var column = this;
-            var select = $(
-              '<select id="UserRole" class="form-select text-capitalize"><option value=""> Select Role </option></select>'
-            )
-              .appendTo('.user_role')
-              .on('change', function () {
-                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                column.search(val ? '^' + val + '$' : '', true, false).draw();
+          $.get('/admin/user/roles', function (roles) {
+
+              var select = $(
+                  '<select id="UserRole" class="form-select text-capitalize">' +
+                  '<option value="">Select Role</option>' +
+                  '</select>'
+              );
+
+              select.appendTo('.user_role');
+
+              roles.forEach(function (role) {
+                  select.append(
+                      `<option value="${role.name}">
+                ${role.name}
+            </option>`
+                  );
               });
 
-            column
-              .data()
-              .unique()
-              .sort()
-              .each(function (d, j) {
-                select.append('<option value="' + d + '">' + d + '</option>');
+              select.on('change', function () {
+                  dt_user.ajax.reload();
               });
+
           });
         // Adding plan filter once table initialized
-        this.api()
-          .columns(4)
-          .every(function () {
-            var column = this;
-            var select = $(
-              '<select id="UserPlan" class="form-select text-capitalize"><option value=""> Select Plan </option></select>'
-            )
-              .appendTo('.user_plan')
-              .on('change', function () {
-                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                column.search(val ? '^' + val + '$' : '', true, false).draw();
+          $.get('/admin/user/statuses', function (statuses) {
+              var select = $(
+                  '<select id="FilterStatus" class="form-select">' +
+                  '<option value="">Select Status</option>' +
+                  '</select>'
+              );
+
+              select.appendTo('.user_status');
+
+              statuses.forEach(function (status) {
+                  select.append(
+                      `<option value="${status.value}">
+                ${status.name}
+            </option>`
+                  );
               });
 
-            column
-              .data()
-              .unique()
-              .sort()
-              .each(function (d, j) {
-                select.append('<option value="' + d + '">' + d + '</option>');
-              });
-          });
-        // Adding status filter once table initialized
-        this.api()
-          .columns(6)
-          .every(function () {
-            var column = this;
-            var select = $(
-              '<select id="FilterTransaction" class="form-select text-capitalize"><option value=""> Select Status </option></select>'
-            )
-              .appendTo('.user_status')
-              .on('change', function () {
-                var val = $.fn.dataTable.util.escapeRegex($(this).val());
-                column.search(val ? '^' + val + '$' : '', true, false).draw();
+              select.on('change', function () {
+                  dt_user.ajax.reload();
               });
 
-            column
-              .data()
-              .unique()
-              .sort()
-              .each(function (d, j) {
-                select.append(
-                  '<option value="' +
-                    statusObj[d].title +
-                    '" class="text-capitalize">' +
-                    statusObj[d].title +
-                    '</option>'
-                );
-              });
           });
       }
     });
   }
+
 
   // Delete Record
   $('.datatables-users tbody').on('click', '.delete-record', function () {

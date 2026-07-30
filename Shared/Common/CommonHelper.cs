@@ -97,10 +97,10 @@ namespace Shared.Common
             return Convert.ToHexString(bytes);
         }
 
-        public static string Generate(int byteLength = 64)
+        public static string GenerateSecureToken(int byteLength = 32)
         {
             var bytes = RandomNumberGenerator.GetBytes(byteLength);
-            return Convert.ToBase64String(bytes);
+            return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
         public static string NormalizeRoute(string route)
         {

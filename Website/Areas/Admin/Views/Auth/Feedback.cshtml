@@ -1,0 +1,42 @@
+﻿@using Shared.Enums
+@using Website.Areas.Admin.Models
+@model FeedbackViewModel
+@{
+    var color = Model.Type switch
+    {
+        FeedbackType.Success => "success",
+        FeedbackType.Danger => "danger",
+        FeedbackType.Warning => "warning",
+        _ => "info"
+    };
+
+    var icon = Model.Type switch
+    {
+        FeedbackType.Success => "fas fa-check-circle",
+        FeedbackType.Danger => "fas fa-times-circle",
+        FeedbackType.Warning => "fas fa-exclamation-triangle",
+        _ => "fas fa-info-circle"
+    };
+}
+
+<h3 class="text-@color">
+    <i class="@icon"></i>
+    <b>@Model.Title</b>
+</h3>
+<p class="mb-6">@Model.Message</p>
+
+<div class="text-center">
+    <a href="@Model.ButtonUrl">
+        <i class="ti ti-chevron-left scaleX-n1-rtl me-1_5"></i>
+        @Model.ButtonText
+    </a>
+</div>
+
+@if (Model.SecondaryButtonUrl != null)
+{
+    <div class="text-center">
+        <a href="@Model.SecondaryButtonUrl" class="btn btn-primary waves-effect waves-light">
+            @Model.SecondaryButtonText
+        </a>
+    </div>
+}

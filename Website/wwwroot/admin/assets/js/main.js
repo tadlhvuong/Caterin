@@ -82,7 +82,6 @@ let menu, animate = false;
     menuInnerShadow = document.getElementsByClassName('menu-inner-shadow')[0];
   if (menuInnerContainer.length > 0 && menuInnerShadow) {
       menuInnerContainer[0].addEventListener('ps-scroll-y', function () {
-          console.log(this.querySelector('.ps__thumb-y').offsetTop);
       if (this.querySelector('.ps__thumb-y').offsetTop) {
         menuInnerShadow.style.display = 'block';
       } else {
@@ -105,7 +104,6 @@ function switchImage(style) {
 
   // Active class on style switcher dropdown items
     const activeStyle = document.documentElement.getAttribute('data-style');
-    console.log(window.templateCustomizer?.settings?.defaultStyle);
   // Get style from local storage or use 'system' as default
     let storedStyle = localStorage.getItem("currentStyle") || "light"; //!if there is no Customizer then use default style as light
     setStyle(storedStyle);
@@ -665,7 +663,6 @@ function setStyle(style) {
 function updateStyleIcon(style) {
 
     const icon = document.querySelector(".dropdown-style-switcher  > a > i");
-    console.log(icon);
     if (!icon) return;
 
     icon.classList.remove(

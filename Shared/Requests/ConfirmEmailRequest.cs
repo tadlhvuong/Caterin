@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 namespace Shared.Requests
 {
 
-    public class ConfirmEmailRequest
+    public sealed class ConfirmEmailRequest
     {
-        public string UserId { get; set; } = default!;
-        public string Token { get; set; } = default!;
+        public string Key { get; set; } = string.Empty;
     }
 }

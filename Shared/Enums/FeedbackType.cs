@@ -4,9 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.Services.Email.Template
+namespace Shared.Enums
 {
-    internal class ForgotPassword
+    public enum FeedbackType
     {
+        Success,
+        Danger,
+        Warning,
+        Info
     }
 }

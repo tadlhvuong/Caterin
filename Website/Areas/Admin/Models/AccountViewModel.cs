@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Shared.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Website.Areas.Admin.Models
 {
@@ -52,6 +53,14 @@ namespace Website.Areas.Admin.Models
         [Compare("Password", ErrorMessage = "NotMatchConfirmPass")]
       
         public string ConfirmPassword { get; set; }
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Bạn phải đồng ý với Điều khoản sử dụng.")]
+        public bool AcceptTerms { get; set; }
+    }
+    public class ResendConfirmEmailViewModel
+    {
+        public string Email { get; set; } = default!;
+        public string? Message { get; set; }
     }
     public class ForgotPasswordViewModel
     {
@@ -74,9 +83,25 @@ namespace Website.Areas.Admin.Models
         [Compare("Password", ErrorMessage = "Mật khẩu không giống nhau")]
         public string ConfirmPassword { get; set; }
 
-        public string Token { get; set; }
-        public string UserId { get; set; }
+        public string Key { get; set; }
     }
+
+    public sealed class ChangePasswordViewModel
+    {
+        [Required]
+        [DataType(DataType.Password)]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password))]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
     public class ExternalLoginListViewModel
     {
         public string? ReturnUrl { get; set; }
@@ -101,6 +126,24 @@ namespace Website.Areas.Admin.Models
         public double? lon { get; set; }
         public string? isp { get; set; }
         public string? query { get; set; }
+    }
+
+    public sealed class FeedbackViewModel
+    {
+        public string Title { get; set; } = string.Empty;
+
+        public string Message { get; set; } = string.Empty;
+
+        public string ButtonText { get; set; } = "Đăng nhập";
+
+        public string ButtonUrl { get; set; } = "/admin/auth/login";
+
+        public string? SecondaryButtonText { get; set; }
+        public string? SecondaryButtonUrl { get; set; }
+
+        public FeedbackType Type { get; init; }
+
+        public bool Success { get; set; }
     }
 
 }

@@ -74,34 +74,61 @@ namespace Shared.Services.Authentication
         }
 
         /// <inheritdoc />
-        public async Task<RotateTokenResult> RotateAsync(RefreshToken oldToken,
-        CancellationToken cancellationToken = default)
+        public async Task<RotateTokenResult> RotateAsync(RefreshToken oldToken, CancellationToken cancellationToken = default)
         {
-            oldToken.IsRevoked = true;
-            oldToken.RevokedAt = DateTime.UtcNow;
+            if (oldToken.IsRevoked)
+            {
+                return new RotateTokenResult
+                {
+                    Success = false,
+                    Error = "Refresh token đã bị thu hồi"
+                };
+            }
+
+            if (oldToken.ExpiredAt <= DateTime.UtcNow)
+            {
+                return new RotateTokenResult
+                {
+                    Success = false,
+                    Error = "Refresh token đã hết hạn"
+                };
+            }
+
+
             var refreshToken = _jwtService.GenerateRefreshToken();
+
             var http = _httpContextAccessor.HttpContext;
             var now = DateTime.UtcNow;
+
             var newToken = new RefreshToken
             {
                 UserId = oldToken.UserId,
                 TokenHash = CommonHelper.Hash(refreshToken),
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = now,
                 ExpiredAt = now.Add(oldToken.Lifetime),
                 Lifetime = oldToken.Lifetime,
+
                 UserAgent = http?.Request.Headers.UserAgent,
                 IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
+
                 IsRevoked = false
             };
-            _dbcontext.RefreshTokens.Add(newToken);
-            oldToken.ReplacedByTokenHash = newToken.TokenHash;
-            oldToken.RevokedAt = DateTime.UtcNow;
+
+
+            oldToken.IsRevoked = true;
+            oldToken.RevokedAt = now;
             oldToken.RevokedReason = "RefreshTokenRotated";
+            oldToken.ReplacedByTokenHash = newToken.TokenHash;
+
+
+            _dbcontext.RefreshTokens.Add(newToken);
 
             await _dbcontext.SaveChangesAsync(cancellationToken);
 
+
             return new RotateTokenResult
             {
+                Success = true,
                 RefreshToken = refreshToken,
                 RefreshTokenEntity = newToken,
                 User = oldToken.User

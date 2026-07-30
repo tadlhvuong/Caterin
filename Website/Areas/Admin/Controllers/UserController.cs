@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
+using Shared.Data.Entities.Identity;
 using Shared.DTOs.Profile;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
@@ -10,6 +12,9 @@ using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
 using Shared.Requests;
 using Shared.Services.Log;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.Threading.Tasks;
 using Website.Areas.Admin.Models;
 
 namespace Website.Areas.Admin.Controllers
@@ -26,8 +31,10 @@ namespace Website.Areas.Admin.Controllers
         private readonly AppDbContext _dbContext;
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
+
+        private readonly RoleManager<AppRole> _roleManager;
         public UserController(ILogger<UserController> logger, IActivityLogger activityLogger, 
-            AppDbContext dbContext, IAuthService authService, IUserService userService)
+            AppDbContext dbContext, IAuthService authService, IUserService userService, RoleManager<AppRole> roleManager)
         {
             _logger = logger;
             _activityLogger = activityLogger;
@@ -35,6 +42,7 @@ namespace Website.Areas.Admin.Controllers
             _dbContext = dbContext;
             _authService = authService;
             _userService = userService;
+            _roleManager = roleManager;
         }
         [HttpGet("")]
         [PermissionAction(ActionType.View)]
@@ -49,15 +57,32 @@ namespace Website.Areas.Admin.Controllers
         {
             return RedirectToActionPermanent(nameof(Index));
         }
+        [Authorize]
+        [PermissionAction(ActionType.View)]
+        [HttpGet("list")]
+        public async Task<IActionResult> GetUsers([FromQuery] UserQueryRequest request, CancellationToken cancellationToken)
+        {
+            var result = await _userService.GetUsersAsync(request, cancellationToken);
+            return Ok(result);
+        }
         // GET: MemberController/Details/5
         [HttpGet("user-details/{id?}")]
         [PermissionAction(ActionType.View)]
-        public ActionResult Details(Guid id, string tab="personal")
+        public async Task<IActionResult> Details(string id, string tab="personal")
         {
+            var user = await _userService.FindByIdAsync(id);
+            if(user == null) return NotFound();
+
             var vm = new UserDetailsViewModel
             {
+                CurrentTab = tab,
                 Id = id,
-                CurrentTab = tab
+                UserName = user.UserName!,
+                Email = user.Email!,
+                ConfirmEmail = user.EmailConfirmed,
+                PhoneNumber = user.PhoneNumber!,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLogin,
             };
             var AllowedTabs = new List<string> { "personal", "security" };
             if (!AllowedTabs.Contains(tab))
@@ -198,21 +223,6 @@ namespace Website.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Details), new { id = userId });
         }
-        [HttpPost("user-change-password")]
-        [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
-        {
-            var result = await _authService.ChangePasswordAsync(request);
-
-            if (!result.Success)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(request);
-            }
-
-            return RedirectToAction(nameof(Details));
-
-        }
         [HttpPost("user-reset-password/{userId?}")]
         [PermissionAction(ActionType.Edit)]
         public async Task<IActionResult> ResetPassword(string userId, ResetPasswordRequest request)
@@ -222,5 +232,64 @@ namespace Website.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = userId });
         }
 
+        #region Lock-Unlock
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Lock(string id, CancellationToken cancellationToken)
+        //{
+        //    await _userService.LockAsync(id, cancellationToken);
+
+        //    TempData["Success"] = "Đã khóa tài khoản.";
+
+        //    return RedirectToAction(nameof(Index));
+        //}
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Unlock(string id, CancellationToken cancellationToken)
+        //{
+        //    await _userService.UnlockAsync(id, cancellationToken);
+
+        //    TempData["Success"] = "Đã mở khóa tài khoản.";
+
+        //    return RedirectToAction(nameof(Index));
+        //}
+        #endregion
+
+        [HttpGet("roles")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GetRoles()
+        {
+            var roles = await _roleManager.Roles
+                .Select(x => new
+                {
+                    id = x.Id,
+                    name = x.Name
+                })
+                .OrderBy(x => x.name)
+                .ToListAsync();
+
+            return Ok(roles);
+        }
+        [HttpGet("statuses")]
+        [PermissionAction(ActionType.View)]
+        public IActionResult GetStatuses()
+        {
+            var statuses = Enum.GetValues<EntityStatus>()
+                 .Select(x =>
+                 {
+                     var member = typeof(EntityStatus).GetMember(x.ToString()).First();
+                     var display = member.GetCustomAttribute<DisplayAttribute>();
+
+                     return new
+                     {
+                         value = (int)x,
+                         name = display?.GetShortName() ?? x.ToString()
+                     };
+                 });
+
+            return Ok(statuses);
+        }
     }
 }

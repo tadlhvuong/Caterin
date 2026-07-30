@@ -1,4 +1,7 @@
 ﻿using Shared.Data.Entities.Identity;
+using Shared.DTOs.Identity;
+using Shared.Requests;
+using Shared.Responses;
 
 namespace Shared.Interfaces.AuthServices
 {
@@ -39,11 +42,14 @@ namespace Shared.Interfaces.AuthServices
         Task LockAsync(string userId, CancellationToken cancellationToken = default);
 
         Task UnlockAsync(string userId, CancellationToken cancellationToken = default);
-
+        Task<bool> IsLockedAsync(AppUser user);
+        Task<bool> IsLockedAsync(string userId);
         Task EnableAsync(string userId, CancellationToken cancellationToken = default);
 
         Task DisableAsync(string userId, CancellationToken cancellationToken = default);
 
         #endregion
+
+        Task<PagedResult<UserListResponse>> GetUsersAsync(UserQueryRequest request, CancellationToken cancellationToken = default);
     }
 }

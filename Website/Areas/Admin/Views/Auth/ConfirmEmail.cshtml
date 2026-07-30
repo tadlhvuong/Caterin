@@ -1,10 +1,36 @@
-﻿@{
+﻿@using Website.Areas.Admin.Models
+@model ResendConfirmEmailViewModel
+@{
+    ViewData["Title"] = "Xác thực tài khoản";
 }
-<h3 style="color: green;"><i class="icon fas fa-check"></i> <b>RegisterConfirmTitleText</b></h3>
+<h3 style="color: green;"><i class="icon fas fa-check"></i> <b>Xác thực tài khoản</b></h3>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-success">
+        @Model.Message
+    </div>
+}
 <p>
-    <localize>RegisterConfirmContent1Text</localize>
+   Chúng tôi sẽ gửi liên kết xác thực tài khoản đến email bạn đã đăng ký (Có thể nằm trong mục thư rác). Nếu không thấy hãy nhấn 'Gửi lại' để lấy email khác
 </p>
 <div class="d-flex justify-content-between mb-2">
-    <a href="/admin/auth/login" class="btn btn-primary">LoginText</a>
-    <a href="https://mail.google.com/" class="btn btn-primary">RegisterConfirmContent2Text</a>
+    <a href="/admin/auth/login" class="btn btn-primary">Trờ lại</a>
+    <form id="resendForm" asp-controller="Auth" asp-action="ResendConfirmEmail" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Email" />
+        <button id="resendBtn" class="btn btn-primary">
+            Gửi lại
+        </button>
+    </form>
 </div>
+
+<script>
+    document.getElementById("resendForm")
+        .addEventListener("submit", function () {
+            const btn = document.getElementById("resendBtn");
+
+            btn.disabled = true;
+            btn.innerText = "Đang gửi...";
+        });
+</script>

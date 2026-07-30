@@ -2,7 +2,13 @@
 {
     public class UserDetailsViewModel
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public string CurrentTab { get; set; } = "personal";
+        public string UserName { get; set; }
+        public string Email { get; set; }
+        public bool ConfirmEmail { get; set; }
+        public string PhoneNumber { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? LastLoginAt { get; set; }
     }
 }

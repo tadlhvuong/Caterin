@@ -45,7 +45,7 @@
         <h4 class="mb-1">Đăng ký 🚀</h4>
         <p class="mb-6">Đăng ký tài khoản quản trị mới. Hãy liên hệ với admin để phân quyền cho bạn!</p>
 
-        <form asp-area="Admin" asp-controller="Auth" asp-action="Register" method="post" autocomplete="off" class="mb-6">
+        <form id="registerForm" asp-area="Admin" asp-controller="Auth" asp-action="Register" method="post" autocomplete="off" class="mb-6">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="mb-6">
@@ -83,14 +83,14 @@
             </div>
             <div class="my-8">
                 <div class="form-check mb-0 ms-2">
-                    <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
+                    <input class="form-check-input" type="checkbox" asp-for="AcceptTerms" />
                     <label class="form-check-label" for="terms-conditions">
                         Tôi đồng ý với 
                         <a href="javascript:void(0);">chính sách bảo mật và điều khoản</a>
                     </label>
                 </div>
             </div>
-            <button class="btn btn-primary d-grid w-100">Đăng ký</button>
+            <button id="btnSubmit" class="btn btn-primary w-100">Đăng ký</button>
         </form>
 
         <p class="text-center">
@@ -123,3 +123,18 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function () {
+            const btn = document.getElementById("btnSubmit");
+
+            btn.disabled = true;
+                    btn.innerHTML = btn.innerHTML = `
+        <span class="d-flex align-items-center justify-content-center">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <span>Đang gửi...</span>
+        </span>`;
+        });
+    </script>
+}

@@ -1,11 +1,11 @@
-﻿using Shared.Helpers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-
-using Shared.Configurations;
-using Shared.Interfaces.AuthServices;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Shared.Configurations;
 using Shared.DTOs.Auth;
+using Shared.Helpers;
+using Shared.Interfaces.AuthServices;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Shared.Middlewares;
 
@@ -57,6 +57,16 @@ public sealed class RefreshTokenMiddleware
 
         try
         {
+
+            ///Log check expires access token và refresh token
+            //_logger.LogInformation("Access exists: {AccessExists}, Refresh exists: {RefreshExists}", !string.IsNullOrWhiteSpace(accessToken),
+            //    !string.IsNullOrWhiteSpace(refreshToken));
+
+            //if (!string.IsNullOrWhiteSpace(accessToken))
+            //{
+            //    var jwt = new JwtSecurityTokenHandler().ReadJwtToken(accessToken);
+            //    _logger.LogInformation("Access expires at: {Expire}", jwt.ValidTo);
+            //}
             var result = await authService.RefreshTokenAsync(refreshToken);
             
             if (result.Success)
@@ -69,8 +79,8 @@ public sealed class RefreshTokenMiddleware
             }
             else
             {
-                    context.Response.Cookies.Delete("access_token");
-                    context.Response.Cookies.Delete("refresh_token");
+                context.Response.Cookies.Delete("access_token");
+                context.Response.Cookies.Delete("refresh_token");
             }
         }
         catch (Exception ex)

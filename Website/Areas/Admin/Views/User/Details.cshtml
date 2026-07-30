@@ -28,78 +28,89 @@
                                  width="120"
                                  alt="User avatar" />
                             <div class="user-info text-center">
-                                <h5>Violet Mendoza</h5>
+                                <h5>@Model.UserName</h5>
                                 <span class="badge bg-label-secondary">Author</span>
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-around flex-wrap my-6 gap-0 gap-md-3 gap-lg-4">
-                        <div class="d-flex align-items-center me-5 gap-4">
-                            <div class="avatar">
+                    <div class="my-6">
+
+                        <!-- Email -->
+                        <div class="d-flex align-items-center py-3 border-bottom">
+                            <div class="avatar me-3">
                                 <div class="avatar-initial bg-label-primary rounded">
-                                    <i class="ti ti-checkbox ti-lg"></i>
+                                    <i class="ti ti-mail ti-lg"></i>
                                 </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">1.23k</h5>
-                                <span>Task Done</span>
+
+                            <div class="flex-grow-1">
+                                <div class="text-muted small">Email</div>
+                                <div class="fw-semibold">@Model.Email</div>
                             </div>
+
+                            <span class="badge bg-label-warning">Chưa xác minh</span>
                         </div>
-                        <div class="d-flex align-items-center gap-4">
-                            <div class="avatar">
+
+                        <!-- Phone -->
+                        <div class="d-flex align-items-center py-3 border-bottom">
+                            <div class="avatar me-3">
                                 <div class="avatar-initial bg-label-primary rounded">
-                                    <i class="ti ti-briefcase ti-lg"></i>
+                                    <i class="ti ti-phone ti-lg"></i>
                                 </div>
                             </div>
-                            <div>
-                                <h5 class="mb-0">568</h5>
-                                <span>Project Done</span>
+
+                            <div class="flex-grow-1">
+                                <div class="text-muted small">Số điện thoại</div>
+                                <div class="fw-semibold">@Model.PhoneNumber</div>
+                            </div>
+
+                            <span class="badge bg-label-success">Đã xác minh</span>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="d-flex align-items-center py-3 border-bottom">
+                            <div class="avatar me-3">
+                                <div class="avatar-initial bg-label-primary rounded">
+                                    <i class="ti ti-rosette-discount-check ti-lg"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="text-muted small">Vai trò</div>
+                                <div class="fw-semibold">Thành viên</div>
                             </div>
                         </div>
-                    </div>
-                    <h5 class="pb-4 border-bottom mb-4">Details</h5>
-                    <div class="info-container">
-                        <ul class="list-unstyled mb-6">
-                            <li class="mb-2">
-                                <span class="h6">Username:</span>
-                                <span>violet.dev</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Email:</span>
-                                <span>vafgot@vultukir.org</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Status:</span>
-                                <span>Active</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Role:</span>
-                                <span>Author</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Tax id:</span>
-                                <span>Tax-8965</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Contact:</span>
-                                <span>(123) 456-7890</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Languages:</span>
-                                <span>French</span>
-                            </li>
-                            <li class="mb-2">
-                                <span class="h6">Country:</span>
-                                <span>England</span>
-                            </li>
-                        </ul>
-                        <div class="d-flex justify-content-center">
-                            <a href="javascript:;"
-                               class="btn btn-primary me-4"
-                               data-bs-target="#editUser"
-                               data-bs-toggle="modal">Edit</a>
-                            <a href="javascript:;" class="btn btn-label-danger suspend-user">Suspend</a>
+
+                        <!-- Created -->
+                        <div class="d-flex align-items-center py-3 border-bottom">
+                            <div class="avatar me-3">
+                                <div class="avatar-initial bg-label-primary rounded">
+                                    <i class="ti ti-calendar ti-lg"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="text-muted small">Thành viên từ</div>
+                                <div class="fw-semibold">@Model.CreatedAt?.ToString("dd/MM/yyyy")</div>
+                            </div>
                         </div>
+
+                        <!-- Last Login -->
+                        <div class="d-flex align-items-center py-3">
+                            <div class="avatar me-3">
+                                <div class="avatar-initial bg-label-primary rounded">
+                                    <i class="ti ti-clock ti-lg"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <div class="text-muted small">Đăng nhập gần nhất</div>
+                                <div class="fw-semibold">
+                                    @(Model.LastLoginAt?.ToString("HH:mm dd/MM/yyyy") ?? "Chưa có")
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

@@ -10,10 +10,7 @@ namespace Shared.Requests
     public sealed class ResetPasswordRequest
     {
         [Required]
-        public string UserId { get; set; } = string.Empty;
-
-        [Required]
-        public string Token { get; set; } = string.Empty;
+        public string Key { get; set; } = string.Empty;
 
         [Required]
         public string NewPassword { get; set; } = string.Empty;

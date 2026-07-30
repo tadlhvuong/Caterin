@@ -22,7 +22,7 @@ public static class SeedUsers
             EmailConfirmed = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Status = EntityStatus.Enabled,
+            Status = EntityStatus.Active,
             IsActive = true
         };
 

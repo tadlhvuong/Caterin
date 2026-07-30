@@ -57,7 +57,7 @@
         <li class="menu-item">
             <a asp-controller="Product" asp-action="Create" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-truck-return"></i>
-                <div data-i18n="Return">Return</div>
+                <div data-i18n="Returns">ReturnsB</div>
             </a>
         </li>
         <!-- Order end -->
@@ -381,7 +381,7 @@
                 <div data-i18n="Users">Users</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item @(Html.IsActive("User", "", "Admin") ? "active" : "")">
+                <li class="menu-item @(Html.IsActive("User", "Index", "Admin") ? "active" : "")">
                     <a asp-controller="User" asp-action="UserList" class="menu-link">
                         <div data-i18n="List">List</div>
                     </a>

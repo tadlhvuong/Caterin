@@ -2,14 +2,12 @@
 @model UserDetailsViewModel
 @{
     Layout = null;
-    // var currentTab = (ViewData["CurrentTab"] as string ?? "personal").ToLower();
 }
 
 <!-- User Pills -->
 <div class="nav-align-top">
     <ul class="nav nav-pills flex-column flex-md-row flex-wrap mb-6 row-gap-2">
         <li class="nav-item">
-            @* <a class="nav-link active" hx-get="/admin/user/details-personal" hx-target="#tab-content" hx-push-url="/admin/user/user-details/@id?tab=details-personal" data-i18n="Account"><i class="ti ti-user-check ti-sm me-1_5"></i>Account</a> *@
             <a class="nav-link"
                hx-get="/admin/user/details-personal/@Model.Id"
                hx-target="#tab-content"
@@ -18,9 +16,6 @@
             </a>
         </li>
         <li class="nav-item">
-            @* <a class="nav-link" hx-get="/admin/user/details-security" hx-target="#tab-content" hx-push-url="/admin/user/user-details/@id?tab=security" data-i18n="Security">
-                <i class="ti ti-lock ti-sm me-1_5"></i>Security</a> *@
-
             <a class="nav-link"
                hx-get="/admin/user/details-security/@Model"
                hx-target="#tab-content"

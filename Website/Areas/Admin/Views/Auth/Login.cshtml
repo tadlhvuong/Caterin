@@ -15,8 +15,19 @@
 <h4 class="mb-1">Trang quản trị CATERIN! 👋</h4>
 <p class="mb-6">Đăng nhập tài khoản có quyền hạn quản lý</p>
 
-<form class="mb-4" asp-controller="Auth" asp-action="Login" method="post">
+<form id="loginForm" class="mb-4" asp-controller="Auth" asp-action="Login" method="post">
     @Html.AntiForgeryToken()
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @error
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="mb-6">
         <label asp-for="Email" class="form-label">Email or Username</label>
@@ -49,7 +60,7 @@
         </div>
     </div>
     <div class="mb-6">
-        <button class="btn btn-primary d-grid w-100" type="submit">Đăng nhập</button>
+        <button id="btnLogin" class="btn btn-primary w-100" type="submit">Đăng nhập</button>
     </div>
 </form>
 
@@ -67,6 +78,17 @@
 
         @section Scripts{
             <script>
+                               document.getElementById("loginForm").addEventListener("submit", function () {
+            const btn = document.getElementById("btnLogin");
+
+            btn.disabled = true;
+                    btn.innerHTML = `
+        <span class="d-flex align-items-center justify-content-center">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <span>Đang đăng nhập...</span>
+        </span>`;
+        });
+
                         document.addEventListener("DOMContentLoaded", function () {
             const rememberMe = document.getElementById("RememberMe");
                 const facebookRememberMe = document.getElementById("facebookRememberMe");
@@ -76,13 +98,6 @@
             facebookRememberMe.value = rememberMe.checked;
             googleRememberMe.value = rememberMe.checked;
         }
-
-            function syncRememberMe() {
-                facebookRememberMe.value = rememberMe.checked;
-                googleRememberMe.value = rememberMe.checked;
-                console.log(facebookRememberMe.value );
-                console.log(googleRememberMe.value );
-            }
 
             // Giá trị ban đầu
             syncRememberMe();

@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shared.Data.Entities.Identity;
+using Shared.Data.Entities.Identity.Core;
 using Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Shared.Data.Entities.Identity;
 
 namespace Shared.Data.Entities.Identity
 {
@@ -54,6 +55,9 @@ namespace Shared.Data.Entities.Identity
         public string? LastLoginIP { get; set; }
 
         public ICollection<RefreshToken> RefreshTokens { get; set; } = null!;
+
+        public virtual ICollection<EmailAction> EmailActions { get; set; } = [];
+        public virtual ICollection<AppUserRole> UserRoles { get; set; } = [];
         //public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
         //[NotMapped]
         //public virtual ICollection<UserLoginInfo> ExtLogins { get; set; }

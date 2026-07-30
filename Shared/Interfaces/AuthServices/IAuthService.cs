@@ -1,4 +1,5 @@
-﻿using Shared.Requests;
+﻿using Shared.Data.Entities.Identity.Core;
+using Shared.Requests;
 using Shared.Responses;
 
 namespace Shared.Interfaces.AuthServices
@@ -29,7 +30,10 @@ namespace Shared.Interfaces.AuthServices
         /// <returns></returns>
         Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
 
-        Task<ServiceResult> ConfirmEmailAsync(ConfirmEmailRequest request);
+        Task<ServiceResult> ConfirmEmailAsync(EmailAction emailAction, CancellationToken cancellationToken = default);
+
+        Task<ServiceResult> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Refresh access token bằng refresh token
         /// </summary>
@@ -46,7 +50,7 @@ namespace Shared.Interfaces.AuthServices
         Task<ServiceResult> ResetPasswordByTokenAsync(ResetPasswordRequest request,
             CancellationToken cancellationToken = default);
 
-        Task<AuthResponse> ChangePasswordAsync(ChangePasswordRequest request,
+        Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request,
             CancellationToken cancellationToken = default);
 
         /// <summary>

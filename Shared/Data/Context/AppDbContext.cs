@@ -29,6 +29,7 @@ namespace Shared.Data.Context
         public virtual DbSet<RolePermission> RolePermissions { get; set; }
         public virtual DbSet<Menu> Menus { get; set; }
         public virtual DbSet<RoutePermission> RoutePermissions { get; set; }
+        public virtual DbSet<EmailAction> EmailActions { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)

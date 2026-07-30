@@ -4,10 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
+using Shared.DTOs.Identity;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
 using Shared.Interfaces.Log;
+using Shared.Requests;
+using Shared.Responses;
 using Shared.Services.Caches;
 using System;
 using System.Collections.Generic;
@@ -165,28 +168,42 @@ namespace Shared.Services.Authentication
             if (user == null) return;
 
             user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
-
             user.PermissionVersion++;
             var result = await _userManager.UpdateAsync(user);
-
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(SecurityActionType.Lock, true, $"Tăng version quyền hạn khi tạm khóa tài khoản: {user.Id} ");
+            await _securityLogger.LogAsync(SecurityActionType.Lock, true, $"Khóa tài khoản {user.Email}");
         }
         public async Task UnlockAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return;
 
+
             user.LockoutEnd = null;
+            user.AccessFailedCount = 0;
             user.PermissionVersion++;
+
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            await _securityLogger.LogAsync(SecurityActionType.UnLock, true, $"Tăng version quyền hạn khi mở khóa tài khoản: {user.Id} ");
+            await _securityLogger.LogAsync(SecurityActionType.UnLock, true, $"Mở tài khoản {user.Email}");
+        }
+        public Task<bool> IsLockedAsync(AppUser user)
+        {
+            return _userManager.IsLockedOutAsync(user);
+        }
+        public async Task<bool> IsLockedAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return false;
+
+            return await _userManager.IsLockedOutAsync(user);
         }
         public async Task DisableAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -259,6 +276,107 @@ namespace Shared.Services.Authentication
         {
             await _cache.RemoveAsync(CacheKeys.UserPermission(userId));
             await _cache.RemoveAsync(CacheKeys.UserRoles(userId));
+        }
+
+        public async Task<PagedResult<UserListResponse>> GetUsersAsync(
+    UserQueryRequest request,
+    CancellationToken cancellationToken = default)
+        {
+            var query = _userManager.Users
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Keyword))
+            {
+                var keyword = request.Keyword.Trim().ToLower();
+
+                query = query.Where(x =>
+                    x.Email!.ToLower().Contains(keyword) ||
+                    x.UserName!.ToLower().Contains(keyword));
+            }
+
+            if (request.EmailConfirmed.HasValue)
+            {
+                query = query.Where(x => x.EmailConfirmed == request.EmailConfirmed.Value);
+            }
+
+            if (request.Status.HasValue)
+            {
+                query = query.Where(x => x.Status == (EntityStatus)request.Status.Value);
+            }
+
+            if (request.Locked.HasValue)
+            {
+                if (request.Locked.Value)
+                {
+                    query = query.Where(x =>
+                        x.LockoutEnd != null &&
+                        x.LockoutEnd > DateTimeOffset.UtcNow);
+                }
+                else
+                {
+                    query = query.Where(x =>
+                        x.LockoutEnd == null ||
+                        x.LockoutEnd <= DateTimeOffset.UtcNow);
+                }
+            }
+
+            // Filter Role
+            if (!string.IsNullOrWhiteSpace(request.Role))
+            {
+                query = query.Where(x =>
+                    x.UserRoles.Any(r => r.Role.Name == request.Role));
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var users = await query
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip((request.Page - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new UserListResponse
+                {
+                    Id = x.Id,
+                    Avatar = x.Avatar,
+                    FullName = x.UserName,
+                    Email = x.Email!,
+                    Billing = "Cash",
+                    Status = x.Status,
+                    CreatedAt = x.CreatedAt
+                })
+                .ToListAsync(cancellationToken);
+
+            var userIds = users.Select(x => x.Id).ToList();
+
+            var roles = await (
+                from ur in _dbContext.UserRoles
+                join r in _dbContext.Roles on ur.RoleId equals r.Id
+                where userIds.Contains(ur.UserId)
+                select new
+                {
+                    ur.UserId,
+                    r.Name
+                })
+                .ToListAsync(cancellationToken);
+
+            var roleLookup = roles
+                .GroupBy(x => x.UserId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Name!).ToList());
+
+            foreach (var user in users)
+            {
+                user.Roles = roleLookup.GetValueOrDefault(user.Id) ?? [];
+            }
+
+            return new PagedResult<UserListResponse>
+            {
+                Items = users,
+                TotalCount = totalCount,
+                Page = request.Page,
+                PageSize = request.PageSize
+            };
         }
     }
 }

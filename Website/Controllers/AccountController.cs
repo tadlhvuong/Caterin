@@ -177,7 +177,7 @@ namespace Website.Controllers
                 _logger.LogError("register comfirm error not found user");
                 return View("Error");
             }
-            user.Status = EntityStatus.Enabled;
+            user.Status = EntityStatus.Active;
             var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             if (result.Succeeded)
@@ -278,28 +278,28 @@ namespace Website.Controllers
 
         [HttpPost("account/reset-password")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ResetPassword(string userId, string token)
+        public async Task<ActionResult> ResetPassword(string key)
         {
             _logger.LogInformation("Page: Reset password");
-            if (userId == null || token == null)
+            if (key == null )
             {
                 _logger.LogError("reset password error not found user or code");
                 ViewBag.ErrorMessage = "Đường dẫn không hợp lệ";
                 return View("Error");
             }
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(key);
             if (user == null)
             {
                 _logger.LogError("reset password error not found user");
                 ViewBag.ErrorMessage = "Không tìm thấy tài khoản hợp lệ";
                 return View("Error");
             }
-            var resetPasswordViewModel = new ResetPasswordViewModel() { UserId = userId, Token = token };
+            var resetPasswordViewModel = new ResetPasswordViewModel() { Key = key };
 
             await _dbContext.SaveChangesAsync();
 
-            if (token == null)
+            if (key == null)
             {
                 ViewBag.ErrorMessage = "Token invalid";
                 return View("Error");
@@ -320,14 +320,14 @@ namespace Website.Controllers
                 _logger.LogError("reset passowrd error");
                 return View(model);
             }
-            var user = await _userManager.FindByIdAsync(model.UserId);
+            var user = await _userManager.FindByIdAsync(model.Key);
             if (user == null)
             {
                 _logger.LogError("reset passowrd error not found user");
 
                 return RedirectToAction("ResetPasswordConfirmationFailed", "Account");
             }
-            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            var result = await _userManager.ResetPasswordAsync(user, model.Key, model.Password);
             if (result.Succeeded)
             {
                 _logger.LogInformation("reset passowrd success");

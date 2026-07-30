@@ -3,8 +3,10 @@
     public enum SecurityActionType
     {
         Login,
+        ExternalLogin,
         Logout,
         RefreshToken,
+        RefreshTokenReuse,
         Register,
         ForgotPassword,
         ChangePassword,
@@ -12,6 +14,7 @@
 
         ConfirmEmail,
         ConfirmPhone,
+        ResendConfirmEmail,
 
         JwtIssued,
         JwtRevoked,
@@ -33,5 +36,6 @@
         UnLock,
         Enable,
         Disable,
+
     }
 }

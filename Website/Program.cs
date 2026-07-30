@@ -128,6 +128,7 @@ services.AddScoped<IUserService, UserService>();
 services.AddScoped<IMenuService, MenuService>();
 services.AddScoped<IEmailSender, EmailSender>();
 services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+services.AddScoped<IEmailActionService, EmailActionService>();
 
 services.AddScoped<IRoutePermissionService, RoutePermissionService>();
 services.AddScoped<IRoutePermissionCache, RoutePermissionCache>();
@@ -182,11 +183,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-//app.UseSecurityHeaders();
+app.UseSecurityHeaders();
 
 app.UseMiddleware<RefreshTokenMiddleware>();
 
 app.UseAuthentication();
+
 
 app.UseMiddleware<UserValidationMiddleware>();
 

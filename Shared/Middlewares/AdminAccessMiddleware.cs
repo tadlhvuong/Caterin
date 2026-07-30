@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Shared.Enums;
 using Shared.Extensions;
@@ -27,6 +28,13 @@ namespace Shared.Middlewares
             var path = context.Request.Path;
 
             if (!path.StartsWithSegments("/admin"))
+            {
+                await _next(context);
+                return;
+            }
+
+            var endpoint = context.GetEndpoint();
+            if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
             {
                 await _next(context);
                 return;

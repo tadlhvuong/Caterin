@@ -1,8 +1,19 @@
-@charset "UTF-8";
+table.dataTable .form-check-input {
+    width: 18px;
+    height: 18px;
+}
+
+table.dataTable.dtr-column > tbody > tr > td.dtr-control:before, table.dataTable.dtr-column > tbody > tr > th.dtr-control:before, table.dataTable.dtr-column > tbody > tr > td.control:before, table.dataTable.dtr-column > tbody > tr > th.control:before,
+table.dataTable.dtr-column > tbody > tr.dtr-expanded td.dtr-control:before, table.dataTable.dtr-column > tbody > tr.dtr-expanded th.dtr-control:before, table.dataTable.dtr-column > tbody > tr.dtr-expanded td.control:before, table.dataTable.dtr-column > tbody > tr.dtr-expanded th.control:before {
+    border-top: none;
+    border-left: none;
+    border-bottom: none;
+    border-right: none;
+}
 table.dataTable.dtr-inline.collapsed > tbody > tr > td.child,
 table.dataTable.dtr-inline.collapsed > tbody > tr > th.child,
 table.dataTable.dtr-inline.collapsed > tbody > tr > td.dataTables_empty {
-  cursor: default !important;
+    cursor: default !important;
 }
 
 table.dataTable.dtr-inline.collapsed > tbody > tr > td.child:before,

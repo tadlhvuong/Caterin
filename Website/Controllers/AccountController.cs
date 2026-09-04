@@ -130,7 +130,7 @@ namespace Website.Controllers
             }
             if (ModelState.IsValid)
             {
-                var user = new AppUser { UserName = model.UserName, Email = model.Email, CreatedAt = DateTime.Now };
+                var user = new AppUser { UserName = model.UserName, Email = model.Email, CreatedAt = DateTime.UtcNow };
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {

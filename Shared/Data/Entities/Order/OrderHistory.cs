@@ -1,25 +1,30 @@
 ﻿using Shared.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Order
 {
-//    - Id
-//- OrderId
-//- Status
-//- Note
-//- UpdatedBy
-//- CreatedAt
     public class OrderHistory
     {
+        [Key]
         public int Id { get; set; }
+
+        [Required]
         public int OrderId { get; set; }
-        public EntityStatus Status { get; set; }
-        public string Note { get; set; }
+
+        [Required]
+        public OrderStatus Status { get; set; }
+
+        [MaxLength(1000)]
+        public string? Note { get; set; }
+
+        [Required]
         public DateTime CreatedAt { get; set; }
-        public DateTime UpdatedAt { get; set; }
+
+        public virtual Order Order { get; set; } = null!;
     }
 }

@@ -60,7 +60,6 @@ $(function () {
                     role: $('#UserRole').val()
                 },
                 success: function (res) {
-                    console.log(res.items);
                     callback({
                         data: res.items,
                         recordsTotal: res.totalCount,
@@ -121,6 +120,7 @@ $(function () {
               var states = ['success', 'danger', 'warning', 'info', 'primary', 'secondary'];
               var $state = states[stateNum],
                   $name = full['fullName'],
+                  userView = '/admin/user/user-details/' + full['id'],
                 $initials = $name.match(/\b\w/g) || [];
               $initials = (($initials.shift() || '') + ($initials.pop() || '')).toUpperCase();
               $output = '<span class="avatar-initial rounded-circle bg-label-' + $state + '">' + $initials + '</span>';
@@ -542,3 +542,18 @@ $(function () {
   //  }
   //});
 })();
+
+
+$(function () {
+    $('#btnGeneratePassword').on('click', function () {
+
+        const password = generatePassword();
+
+        $('#NewPassword').val(password);
+        $('#ConfirmPassword').val(password);
+
+        // trigger validation nếu dùng FormValidation
+        fv.revalidateField('NewPassword');
+        fv.revalidateField('ConfirmPassword');
+    });
+})

@@ -17,17 +17,24 @@ using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Seeders;
 using Shared.DTOs.Auth;
+using Shared.DTOs.Identity;
 using Shared.Extensions;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
+using Shared.Interfaces.Core;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
+using Shared.Interfaces.Media;
 using Shared.Middlewares;
+using Shared.Resources;
 using Shared.Services;
 using Shared.Services.Authentication;
 using Shared.Services.Caches;
 using Shared.Services.Email;
 using Shared.Services.Log;
+using Shared.Services.Media;
+using Shared.Services.Order;
+using Shared.Services.Product;
 using Shared.UserValidation.Interface;
 using Shared.UserValidation.Sevices;
 
@@ -121,6 +128,7 @@ services.AddOptions<JwtSetting>().Bind(builder.Configuration.GetSection("JwtSett
 services.AddScoped<IJwtService, JwtService>();
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+services.AddScoped<IModuleService, ModuleService>();
 services.AddScoped<IPermissionService, PermissionService>();
 
 services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -139,6 +147,13 @@ services.AddScoped<Shared.UserValidation.Interface.ISecurityStampValidator, Shar
 services.AddScoped<IUserValidationService, UserValidationService>();
 services.AddScoped<IUserStatusValidator, UserStatusValidator>();
 
+services.Configure<MediaStorageOptions>(builder.Configuration.GetSection("AppSettings:MediaStorage"));
+builder.Services.AddScoped<IMediaService, MediaService>();
+
+services.AddScoped<IProductService, ProductService>();
+services.AddScoped<IOrderService, OrderService>();
+
+
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)
@@ -148,7 +163,12 @@ else
 
 services.AddJwtConfiguration(builder.Configuration);
 services.AddPermissionAuthorization();
-services.AddControllersWithViews();
+services.AddControllersWithViews().AddViewLocalization()
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider = (type, factory) =>
+            factory.Create(typeof(SharedResource));
+    }); ;
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -237,6 +257,10 @@ app.Lifetime.ApplicationStarted.Register(() =>
     _ = Task.Run(async () =>
     {
         using var scope = app.Services.CreateScope();
+        //var module = scope.ServiceProvider.GetRequiredService<IModuleService>();
+        //await module.SyncModulesAsync();
+        //var permission = scope.ServiceProvider.GetRequiredService<IPermissionService>();
+        //await permission.SyncPermissionsAsync();
 
         var service = scope.ServiceProvider.GetRequiredService<IRoutePermissionService>();
 

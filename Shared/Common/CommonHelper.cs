@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -149,6 +150,48 @@ namespace Shared.Common
             responsereader.Close();
             responsereader.Dispose();
             return responseread;
+        }
+
+        public static class SlugHelper
+        {
+            public static string Generate(string text)
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                    return string.Empty;
+
+                text = text.Trim().ToLowerInvariant();
+
+                text = RemoveVietnameseCharacters(text);
+
+                text = Regex.Replace(
+                    text,
+                    @"[^a-z0-9\s-]",
+                    "");
+
+                text = Regex.Replace(
+                    text,
+                    @"[\s-]+",
+                    "-");
+
+                return text.Trim('-');
+            }
+
+            private static string RemoveVietnameseCharacters(
+                string text)
+            {
+                var normalized = text.Normalize(
+                    NormalizationForm.FormD);
+
+                var chars = normalized
+                    .Where(c =>
+                        CharUnicodeInfo.GetUnicodeCategory(c)
+                        != UnicodeCategory.NonSpacingMark)
+                    .ToArray();
+
+                return new string(chars)
+                    .Normalize(NormalizationForm.FormC)
+                    .Replace('đ', 'd');
+            }
         }
     }
 }

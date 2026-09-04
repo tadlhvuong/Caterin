@@ -3,8 +3,8 @@
 @{
     ViewData["Title"] = "Thông tin tài khoản";
     // var currentTab = (ViewData["CurrentTab"] as string ?? "personal").ToLower();
-
-    var url = Model.CurrentTab switch
+    var curent = Model.CurrentTab;
+    var initAction = Model.CurrentTab switch
     {
         "security" => "details-security",
         "billing" => "details-billing",
@@ -13,6 +13,11 @@
         "personal" => "details-personal"
     };
 }
+@section Styles {
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+
+}
+
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
         <!-- User Sidebar -->
@@ -110,7 +115,13 @@
                                 </div>
                             </div>
                         </div>
-
+                        <div class="d-flex justify-content-center">
+                            <a href="javascript:;"
+                               class="btn btn-primary me-4"
+                               data-bs-target="#editUser"
+                               data-bs-toggle="modal">Edit</a>
+                            <a href="javascript:;" class="btn btn-label-danger suspend-user">Suspend</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -168,7 +179,7 @@
                  hx-get="/admin/user/@url" hx-trigger="load">
             </div> *@
             <div id="tab-content"
-                 hx-get="/admin/user/details-personal/@Model.Id"
+                 hx-get="@Url.Action(initAction, "User", new { id = Model.Id })"
                  hx-trigger="load" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
             </div>
             @* <div id="profile-content"
@@ -223,7 +234,10 @@
 </div>
 
                           @section Scripts {
-                           
+
+    <script src="~/admin/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
+    <script src="~/admin/assets/js/modal-edit-user.js"></script>
+    <script src="~/admin/assets/js/hk.user-view.js"></script>
     <script>
             document.body.addEventListener("htmx:afterRequest", function (e) {
             const url = new URL(window.location.href);
@@ -234,6 +248,5 @@
             });
         });
     </script>
-    <script src="~/admin/assets/js/modal-edit-user.js"></script>
-    <script src="~/admin/assets/js/app-user-view.js"></script>
+
                           }

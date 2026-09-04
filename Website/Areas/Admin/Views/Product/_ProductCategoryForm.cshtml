@@ -1,0 +1,106 @@
+﻿@using Shared.Requests.Product.Category
+@model EditProductCategoryRequest
+ @{
+     Layout  = null;
+ }
+
+<div class="offcanvas-body border-top">
+    <form class="pt-0" id="form-create-category" asp-controller="Product" asp-action="CreateProductCategory" method="post">
+        @Html.AntiForgeryToken()
+        @* <div data-validation-summary  class="text-danger d-none"> </div> *@
+        <!-- Title -->
+        <div class="mb-6">
+            <label class="form-label" for="ecommerce-category-title">Title</label>
+            <input type="text"
+                   class="form-control"
+                   asp-for="Name"
+                   placeholder="Enter category title"
+                   aria-label="category title" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <!-- Slug -->
+        <div class="mb-6">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label mb-0" asp-for="Slug">
+                    Slug
+                </label>
+
+                <a href="javascript:void(0);"
+                   id="btn-generate-slug"
+                   class="small text-primary text-decoration-none">
+                    <i class="ti ti-wand me-1"></i>
+                    Generate Slug
+                </a>
+            </div>
+
+            <input type="text"
+                   asp-for="Slug"
+                   class="form-control"
+                   placeholder="Enter slug"
+                   aria-label="slug" />
+
+            <span asp-validation-for="Slug"
+                  class="text-danger"></span>
+        </div>
+        <!-- Description -->
+        <div class="mb-6">
+            <label class="form-label">Description</label>
+            <div class="form-control p-0 py-1">
+                <div class="comment-editor border-0" id="Description"></div>
+                <div class="comment-toolbar border-0 rounded">
+                    <div class="d-flex justify-content-end">
+                        <span class="ql-formats me-0">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                            <button class="ql-link"></button>
+                            <button class="ql-image"></button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mb-6">
+            <label class="form-label" for="ecommerce-category-slug">Seo Title</label>
+            <input type="text"
+                   asp-for="SeoTitle"
+                   class="form-control"
+                   placeholder="Enter seo title"
+                   aria-label="seo title" />
+        </div>
+        <div class="mb-6">
+            <label class="form-label" for="ecommerce-category-slug">Seo Description</label>
+            <input type="text"
+                   asp-for="SeoDescription"
+                   class="form-control"
+                   placeholder="Enter slug"
+                   aria-label="slug" />
+        </div>
+        <div class="mb-6">
+            <label class="form-label" for="ecommerce-category-slug">Seo Keyword</label>
+            <input type="text"
+                   asp-for="SeoKeywords"
+                   class="form-control"
+                   placeholder="Enter slug"
+                   aria-label="slug" />
+        </div>
+        <!-- Status -->
+        <div class="mb-6 ecommerce-select2-dropdown">
+            <label class="form-label">Select category status</label>
+            <select class="form-select"
+                    asp-for="IsActive"
+                    asp-items="@(ViewData["Statuses"] as IEnumerable<SelectListItem>)"
+                    name="Status">
+                <option value="">Select Status</option>
+            </select>
+        </div>
+
+        <!-- Submit and reset -->
+        <div class="mb-6">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1 data-submit">Add</button>
+            <button type="reset" class="btn btn-label-danger" id="btn-reset-category" data-bs-dismiss="offcanvas">Discard</button>
+        </div>
+    </form>
+</div>

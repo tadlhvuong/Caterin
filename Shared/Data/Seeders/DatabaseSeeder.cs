@@ -14,6 +14,7 @@ public static class DatabaseSeeder
 
         var serviceProvider = scope.ServiceProvider;
         var dbContext = services.GetService<AppDbContext>();
+        var moduleService = serviceProvider.GetRequiredService<IModuleService>();
         var permissionService = serviceProvider.GetRequiredService<IPermissionService>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();

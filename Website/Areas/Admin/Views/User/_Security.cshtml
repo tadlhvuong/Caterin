@@ -6,8 +6,8 @@
 }
 
 <!-- Change Password -->
-<div class="card mb-6">
-    <h5 class="card-header">Change Password</h5>
+<div class="card mb-6" data-page="security">
+    <h5 class="card-header" data-i18n="Change Password">Change Password</h5>
     <div class="card-body">
         <form id="formChangePassword" method="GET" onsubmit="return false">
             <div class="alert alert-warning alert-dismissible" role="alert">
@@ -26,6 +26,8 @@
                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                         <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
+
+                    <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="mb-4 col-12 col-sm-6 form-password-toggle">
@@ -38,8 +40,14 @@
                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                         <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
+                    <div class="invalid-feedback"></div>
                 </div>
                 <div>
+                    <button class="btn btn-primary me-2"
+                            type="button"
+                            id="btnGeneratePassword">
+                        <i class="ti ti-wand"></i> Tạo mật khẩu
+                    </button>
                     <button type="submit" class="btn btn-primary me-2">Change Password</button>
                 </div>
             </div>
@@ -136,7 +144,5 @@
 </div>
 <!--/ Recent Devices -->
 @section Scripts {
-
-    <script src="~/admin/assets/js/modal-enable-otp.js"></script>
-    <script src="~/admin/assets/js/app-user-view-security.js"></script>
+    <script src="~/admin/assets/js/hk.user-view-security.js"></script>
 }

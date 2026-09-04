@@ -10,7 +10,7 @@ namespace Website.Areas.Admin.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "{0} not null")]
+        [Required(ErrorMessage = "{0} đang trống")]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }

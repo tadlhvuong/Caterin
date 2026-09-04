@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Requests;
+using Shared.Requests.Product;
 
 namespace Website.Controllers
 {
     public class ProductController : Controller
     {
+
         // GET: ShopController
         public ActionResult Index()
         {

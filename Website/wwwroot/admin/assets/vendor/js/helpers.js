@@ -988,6 +988,8 @@ const Helpers = {
     // ---
     // Init Password Toggle
     initPasswordToggle() {
+
+        console.log('helper')
         const toggler = document.querySelectorAll('.form-password-toggle i')
         if (typeof toggler !== 'undefined' && toggler !== null) {
             toggler.forEach(el => {

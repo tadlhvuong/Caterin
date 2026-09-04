@@ -1,35 +1,59 @@
-﻿using Shared.Enums;
+﻿using Shared.Data.Entities.Identity;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Order
 {
-//    - Id
-//- UserId
-//- OrderCode
-//- Status
-//- Subtotal
-//- DiscountAmount
-//- ShippingAmount
-//- TotalAmount
-//- Note
-//- CreatedAt
-//- UpdatedAt
     public class Order
     {
         public int Id { get; set; }
-        public string UserId { get; set; }
-        public string OrderCode { get; set; }
-        public EntityStatus Status { get; set; }
-        public double SubTotal { get; set; }
-        public double DiscountAmount { get; set; }
-        public double ShippingAmount { get; set; }
-        public double TotalAmount { get; set; }
-        public string Note { get; set; }
+        [Required]
+        [MaxLength(450)]
+        public string UserId { get; set; } = null!;
+
+        [Required]
+        [MaxLength(50)]
+        public string OrderCode { get; set; } = null!;
+
+        [Required]
+        public OrderStatus Status { get; set; }
+        [Required]
+        public PaymentStatus PaymentStatus { get; set; }
+
+        [Required]
+        public decimal SubTotal { get; set; }
+
+        [Required]
+        public decimal DiscountAmount { get; set; }
+
+        [Required]
+        public decimal ShippingAmount { get; set; }
+
+        [Required]
+        public decimal TotalAmount { get; set; }
+
+        [MaxLength(1000)]
+        public string? Note { get; set; }
+
+        [Required]
         public DateTime CreatedAt { get; set; }
+
+        [Required]
         public DateTime UpdatedAt { get; set; }
+
+        public virtual AppUser User { get; set; } = null!;
+
+        public virtual OrderAddress Address { get; set; } = null!;
+
+        public virtual ICollection<OrderItem> Items { get; set; }
+            = new HashSet<OrderItem>();
+
+        public virtual ICollection<OrderHistory> Histories { get; set; }
+            = new HashSet<OrderHistory>();
     }
 }

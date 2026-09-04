@@ -50,12 +50,14 @@
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/typeahead-js/typeahead.css" />
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/apex-charts/apex-charts.css" />
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.css" />
-    <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/responsive.bootstrap5.min.css" />
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-bs5/buttons.bootstrap5.min.css" />
 
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/select2/select2.min.css" />
+    <link rel="stylesheet" href="~/admin/assets/vendor/js/sweetalert2.min.js" />
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/form-validation/form-validation.min.css" />
     <!-- Page CSS -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Helpers -->
     <script src="~/admin/assets/vendor/js/helpers.js"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -75,13 +77,11 @@
     </div> *@
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
-
             <!-- Menu -->
             <partial name="_SideBar" />
             <!-- / Menu -->
 
             <div class="layout-page">
-
                 <!-- Navbar -->
                 <partial name="_Navbar" />
                 <!-- / Navbar -->
@@ -107,6 +107,7 @@
         <div class="drag-target"></div>
     </div>
     <script src="~/admin/assets/vendor/libs/jquery/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/htmx.org@2.0.7"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.min.js"></script>
@@ -139,6 +140,19 @@
     <!-- endbuild -->
     <!-- Vendors JS -->
     <script src="~/admin/assets/vendor/libs/apex-charts/apexcharts.min.js"></script>
+
+    @* validation *@
+    <script src="~/admin/assets/vendor/js/core/app.messages.js"></script>
+    <script src="~/admin/assets/vendor/js/core/app.utils.js"></script>
+    <script src="~/admin/assets/vendor/js/core/app.validators.js"></script>
+    <script src="~/admin/assets/vendor/js/core/app.rules.js"></script>
+    <script src="~/admin/assets/vendor/js/core/app.validation.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11"></script>
+    <script src="~/admin/assets/js/customize/toast-setting.js"></script>
+    <script src="~/admin/assets/js/customize/validation-setting.js"></script>
+
     <!-- Main JS -->
     <script src="~/admin/assets/js/config.js"></script>
     <script src="~/admin/assets/js/main.js"></script>

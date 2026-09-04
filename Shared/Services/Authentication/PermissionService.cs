@@ -39,88 +39,88 @@ namespace Shared.Services.Authentication
 
         #region Sync / Generate Permissions
 
-        public async Task GeneratePermissionsAsync(int moduleId, bool saveChanges = true)
-        {
-            var module = await _dbContext.CMSModules
-                .FirstOrDefaultAsync(x => x.Id == moduleId);
-
-            if (module == null)
+            public async Task GeneratePermissionsAsync(int moduleId, bool saveChanges = true)
             {
-                _logger.LogError("Module {ModuleId} not found.", moduleId);
-                throw new Exception($"Module {moduleId} not found.");
-            }
+                var module = await _dbContext.CMSModules
+                    .FirstOrDefaultAsync(x => x.Id == moduleId);
 
-            var actions = await _dbContext.CMSCatalogs
-                .Where(x => x.Type == CatalogType.Action && x.IsActive).ToListAsync();
-
-            if (actions.Count == 0)
-                return;
-
-            var existingCodes = await _dbContext.Permissions
-                .Where(x => x.ModuleId == moduleId && !x.IsSystem).Select(x => x.Code).ToListAsync();
-
-            var existingSet = new HashSet<string>(existingCodes, StringComparer.OrdinalIgnoreCase);
-
-            var newPermissions = new List<Permission>();
-
-            foreach (var action in actions)
-            {
-                var code = $"{module.Code}.{action.Code}".ToLowerInvariant();
-
-                if (existingSet.Contains(code))
-                    continue;
-
-                newPermissions.Add(new Permission
+                if (module == null)
                 {
-                    ModuleId = module.Id,
-                    Code = code,
-                    Name = $"{module.Name} {action.Name}",
-                    Action = action.Name,
-                    Description = $"{action.Name} permission for {module.Name}",
-                    IsActive = true,
-                    IsSystem = false
-                });
-            }
-
-            if (newPermissions.Count == 0)
-                return;
-
-            await _dbContext.Permissions.AddRangeAsync(newPermissions);
-
-            if (saveChanges)
-            {
-                await _dbContext.SaveChangesAsync();
-                await InvalidatePermissionLookupCacheAsync();
-            }
-        }
-
-        public async Task SyncPermissionsAsync()
-        {
-            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
-            try
-            {
-                var modules = await _dbContext.CMSModules.Where(x => x.IsActive).ToListAsync();
-
-                foreach (var module in modules)
-                {
-                    if (!module.IsSystem)
-                    {
-                        await GeneratePermissionsAsync(module.Id, saveChanges: false);
-                    }
+                    _logger.LogError("Module {ModuleId} not found.", moduleId);
+                    throw new Exception($"Module {moduleId} not found.");
                 }
 
-                await _dbContext.SaveChangesAsync();
-                await transaction.CommitAsync();
-                await InvalidatePermissionLookupCacheAsync();
+                var actions = await _dbContext.CMSCatalogs
+                    .Where(x => x.Type == CatalogType.Action && x.IsActive).ToListAsync();
+
+                if (actions.Count == 0)
+                    return;
+
+                var existingCodes = await _dbContext.Permissions
+                    .Where(x => x.ModuleId == moduleId && !x.IsSystem).Select(x => x.Code).ToListAsync();
+
+                var existingSet = new HashSet<string>(existingCodes, StringComparer.OrdinalIgnoreCase);
+
+                var newPermissions = new List<Permission>();
+
+                foreach (var action in actions)
+                {
+                    var code = $"{module.Code}.{action.Code}".ToLowerInvariant();
+
+                    if (existingSet.Contains(code))
+                        continue;
+
+                    newPermissions.Add(new Permission
+                    {
+                        ModuleId = module.Id,
+                        Code = code,
+                        Name = $"{module.Name} {action.Name}",
+                        Action = action.Name,
+                        Description = $"{action.Name} permission for {module.Name}",
+                        IsActive = true,
+                        IsSystem = false
+                    });
+                }
+
+                if (newPermissions.Count == 0)
+                    return;
+
+                await _dbContext.Permissions.AddRangeAsync(newPermissions);
+
+                if (saveChanges)
+                {
+                    await _dbContext.SaveChangesAsync();
+                    await InvalidatePermissionLookupCacheAsync();
+                }
             }
-            catch (Exception ex)
+
+            public async Task SyncPermissionsAsync()
             {
-                _logger.LogError(ex, "Permission sync failed");
-                await transaction.RollbackAsync();
-                throw;
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                try
+                {
+                    var modules = await _dbContext.CMSModules.Where(x => x.IsActive).ToListAsync();
+
+                    foreach (var module in modules)
+                    {
+                        if (!module.IsSystem)
+                        {
+                            await GeneratePermissionsAsync(module.Id, saveChanges: false);
+                        }
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    await InvalidatePermissionLookupCacheAsync();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Permission sync failed");
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
-        }
 
         #endregion
 

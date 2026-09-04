@@ -1,9 +1,24 @@
-/**
+﻿/**
  * App User View - Suspend User Script
  */
 'use strict';
 
 (function () {
+    document.body.addEventListener('htmx:afterSwap', function (e) {
+        console.log(e.target.id);
+        if (e.target.id === 'tab-content') {
+            window.Helpers.initPasswordToggle();
+        }
+
+        $('#btnGeneratePassword').on('click', function () {
+            console.log('generate');
+            const password = generatePassword();
+
+            $('#newPassword').val(password);
+            $('#confirmPassword').val(password);
+        });
+    });
+
   const suspendUser = document.querySelector('.suspend-user');
 
   // Suspend User javascript
@@ -87,3 +102,27 @@
     });
   }
 })();
+
+function generatePassword(length = 14) {
+    const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lower = "abcdefghijkmnopqrstuvwxyz";
+    const numbers = "23456789";
+    const special = "!@#$%^&*";
+
+    const all = upper + lower + numbers + special;
+
+    let password = [
+        upper[Math.floor(Math.random() * upper.length)],
+        lower[Math.floor(Math.random() * lower.length)],
+        numbers[Math.floor(Math.random() * numbers.length)],
+        special[Math.floor(Math.random() * special.length)]
+    ];
+
+    while (password.length < length) {
+        password.push(all[Math.floor(Math.random() * all.length)]);
+    }
+
+    password.sort(() => Math.random() - 0.5);
+
+    return password.join("");
+}

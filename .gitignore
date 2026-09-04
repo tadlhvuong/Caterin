@@ -31,3 +31,4 @@ node_modules/
 ## Secrets (nếu có)
 appsettings.Development.json
 /Website/Logs
+/Website/wwwroot/uploads/products

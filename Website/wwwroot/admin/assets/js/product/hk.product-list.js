@@ -61,14 +61,7 @@ $(function () {
                 contentType: 'application/json',
 
                 data: function (d) {
-
                     var order = d.order && d.order.length ? d.order[0] : null;
-
-                    var statusValue = $('#FilterStatus').val() || null;
-                    var stockValue = $('#ProductStock').val() || null;
-
-                    console.log('Status:', statusValue);
-                    console.log('Stock:', stockValue);
 
                     return JSON.stringify({
                         draw: d.draw,
@@ -79,9 +72,7 @@ $(function () {
 
                         sortColumn: order ? d.columns[order.column].data : null,
 
-                        sortDirection: order
-                            ? order.dir
-                            : null,
+                        sortDirection: order ? order.dir : null,
 
                         status: $('#FilterStatus').val() ? parseInt($('#FilterStatus').val(), 10) : null,
 
@@ -110,7 +101,6 @@ $(function () {
                 { data: 'productName' },
                 { data: 'category' },
                 { data: 'stock' },
-                { data: 'sku' },
                 { data: 'price' },
                 { data: 'quantity' },
                 { data: 'status' },
@@ -134,12 +124,7 @@ $(function () {
                     orderable: false,
                     searchable: false,
                     checkboxes: true,
-                    responsivePriority: 4,
-
-                    //checkboxes: {
-                    //    selectAllRender:
-                    //        '<input type="checkbox" class="form-check-input">'
-                    //},
+                    responsivePriority: 3,
 
                     render: function () {
                         return '<input type="checkbox" class="dt-checkboxes form-check-input">';
@@ -157,8 +142,7 @@ $(function () {
                         var name = full.name;
                         var id = full.id;
                         var brand = "Thêm sau";
-                        var image = full.image;
-
+                        var image = full.imageUrl;
                         var output;
 
                         if (image) {
@@ -230,7 +214,6 @@ $(function () {
 
                 {
                     targets: 3,
-                    responsivePriority: 5,
 
                     render: function (data, type, full) {
 
@@ -247,61 +230,26 @@ $(function () {
                 {
                     targets: 4,
                     orderable: false,
-                    responsivePriority: 3,
                     render: function (data, type, full) {
                         var inStock = full.inStock;
-                        console.log(inStock);
                         return inStock
                             ? '<span class="badge bg-label-success">Còn hàng</span>'
                             : '<span class="badge bg-label-danger">Hết hàng</span>';
                     }
-                    //render: function (data, type, full) {
-                    //    var inStock = full.inStock;
-
-                    //    return (
-                    //        '<label class="switch switch-primary switch-sm">' +
-
-                    //        '<input type="checkbox" ' +
-                    //        'class="switch-input product-stock-toggle" ' +
-                    //        'data-id="' + full.id + '" ' +
-                    //        (inStock ? 'checked' : '') +
-                    //        '>' +
-
-                    //        '<span class="switch-toggle-slider">' +
-
-                    //        (inStock
-                    //            ? '<span class="switch-on"></span>'
-                    //            : '<span class="switch-off"></span>') +
-
-                    //        '</span>' +
-
-                    //        '</label>'
-                    //    );
-                    //}
                 },
-
                 {
                     targets: 5,
 
-                    render: function (data, type, full) {
-                        return '<span>' + (full.sku ?? '') + '</span>';
+                    render: function (data, type, row) {
+
+                        return '<span>' + formatProductPrice(row) + '</span>';
+                        
                     }
                 },
 
                 {
                     targets: 6,
-
-                    render: function (data, type, full) {
-
-                        return '<span>' +
-                            Number(full.price || 0).toLocaleString('vi-VN') +
-                            '</span>';
-                    }
-                },
-
-                {
-                    targets: 7,
-                    responsivePriority: 4,
+                    responsivePriority: 5,
 
                     render: function (data, type, full) {
                         return '<span>' + (full.quantity ?? 0) + '</span>';
@@ -331,6 +279,7 @@ $(function () {
                     title: 'Actions',
                     searchable: false,
                     orderable: false,
+                    responsivePriority: 4,
 
                     render: function (data, type, full) {
                         const suspendText = full.status === 1 ? 'Suspend' : 'Unsuspend';
@@ -436,7 +385,6 @@ $(function () {
                         $.fn.dataTable.Responsive.display.modal({
                             header: function (row) {
                                 var data = row.data();
-                                console.log(data);
                                 return 'Chi tiết  ' + data.name;
                             }
                         }),
@@ -529,6 +477,16 @@ $(function () {
 
         });
 
+    }
+    function formatProductPrice(row) {
+        const minPrice = Number(row.minPrice || 0);
+        const maxPrice = Number(row.maxPrice || 0);
+
+        if (minPrice === maxPrice) {
+            return minPrice.toLocaleString("vi-VN");
+        }
+
+        return `${minPrice.toLocaleString("vi-VN")} - ${maxPrice.toLocaleString("vi-VN")}`;
     }
     function updateSelectAllState() {
     const $checkboxes =

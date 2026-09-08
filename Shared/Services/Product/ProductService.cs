@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Logging;
+using Shared.Constants.Core;
 using Shared.Data.Context;
 using Shared.Data.Entities.Catelog;
+using Shared.Data.Entities.Inventory;
 using Shared.Data.Entities.Media;
 using Shared.Data.Entities.Product;
 using Shared.DTOs.Identity;
@@ -43,9 +45,12 @@ namespace Shared.Services.Product
             _mediaStorage = mediaStorage.Value;
         }
 
-        public async Task<PagedResult<ProductListResult>> GetProductsAsync(DataTableRequest request)
+        public async Task<PagedResult<ProductListResult>> GetProductsAsync(
+    DataTableRequest request)
         {
-            var query = _dbContext.Products.AsNoTracking().AsQueryable();
+            var query = _dbContext.Products
+                .AsNoTracking()
+                .AsQueryable();
 
             // =========================
             // TOTAL
@@ -61,7 +66,10 @@ namespace Shared.Services.Product
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 var search = request.Search.Trim();
-                query = query.Where(x => x.Name.Contains(search) || (x.Sku != null && x.Sku.Contains(search)));
+
+                query = query.Where(x =>
+                    x.Name.Contains(search) ||
+                    (x.Sku != null && x.Sku.Contains(search)));
             }
 
 
@@ -69,9 +77,11 @@ namespace Shared.Services.Product
             // STATUS
             // =========================
 
-            if (request.Status.HasValue && Enum.IsDefined(typeof(ProductStatus), request.Status.Value))
+            if (request.Status.HasValue &&
+                Enum.IsDefined(typeof(ProductStatus), request.Status.Value))
             {
                 var status = (ProductStatus)request.Status.Value;
+
                 query = query.Where(x => x.Status == status);
             }
 
@@ -85,16 +95,23 @@ namespace Shared.Services.Product
                 if (request.Stock.Value == 1)
                 {
                     // Còn hàng
-                    query = query.Where(x => x.Variants.Any(v => v.InventoryStocks.Any(s => s.AvailableQuantity > 0)));
+                    query = query.Where(x =>
+                        x.Variants
+                            .Where(v => v.IsActive)
+                            .SelectMany(v => v.InventoryStocks)
+                            .Any(s => s.AvailableQuantity > 0));
                 }
                 else if (request.Stock.Value == 0)
                 {
                     // Hết hàng
-                    query = query.Where(x => !x.Variants.Any(v =>
-                            v.InventoryStocks.Any(s =>
-                                s.AvailableQuantity > 0)));
+                    query = query.Where(x =>
+                        !x.Variants
+                            .Where(v => v.IsActive)
+                            .SelectMany(v => v.InventoryStocks)
+                            .Any(s => s.AvailableQuantity > 0));
                 }
             }
+
 
             // =========================
             // FILTERED COUNT
@@ -123,8 +140,16 @@ namespace Shared.Services.Product
 
                 "price" =>
                     request.SortDirection == "desc"
-                        ? query.OrderByDescending(x => x.Price)
-                        : query.OrderBy(x => x.Price),
+                        ? query.OrderByDescending(x =>
+                            x.Variants
+                                .Where(v => v.IsActive)
+                                .Select(v => (decimal?)v.Price)
+                                .Min() ?? x.Price)
+                        : query.OrderBy(x =>
+                            x.Variants
+                                .Where(v => v.IsActive)
+                                .Select(v => (decimal?)v.Price)
+                                .Min() ?? x.Price),
 
                 "status" =>
                     request.SortDirection == "desc"
@@ -132,7 +157,8 @@ namespace Shared.Services.Product
                         : query.OrderBy(x => x.Status),
 
                 _ =>
-                    query.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt)
+                    query.OrderByDescending(x =>
+                        x.UpdatedAt ?? x.CreatedAt)
             };
 
 
@@ -140,39 +166,96 @@ namespace Shared.Services.Product
             // PAGING + SELECT
             // =========================
 
-            var items = await query.Skip(request.Start).Take(request.Length)
-            .Select(x => new ProductListResult
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Slug = x.Slug,
-                ShortDescription = x.ShortDescription,
-                ImageUrl = "Chưa rõ",
+            var items = await query
+                .Skip(request.Start)
+                .Take(request.Length)
+                .Select(x => new ProductListResult
+                {
+                    Id = x.Id,
 
-                CategoryId = x.CategoryId,
-                CategoryName = x.Category != null
-                    ? x.Category.Name
-                    : string.Empty,
+                    Name = x.Name,
 
-                Sku = x.Sku,
-                Price = x.Price,
+                    Slug = x.Slug,
 
-                // Tổng số lượng có thể bán
-                Quantity = x.Variants
-                .SelectMany(v => v.InventoryStocks)
-                .Sum(s => s.AvailableQuantity),
+                    ShortDescription = x.ShortDescription,
 
-                // Có ít nhất một variant còn hàng
-                InStock = x.Variants
-                .SelectMany(v => v.InventoryStocks)
-                .Any(s => s.AvailableQuantity > 0),
 
-                Status = x.Status,
+                    // =========================
+                    // PRIMARY IMAGE
+                    // =========================
 
-                IsFeatured = x.IsFeatured,
-                DisplayOrder = x.DisplayOrder,
-                CreatedAt = x.CreatedAt
-            }).ToListAsync();
+                    ImageUrl = x.ProductMedias
+                        .Where(i => i.IsPrimary)
+                        .Select(i =>
+                            i.MediaFile.StoragePath == null
+                                ? null
+                                : i.MediaFile.StoragePath.StartsWith("/uploads/")
+                                    ? i.MediaFile.StoragePath
+                                    : "/uploads/" + i.MediaFile.StoragePath)
+                        .FirstOrDefault(),
+
+
+                    // =========================
+                    // CATEGORY
+                    // =========================
+
+                    CategoryId = x.CategoryId,
+
+                    CategoryName = x.Category != null
+                        ? x.Category.Name
+                        : string.Empty,
+
+
+                    // =========================
+                    // SKU
+                    // =========================
+
+                    Sku = x.Sku,
+
+
+                    // =========================
+                    // PRICE
+                    // =========================
+
+                    MinPrice = x.Variants
+                        .Where(v => v.IsActive)
+                        .Select(v => (decimal?)v.Price)
+                        .Min() ?? x.Price,
+
+                    MaxPrice = x.Variants
+                        .Where(v => v.IsActive)
+                        .Select(v => (decimal?)v.Price)
+                        .Max() ?? x.Price,
+
+
+                    // =========================
+                    // STOCK
+                    // =========================
+
+                    Quantity = x.Variants
+                        .Where(v => v.IsActive)
+                        .SelectMany(v => v.InventoryStocks)
+                        .Sum(s => s.AvailableQuantity),
+
+                    InStock = x.Variants
+                        .Where(v => v.IsActive)
+                        .SelectMany(v => v.InventoryStocks)
+                        .Any(s => s.AvailableQuantity > 0),
+
+
+                    // =========================
+                    // OTHER
+                    // =========================
+
+                    Status = x.Status,
+
+                    IsFeatured = x.IsFeatured,
+
+                    DisplayOrder = x.DisplayOrder,
+
+                    CreatedAt = x.CreatedAt
+                })
+                .ToListAsync();
 
 
             // =========================
@@ -238,7 +321,6 @@ namespace Shared.Services.Product
                     $"SKU '{sku}' đã tồn tại.");
             }
 
-
             // =========================================================
             // SLUG
             // =========================================================
@@ -253,21 +335,13 @@ namespace Shared.Services.Product
             {
                 slug = $"{slug}-{Guid.NewGuid():N}";
             }
-
-            //        var productVariants = string.IsNullOrWhiteSpace(request.Variants) ? [] 
-            //        : JsonSerializer.Deserialize<List<CreateProductVariantRequest>>(
-            //    request.Variants
-            //) ?? [];
-            var productVariants =
-    string.IsNullOrWhiteSpace(request.Variants)
-        ? []
-        : JsonSerializer.Deserialize<List<CreateProductVariantRequest>>(
-            request.Variants,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            })
-          ?? [];
+            var productVariants = string.IsNullOrWhiteSpace(request.Variants) ? [] : 
+                JsonSerializer.Deserialize<List<CreateProductVariantRequest>>(request.Variants,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                })
+                ?? [];
 
             var status = request.Action switch
             {
@@ -301,7 +375,7 @@ namespace Shared.Services.Product
                     CategoryId = request.CategoryId,
                     Price = productVariants is { Count: > 0 } ? null : request.Price,
 
-                    Stock = productVariants is { Count: > 0 } ? null : request.Stock,
+                    //Stock = productVariants is { Count: > 0 } ? null : request.Stock,
 
                     IsFeatured = request.IsFeatured,
 
@@ -349,12 +423,64 @@ namespace Shared.Services.Product
                         variants,
                         request.VariantImages,
                         cancellationToken);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    foreach (var variant in variants)
+                    {
+                        // tìm request tương ứng
+                        var variantRequest = productVariants
+                            .First(x => x.SKU == variant.Sku);
 
+                        var inventoryStock = new InventoryStock
+                        {
+                            WarehouseId = WarehouseConstants.MainWarehouseId,
+                            ProductVariantId = variant.Id,
+                            AvailableQuantity = variantRequest.Stock,
+                            ReservedQuantity = 0,
+                            MinStock = 0,
+                            UpdatedAt = DateTime.UtcNow
+                        };
+
+                        await _dbContext.InventoryStocks.AddAsync(
+                            inventoryStock,
+                            cancellationToken);
+                    }
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
 
                 }
+                else
+                {
+                    var defaultVariant = new ProductVariant
+                    {
+                        ProductId = product.Id,
+                        Name = product.Name,
+                        Sku = product.Sku,
+                        Price = request.Price ?? 0,
+                        IsDefault = true,
+                        IsActive = true,
+                        DisplayOrder = 0,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _dbContext.ProductVariants.AddAsync(defaultVariant, cancellationToken);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    // =====================================================
+                    // CREATE STOCK
+                    // =====================================================
 
+                    var inventoryStock = new InventoryStock
+                    {
+                        WarehouseId = WarehouseConstants.MainWarehouseId,
+                        ProductVariantId = defaultVariant.Id,
+                        AvailableQuantity = request.Stock ?? 0,
+                        ReservedQuantity = 0,
+                        MinStock = 0,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                    await _dbContext.InventoryStocks.AddAsync(
+                        inventoryStock,
+                        cancellationToken);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                }
 
                 // =====================================================
                 // COMMIT
@@ -796,6 +922,7 @@ namespace Shared.Services.Product
         #region Update product
         public async Task<ServiceResult<int>> UpdateAsync(CreateProductRequest request, CancellationToken cancellationToken = default)
         {
+            var warehouseId = WarehouseConstants.MainWarehouseId;
             // =========================================================
             // VALIDATE PRODUCT ID
             // =========================================================
@@ -818,8 +945,7 @@ namespace Shared.Services.Product
 
             if (product == null)
             {
-                return ServiceResult<int>.Fail(
-                    "Không tìm thấy sản phẩm.");
+                return ServiceResult<int>.Fail("Không tìm thấy sản phẩm.");
             }
 
             // =========================================================
@@ -856,8 +982,7 @@ namespace Shared.Services.Product
 
             if (variants == null)
             {
-                return ServiceResult<int>.Fail(
-                    "Dữ liệu variant không hợp lệ.");
+                return ServiceResult<int>.Fail( "Dữ liệu variant không hợp lệ.");
             }
 
             // =========================================================
@@ -904,6 +1029,15 @@ namespace Shared.Services.Product
                     cancellationToken);
 
                 // =====================================================
+                // UPDATE INVENTORY
+                // =====================================================
+
+                await UpdateInventoryAsync(
+                    product,
+                    request.Stock,
+                    variants,
+                    cancellationToken);
+                // =====================================================
                 // UPDATE VARIANT IMAGES
                 // =====================================================
 
@@ -930,16 +1064,15 @@ namespace Shared.Services.Product
                     product.Id,
                     "Cập nhật sản phẩm thành công.");
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync(
                     cancellationToken);
 
-                throw;
+                return ServiceResult<int>.Fail(ex.Message);
             }
         }
-        public async Task<ServiceResult<ProductUpdateResponse>> GetUpdateProductAsync(int id,
-        CancellationToken cancellationToken = default)
+        public async Task<ServiceResult<ProductUpdateResponse>> GetUpdateProductAsync(int id, CancellationToken cancellationToken = default)
         {
             // =========================================================
             // LOAD PRODUCT
@@ -949,32 +1082,16 @@ namespace Shared.Services.Product
             {
                 product = await _dbContext.Products
                     .AsNoTracking()
-
-                    // Product Images
-                    .Include(x => x.ProductMedias)
-                        .ThenInclude(x => x.MediaFile)
-                // Product Tags
-                .Include(x => x.ProductTagMappings)
-                    .ThenInclude(x => x.Tag)
-
-                    // Variants -> Attributes
-                    .Include(x => x.Variants)
-                        .ThenInclude(x => x.VariantAttributes)
-                            .ThenInclude(x => x.AttributeValue)
-                                .ThenInclude(x => x.Attribute)
-
-                    // Variants -> Images
-                    .Include(x => x.Variants)
-                        .ThenInclude(x => x.VariantMedias)
-                            .ThenInclude(x => x.MediaFile)
-                              .Include(x => x.Variants)
-        .ThenInclude(x => x.VariantMedias)
-            .ThenInclude(x => x.AttributeValue)
-                .ThenInclude(x => x.Attribute)
+                    .Include(x => x.ProductMedias).ThenInclude(x => x.MediaFile)
+                    .Include(x => x.ProductTagMappings).ThenInclude(x => x.Tag)
+                    .Include(x => x.Variants.Where(v => v.IsActive)).ThenInclude(x => x.VariantAttributes).ThenInclude(x => x.AttributeValue).ThenInclude(x => x.Attribute)
+                    .Include(x => x.Variants.Where(v => v.IsActive)).ThenInclude(x => x.VariantMedias).ThenInclude(x => x.MediaFile)
+                    .Include(x => x.Variants.Where(v => v.IsActive)).ThenInclude(x => x.VariantMedias).ThenInclude(x => x.AttributeValue).ThenInclude(x => x.Attribute)
+                    .Include(x => x.Variants.Where(v => v.IsActive)).ThenInclude(x => x.InventoryStocks)
                     .FirstOrDefaultAsync(
                         x => x.Id == id,
                         cancellationToken);
-                
+
             }
             catch (Exception ex)
             {
@@ -1044,6 +1161,14 @@ namespace Shared.Services.Product
                 .ToList();
 
             // =========================================================
+            // PRODUCT STOCK
+            // =========================================================
+
+            var defaultVariant = product.Variants.FirstOrDefault(x => x.IsDefault);
+            response.Stock = defaultVariant?.InventoryStocks
+                .FirstOrDefault(x => x.WarehouseId == WarehouseConstants.MainWarehouseId)?.AvailableQuantity ?? 0;
+
+            // =========================================================
             // OPTIONS
             // =========================================================
 
@@ -1092,11 +1217,11 @@ namespace Shared.Services.Product
 
                         Price = variant.Price,
 
-                        IsDefault =
-                            variant.IsDefault,
+                        Stock = variant.InventoryStocks.FirstOrDefault(x => x.WarehouseId == WarehouseConstants.MainWarehouseId)?.AvailableQuantity ?? 0,
 
-                        IsActive =
-                            variant.IsActive,
+                        IsDefault = variant.IsDefault,
+
+                        IsActive = variant.IsActive,
 
                         Options =
                             variant.VariantAttributes
@@ -1227,14 +1352,37 @@ namespace Shared.Services.Product
 
             product.Description = request.Description;
         }
-        private async Task UpdateProductImagesAsync(ProductEntity product,List<CreateProductImageRequest> requests,
-        CancellationToken cancellationToken)
+        private async Task UpdateProductImagesAsync(
+    ProductEntity product,
+    List<CreateProductImageRequest> requests,
+    CancellationToken cancellationToken)
         {
-            var existingImages =
-                product.ProductMedias.ToList();
+            // =========================================================
+            // EXISTING IMAGES
+            // =========================================================
 
-            var requestIds = requests .Where(x => x.Id.HasValue)
-                            .Select(x => x.Id!.Value) .ToHashSet();
+            var existingImages = product.ProductMedias.ToList();
+
+            // =========================================================
+            // VALIDATE PRIMARY
+            // =========================================================
+
+            var primaryCount = requests.Count(x => x.IsPrimary);
+
+            if (primaryCount > 1)
+            {
+                throw new InvalidOperationException(
+                    "Sản phẩm chỉ được có một ảnh chính.");
+            }
+
+            // =========================================================
+            // REQUEST IDS
+            // =========================================================
+
+            var requestIds = requests
+                .Where(x => x.Id.HasValue)
+                .Select(x => x.Id!.Value)
+                .ToHashSet();
 
             // =========================================================
             // DELETE REMOVED IMAGES
@@ -1247,14 +1395,11 @@ namespace Shared.Services.Product
                     continue;
                 }
 
-                var mediaFile =
-                    existingImage.MediaFile;
+                var mediaFile = existingImage.MediaFile;
 
-                product.ProductMedias.Remove(
-                    existingImage);
+                product.ProductMedias.Remove(existingImage);
 
-                _dbContext.ProductMedias.Remove(
-                    existingImage);
+                _dbContext.ProductMedias.Remove(existingImage);
 
                 if (mediaFile != null)
                 {
@@ -1271,14 +1416,13 @@ namespace Shared.Services.Product
             foreach (var request in requests)
             {
                 // =====================================================
-                // EXISTING
+                // EXISTING IMAGE
                 // =====================================================
 
                 if (request.Id.HasValue)
                 {
-                    var existingImage =
-                        existingImages.FirstOrDefault(
-                            x => x.Id == request.Id.Value);
+                    var existingImage = existingImages
+                        .FirstOrDefault(x => x.Id == request.Id.Value);
 
                     if (existingImage == null)
                     {
@@ -1286,11 +1430,8 @@ namespace Shared.Services.Product
                             $"ProductMedia {request.Id.Value} không thuộc sản phẩm.");
                     }
 
-                    existingImage.DisplayOrder =
-                        request.DisplayOrder;
-
-                    existingImage.IsPrimary =
-                        request.IsPrimary;
+                    existingImage.DisplayOrder = request.DisplayOrder;
+                    existingImage.IsPrimary = request.IsPrimary;
 
                     // -------------------------------------------------
                     // REPLACE FILE
@@ -1298,20 +1439,15 @@ namespace Shared.Services.Product
 
                     if (request.File != null)
                     {
-                        var oldMedia =
-                            existingImage.MediaFile;
+                        var oldMedia = existingImage.MediaFile;
 
-                        var newMedia =
-                            await _mediaService.UploadAsync(
-                                request.File,
-                                _mediaStorage.ProductFolder,
-                                cancellationToken);
+                        var newMedia = await _mediaService.UploadAsync(
+                            request.File,
+                            _mediaStorage.ProductFolder,
+                            cancellationToken);
 
-                        existingImage.MediaFile =
-                            newMedia;
-
-                        existingImage.MediaFileId =
-                            newMedia.Id;
+                        existingImage.MediaFile = newMedia;
+                        existingImage.MediaFileId = newMedia.Id;
 
                         if (oldMedia != null)
                         {
@@ -1333,32 +1469,52 @@ namespace Shared.Services.Product
                     continue;
                 }
 
-                var media =
-                    await _mediaService.UploadAsync(
-                        request.File,
-                        _mediaStorage.ProductFolder,
-                        cancellationToken);
+                var media = await _mediaService.UploadAsync(
+                    request.File,
+                    _mediaStorage.ProductFolder,
+                    cancellationToken);
 
                 var productMedia = new ProductMedia
                 {
-                    ProductId =
-                        product.Id,
-
-                    MediaFileId =
-                        media.Id,
-
-                    MediaFile =
-                        media,
-
-                    DisplayOrder =
-                        request.DisplayOrder,
-
-                    IsPrimary =
-                        request.IsPrimary
+                    ProductId = product.Id,
+                    MediaFileId = media.Id,
+                    MediaFile = media,
+                    DisplayOrder = request.DisplayOrder,
+                    IsPrimary = request.IsPrimary
                 };
 
-                product.ProductMedias.Add(
-                    productMedia);
+                product.ProductMedias.Add(productMedia);
+            }
+
+            // =========================================================
+            // ENSURE ONLY ONE PRIMARY IMAGE
+            // =========================================================
+
+            var remainingImages = product.ProductMedias.ToList();
+
+            var primaryImages = remainingImages
+                .Where(x => x.IsPrimary)
+                .ToList();
+
+            if (primaryImages.Count > 1)
+            {
+                throw new InvalidOperationException(
+                    "Sản phẩm chỉ được có một ảnh chính.");
+            }
+
+            // =========================================================
+            // FALLBACK PRIMARY
+            // =========================================================
+
+            if (remainingImages.Count > 0 &&
+                primaryImages.Count == 0)
+            {
+                var firstImage = remainingImages
+                    .OrderBy(x => x.DisplayOrder)
+                    .ThenBy(x => x.Id)
+                    .First();
+
+                firstImage.IsPrimary = true;
             }
         }
         private async Task UpdateVariantsAsync(ProductEntity product, List<CreateProductOptionRequest> options, 
@@ -1495,6 +1651,132 @@ namespace Shared.Services.Product
             // =========================================================
 
             NormalizeDefaultVariant(product);
+        }
+
+        private async Task UpdateInventoryAsync(
+    ProductEntity product,
+    int? productStock,
+    List<CreateProductVariantRequest> variants,
+    CancellationToken cancellationToken)
+        {
+            var warehouseId = WarehouseConstants.MainWarehouseId;
+
+            // =========================================================
+            // PRODUCT WITHOUT VARIANTS
+            // =========================================================
+
+            if (variants.Count == 0)
+            {
+                var defaultVariant = product.Variants
+                    .FirstOrDefault(x => x.IsDefault);
+
+                if (defaultVariant == null)
+                {
+                    defaultVariant = new ProductVariant
+                    {
+                        ProductId = product.Id,
+                        Name = product.Name,
+                        Sku = product.Sku,
+                        Price = product.Price ?? 0,
+                        IsDefault = true,
+                        IsActive = true,
+                        DisplayOrder = 0,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _dbContext.ProductVariants.AddAsync(
+                        defaultVariant,
+                        cancellationToken);
+
+                    await _dbContext.SaveChangesAsync(
+                        cancellationToken);
+                }
+
+                var stock = await _dbContext.InventoryStocks
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.WarehouseId == warehouseId &&
+                            x.ProductVariantId == defaultVariant.Id,
+                        cancellationToken);
+
+                var quantity = productStock ?? 0;
+
+                if (stock == null)
+                {
+                    stock = new InventoryStock
+                    {
+                        WarehouseId = warehouseId,
+                        ProductVariantId = defaultVariant.Id,
+                        AvailableQuantity = quantity,
+                        ReservedQuantity = 0,
+                        MinStock = 0,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _dbContext.InventoryStocks.AddAsync(
+                        stock,
+                        cancellationToken);
+                }
+                else
+                {
+                    stock.AvailableQuantity = quantity;
+                    stock.UpdatedAt = DateTime.UtcNow;
+                }
+
+                return;
+            }
+
+            // =========================================================
+            // PRODUCT WITH VARIANTS
+            // =========================================================
+
+            var variantIds = product.Variants
+                .Select(x => x.Id)
+                .ToList();
+
+            var stocks = await _dbContext.InventoryStocks
+                .Where(x =>
+                    x.WarehouseId == warehouseId &&
+                    variantIds.Contains(x.ProductVariantId))
+                .ToListAsync(cancellationToken);
+
+            foreach (var variantRequest in variants)
+            {
+                var variant = product.Variants
+                    .FirstOrDefault(x => x.Id == variantRequest.Id);
+
+                if (variant == null)
+                {
+                    continue;
+                }
+
+                var stock = stocks.FirstOrDefault(
+                    x => x.ProductVariantId == variant.Id);
+
+                var quantity = variantRequest.Stock;
+
+                if (stock == null)
+                {
+                    stock = new InventoryStock
+                    {
+                        WarehouseId = warehouseId,
+                        ProductVariantId = variant.Id,
+                        AvailableQuantity = quantity,
+                        ReservedQuantity = 0,
+                        MinStock = 0,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _dbContext.InventoryStocks.AddAsync(
+                        stock,
+                        cancellationToken);
+                }
+                else
+                {
+                    stock.AvailableQuantity = quantity;
+                    stock.UpdatedAt = DateTime.UtcNow;
+                }
+            }
         }
         private static string? GetOptionValue(
     Dictionary<string, string> options,
@@ -2400,19 +2682,13 @@ namespace Shared.Services.Product
         }
        
         private async Task<ServiceResult<int>>
-    ValidateUpdateProductAsync(
-        ProductEntity product,
-        CreateProductRequest request,
-        CancellationToken cancellationToken)
+    ValidateUpdateProductAsync(ProductEntity product, CreateProductRequest request, CancellationToken cancellationToken)
         {
             var sku = request.SKU.Trim();
 
             var skuExists =
                 await _dbContext.Products.AnyAsync(
-                    x =>
-                        x.Id != product.Id &&
-                        x.Sku == sku,
-                    cancellationToken);
+                    x => x.Id != product.Id && x.Sku == sku, cancellationToken);
 
             if (skuExists)
             {
@@ -2435,8 +2711,7 @@ namespace Shared.Services.Product
                     "Slug đã tồn tại.");
             }
 
-            return ServiceResult<int>.Success(
-                product.Id);
+            return ServiceResult<int>.Success(product.Id);
         }
         #endregion Update product
 

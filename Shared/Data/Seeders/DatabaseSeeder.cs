@@ -26,6 +26,8 @@ public static class DatabaseSeeder
 
         await SeedSetting.SeedAsync(dbContext);
 
+        await SeedWarehouse.SeedAsync(dbContext);
+
         await SeedCatalogs.SeedAsync(dbContext);
 
         await SeedModules.SeedAsync(dbContext);

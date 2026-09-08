@@ -91,9 +91,9 @@
     }
 
     let editor;
-    console.log('id product:' + productId);
     try {
-        console.log('update');
+        console.log('update: ' + productId);
+        console.log(product);
         editor = await ProductEditor.init({
             mode: "update",
             form: productForm,
@@ -285,29 +285,6 @@
         }
 
         // =====================================================
-        // VALIDATE VARIANTS
-        // =====================================================
-
-        //const invalidVariant = variants.find(function (variant) {
-        //    if (!variant) {
-        //        return true;
-        //    }
-
-        //    if (!variant.sku?.trim()) {
-        //        return true;
-        //    }
-
-        //    if (
-        //        variant.price === "" ||
-        //        variant.price === null ||
-        //        variant.price === undefined
-        //    ) {
-        //        return true;
-        //    }
-
-        //    return false;
-        //});
-        // =====================================================
         // VALIDATE CATEGORY
         // =====================================================
 
@@ -428,14 +405,6 @@
                 return;
             }
         }
-        //if (invalidVariant) {
-        //    Toast.warning(
-        //        "Vui lòng nhập đầy đủ SKU và giá cho các variant.",
-        //    );
-
-        //    return;
-        //}
-
         // =========================================================
         // VALIDATE VARIANTS
         // =========================================================
@@ -718,7 +687,7 @@
         // =====================================================
         // BUILD FORM DATA
         // =====================================================
-
+        console.log(productImages);
         const formData = buildFormData({
             options,
             variants,
@@ -1345,6 +1314,7 @@
          * nhận format ổn định.
          */
         console.log('normalizeProductData');
+        console.log(data);
         console.log(data.variants);
         return {
             ...data,

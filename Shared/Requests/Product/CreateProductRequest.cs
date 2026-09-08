@@ -33,7 +33,7 @@ namespace Shared.Requests.Product
 
         // Chỉ sử dụng khi KHÔNG có Variant
         [Range(0, 999999999)]
-        public decimal? Stock { get; set; }
+        public int? Stock { get; set; }
 
         public string? Unit { get; set; }
 

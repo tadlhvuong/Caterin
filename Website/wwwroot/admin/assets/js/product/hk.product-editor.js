@@ -185,7 +185,8 @@
              *
              *     restore existing product
              */
-
+            console.log("editor update");
+            console.log(product);
             await restoreProductData(mode, product);
 
             initialized = true;
@@ -320,7 +321,6 @@
             }
 
             const plugins = [];
-
             if (typeof FilePondPluginFileValidateType !== "undefined") {
                 plugins.push(FilePondPluginFileValidateType);
             }
@@ -339,6 +339,10 @@
 
             if (typeof FilePondPluginImageTransform !== "undefined") {
                 plugins.push(FilePondPluginImageTransform);
+            }
+
+            if (typeof FilePondPluginFileReorder !== "undefined") {
+                plugins.push(FilePondPluginFileReorder);
             }
 
             if (plugins.length) {
@@ -632,6 +636,7 @@
                 const existingImages = mode === "update" && Array.isArray(images) ? images : [];
                 productImagePond = FilePond.create(elements.productImages, {
                     allowMultiple: true,
+                    allowReorder: true,
 
                     files: existingImages.map(function (image) {
                         return {
@@ -677,7 +682,6 @@
 
                     labelMaxFiles: "Tối đa {maxFiles} ảnh",
 
-                    allowReorder: true,
 
                     acceptedFileTypes: ["image/jpeg", "image/png", "image/webp"],
 
@@ -747,16 +751,18 @@
                 if (!file) {
                     return;
                 }
-
+                console.log("addfile");
+                console.log(productImages);
+                console.log(file);
                 const exists = productImages.some(function (image) {
-                    return image.id === file.id;
+                    return image.filePondId === file.id;
                 });
                 const metadata = file.getMetadata();
                 if (!exists) {
                     productImages.push({
                         id: metadata.mediaId,
-
-                        file: file.file,
+                        filePondId: file.id,
+                        file: file.file ?? null,
 
                         displayOrder: productImages.length,
 
@@ -829,7 +835,7 @@
 
                 files.forEach(function (file, index) {
                     const image = productImages.find(function (item) {
-                        return item.id === file.id;
+                        return item.filePondId === file.id;
                     });
 
                     if (image) {
@@ -842,7 +848,6 @@
                 });
 
                 reindexProductImages();
-
                 renderProductImageEditButtons();
             });
 
@@ -1854,6 +1859,17 @@
                 return;
             }
 
+
+            const hasEmptyOption = options.some(
+                option =>
+                    !Array.isArray(option.values) ||
+                    option.values.length === 0
+            );
+            if (hasEmptyOption) {
+                productVariantState.variants = [];
+                renderVariantTable([]);
+                return;
+            }
             // ====================================================
             // INVALID OPTION
             // ====================================================
@@ -2582,8 +2598,10 @@
                 if (!group) {
                     return;
                 }
+                const existingMediaId = group.image?.id ?? null;
                 const imageData = {
-                    id: image.id,
+                    //id: image.id,
+                    id: existingMediaId,
                     url: null,
                     file: fileItem.file,
                     name:
@@ -2811,18 +2829,45 @@
              * 2. Sau khi variants tồn tại
              *    mới gắn variant images
              */
-            await restoreVariantImages(data.variantImages);
-            restoreVariants(data.variants);
+            const options = Array.isArray(data.options)
+                ? data.options
+                : [];
+            const variants = Array.isArray(data.variants)
+                ? data.variants
+                : [];
 
-            /*
-             * Nếu DB có variants,
-             * ưu tiên thứ tự theo options hiện tại.
-             */
+            const hasVariants = options.length > 0;
 
-            if (productVariantState.options.length) {
-                regenerateUsingExistingVariants();
-            } else {
-                renderVariantTable(productVariantState.variants);
+
+            console.log("editor update variant ");
+            console.log(variants);
+            console.log(hasVariants);
+            if (!hasVariants) {
+                const defaultVariant = variants[0];
+                // Price
+                $("#Price").val(defaultVariant?.price ?? "");
+                $("#Stock").val(defaultVariant?.stock ?? "");
+
+
+                // Không có variant image
+                variantImageGroups.clear();
+            }
+            else {
+                $("#Price").val("");
+                $("#Stock").val("");
+
+                await restoreVariantImages(data.variantImages);
+                restoreVariants(data.variants);
+                /*
+                 * Nếu DB có variants,
+                 * ưu tiên thứ tự theo options hiện tại.
+                 */
+
+                if (productVariantState.options.length) {
+                    regenerateUsingExistingVariants();
+                } else {
+                    renderVariantTable(productVariantState.variants);
+                }
             }
 
             /*
@@ -2838,7 +2883,9 @@
              * sau khi table đã render.
              */
 
-            setTimeout(initializeVariantFilePonds(), 100);
+            setTimeout(() => {
+                initializeVariantFilePonds();
+            }, 100);
         }
 
         // ========================================================

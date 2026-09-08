@@ -17,7 +17,6 @@ using Shared.Services.Log;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Website.Areas.Admin.Models.Product;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Website.Areas.Admin.Controllers
 {
@@ -150,28 +149,6 @@ namespace Website.Areas.Admin.Controllers
                 ModelState.AddModelError(nameof(request.Slug), $"{request.Slug} đã tồn tại.");
                 return ValidationProblem(ModelState);
             }
-            //if (request.VariantImages.Count != 0 || request.Variants.Length != 0)
-            //{
-            //    if (request.Variants.Length == 0)
-            //    {
-            //        return Json(new
-            //        {
-            //            success = false,
-            //            message = "Cập nhật sản phẩm thất bại.",
-            //            redirectUrl = Url.Action(nameof(Index), "Product", new { area = "Admin" })
-            //        });
-            //    }
-            //    if (request.VariantImages.Count == 0)
-            //    {
-            //        return Json(new
-            //        {
-            //            success = false,
-            //            message = "Cập nhật sản phẩm thất bại.",
-            //            redirectUrl = Url.Action(nameof(Index), "Product", new { area = "Admin" })
-            //        });
-            //    }
-
-            //}
             var result = await _productService.CreateAsync(request, cancellationToken);
 
             if (!result.Succeeded)
@@ -274,9 +251,7 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("edit")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> Update(
-    [FromForm] CreateProductRequest request,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromForm] CreateProductRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
@@ -284,28 +259,6 @@ namespace Website.Areas.Admin.Controllers
             // =========================================================
             // UPDATE PRODUCT
             // =========================================================
-            //if(request.VariantImages.Count != 0 ||  request.Variants.Length  != 0)
-            //{
-            //    if(request.Variants.Length == 0)
-            //    {
-            //        return Json(new
-            //        {
-            //            success = false,
-            //            message = "Dữ liệu biến thể lỗi. Thử lại sau",
-            //            redirectUrl =  ""
-            //        });
-            //    }
-            //    if(request.VariantImages.Count == 0)
-            //    {
-            //        return Json(new
-            //        {
-            //            success = false,
-            //            message = "Dữ liệu ảnh biến thể lỗi. Thử lại sau",
-            //            redirectUrl = ""
-            //        });
-            //    }    
-
-            //}    
             var result = await _productService.UpdateAsync(request, cancellationToken);
 
             // =========================================================

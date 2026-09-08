@@ -20,8 +20,11 @@ namespace Shared.DTOs.Product
 
         public string Sku { get; set; } = string.Empty;
 
-        public decimal? Price { get; set; }
+        //public decimal? Price { get; set; }
+        public decimal? MinPrice { get; set; }
 
+        // Giá cao nhất
+        public decimal? MaxPrice { get; set; }
         /// <summary>
         /// Tổng tồn kho khả dụng.
         /// </summary>

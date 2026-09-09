@@ -12,8 +12,8 @@ using Shared.Data.Context;
 namespace Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260819125545_slugproduct")]
-    partial class slugproduct
+    [Migration("20260908094955_DBInit")]
+    partial class DBInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1258,58 +1258,37 @@ namespace Shared.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int?>("AlbumId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("AltText")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<string>("ContentType")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<int?>("MediaAlbumId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("Height")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Url")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int?>("Width")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AlbumId");
-
-                    b.HasIndex("FileName");
-
-                    b.HasIndex("Type");
+                    b.HasIndex("MediaAlbumId");
 
                     b.ToTable("MediaFiles", (string)null);
                 });
@@ -1644,6 +1623,9 @@ namespace Shared.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
+                    b.Property<decimal?>("Stock")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1662,6 +1644,9 @@ namespace Shared.Migrations
                     b.HasIndex("IsDeleted");
 
                     b.HasIndex("IsFeatured");
+
+                    b.HasIndex("Sku")
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.HasIndex("Slug")
                         .IsUnique()
@@ -1754,14 +1739,10 @@ namespace Shared.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DisplayOrder")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsPrimary")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasColumnType("boolean");
 
                     b.Property<long>("MediaFileId")
                         .HasColumnType("bigint");
@@ -1777,10 +1758,7 @@ namespace Shared.Migrations
 
                     b.HasIndex("ProductId", "IsPrimary");
 
-                    b.HasIndex("ProductId", "MediaFileId")
-                        .IsUnique();
-
-                    b.ToTable("ProductMedia", (string)null);
+                    b.ToTable("ProductMedias", (string)null);
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.ProductTag", b =>
@@ -1927,11 +1905,44 @@ namespace Shared.Migrations
                         .HasFilter("\"IsDefault\" = true");
 
                     b.HasIndex("Sku")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsActive\" = true");
 
                     b.HasIndex("ProductId", "DisplayOrder");
 
                     b.ToTable("ProductVariants", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Product.ProductVariantMedia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttributeValueId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("MediaFileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeValueId");
+
+                    b.HasIndex("MediaFileId");
+
+                    b.HasIndex("ProductVariantId", "AttributeValueId", "MediaFileId")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariantMedias", (string)null);
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.VariantAttribute", b =>
@@ -2167,12 +2178,9 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
-                    b.HasOne("Shared.Data.Entities.Media.MediaAlbum", "Album")
+                    b.HasOne("Shared.Data.Entities.Media.MediaAlbum", null)
                         .WithMany("Files")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Album");
+                        .HasForeignKey("MediaAlbumId");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Order.Order", b =>
@@ -2266,7 +2274,7 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.HasOne("Shared.Data.Entities.Product.Product", "Product")
-                        .WithMany("Media")
+                        .WithMany("ProductMedias")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2311,6 +2319,33 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Product.ProductVariantMedia", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Product.AttributeValue", "AttributeValue")
+                        .WithMany("ProductVariantMedias")
+                        .HasForeignKey("AttributeValueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "MediaFile")
+                        .WithMany("ProductVariantMedias")
+                        .HasForeignKey("MediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Product.ProductVariant", "ProductVariant")
+                        .WithMany("VariantMedias")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttributeValue");
+
+                    b.Navigation("MediaFile");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.VariantAttribute", b =>
@@ -2390,6 +2425,8 @@ namespace Shared.Migrations
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
                     b.Navigation("ProductMedias");
+
+                    b.Navigation("ProductVariantMedias");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Order.Order", b =>
@@ -2409,12 +2446,14 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Product.AttributeValue", b =>
                 {
+                    b.Navigation("ProductVariantMedias");
+
                     b.Navigation("VariantAttributes");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.Product", b =>
                 {
-                    b.Navigation("Media");
+                    b.Navigation("ProductMedias");
 
                     b.Navigation("ProductTagMappings");
 
@@ -2438,6 +2477,8 @@ namespace Shared.Migrations
                     b.Navigation("InventoryTransactions");
 
                     b.Navigation("VariantAttributes");
+
+                    b.Navigation("VariantMedias");
                 });
 #pragma warning restore 612, 618
         }

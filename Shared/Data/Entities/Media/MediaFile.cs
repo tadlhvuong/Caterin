@@ -33,10 +33,8 @@ namespace Shared.Data.Entities.Media
 
         public DateTime CreatedAt { get; set; }
 
-        public virtual ICollection<ProductMedia> ProductMedias { get; set; }
-            = new List<ProductMedia>();
+        public virtual ICollection<ProductMedia> ProductMedias { get; set; } = new List<ProductMedia>();
 
-        public virtual ICollection<ProductVariantMedia> ProductVariantMedias { get; set; }
-            = new List<ProductVariantMedia>();
+        public virtual ICollection<ProductVariantMedia> ProductVariantMedias { get; set; }  = new List<ProductVariantMedia>();
     }
 }

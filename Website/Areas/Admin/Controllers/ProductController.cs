@@ -290,17 +290,6 @@ namespace Website.Areas.Admin.Controllers
                 redirectUrl = Url.Action(nameof(Index), "Product", new { area = "Admin" })
             });
         }
-        //[HttpPost("edit/{id:int}")]
-        //[PermissionAction(ActionType.Edit)]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Update(int id, [FromForm] CreateProductRequest request, CancellationToken cancellationToken)
-        //{
-        //    if (!ModelState.IsValid)
-        //        return ValidationProblem(ModelState);
-
-        //    return RedirectToAction(nameof(Index));
-        //}
-
         // GET: HomeController1/Delete/5
         [HttpGet("delete/{id}")]
         [PermissionAction(ActionType.Delete)]

@@ -607,7 +607,7 @@ namespace Shared.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("Menus", (string)null);
+                    b.ToTable("Menus");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Identity.Core.Permission", b =>
@@ -1114,6 +1114,9 @@ namespace Shared.Migrations
                     b.Property<int>("AvailableQuantity")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("MinStock")
                         .HasColumnType("integer");
 
@@ -1224,9 +1227,7 @@ namespace Shared.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -1901,10 +1902,11 @@ namespace Shared.Migrations
                         .IsUnique()
                         .HasFilter("\"IsDefault\" = true");
 
-                    b.HasIndex("Sku")
-                        .IsUnique();
-
                     b.HasIndex("ProductId", "DisplayOrder");
+
+                    b.HasIndex("ProductId", "Sku")
+                        .IsUnique()
+                        .HasFilter("\"IsActive\" = true");
 
                     b.ToTable("ProductVariants", (string)null);
                 });
@@ -2326,7 +2328,7 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.HasOne("Shared.Data.Entities.Media.MediaFile", "MediaFile")
-                        .WithMany()
+                        .WithMany("ProductVariantMedias")
                         .HasForeignKey("MediaFileId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

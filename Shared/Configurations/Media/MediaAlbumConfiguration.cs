@@ -42,7 +42,7 @@ public class MediaAlbumConfiguration
 
         builder.Property(x => x.CreatedAt)
             .IsRequired()
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasColumnType("timestamp with time zone");
 
         builder.Property(x => x.UpdatedAt);
 

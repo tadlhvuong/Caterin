@@ -482,10 +482,7 @@
                         form,
                     );
 
-                    focusVariantInput(
-                        row,
-                        ".variant-price",
-                    );
+                    focusVariantInput(row, ".variant-price");
 
                     return true;
                 }
@@ -1061,11 +1058,8 @@
                  * thì chuyển trang.
                  */
 
-                if (
-                    response.redirectUrl
-                ) {
-                    window.location.href =
-                        response.redirectUrl;
+                if (response.redirectUrl) {
+                    window.location.href = response.redirectUrl;
 
                     return;
                 }
@@ -1077,11 +1071,10 @@
 
                 return;
             }
-
             // =================================================
             // BUSINESS ERROR
             // =================================================
-
+            console.log( " BUSINESS ERROR"   );
             Toast.error(
                 response.message ||
                 "Không thể cập nhật sản phẩm.",
@@ -1096,14 +1089,8 @@
             // VALIDATION
             // =================================================
 
-            if (
-                xhr?.responseJSON?.errors
-            ) {
-                handleValidationErrors(
-                    xhr,
-                    productForm,
-                );
-
+            if (xhr?.responseJSON?.errors) {
+                window.handleValidationErrors(xhr, productForm);
                 return;
             }
 
@@ -1111,15 +1098,9 @@
             // GENERAL ERROR
             // =================================================
 
-            Toast.error(
-                xhr?.responseJSON
-                    ?.message ||
-                "Không thể cập nhật sản phẩm.",
-            );
+            Toast.error(xhr?.responseJSON?.message || "Không thể cập nhật sản phẩm.");
         } finally {
-            setSubmitButtonsDisabled(
-                false,
-            );
+            setSubmitButtonsDisabled(false);
         }
     }
 
@@ -1527,7 +1508,7 @@
                         showCancelButton: true,
 
                         confirmButtonText:
-                            "Discard",
+                            "Xác nhận",
 
                         cancelButtonText:
                             "Hủy",

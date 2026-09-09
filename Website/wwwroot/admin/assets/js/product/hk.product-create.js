@@ -79,6 +79,9 @@
 
     const skuInput = $("#SKU");
 
+    $("CategoryId").select2({
+        width: '100%'
+    });
 
     // =========================================================
     // SUBMIT
@@ -292,14 +295,8 @@
             // PRICE
             // =================================================
 
-            if (
-                price === null ||
-                price === undefined ||
-                price.toString().trim() === ""
-            ) {
-                Toast.warning(
-                    "Giá sản phẩm không được để trống.",
-                );
+            if (price === null || price === undefined || price.toString().trim() === "") {
+                Toast.warning("Giá sản phẩm không được để trống.");
 
                 handleValidationErrors(
                     {
@@ -323,10 +320,7 @@
             // STOCK
             // =================================================
 
-            if (
-                stock === null ||
-                stock === undefined ||
-                stock.toString().trim() === ""
+            if (stock === null || stock === undefined || stock.toString().trim() === ""
             ) {
                 Toast.warning(
                     "Số lượng tồn kho không được để trống.",
@@ -1008,10 +1002,10 @@
                 "Create product error:",
                 xhr,
             );
-            Toast.error(
-               
-                "Không thể tạo sản phẩm: " + xhr,
-            );
+            //Toast.error(
+
+            //    "Không thể tạo sản phẩm: " + xhr,
+            //);
             /*
              * Validation error từ server.
              */
@@ -1024,9 +1018,7 @@
                     productForm,
                 );
             } else {
-                Toast.error(
-                    "Không thể tạo sản phẩm.",
-                );
+                Toast.error(xhr?.responseJSON?.message || "Không thể tạo sản phẩm.");
             }
         } finally {
             setSubmitButtonsDisabled(
@@ -1202,7 +1194,7 @@
                         showCancelButton: true,
 
                         confirmButtonText:
-                            "Discard",
+                            "Xác nhận",
 
                         cancelButtonText:
                             "Hủy",

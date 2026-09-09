@@ -28,7 +28,7 @@ namespace Shared.Requests.Product
         public int CategoryId { get; set; }
 
         // Chỉ sử dụng khi KHÔNG có Variant
-        [Range(0.01, 999999999)]
+        [Range(0, 999999999)]
         public decimal? Price { get; set; }
 
         // Chỉ sử dụng khi KHÔNG có Variant

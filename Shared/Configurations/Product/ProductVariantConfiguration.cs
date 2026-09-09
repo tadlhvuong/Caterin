@@ -92,9 +92,13 @@ public class ProductVariantConfiguration
         // =========================
         // Indexes
         // =========================
-
-        builder.HasIndex(x => x.Sku)
-            .IsUnique();
+        builder.HasIndex(x => new
+        {
+            x.ProductId,
+            x.Sku
+        }).IsUnique().HasFilter("\"IsActive\" = true");
+        //builder.HasIndex(x => x.Sku)
+        //    .IsUnique().HasFilter("\"IsActive\" = true");
 
         builder.HasIndex(x => x.Barcode)
             .IsUnique()

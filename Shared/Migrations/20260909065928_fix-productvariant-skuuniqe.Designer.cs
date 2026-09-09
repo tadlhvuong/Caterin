@@ -12,8 +12,8 @@ using Shared.Data.Context;
 namespace Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260813082833_removeCaterogy")]
-    partial class removeCaterogy
+    [Migration("20260909065928_fix-productvariant-skuuniqe")]
+    partial class fixproductvariantskuuniqe
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1106,6 +1106,121 @@ namespace Shared.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.InventoryStock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MinStock")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ReservedQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("WarehouseId", "ProductVariantId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryStocks", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.InventoryTransaction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ReferenceId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.HasIndex("ProductVariantId", "WarehouseId");
+
+                    b.ToTable("InventoryTransactions", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.Warehouse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Warehouses", (string)null);
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaAlbum", b =>
                 {
                     b.Property<int>("Id")
@@ -1115,9 +1230,7 @@ namespace Shared.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
@@ -1146,58 +1259,37 @@ namespace Shared.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int?>("AlbumId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("AltText")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
                     b.Property<string>("ContentType")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("FilePath")
+                    b.Property<int?>("MediaAlbumId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("StoragePath")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
-                    b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("Height")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Url")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int?>("Width")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AlbumId");
-
-                    b.HasIndex("FileName");
-
-                    b.HasIndex("Type");
+                    b.HasIndex("MediaAlbumId");
 
                     b.ToTable("MediaFiles", (string)null);
                 });
@@ -1382,11 +1474,16 @@ namespace Shared.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("WarehouseId");
 
                     b.ToTable("OrderItems", (string)null);
                 });
@@ -1527,6 +1624,9 @@ namespace Shared.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
+                    b.Property<decimal?>("Stock")
+                        .HasColumnType("numeric");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -1547,11 +1647,11 @@ namespace Shared.Migrations
                     b.HasIndex("IsFeatured");
 
                     b.HasIndex("Sku")
-                        .IsUnique()
-                        .HasFilter("\"Sku\" IS NOT NULL");
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.HasIndex("Slug")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.HasIndex("Status");
 
@@ -1584,6 +1684,11 @@ namespace Shared.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1620,7 +1725,8 @@ namespace Shared.Migrations
                     b.HasIndex("IsActive");
 
                     b.HasIndex("Slug")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("\"IsDeleted\" = false");
 
                     b.ToTable("ProductCategories", (string)null);
                 });
@@ -1634,14 +1740,10 @@ namespace Shared.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("DisplayOrder")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsPrimary")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
+                        .HasColumnType("boolean");
 
                     b.Property<long>("MediaFileId")
                         .HasColumnType("bigint");
@@ -1657,10 +1759,7 @@ namespace Shared.Migrations
 
                     b.HasIndex("ProductId", "IsPrimary");
 
-                    b.HasIndex("ProductId", "MediaFileId")
-                        .IsUnique();
-
-                    b.ToTable("ProductMedia", (string)null);
+                    b.ToTable("ProductMedias", (string)null);
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.ProductTag", b =>
@@ -1750,11 +1849,6 @@ namespace Shared.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AvailableQuantity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
                     b.Property<string>("Barcode")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -1793,11 +1887,6 @@ namespace Shared.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ReservedQuantity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(0);
-
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1816,12 +1905,45 @@ namespace Shared.Migrations
                         .IsUnique()
                         .HasFilter("\"IsDefault\" = true");
 
-                    b.HasIndex("Sku")
-                        .IsUnique();
-
                     b.HasIndex("ProductId", "DisplayOrder");
 
+                    b.HasIndex("ProductId", "Sku")
+                        .IsUnique()
+                        .HasFilter("\"IsActive\" = true");
+
                     b.ToTable("ProductVariants", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Product.ProductVariantMedia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttributeValueId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("MediaFileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ProductVariantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AttributeValueId");
+
+                    b.HasIndex("MediaFileId");
+
+                    b.HasIndex("ProductVariantId", "AttributeValueId", "MediaFileId")
+                        .IsUnique();
+
+                    b.ToTable("ProductVariantMedias", (string)null);
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.VariantAttribute", b =>
@@ -2017,14 +2139,49 @@ namespace Shared.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.InventoryStock", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Product.ProductVariant", "ProductVariant")
+                        .WithMany("InventoryStocks")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Inventory.Warehouse", "Warehouse")
+                        .WithMany("InventoryStocks")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.InventoryTransaction", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Product.ProductVariant", "ProductVariant")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Inventory.Warehouse", "Warehouse")
+                        .WithMany("InventoryTransactions")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductVariant");
+
+                    b.Navigation("Warehouse");
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
-                    b.HasOne("Shared.Data.Entities.Media.MediaAlbum", "Album")
+                    b.HasOne("Shared.Data.Entities.Media.MediaAlbum", null)
                         .WithMany("Files")
-                        .HasForeignKey("AlbumId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Album");
+                        .HasForeignKey("MediaAlbumId");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Order.Order", b =>
@@ -2074,9 +2231,17 @@ namespace Shared.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Shared.Data.Entities.Inventory.Warehouse", "Warehouse")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Order");
 
                     b.Navigation("ProductVariants");
+
+                    b.Navigation("Warehouse");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.AttributeValue", b =>
@@ -2110,7 +2275,7 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.HasOne("Shared.Data.Entities.Product.Product", "Product")
-                        .WithMany("Media")
+                        .WithMany("ProductMedias")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2155,6 +2320,33 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Product.ProductVariantMedia", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Product.AttributeValue", "AttributeValue")
+                        .WithMany("ProductVariantMedias")
+                        .HasForeignKey("AttributeValueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "MediaFile")
+                        .WithMany("ProductVariantMedias")
+                        .HasForeignKey("MediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Product.ProductVariant", "ProductVariant")
+                        .WithMany("VariantMedias")
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AttributeValue");
+
+                    b.Navigation("MediaFile");
+
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.VariantAttribute", b =>
@@ -2217,6 +2409,15 @@ namespace Shared.Migrations
                     b.Navigation("RoutePermissions");
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Inventory.Warehouse", b =>
+                {
+                    b.Navigation("InventoryStocks");
+
+                    b.Navigation("InventoryTransactions");
+
+                    b.Navigation("OrderItems");
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaAlbum", b =>
                 {
                     b.Navigation("Files");
@@ -2225,6 +2426,8 @@ namespace Shared.Migrations
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
                     b.Navigation("ProductMedias");
+
+                    b.Navigation("ProductVariantMedias");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Order.Order", b =>
@@ -2244,12 +2447,14 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Product.AttributeValue", b =>
                 {
+                    b.Navigation("ProductVariantMedias");
+
                     b.Navigation("VariantAttributes");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Product.Product", b =>
                 {
-                    b.Navigation("Media");
+                    b.Navigation("ProductMedias");
 
                     b.Navigation("ProductTagMappings");
 
@@ -2268,7 +2473,13 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Product.ProductVariant", b =>
                 {
+                    b.Navigation("InventoryStocks");
+
+                    b.Navigation("InventoryTransactions");
+
                     b.Navigation("VariantAttributes");
+
+                    b.Navigation("VariantMedias");
                 });
 #pragma warning restore 612, 618
         }

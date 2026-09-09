@@ -15,6 +15,7 @@ namespace Shared.Data.Entities.Inventory
         public int AvailableQuantity { get; set; }
         public int ReservedQuantity { get; set; }
         public int MinStock { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public Warehouse Warehouse { get; set; } = null!;
 

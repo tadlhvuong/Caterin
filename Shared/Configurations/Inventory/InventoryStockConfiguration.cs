@@ -61,12 +61,13 @@ namespace Shared.Configurations.Inventory
             builder.Property(x => x.MinStock)
                 .IsRequired();
 
-            // =========================
-            // UpdatedAt
-            // =========================
 
+            builder.Property(x => x.CreateAt)
+                .IsRequired()
+            .HasColumnType("timestamp with time zone");
             builder.Property(x => x.UpdatedAt)
-                .IsRequired();
+                .IsRequired()
+            .HasColumnType("timestamp with time zone");
 
             // =========================
             // Unique

@@ -1,13 +1,22 @@
 ﻿window.handleValidationErrors = function(xhr, form) {
+    console.log('ENTER handleValidationErrors');
+
     const response = xhr.responseJSON;
 
+    console.log('response =', response);
+    console.log(!response?.errors);
     if (!response?.errors)
     {
+        console.log('b lỗi');
         Toast.error(
             response?.detail ||
             response?.title ||
             'An error occurred.'
         );
+        return;
+    }
+    if (response?.errors[""]) {
+        Toast.error(response?.errors[""].join('<br>'));
         return;
     }
 

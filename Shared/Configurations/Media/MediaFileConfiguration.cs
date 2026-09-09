@@ -71,6 +71,10 @@ public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
             .WithOne(x => x.MediaFile)
             .HasForeignKey(x => x.MediaFileId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.HasMany(x => x.ProductVariantMedias)
+            .WithOne(x => x.MediaFile)
+            .HasForeignKey(x => x.MediaFileId)
+            .OnDelete(DeleteBehavior.Restrict);
 
     }
 }

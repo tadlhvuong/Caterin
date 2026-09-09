@@ -2,30 +2,44 @@
 @model CreateProductRequest
 @{
 }
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-6 row-gap-4">
-    <div class="d-flex flex-column justify-content-center">
-        <h4 class="mb-1">Add a new Product</h4>
+<style>
+    .product-form-actions {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1030;
+        padding: 1rem 0;
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(8px);
+        border-top: 1px solid var(--bs-border-color);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    }
+</style>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-end align-items-md-center row-gap-4 product-form-actions">
+   @*  <div class="d-flex flex-column justify-content-center">
+        <h4 class="mb-1">Chỉnh sửa sản phẩm</h4>
         <p class="mb-0">Orders placed across your store</p>
-    </div>
-    <div class="d-flex align-content-center flex-wrap gap-4">
+    </div> *@
+    <div class="d-flex align-content-center flex-wrap gap-4 offset-8">
         <div class="d-flex gap-4">
             <button type="button"
                     id="btnDiscard"
                     class="btn btn-label-secondary">
-                Discard
+                Hủy bỏ
             </button>
             <button type="submit"
                     id="btnSaveDraft"
                     data-action="draft"
                     class="btn btn-label-primary">
-                Save draft
+                Ẩn
             </button>
         </div>
         <button type="submit"
                 id="btnPublish"
                 data-action="publish"
                 class="btn btn-primary">
-            Publish
+            Hiện
         </button>
     </div>
 </div>
@@ -136,6 +150,7 @@
                                 Select Category
                             </option>
                         </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="row mb-6">

@@ -59,7 +59,6 @@ $(function () {
                 url: '/admin/product/get-products',
                 type: 'POST',
                 contentType: 'application/json',
-
                 data: function (d) {
                     var order = d.order && d.order.length ? d.order[0] : null;
 

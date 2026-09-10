@@ -1,11 +1,5 @@
-﻿
-using Shared.Data.Entities.Inventory;
-using System;
-using System.Collections.Generic;
+﻿using Shared.Data.Entities.Inventory;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Product
 {
@@ -17,10 +11,7 @@ namespace Shared.Data.Entities.Product
 
         [Required]
         public int ProductId { get; set; }
-        // =========================
-        // Variant information
-        // =========================
-
+       
         [Required]
         [MaxLength(150)]
         public string Name { get; set; } = string.Empty;
@@ -32,10 +23,7 @@ namespace Shared.Data.Entities.Product
 
         [MaxLength(50)]
         public string? Barcode { get; set; }
-        // =========================
-        // Pricing
-        // =========================
-
+        
         [Required]
         [Range(0, double.MaxValue)]
         public decimal Price { get; set; }
@@ -52,18 +40,10 @@ namespace Shared.Data.Entities.Product
 
         public int DisplayOrder { get; set; }
 
-        // =========================
-        // Audit
-        // =========================
-
         [Required]
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
-
-        // =========================
-        // Navigation
-        // =========================
 
         public Product Product { get; set; } = null!;
         public ICollection<VariantAttribute> VariantAttributes { get; set; } = [];

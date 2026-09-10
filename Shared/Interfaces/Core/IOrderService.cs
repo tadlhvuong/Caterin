@@ -14,23 +14,17 @@ namespace Shared.Interfaces.Core
     public interface IOrderService
     {
         Task<ServiceResult<PagedResult<OrderListItemResult>>> GetOrdersAsync(OrderListRequest request, CancellationToken cancellationToken = default);
+        
         Task<OrderDetailsDto?> GetDetailsAsync(int orderId, CancellationToken cancellationToken = default);
+        
         Task<ServiceResult<int>> CreateAsync(CreateOrderRequest request);
 
-        Task<ServiceResult> UpdateAsync(
-            int id,
-            UpdateOrderRequest request);
+        Task<ServiceResult> UpdateAsync(int id, UpdateOrderRequest request);
 
-        Task<ServiceResult> ChangeStatusAsync(
-            int id,
-            OrderStatus status,
-            string? note = null);
+        Task<ServiceResult> ChangeStatusAsync(int id, OrderStatus status, string? note = null);
 
-        Task<ServiceResult> CancelAsync(
-            int id,
-            string? reason = null);
+        Task<ServiceResult> CancelAsync(int id, string? reason = null);
 
-        // Delete
         Task<ServiceResult> DeleteAsync(int id);
     }
 }

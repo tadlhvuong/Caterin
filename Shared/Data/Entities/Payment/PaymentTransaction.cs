@@ -1,18 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Data.Entities.Payment
+﻿namespace Shared.Data.Entities.Payment
 {
-//    - Id
-//- PaymentId
-//- Gateway
-//- TransactionId
-//- RawResponse
-//- IsSuccess
-//- CreatedAt
     public  class PaymentTransaction
     {
         public int Id { get; set; }

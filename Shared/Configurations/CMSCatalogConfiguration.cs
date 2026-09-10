@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations
 {
@@ -31,10 +26,10 @@ namespace Shared.Configurations
 
             builder.HasOne(x => x.Parent).WithMany().HasForeignKey(x => x.ParentId).OnDelete(DeleteBehavior.Restrict);
 
-            // ===== Index =====
-
             builder.HasIndex(x => x.Type);
+
             builder.HasIndex(x => x.Code).IsUnique();
+
             builder.HasIndex(x => x.Name);
         }
     }

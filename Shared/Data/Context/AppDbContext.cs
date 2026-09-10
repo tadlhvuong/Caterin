@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Shared.Data.Entities.Catelog;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Data.Entities.Identity.Log;
@@ -9,8 +8,6 @@ using Shared.Data.Entities.Inventory;
 using Shared.Data.Entities.Media;
 using Shared.Data.Entities.Order;
 using Shared.Data.Entities.Product;
-using Shared.Services.Authentication;
-using System.Reflection.Emit;
 using Attribute = Shared.Data.Entities.Product.Attribute;
 
 namespace Shared.Data.Context
@@ -47,7 +44,6 @@ namespace Shared.Data.Context
         public virtual DbSet<ProductMedia> ProductMedias { get; set; }
         public virtual DbSet<ProductTag> ProductTags { get; set; }
         public virtual DbSet<ProductTagMapping> ProductTagMappings { get; set; }
-
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderItem> OrderItems { get; set; }
         public virtual DbSet<OrderAddress> OrderAddresses { get; set; }
@@ -57,8 +53,7 @@ namespace Shared.Data.Context
         public virtual DbSet<InventoryStock> InventoryStocks { get; set; }
         public virtual DbSet<InventoryTransaction> InventoryTransactions { get; set; }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

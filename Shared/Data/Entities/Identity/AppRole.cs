@@ -18,8 +18,7 @@ namespace Shared.Data.Entities.Identity
         {
         }
 
-        public AppRole(string roleName, int level)
-            : base(roleName)
+        public AppRole(string roleName, int level) : base(roleName)
         {
             Level = level;
             CreatedAt = DateTime.UtcNow;

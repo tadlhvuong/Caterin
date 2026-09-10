@@ -18,10 +18,7 @@ namespace Shared.Services.Caches
         private readonly AppDbContext _db;
         private readonly ILogger<RoutePermissionCache> _logger;
 
-        public RoutePermissionCache(
-            IMemoryCache cache,
-            AppDbContext db,
-            ILogger<RoutePermissionCache> logger)
+        public RoutePermissionCache(AppDbContext db, IMemoryCache cache, ILogger<RoutePermissionCache> logger)
         {
             _cache = cache;
             _db = db;
@@ -31,7 +28,9 @@ namespace Shared.Services.Caches
         {
             if (_initialized)
                 return;
+
             _logger.LogInformation("{Prefix} Initializing RoutePermission cache...", LogPrefix);
+
             await _lock.WaitAsync();
             try
             {
@@ -48,6 +47,7 @@ namespace Shared.Services.Caches
                 _lock.Release();
             }
         }
+
         public bool TryGetPermission(string route, string method, out RoutePermissionCacheItem permission)
         {
             permission = default!;
@@ -57,30 +57,20 @@ namespace Shared.Services.Caches
                 _logger.LogError("{Prefix} Cache not initialized.", LogPrefix);
                 throw new InvalidOperationException("RoutePermissionCache not initialized");
             }
-            //return routes.TryGetValue(CacheKeys.RoutePermission(method, route), out permission);
 
             var key = CacheKeys.RoutePermission(method, route);
 
-            _logger.LogDebug(
-                "{Prefix} Lookup => {Key}",
-                LogPrefix,
-                key);
+            _logger.LogDebug("{Prefix} Lookup => {Key}", LogPrefix, key);
 
             if (routes.TryGetValue(key, out permission))
             {
-                _logger.LogDebug(
-                    "{Prefix} Cache HIT => Permission={PermissionCode} ({PermissionId})",
-                    LogPrefix,
-                    permission.PermissionCode,
-                    permission.PermissionId);
+                _logger.LogDebug("{Prefix} Cache HIT => Permission={PermissionCode} ({PermissionId})", LogPrefix, 
+                    permission.PermissionCode, permission.PermissionId);
 
                 return true;
             }
 
-            _logger.LogWarning(
-                "{Prefix} Cache MISS => {Key}",
-                LogPrefix,
-                key);
+            _logger.LogWarning("{Prefix} Cache MISS => {Key}", LogPrefix, key);
 
             return false;
         }

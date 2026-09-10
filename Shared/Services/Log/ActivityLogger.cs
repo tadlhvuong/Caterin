@@ -3,12 +3,7 @@ using Shared.Data.Entities.Identity.Log;
 using Shared.Enums;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Log
 {

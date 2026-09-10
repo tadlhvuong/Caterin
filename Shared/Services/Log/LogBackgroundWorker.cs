@@ -4,11 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity.Log;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Log
 {
@@ -19,15 +14,13 @@ namespace Shared.Services.Log
         private readonly LogWorkerOptions _options;
         private readonly ILogger<LogBackgroundWorker> _logger;
 
-        public LogBackgroundWorker(
-            IServiceScopeFactory scopeFactory,
-            LogQueue queue,
-            IOptions<LogWorkerOptions> options,
-            ILogger<LogBackgroundWorker> logger)
+        public LogBackgroundWorker(IServiceScopeFactory scopeFactory, IOptions<LogWorkerOptions> options,
+            LogQueue queue, ILogger<LogBackgroundWorker> logger)
         {
             _scopeFactory = scopeFactory;
-            _queue = queue;
             _options = options.Value;
+
+            _queue = queue;
             _logger = logger;
         }
 

@@ -1,14 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Shared.Common;
+﻿using Shared.Common;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Enums;
 using Shared.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Email
 {
@@ -16,11 +10,11 @@ namespace Shared.Services.Email
 
     public sealed class EmailActionService : IEmailActionService
     {
-        private readonly AppDbContext _context;
+        private readonly AppDbContext _dbcontext;
 
         public EmailActionService(AppDbContext context)
         {
-            _context = context;
+            _dbcontext = context;
         }
 
         public async Task<string> CreateAsync(string userId, EmailActionType type, string token,
@@ -39,9 +33,9 @@ namespace Shared.Services.Email
                 ExpiredAt = DateTime.UtcNow.Add(lifetime)
             };
 
-            _context.EmailActions.Add(entity);
+            _dbcontext.EmailActions.Add(entity);
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _dbcontext.SaveChangesAsync(cancellationToken);
 
             return key;
         }
@@ -50,7 +44,7 @@ namespace Shared.Services.Email
         {
             var hash = CommonHelper.Hash(key);
 
-            var entity = await _context.EmailActions.SingleOrDefaultAsync(x => x.KeyHash == hash, cancellationToken);
+            var entity = await _dbcontext.EmailActions.SingleOrDefaultAsync(x => x.KeyHash == hash, cancellationToken);
 
             if (entity == null)
                 return ServiceResult<EmailAction>.Fail("Liên kết không tồn tại.");
@@ -69,7 +63,7 @@ namespace Shared.Services.Email
 
         public async Task<ServiceResult> MarkUsedAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var entity = await _context.EmailActions.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            var entity = await _dbcontext.EmailActions.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
             if (entity == null)
                 return ServiceResult.Fail("Dữ liệu email đã gửi không còn tồn tại.");
@@ -79,7 +73,7 @@ namespace Shared.Services.Email
 
             entity.UsedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _dbcontext.SaveChangesAsync(cancellationToken);
 
             return ServiceResult.Success();
         }
@@ -87,7 +81,7 @@ namespace Shared.Services.Email
         public async Task<ServiceResult> RevokeAsync(string userId, EmailActionType type,
             string? reason = null, CancellationToken cancellationToken = default)
         {
-            var actions = await _context.EmailActions
+            var actions = await _dbcontext.EmailActions
                 .Where(x => x.UserId == userId && x.Type == type && x.UsedAt == null && x.RevokedAt == null)
                 .ToListAsync(cancellationToken);
 
@@ -100,7 +94,7 @@ namespace Shared.Services.Email
                 item.RevokedReason = reason;
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await _dbcontext.SaveChangesAsync(cancellationToken);
 
             return ServiceResult.Success();
         }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Shared.Configurations;
 using Shared.Constants.Permission;
 using Shared.Data.Entities.Identity;
 using Shared.DTOs.Auth;
@@ -18,22 +17,13 @@ public class JwtService : IJwtService
 {
     private readonly JwtSetting _jwtSettings;
 
-    private readonly UserManager<AppUser>
-        _userManager;
-
-    public JwtService(
-        IOptions<JwtSetting> jwtSettings,
-        UserManager<AppUser> userManager)
+    public JwtService(IOptions<JwtSetting> jwtSettings, UserManager<AppUser> userManager)
     {
         _jwtSettings = jwtSettings.Value;
-
-        _userManager = userManager;
     }
 
-    public string GenerateAccessToken(AppUser user,
-     IEnumerable<string> roles)
+    public string GenerateAccessToken(AppUser user, IEnumerable<string> roles)
     {
-        
         var claims = CreateClaims(user, roles);
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
@@ -60,8 +50,7 @@ public class JwtService : IJwtService
 
         return Convert.ToBase64String(randomBytes);
     }
-    private List<Claim> CreateClaims(AppUser user,
-     IEnumerable<string> roles)
+    private List<Claim> CreateClaims(AppUser user, IEnumerable<string> roles)
     {
         var claims =
             new List<Claim>
@@ -108,11 +97,9 @@ public class JwtService : IJwtService
                 ValidateAudience = true,
                 ValidateLifetime = false, // quan trọng: refresh token có thể expired access token
                 ValidateIssuerSigningKey = true,
-
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidAudience = _jwtSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey)),
                 ClockSkew = TimeSpan.Zero
             },
             out SecurityToken validatedToken);

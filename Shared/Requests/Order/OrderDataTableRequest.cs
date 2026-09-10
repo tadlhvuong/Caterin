@@ -1,4 +1,5 @@
 ﻿using Shared.Enums;
+using Shared.Responses.Datatables;
 using System;
 using System.Collections.Generic;
 using System.Linq;

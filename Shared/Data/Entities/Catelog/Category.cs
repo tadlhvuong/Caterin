@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Shared.Data.Entities.Product;
-
 
 namespace Shared.Data.Entities.Catelog
 {
@@ -24,7 +18,6 @@ namespace Shared.Data.Entities.Catelog
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        // SEO
         [MaxLength(250)]
         public string? SeoTitle { get; set; }
 
@@ -46,7 +39,6 @@ namespace Shared.Data.Entities.Catelog
 
         public DateTime? UpdatedAt { get; set; }
 
-        // Navigation
         public Category? Parent { get; set; }
 
         public ICollection<Category> Children { get; set; } = new List<Category>();

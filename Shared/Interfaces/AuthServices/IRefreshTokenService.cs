@@ -1,11 +1,9 @@
-﻿
-using Shared.Data.Entities.Identity;
+﻿using Shared.Data.Entities.Identity;
 using Shared.DTOs;
 using Shared.DTOs.Auth;
 
 namespace Shared.Interfaces.AuthServices
 {
-
     public interface IRefreshTokenService
     {
         /// <summary>

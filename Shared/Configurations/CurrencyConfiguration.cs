@@ -1,16 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Identity.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations
 {
-    public sealed class CurrencyConfiguration
-    : IEntityTypeConfiguration<Currency>
+    public sealed class CurrencyConfiguration : IEntityTypeConfiguration<Currency>
     {
         public void Configure(EntityTypeBuilder<Currency> builder)
         {

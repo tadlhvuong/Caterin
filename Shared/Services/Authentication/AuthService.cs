@@ -22,10 +22,8 @@ using Shared.Services.Email.EmailModels;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
 using System.Data;
-using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace Shared.Services.Authentication;
 public class AuthService : IAuthService
@@ -47,20 +45,13 @@ public class AuthService : IAuthService
     private readonly IEmailActionService _emailActionService;
 
     public AuthService(
-        UserManager<AppUser> userManager,
-        RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager,
+        UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager,
         IJwtService jwtService, IOptions<JwtSetting> jwtOptions, IRefreshTokenService refreshTokenService,
-        AppDbContext context,
-        IOptions<JwtSetting> jwtSettings,
-        IOptions<AppSettings> appSettings,
-        IAppCache appCache,
-        IUserValidationService userValidationService,
-        ICurrentUserService currentUserService,
-        IEmailSender emailSender,
-        ISecurityLogger securityLogger,
-        ILogger<AuthService> logger, IUserService userService,
-         IConfiguration configuration, IEmailTemplateService emailTemplate,
-         IEmailActionService emailActionService)
+        AppDbContext context, IAppCache appCache, IConfiguration configuration,
+        IOptions<JwtSetting> jwtSettings, IOptions<AppSettings> appSettings,
+        IUserService userService, IUserValidationService userValidationService, ICurrentUserService currentUserService,
+        IEmailSender emailSender, IEmailActionService emailActionService,IEmailTemplateService emailTemplate,
+        ISecurityLogger securityLogger, ILogger<AuthService> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -68,21 +59,25 @@ public class AuthService : IAuthService
         _jwtSettings = jwtOptions.Value;
         _refreshTokenService = refreshTokenService;
         _cache = appCache;
+        _configuration = configuration;
+
+        _userService = userService;
         _userValidationService = userValidationService;
         _currentUserService = currentUserService;
+
         _emailSender = emailSender;
-        _securityLogger = securityLogger;
-        _logger = logger;
-        _userService = userService;
-        _configuration = configuration;
         _emailTemplate = emailTemplate;
         _emailActionService = emailActionService;
+
+        _securityLogger = securityLogger;
+        _logger = logger;
     }
 
     #region Login
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
+        //Find user
         var user = await _userService.FindByEmailAsync(request.Email);
         if (user == null)
         {
@@ -94,7 +89,7 @@ public class AuthService : IAuthService
             };
         }
 
-
+        //Check user email confirmed
         if (!user.EmailConfirmed)
         {
             await _securityLogger.LogAsync(SecurityActionType.Login, false, "Login failed: email not confirmed");
@@ -104,20 +99,9 @@ public class AuthService : IAuthService
                 Message = "Vui lòng xác nhận email trước khi đăng nhập."
             };
         }
-        //var isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
 
-        //if (!isPasswordValid)
-        //{
-        //    await _securityLogger.LogAsync(SecurityActionType.Login, false, "Login failed: invalid password");
-        //    await _userManager.AccessFailedAsync(user);
-        //    return new AuthResponse
-        //    {
-        //        Success = false,
-        //        Message = "Tài khoản hoặc mật khẩu không hợp lệ"
-        //    };
-        //}
+        //Sign in
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-
         if (signInResult.IsLockedOut)
         {
             await _securityLogger.LogAsync(SecurityActionType.Login, false, "Login failed: account locked");
@@ -129,7 +113,7 @@ public class AuthService : IAuthService
                 Message = $"Tài khoản tạm thời bị khóa. Vui lòng thử lại sau {minutes} phút."
             };
         }
-
+        //Check sign in
         if (!signInResult.Succeeded)
         {
             await _securityLogger.LogAsync(SecurityActionType.Login, false, "Login failed: invalid password");
@@ -140,8 +124,7 @@ public class AuthService : IAuthService
                 Message = "Tài khoản hoặc mật khẩu không hợp lệ"
             };
         }
-
-
+        //Check user đăng nhập hợp lệ không
         var validation = await _userValidationService.ValidateAsync(new()
         {
             Scenario = UserValidationScenario.Login,
@@ -158,22 +141,25 @@ public class AuthService : IAuthService
                 Message = validation.Error.ToString()
             };
         }
+        //Lấy vai trò của user
         var roles = await _userService.GetRolesAsync(user.Id);
         var lifeTime = request.IsRemember ? TimeSpan.FromDays(_jwtSettings.RefreshTokenRememberExpirationDays) : TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays);
         await _securityLogger.LogAsync(SecurityActionType.Login, true, $"{user.UserName} login success");
+        //Tạo Auth cho user: Access token + refresh token
         return await GenerateAuthResponseAsync(user, roles, lifeTime);
     }
 
     #endregion
 
     #region Register
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request,
-    CancellationToken cancellationToken = default)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
 
         var email = request.Email.Trim().ToLowerInvariant();
         var username = request.UserName.Trim();
+
+        //Check đã đồng ý điều khoản
         if (!request.AcceptTerms)
         {
             return new AuthResponse
@@ -182,19 +168,17 @@ public class AuthService : IAuthService
                 Message = "Bạn phải đồng ý với Điều khoản sử dụng."
             };
         }
+        //Check email hiện tại đăng ký đã tồn tại chưa
         if (await _userManager.FindByEmailAsync(email) != null)
         {
-            await _securityLogger.LogAsync(
-    SecurityActionType.Register,
-    false,
-    "Register failed: email existed");
+            await _securityLogger.LogAsync(SecurityActionType.Register, false, "Register failed: email existed");
             return new AuthResponse
             {
                 Success = false,
                 Message = "Đăng ký lỗi: Email đã tồn tại"
             };
         }
-
+        //Check Tên đã tồn tại chưa
         if (await _userManager.FindByNameAsync(username) != null)
         {
             return new AuthResponse
@@ -211,9 +195,9 @@ public class AuthService : IAuthService
             PhoneNumber = request.PhoneNumber,
             EmailConfirmed = false
         };
-
+        //Tạo tài khoản mới
         var result = await _userManager.CreateAsync(user, request.Password);
-
+        //Check tạo tài khoản thành công không
         if (!result.Succeeded)
         {
             await _securityLogger.LogAsync(SecurityActionType.Register, false,
@@ -224,32 +208,16 @@ public class AuthService : IAuthService
                 Message = string.Join(", ", result.Errors.Select(x => x.Description))
             };
         }
-
+        //Gán role mặc định "User" cho tài khoản vừa tạo
         await _userService.AssignRoleAsync(user.Id, "User", cancellationToken);
         await _securityLogger.LogAsync(SecurityActionType.Register, true, $"{user.UserName} đăng ký thành công");
-
-        //try
-        //{
-        //    await SendConfirmEmailAsync(user);
-        //}
-        //catch (Exception ex)
-        //{
-        //    _logger.LogError(ex, "Send confirm email failed. UserId: {UserId}", user.Id);
-        //}
-        //return new AuthResponse
-        //{
-        //    Success = true,
-        //    Message = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản."
-        //};
+        
+        //Gửi thư xác thực tài khoản
         var resultConfirmEmail = await SendConfirmEmailAsync(user, cancellationToken);
-
+        //Check gửi thư thành công không
         if (!resultConfirmEmail.Succeeded)
         {
-            await _securityLogger.LogAsync(
-                SecurityActionType.ResendConfirmEmail,
-                false,
-                $"Resend confirm email failed. UserId: {user.Id}");
-
+            await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, false, $"Resend confirm email failed. UserId: {user.Id}");
 
             return new AuthResponse
             {
@@ -265,18 +233,18 @@ public class AuthService : IAuthService
         };
     }
 
-    public async Task<ServiceResult> ConfirmEmailAsync(EmailAction emailAction,
-    CancellationToken cancellationToken = default)
+    public async Task<ServiceResult> ConfirmEmailAsync(EmailAction emailAction, CancellationToken cancellationToken = default)
     {
+        //Tìm user theo id
         var user = await _userManager.FindByIdAsync(emailAction.UserId);
 
         if (user == null)
             return ServiceResult.Fail("Không tìm thấy tài khoản hợp lệ.");
 
         var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailAction.Token));
-
+        //Xác thực email
         var result = await _userManager.ConfirmEmailAsync(user, token);
-
+        //Check xác thực email đã thành công chưa
         if (!result.Succeeded)
         {
             await _securityLogger.LogAsync(SecurityActionType.ConfirmEmail, false,
@@ -284,7 +252,7 @@ public class AuthService : IAuthService
 
             return ServiceResult.Fail(result.Errors.Select(x => x.Description));
         }
-
+        //Check mail xác thực còn tồn tại không
         var markResult = await _emailActionService.MarkUsedAsync(emailAction.Id, cancellationToken);
 
         if (!markResult.Succeeded)
@@ -293,63 +261,45 @@ public class AuthService : IAuthService
         }
         try
         {
+            //Gửi mail báo xác thực thành công
             await SendWelcomeEmailAsync(user);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Send welcome email failed. UserId: {UserId}", user.Id);
         }
-
-        await _securityLogger.LogAsync(
-            SecurityActionType.ConfirmEmail,
-            true,
-            $"{user.UserName} xác thực email thành công");
+        await _securityLogger.LogAsync(SecurityActionType.ConfirmEmail, true, $"{user.UserName} xác thực email thành công");
 
         return ServiceResult.Success();
     }
-    public async Task<ServiceResult> ResendConfirmEmailAsync(
-    string email,
-    CancellationToken cancellationToken = default)
+    public async Task<ServiceResult> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
 
         email = email.Trim().ToLowerInvariant();
-
+        //Tìm user theo email user
         var user = await _userManager.FindByEmailAsync(email);
 
-        // Luôn trả cùng một thông báo
         if (user == null || user.EmailConfirmed)
         {
-            await _securityLogger.LogAsync(
-                SecurityActionType.ResendConfirmEmail,
-                true,
-                "Resend confirm email ignored.");
+            await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, true, "Resend confirm email ignored.");
 
-            return ServiceResult.Success(
-                "Nếu email tồn tại trong hệ thống và chưa được xác thực, chúng tôi đã gửi email xác thực.");
+            return ServiceResult.Success("Nếu email tồn tại trong hệ thống và chưa được xác thực, chúng tôi đã gửi email xác thực.");
         }
-
+        //Gửi lại email xác thực
         var result = await SendConfirmEmailAsync(user, cancellationToken);
 
         if (!result.Succeeded)
         {
-            await _securityLogger.LogAsync(
-                SecurityActionType.ResendConfirmEmail,
-                false,
-                $"Resend confirm email failed. UserId: {user.Id}");
+            await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, false, $"Resend confirm email failed. UserId: {user.Id}");
 
             return result;
         }
 
-        await _securityLogger.LogAsync(
-            SecurityActionType.ResendConfirmEmail,
-            true,
-            $"Resend confirm email success. UserId: {user.Id}");
+        await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, true, $"Resend confirm email success. UserId: {user.Id}");
 
-        return ServiceResult.Success(
-            "Nếu email tồn tại trong hệ thống và chưa được xác thực, chúng tôi đã gửi email xác thực.");
+        return ServiceResult.Success("Nếu email tồn tại trong hệ thống và chưa được xác thực, chúng tôi đã gửi email xác thực.");
     }
-
     #endregion
 
     #region Refresh Token
@@ -369,7 +319,7 @@ public class AuthService : IAuthService
             };
         }
 
-        // Validate User
+        // Check Validate User
         var validation = await _userValidationService.ValidateAsync(
                 new UserValidationContext
                 {
@@ -388,7 +338,7 @@ public class AuthService : IAuthService
             };
         }
 
-        // Rotate
+        // Rotate refresht token
         var rotateResult = await _refreshTokenService.RotateAsync(refreshTokenEntity, cancellationToken);
         if (!rotateResult.Success)
         {
@@ -406,7 +356,7 @@ public class AuthService : IAuthService
         // Roles
         var roles = await _userManager.GetRolesAsync(rotateResult.User);
 
-        // AccessToken
+        // Tạo lại AccessToken
         var accessToken = _jwtService.GenerateAccessToken(rotateResult.User, roles);
 
         await _securityLogger.LogAsync(SecurityActionType.RefreshToken, true, "Refresh token đổi thành công");
@@ -425,25 +375,24 @@ public class AuthService : IAuthService
     #endregion
 
     #region External Login
-
     public async Task<AuthResponse> ExternalLoginAsync(ExternalLoginRequest request,
     CancellationToken cancellationToken = default)
     {
         try
         {
-
+            //Tìm/Tạo user liên kết
             var user = await FindOrCreateExternalUserAsync(request, cancellationToken);
+
             if (user == null)
             {
                 return AuthResponse.Fail("Không thể tạo hoặc liên kết tài khoản.");
             }
             await SaveExternalTokensAsync(user, request);
+            
             var roles = await _userService.GetRolesAsync(user.Id);
             var lifeTime = request.RememberMe ? TimeSpan.FromDays(_jwtSettings.RefreshTokenRememberExpirationDays) : TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays);
-            await _securityLogger.LogAsync(
-    SecurityActionType.ExternalLogin,
-    true,
-    $"{user.UserName} external login success");
+            
+            await _securityLogger.LogAsync(SecurityActionType.ExternalLogin, true, $"{user.UserName} external login success");
             return await GenerateAuthResponseAsync(user, roles, lifeTime, cancellationToken);
         }
         catch (Exception ex)
@@ -463,44 +412,37 @@ public class AuthService : IAuthService
 
         if (refreshTokenEntity == null)
         {
-            await _securityLogger.LogAsync(
-    SecurityActionType.Logout,
-    false,
-    "Logout failed: invalid refresh token");
+            await _securityLogger.LogAsync(SecurityActionType.Logout,false, "Logout failed: invalid refresh token");
             return;
         }
-
+        //Revoke toàn bộ token user đăng xuất đang sử dụng
         await _refreshTokenService.RevokeAllUserTokensAsync(refreshTokenEntity.UserId, cancellationToken);
 
         await _securityLogger.LogAsync(SecurityActionType.Logout, true, $"{refreshTokenEntity.UserId} đăng xuất thành công");
         _logger.LogInformation("Đăng xuất thành công");
     }
-
     #endregion
 
-    public async Task<ServiceResult> ForgotPasswordAsync(ForgotPasswordRequest request,
-    CancellationToken cancellationToken = default)
+    #region Change Password
+    public async Task<ServiceResult> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userService.FindByEmailAsync($"{request.Email}");
 
         if (user == null)
         {
-            await _securityLogger.LogAsync(
-    SecurityActionType.ForgotPassword,
-    false,
-    "Forgot password requested for unknown email");
+            await _securityLogger.LogAsync(SecurityActionType.ForgotPassword, false, "Forgot password requested for unknown email");
             return ServiceResult.Fail("Nếu email tồn tại, chúng tôi đã gửi hướng dẫn.");
         }
 
         if (!await _userManager.IsEmailConfirmedAsync(user))
             return ServiceResult.Fail("Tài khoản chưa xác minh email");
-
+        //Gửi email quên mật khẩu
         await SendForgotPasswordEmailAsync(user);
+
         await _securityLogger.LogAsync(SecurityActionType.ForgotPassword, true, "Quên mật khẩu thành công đợi xác nhận.");
         return ServiceResult.Success();
     }
-    public async Task<ServiceResult> ResetPasswordByTokenAsync(ResetPasswordRequest request,
-    CancellationToken cancellationToken = default)
+    public async Task<ServiceResult> ResetPasswordByTokenAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
     {
         var actionResult = await _emailActionService.GetValidAsync(request.Key, cancellationToken);
 
@@ -516,35 +458,30 @@ public class AuthService : IAuthService
 
         if (user == null)
             return ServiceResult.Fail("Tài khoản không tồn tại.");
-
+        
         var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailAction.Token));
-
+        //Reset password
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
 
         if (!result.Succeeded)
         {
-            await _securityLogger.LogAsync(
-    SecurityActionType.ResetPassword,
-    false,
-    "Reset password failed");
+            await _securityLogger.LogAsync(SecurityActionType.ResetPassword, false, "Reset password failed");
             return ServiceResult.Fail(result.Errors.Select(x => x.Description));
         }
-
+        //Kiểm tra hành động reset pass còn tồn tại không
         var markResult = await _emailActionService.MarkUsedAsync(emailAction.Id, cancellationToken);
         if (!markResult.Succeeded)
         {
             _logger.LogWarning("Cannot mark EmailAction ResetPassword {EmailActionId} as used.", emailAction.Id);
         }
+        //Vô hiệu hóa các phiên đăng nhập/cookie Identity cũ
         await _userManager.UpdateSecurityStampAsync(user);
-
+        //Vô hiệu hóa quyền hạn cũ của user
         await _userService.IncreasePermissionVersionAsync(user.Id);
-
+        //Revoke toàn bộ token của user hiện tại
         await _refreshTokenService.RevokeAllUserTokensAsync(user.Id);
 
-        await _securityLogger.LogAsync(
-            SecurityActionType.ResetPassword,
-            true,
-            "Password reset.");
+        await _securityLogger.LogAsync(SecurityActionType.ResetPassword, true, "Password reset.");
 
         return ServiceResult.Success();
     }
@@ -559,27 +496,28 @@ public class AuthService : IAuthService
 
         if (user == null)
             return ServiceResult.Fail("Không tìm thấy tài khoản.");
-
+        //Đổi mật khẩu
         var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
         if (!result.Succeeded)
         {
-            await _securityLogger.LogAsync(
-    SecurityActionType.ChangePassword,
-    false,
-    "Change password failed");
+            await _securityLogger.LogAsync(SecurityActionType.ChangePassword, false, "Change password failed");
             return ServiceResult.Fail(result.Errors.Select(x => x.Description));
         }
 
+        //Vô hiệu hóa các phiên đăng nhập/cookie Identity cũ
         await _userManager.UpdateSecurityStampAsync(user);
+        //Vô hiệu hóa quyền hạn cũ của user
         await _userService.IncreasePermissionVersionAsync(user.Id);
+        //Revoke toàn bộ token của user hiện tại
         await _refreshTokenService.RevokeAllUserTokensAsync(user.Id);
+
         await _securityLogger.LogAsync(SecurityActionType.ChangePassword, true, "Password changed.");
         return ServiceResult.Success();
     }
+    #endregion Change Password
 
     #region Validate Exists
-
     public async Task<bool> IsEmailExistsAsync(string email)
     {
         return await _userManager.Users.AnyAsync(x => x.Email == email);
@@ -591,8 +529,48 @@ public class AuthService : IAuthService
     }
     #endregion
 
-    #region Private Methods
+    #region Helper SendMail
+    private async Task SendWelcomeEmailAsync(AppUser user)
+    {
+        var baseUrl = _configuration["BaseUrl"];
+        var html = await _emailTemplate.RenderAsync("Welcome",
+            new SuccessEmailModel
+            {
+                LoginUrl = $"{baseUrl}/admin/auth/login",
+                UserName = user.UserName!,
+            });
 
+        await _emailSender.SendEmailAsync(user.Email!, "Chào mừng bạn", html);
+    }
+    private async Task SendForgotPasswordEmailAsync(AppUser user)
+    {
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        var baseUrl = _configuration["BaseUrl"];
+        var minutes = _configuration["ExpireMinutesChangePass"] != null ? int.Parse(_configuration["ExpireMinutesChangePass"]!.ToString()) : 10;
+        await _emailActionService.RevokeAsync(user.Id, EmailActionType.ResetPassword);
+
+        var expireAt = minutes;
+        var key = await _emailActionService.CreateAsync(user.Id, EmailActionType.ResetPassword,
+            token, TimeSpan.FromMinutes(expireAt));
+        var callback = $"{baseUrl}/admin/auth/e/{key}";
+        var html = await _emailTemplate.RenderAsync("ResetPassword",
+            new ResetPasswordEmailModel
+            {
+                UserName = user.UserName!,
+                ResetPasswordUrl = callback,
+                LogoUrl = "https://scontent.fsgn8-4.fna.fbcdn.net/v/t39.30808-6/623377577_1537695691356875_8719577165193812137_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFB6BR-lE0FCz1JlCdka_PU_6ErkG8qdDb_oSuQbyp0Nup9FqHqOUR09brkE_ad8Dbi57Et2dXAQIGguYzg_3e7&_nc_ohc=OPjBncn8hy8Q7kNvwGINdx4&_nc_oc=AdqKU47uWlCDz9e7KgOg11EgRAQaavSUA7-uYKEX0u7TKFy3T05UryXdT793wmA6O38&_nc_zt=23&_nc_ht=scontent.fsgn8-4.fna&_nc_gid=YO1VrraqeTiBGWu83n58-w&_nc_ss=7b2a8&oh=00_AQCEp1p5DCJzN4njmJKOXt15pTKI7etsyUETgKuoJFLYrQ&oe=6A6674F4",
+                SiteName = "Caterin Việt Nam",
+                SupportPhone = "0903653303",
+                ExpireMinutes = expireAt
+            });
+
+        await _emailSender.SendEmailAsync(user.Email!, "Xác thực tài khoản", html);
+    }
+    #endregion Helper SendMail
+
+    #region Helper Account
     private async Task<AuthResponse> GenerateAuthResponseAsync(AppUser user, IReadOnlyList<string> roles, TimeSpan lifeTime,
         CancellationToken cancellationToken = default)
     {
@@ -610,7 +588,6 @@ public class AuthService : IAuthService
             Message = "Đăng nhập thành công"
         };
     }
-
     private async Task<ServiceResult> SendConfirmEmailAsync(AppUser user, CancellationToken cancellationToken = default)
     {
         try
@@ -619,8 +596,7 @@ public class AuthService : IAuthService
 
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-            await _emailActionService.RevokeAsync(user.Id, EmailActionType.ConfirmEmail, 
-                reason: "Resend confirm email", cancellationToken);
+            await _emailActionService.RevokeAsync(user.Id, EmailActionType.ConfirmEmail, reason: "Resend confirm email", cancellationToken);
 
             var key = await _emailActionService.CreateAsync(
                 user.Id,
@@ -633,8 +609,7 @@ public class AuthService : IAuthService
             var hours = _configuration["ExpireHoursConfirmEmail"] != null ? int.Parse(_configuration["ExpireHoursConfirmEmail"]!.ToString()) : 10;
             var callbackUrl = $"{baseUrl}/admin/auth/e/{key}";
 
-            var html = await _emailTemplate.RenderAsync(
-                "ConfirmEmail",
+            var html = await _emailTemplate.RenderAsync("ConfirmEmail",
                 new ConfirmEmailModel
                 {
                     UserName = user.UserName!,
@@ -654,51 +629,14 @@ public class AuthService : IAuthService
         }
     }
 
-    private async Task SendWelcomeEmailAsync(AppUser user)
-    {
-        var baseUrl = _configuration["BaseUrl"];
-        var html = await _emailTemplate.RenderAsync("Welcome",
-            new SuccessEmailModel
-            {
-                LoginUrl = $"{baseUrl}/admin/auth/login",
-                UserName = user.UserName!,
-            });
-
-        await _emailSender.SendEmailAsync(user.Email!, "Chào mừng bạn", html);
-    }
-    private async Task SendForgotPasswordEmailAsync(AppUser user)
-    {
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-        var baseUrl = _configuration["BaseUrl"];
-        var minutes = _configuration["ExpireMinutesChangePass"] != null ? int.Parse(_configuration["ExpireMinutesChangePass"]!.ToString()) : 10;
-        await _emailActionService.RevokeAsync(user.Id, EmailActionType.ResetPassword);
-        var expireAt = minutes;
-        var key = await _emailActionService.CreateAsync(user.Id, EmailActionType.ResetPassword,
-            token, TimeSpan.FromMinutes(expireAt));
-        var callback = $"{baseUrl}/admin/auth/e/{key}";
-        var html = await _emailTemplate.RenderAsync("ResetPassword",
-            new ResetPasswordEmailModel
-            {
-                UserName = user.UserName!,
-                ResetPasswordUrl = callback,
-                LogoUrl = "https://scontent.fsgn8-4.fna.fbcdn.net/v/t39.30808-6/623377577_1537695691356875_8719577165193812137_n.jpg?stp=dst-jpg_tt6&cstp=mx2048x2048&ctp=s2048x2048&_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFB6BR-lE0FCz1JlCdka_PU_6ErkG8qdDb_oSuQbyp0Nup9FqHqOUR09brkE_ad8Dbi57Et2dXAQIGguYzg_3e7&_nc_ohc=OPjBncn8hy8Q7kNvwGINdx4&_nc_oc=AdqKU47uWlCDz9e7KgOg11EgRAQaavSUA7-uYKEX0u7TKFy3T05UryXdT793wmA6O38&_nc_zt=23&_nc_ht=scontent.fsgn8-4.fna&_nc_gid=YO1VrraqeTiBGWu83n58-w&_nc_ss=7b2a8&oh=00_AQCEp1p5DCJzN4njmJKOXt15pTKI7etsyUETgKuoJFLYrQ&oe=6A6674F4",
-                SiteName = "Caterin Việt Nam",
-                SupportPhone = "0903653303",
-                ExpireMinutes = expireAt
-            });
-
-        await _emailSender.SendEmailAsync(user.Email!, "Xác thực tài khoản", html);
-    }
-
     private async Task<AppUser?> FindOrCreateExternalUserAsync(ExternalLoginRequest request, CancellationToken cancellationToken = default)
     {
-        // 1. Tìm theo Provider
+        // Tìm theo Provider
         var user = await _userManager.FindByLoginAsync(request.Provider, request.ProviderKey);
 
         if (user != null)
             return user;
-        // 2. Tìm theo Email
+        //Tìm theo Email
         if (!string.IsNullOrWhiteSpace(request.Email))
         {
             user = await _userManager.FindByEmailAsync(request.Email);
@@ -706,7 +644,7 @@ public class AuthService : IAuthService
 
 
         bool isNewUser = false;
-        // 3. Chưa có User
+        //Chưa có User
         if (user == null)
         {
             string? avatar = null;
@@ -739,17 +677,14 @@ public class AuthService : IAuthService
             isNewUser = true;
         }
 
+        //Đã có user
         var result = await _userManager.AddLoginAsync(user, new UserLoginInfo(
-                    request.Provider,
-                    request.ProviderKey,
-                    request.Provider));
+                    request.Provider, request.ProviderKey, request.Provider));
 
         if (!result.Succeeded)
         {
             // Có thể request khác vừa liên kết xong
-            var existing = await _userManager.FindByLoginAsync(
-                request.Provider,
-                request.ProviderKey);
+            var existing = await _userManager.FindByLoginAsync(request.Provider, request.ProviderKey);
 
             if (existing != null)
                 return existing;
@@ -768,28 +703,19 @@ public class AuthService : IAuthService
         if (!string.IsNullOrEmpty(request.AccessToken))
         {
             await _userManager.SetAuthenticationTokenAsync(
-                user,
-                request.Provider,
-                "access_token",
-                request.AccessToken);
+                user, request.Provider, "access_token", request.AccessToken);
         }
 
         if (!string.IsNullOrEmpty(request.RefreshToken))
         {
             await _userManager.SetAuthenticationTokenAsync(
-                user,
-                request.Provider,
-                "refresh_token",
-                request.RefreshToken);
+                user, request.Provider, "refresh_token", request.RefreshToken);
         }
 
         if (request.ExpiresAt.HasValue)
         {
             await _userManager.SetAuthenticationTokenAsync(
-                user,
-                request.Provider,
-                "expires_at",
-                request.ExpiresAt.Value.ToUnixTimeSeconds().ToString());
+                user, request.Provider, "expires_at", request.ExpiresAt.Value.ToUnixTimeSeconds().ToString());
         }
     }
 
@@ -807,9 +733,7 @@ public class AuthService : IAuthService
         }
 
         // Chuẩn hóa
-        source = CommonHelper.NormalizeVietnamese(source)
-                             .ToLowerInvariant()
-                             .Replace(" ", "");
+        source = CommonHelper.NormalizeVietnamese(source).ToLowerInvariant() .Replace(" ", "");
 
         // Chỉ giữ a-z, 0-9 và _
         source = Regex.Replace(source, @"[^a-z0-9_]", "");
@@ -829,5 +753,5 @@ public class AuthService : IAuthService
 
         return username;
     }
-    #endregion
+    #endregion Helper Account
 }

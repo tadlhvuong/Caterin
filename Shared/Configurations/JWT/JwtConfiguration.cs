@@ -20,19 +20,14 @@ namespace Shared.Configurations.JWT
     {
         public static ILogger JwtLogger(this HttpContext context)
         {
-            return context.RequestServices
-                .GetRequiredService<ILoggerFactory>()
-                .CreateLogger("JwtBearer");
+            return context.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("JwtBearer");
         }
     }
     public static class JwtConfiguration
     {
-        public static IServiceCollection AddJwtConfiguration(
-            this IServiceCollection services,
-            IConfiguration configuration)
+        public static IServiceCollection AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
-            var jwtSettings = configuration.GetSection("JwtSetting").Get<JwtSetting>()
-                                ?? throw new InvalidOperationException("JwtSetting is missing.");
+            var jwtSettings = configuration.GetSection("JwtSetting").Get<JwtSetting>() ?? throw new InvalidOperationException("JwtSetting is missing.");
             services.AddScoped<JwtBearerEventHandler>();
             services.AddAuthentication(
                 options => {

@@ -1,28 +1,29 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Shared.Helpers;
-
-public static class CookieHelper
+namespace Shared.Helpers
 {
-    public static CookieOptions AccessToken(int exprired)
+    public static class CookieHelper
     {
-        return new CookieOptions
+        public static CookieOptions AccessToken(int exprired)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTime.UtcNow.AddMinutes(exprired)
-        };
-    }
+            return new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddMinutes(exprired)
+            };
+        }
 
-    public static CookieOptions RefreshToken(DateTime expiresAt)
-    {
-        return new CookieOptions
+        public static CookieOptions RefreshToken(DateTime expiresAt)
         {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Lax,
-            Expires = new DateTimeOffset(expiresAt)
-        };
+            return new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = new DateTimeOffset(expiresAt)
+            };
+        }
     }
 }

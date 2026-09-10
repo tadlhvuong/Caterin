@@ -2,78 +2,36 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Order;
 
-public class OrderAddressConfiguration : IEntityTypeConfiguration<OrderAddress>
+namespace Shared.Configurations.Order
 {
-    public void Configure(EntityTypeBuilder<OrderAddress> builder)
+    public class OrderAddressConfiguration : IEntityTypeConfiguration<OrderAddress>
     {
-        // =========================
-        // Table
-        // =========================
+        public void Configure(EntityTypeBuilder<OrderAddress> builder)
+        {
+            builder.ToTable("OrderAddresses");
 
-        builder.ToTable("OrderAddresses");
+            builder.HasKey(x => x.Id);
 
-        // =========================
-        // Primary Key
-        // =========================
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.HasKey(x => x.Id);
+            builder.Property(x => x.OrderId).IsRequired();
 
-        builder.Property(x => x.Id)
-            .ValueGeneratedOnAdd();
+            builder.Property(x => x.ReceiverName).IsRequired().HasMaxLength(200);
 
-        // =========================
-        // OrderId
-        // =========================
+            builder.Property(x => x.Phone).IsRequired().HasMaxLength(20);
 
-        builder.Property(x => x.OrderId)
-            .IsRequired();
+            builder.Property(x => x.Province).IsRequired().HasMaxLength(100);
 
-        // =========================
-        // Receiver
-        // =========================
+            builder.Property(x => x.District).HasMaxLength(100).IsRequired(false);
 
-        builder.Property(x => x.ReceiverName)
-            .IsRequired()
-            .HasMaxLength(200);
+            builder.Property(x => x.Ward).IsRequired().HasMaxLength(100);
 
-        builder.Property(x => x.Phone)
-            .IsRequired()
-            .HasMaxLength(20);
+            builder.Property(x => x.AddressLine).IsRequired().HasMaxLength(500);
 
-        // =========================
-        // Address
-        // =========================
+            builder.HasOne(x => x.Order).WithOne(x => x.Address)
+                .HasForeignKey<OrderAddress>(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.Province)
-            .IsRequired()
-            .HasMaxLength(100);
-
-        builder.Property(x => x.District)
-            .HasMaxLength(100)
-            .IsRequired(false);
-
-        builder.Property(x => x.Ward)
-            .IsRequired()
-            .HasMaxLength(100);
-
-        builder.Property(x => x.AddressLine)
-            .IsRequired()
-            .HasMaxLength(500);
-
-        // =========================
-        // Order relationship
-        // =========================
-
-        builder.HasOne(x => x.Order)
-            .WithOne(x => x.Address)
-            .HasForeignKey<OrderAddress>(x => x.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // =========================
-        // Index
-        // =========================
-
-        builder.HasIndex(x => x.OrderId)
-            .IsUnique();
+            builder.HasIndex(x => x.OrderId).IsUnique();
+        }
     }
 }

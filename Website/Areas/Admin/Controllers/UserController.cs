@@ -218,7 +218,6 @@ namespace Website.Areas.Admin.Controllers
         [PermissionAction(ActionType.Edit)]
         public async Task<IActionResult> AssignRole(string userId, string role)
         {
-            //await _authService.AssignRoleAsync(userId, role
             await _userService.AssignRoleAsync(userId, role);
 
             return RedirectToAction(nameof(Details), new { id = userId });

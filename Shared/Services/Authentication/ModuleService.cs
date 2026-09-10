@@ -6,11 +6,6 @@ using Shared.Data.Context;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Authentication
 {
@@ -18,8 +13,8 @@ namespace Shared.Services.Authentication
     {
         private readonly AppDbContext _dbContext;
         private readonly IAppCache _cache;
-        private readonly ILogger<ModuleService> _logger;
         private readonly EndpointDataSource _endpointDataSource;
+        private readonly ILogger<ModuleService> _logger;
 
         public ModuleService(
             AppDbContext dbContext,

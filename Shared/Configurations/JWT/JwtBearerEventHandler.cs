@@ -8,12 +8,6 @@ using Shared.UserValidation.Interface;
 
 namespace Shared.Configurations.JWT
 {
-
-    // JwtBearerHandler call run (framework nội bộ ASP.NET Core)
-    //TokenValidated: JwtBearerHandler call
-    //AuthenticationFailed: Jwt middleware cal
-    //Challenge: Authorization middleware call
-    //Forbidden: Authorization middleware call
     public sealed class JwtBearerEventHandler : JwtBearerEvents
     {
         private readonly ILogger<JwtBearerEventHandler> _logger;

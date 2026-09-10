@@ -3,12 +3,7 @@ using Shared.Data.Entities.Identity.Log;
 using Shared.Enums;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Log
 {
@@ -19,10 +14,7 @@ namespace Shared.Services.Log
         private readonly IHttpContextAccessor _httpContext;
         private readonly ILogPipeline _pipeline;
 
-        public SecurityLogger(
-            ICurrentUserService currentUser,
-            IHttpContextAccessor httpContext,
-            ILogPipeline pipeline)
+        public SecurityLogger(ICurrentUserService currentUser, IHttpContextAccessor httpContext, ILogPipeline pipeline)
         {
             _currentUser = currentUser;
             _httpContext = httpContext;
@@ -37,6 +29,7 @@ namespace Shared.Services.Log
             var log = new SecurityLog
             {
                 UserId = _currentUser.UserId,
+
                 UserName = _currentUser.UserName,
 
                 ActionType = action,
@@ -45,19 +38,11 @@ namespace Shared.Services.Log
 
                 Message = message,
 
-                IpAddress = _httpContext.HttpContext?
-                    .Connection
-                    .RemoteIpAddress?
-                    .ToString(),
+                IpAddress = _httpContext.HttpContext?.Connection.RemoteIpAddress?.ToString(),
 
-                UserAgent =
-                    _httpContext.HttpContext?
-                        .Request
-                        .Headers["User-Agent"],
+                UserAgent = _httpContext.HttpContext?.Request.Headers["User-Agent"],
 
-                TraceId =
-                    Activity.Current?.TraceId
-                        .ToString(),
+                TraceId = Activity.Current?.TraceId .ToString(),
 
                 CreatedAt = DateTime.UtcNow
             };

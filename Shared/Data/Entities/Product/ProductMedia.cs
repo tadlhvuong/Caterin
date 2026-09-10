@@ -1,10 +1,5 @@
 ﻿using Shared.Data.Entities.Media;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Product
 {
@@ -21,11 +16,6 @@ namespace Shared.Data.Entities.Product
         public bool IsPrimary { get; set; }
 
         public int DisplayOrder { get; set; }
-
-        // =========================
-        // Navigation
-        // =========================
-
         public MediaFile MediaFile { get; set; } = null!;
         public virtual Product Product { get; set; } = null!;
     }

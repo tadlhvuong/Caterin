@@ -14,8 +14,7 @@ namespace Shared.Extensions
 
         public static UserValidationContext? GetUserValidationContext(this HttpContext context)
         {
-            return context.Items.TryGetValue(UserValidationContextKey, out var value)
-                ? value as UserValidationContext : null;
+            return context.Items.TryGetValue(UserValidationContextKey, out var value) ? value as UserValidationContext : null;
         }
     }
 }

@@ -8,6 +8,8 @@ using Shared.Requests;
 using Shared.Requests.Product;
 using Shared.Requests.Product.Category;
 using Shared.Responses;
+using Shared.Responses.Datatables;
+using Shared.Responses.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,45 +20,119 @@ namespace Shared.Interfaces.Core
 {
     public interface IProductService
     {
-        // Query
-        //Task<Product?> GetByIdAsync(int id);
-        //Task<Product?> GetByIdWithCategoryAsync(int id);
-        //Task<Product?> GetBySkuAsync(string sku);
-        //Task<IReadOnlyList<Product>> GetByIdsAsync(IEnumerable<int> ids);
+        #region IProduct
 
-        Task<PagedResult<ProductListResult>> GetProductsAsync(DataTableRequest request);
+        /// <summary>
+        /// Show product list
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PagedResult<ProductListResult>> GetProductsAsync(DataTableResponse request);
+        /// <summary>
+        /// Get category list for view _ProductForm 
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<List<SelectListItem>> GetCreateProductCategoriesAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Get attribute list for view _ProductForm 
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<List<SelectListItem>> GetCreateAttributesAsync(CancellationToken cancellationToken = default);
-        //Task<ServiceResult<CreateProductRequest>> GetForEditAsync(int id, CancellationToken cancellationToken);
-        Task<bool> ExistsBySKUProductAsync(string slug);
-        Task<bool> ExistsBySlugProductAsync(string slug);
-        Task<ServiceResult> MoveToDraftAsync(DeleteFormRequest request, CancellationToken cancellationToken);
-        Task<ServiceResult<ProductStatus>> ToggleSuspendAsync(int productId, CancellationToken cancellationToken);
-        //Task<ServiceResult<int>> UpdateStockStatusAsync(UpdateProductStockRequest request);
-
-        //Task<IReadOnlyList<Product>> GetActiveAsync();
-
-        //Task<IReadOnlyList<Product>> GetByCategoryAsync(int categoryId);
-
-        //Task<bool> ExistsAsync(int id);
-
-        //Task<bool> ExistsSkuAsync(string sku, int? excludeId = null);
-
-
-        //// CRUD
-        Task<ServiceResult<int>> CreateAsync(CreateProductRequest request, CancellationToken cancellationToken = default);
-
-        Task<ServiceResult<int>> UpdateAsync(CreateProductRequest request, CancellationToken cancellationToken = default);
-        Task<ServiceResult<ProductUpdateResponse>> GetUpdateProductAsync(int id, CancellationToken cancellationToken = default);
-
-        //Service Category Product
-        Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableRequest request);
-        Task<EditProductCategoryRequest> GetCategoryIdAsync(int categoryId);
-        Task<bool> ExistsBySlugCategoryAsync(string slug);
+        /// <summary>
+        /// Generate unique slug product follow product name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         Task<string> GenerateUniqueSlugProductAsync(string name);
+        /// <summary>
+        /// Change product type. use in view product list
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<ProductStatus>> ToggleSuspendAsync(int productId, CancellationToken cancellationToken);
+        /// <summary>
+        /// Check product SKU exist
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        Task<bool> ExistsBySKUProductAsync(string slug);
+        /// <summary>
+        /// Check product slug exits
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        Task<bool> ExistsBySlugProductAsync(string slug);
+        /// <summary>
+        /// Create product
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> CreateAsync(ProductRequest request, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Get data product updated
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<ProductResponse>> GetUpdateProductAsync(int id, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Update product
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> UpdateAsync(ProductRequest request, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Soft delete  product
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult> MoveToDraftAsync(DeleteFormRequest request, CancellationToken cancellationToken);
+        #endregion IProduct
+
+        #region ICategory
+        /// <summary>
+        /// Get category list
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableResponse request);
+        /// <summary>
+        /// Get data follow id category
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <returns></returns>
+        Task<EditProductCategoryRequest> GetCategoryIdAsync(int categoryId);
+        /// <summary>
+        /// Check category slug exits
+        /// </summary>
+        /// <param name="slug"></param>
+        /// <returns></returns>
+        Task<bool> ExistsBySlugCategoryAsync(string slug);
+        /// <summary>
+        /// Generate unique category slug
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         Task<string> GenerateUniqueSlugCategoryAsync(string name);
-        Task<ServiceResult<int>> SaveCategoryAsync(EditProductCategoryRequest model, CancellationToken cancellationToken);
-        Task<ServiceResult<int>> DeleteAsync(DeleteFormRequest request);
-        //Task<ServiceResult<int>> CreateProductCategoryAsync(CreateProductCategoryRequest request, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Create/Update category
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> SaveCategoryAsync(EditProductCategoryRequest request, CancellationToken cancellationToken);
+        /// <summary>
+        /// Soft Delete category
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> DeleteCategoryAsync(DeleteFormRequest request);
+        #endregion ICategory
     }
 }

@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Shared.Data.Entities.Identity;
 using Shared.Services.Authentication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.UserValidation.DTOs
 {

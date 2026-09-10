@@ -1,10 +1,4 @@
-﻿using Shared.Data.Entities.Catelog;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Data.Entities.Product
 {
@@ -24,7 +18,6 @@ namespace Shared.Data.Entities.Product
         [MaxLength(500)]
         public string? Description { get; set; }
 
-        // SEO
         [MaxLength(180)]
         public string? SeoTitle { get; set; }
 
@@ -45,7 +38,6 @@ namespace Shared.Data.Entities.Product
 
         public DateTime? UpdatedAt { get; set; }
 
-        // Navigation
         public ICollection<Product> Products { get; set; } = [];
     }
 }

@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Shared.Data.Entities.Identity;
-using Shared.Data.Entities.Identity.Core;
-
-namespace Shared.Data.Entities.Identity.Core
+﻿namespace Shared.Data.Entities.Identity.Core
 {
     public class RolePermission
     {

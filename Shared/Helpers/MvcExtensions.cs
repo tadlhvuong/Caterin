@@ -26,7 +26,6 @@ namespace Shared.Helpers
             if (string.IsNullOrEmpty(area))
                 area = currentArea;
             return controller == currentController && action == currentAction && area == currentArea;
-            //return controller == currentController && action == currentAction;
         }
         public static bool IsActiveTab(this IHtmlHelper html, string tab)
         {

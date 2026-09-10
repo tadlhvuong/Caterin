@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.Requests
+namespace Shared.Responses.Datatables
 {
-    public class DataTableRequest
+    public class DataTableResponse
     {
         public int Draw { get; set; }
 
@@ -20,7 +20,9 @@ namespace Shared.Requests
         public string? SortColumn { get; set; }
 
         public string? SortDirection { get; set; }
+
         public int? Status { get; set; }
+
         public int? Stock { get; set; }
     }
 }

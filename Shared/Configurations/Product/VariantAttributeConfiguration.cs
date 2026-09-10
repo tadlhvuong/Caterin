@@ -14,27 +14,11 @@ public class VariantAttributeConfiguration : IEntityTypeConfiguration<VariantAtt
             x.AttributeValueId
         });
 
-        // =========================
-        // ProductVariant relationship
-        // =========================
+        builder.HasOne(x => x.ProductVariant).WithMany(x => x.VariantAttributes)
+            .HasForeignKey(x => x.ProductVariantId).OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(x => x.ProductVariant)
-            .WithMany(x => x.VariantAttributes)
-            .HasForeignKey(x => x.ProductVariantId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // =========================
-        // AttributeValue relationship
-        // =========================
-
-        builder.HasOne(x => x.AttributeValue)
-            .WithMany(x => x.VariantAttributes)
-            .HasForeignKey(x => x.AttributeValueId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // =========================
-        // Index
-        // =========================
+        builder.HasOne(x => x.AttributeValue).WithMany(x => x.VariantAttributes)
+            .HasForeignKey(x => x.AttributeValueId).OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(x => x.AttributeValueId);
     }

@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Mvc.Controllers;
+﻿using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -19,9 +18,7 @@ namespace Shared.Services.Authentication
         private readonly IRoutePermissionCache _routePermissionCache;
         private readonly ILogger<RoutePermissionService> _logger;
 
-        public RoutePermissionService(
-            EndpointDataSource endpointDataSource,
-            AppDbContext dbContext,
+        public RoutePermissionService(EndpointDataSource endpointDataSource, AppDbContext dbContext,
             IRoutePermissionCache routePermissionCache, ILogger<RoutePermissionService> logger)
         {
             _endpointDataSource = endpointDataSource;
@@ -51,10 +48,11 @@ namespace Shared.Services.Authentication
 
                 foreach (var endpoint in endpoints)
                 {
-                    ProcessEndpoint(endpoint, permissionLookup, routeLookup, scannedRoutes);
+                    ProcessEndpoint(endpoint, scannedRoutes, permissionLookup, routeLookup);
                 }
 
                 DisableRemovedRoutes(routeLookup, scannedRoutes);
+
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
                 await _routePermissionCache.ReloadAsync();
@@ -71,10 +69,8 @@ namespace Shared.Services.Authentication
         {
             return string.Equals( actionDescriptor.RouteValues["area"], "Admin", StringComparison.OrdinalIgnoreCase);
         }
-        private void ProcessEndpoint( RouteEndpoint endpoint,
-            Dictionary<string, Permission> permissionLookup,
-            Dictionary<string, RoutePermission> routeLookup,
-            HashSet<string> scannedRoutes)
+        private void ProcessEndpoint(RouteEndpoint endpoint, HashSet<string> scannedRoutes,
+            Dictionary<string, Permission> permissionLookup, Dictionary<string, RoutePermission> routeLookup)
         {
 
             var actionDescriptor = endpoint.Metadata.GetMetadata<ControllerActionDescriptor>();
@@ -94,7 +90,6 @@ namespace Shared.Services.Authentication
             {
                 throw new InvalidOperationException($"Route '{actionDescriptor.ControllerName}/{actionDescriptor.ActionName}' chưa khai báo PermissionActionAttribute.");
             }
-
 
             var module = moduleAttribute.Module.ToLower();
             var action =  permissionActionAttribute.Action.ToString().ToLower();
@@ -139,11 +134,8 @@ namespace Shared.Services.Authentication
             _dbContext.RoutePermissions.Add(routePermission);
 
             routeLookup[routeKey] = routePermission;
-            _logger.LogInformation(
-    "Scan: Method={Method}, Route={Route}, Key={Key}",
-    httpMethod,
-    route,
-    routeKey);
+            _logger.LogInformation("Scan: Method={Method}, Route={Route}, Key={Key}", 
+                httpMethod, route, routeKey);
         }
 
         private void DisableRemovedRoutes(Dictionary<string, RoutePermission> routeLookup, HashSet<string> scannedRoutes)
@@ -159,10 +151,8 @@ namespace Shared.Services.Authentication
                 }
                 route.IsActive = isActive;
                 route.UpdatedAt = DateTime.UtcNow;
-                _logger.LogInformation(
-    "DB: Method={Method}, Route={Route}, Key={Key}",
-    route.HttpMethod,
-    route.Route,
+                _logger.LogInformation("DB: Method={Method}, Route={Route}, Key={Key}",
+                    route.HttpMethod, route.Route,
     routeKey);
             }
         }

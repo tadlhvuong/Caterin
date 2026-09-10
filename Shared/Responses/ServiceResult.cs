@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Responses
+﻿namespace Shared.Responses
 {
     public sealed class ServiceResult
     {
@@ -53,7 +47,6 @@ namespace Shared.Responses
                })
                .ToList()
        };
-        // Fail(IEnumerable<string>)
         public static ServiceResult Fail(IEnumerable<ServiceError> errors)
             => new()
             {
@@ -61,8 +54,6 @@ namespace Shared.Responses
                 Errors = errors.ToList()
             };
 
-        // Fail(ServiceError)
-        // Fail(ServiceError, ServiceError)
         public static ServiceResult Fail(params ServiceError[] errors)
             => new()
             {

@@ -1,20 +1,7 @@
 ﻿using Shared.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Payment
 {
-//    - Id
-//- OrderId
-//- PaymentMethodId
-//- Status
-//- Amount
-//- TransactionCode
-//- PaidAt
-//- CreatedAt
     public class Payment
     {
         public int Id { get; set; }

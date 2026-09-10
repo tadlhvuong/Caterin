@@ -1,20 +1,7 @@
 ﻿using Shared.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Notification
 {
-//    - Id
-//- ToEmail
-//- Subject
-//- Body
-//- Status
-//- RetryCount
-//- SentAt
-//- CreatedAt
     public class EmailMessage
     {
         public int Id { get; set; }

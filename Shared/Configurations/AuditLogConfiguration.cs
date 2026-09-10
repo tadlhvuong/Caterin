@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Identity.Log;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations
 {
@@ -26,8 +21,6 @@ namespace Shared.Configurations
             builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
 
             builder.Property(x => x.ActionType).HasConversion<string>();
-
-            // ===== Index =====
 
             builder.HasIndex(x => x.TableName);
 

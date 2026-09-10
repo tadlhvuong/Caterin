@@ -2,22 +2,25 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Identity;
 
-public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
+namespace Shared.Configurations
 {
-    public void Configure(EntityTypeBuilder<AppUser> builder)
+    public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
     {
-        builder.ToTable("Users");
+        public void Configure(EntityTypeBuilder<AppUser> builder)
+        {
+            builder.ToTable("Users");
 
-        builder.HasKey(x => x.Id);
+            builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.PermissionVersion).HasDefaultValue(1);
+            builder.Property(x => x.PermissionVersion).HasDefaultValue(1);
 
-        builder.Property(x => x.UserName).HasMaxLength(256);
+            builder.Property(x => x.UserName).HasMaxLength(256);
 
-        builder.Property(x => x.Email).HasMaxLength(256);
+            builder.Property(x => x.Email).HasMaxLength(256);
 
-        builder.Property(x => x.UserName).HasMaxLength(200);
+            builder.Property(x => x.UserName).HasMaxLength(200);
 
-        builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+        }
     }
 }

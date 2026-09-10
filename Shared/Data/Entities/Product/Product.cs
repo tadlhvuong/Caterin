@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Shared.Data.Entities.Catelog;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Shared.Enums;
 
 namespace Shared.Data.Entities.Product
@@ -12,10 +6,6 @@ namespace Shared.Data.Entities.Product
     public class Product
     {
         public int Id { get; set; }
-
-        // =========================
-        // Basic information
-        // =========================
 
         [Required]
         [MaxLength(250)]
@@ -34,10 +24,6 @@ namespace Shared.Data.Entities.Product
 
         public string? Description { get; set; }
 
-        // =========================
-        // Pricing
-        // =========================
-
         /// <summary>
         /// Giá mặc định hoặc giá bắt đầu.
         /// Giá thực tế của variant nằm ở ProductVariant.
@@ -46,10 +32,6 @@ namespace Shared.Data.Entities.Product
         public decimal? Price { get; set; }
         [Range(0, 999999999)]
         public decimal? Stock { get; set; }
-        // =========================
-        // Shipping
-        // =========================
-
         /// <summary>
         /// Khối lượng sản phẩm, tính theo WeightUnit.
         /// </summary>
@@ -58,18 +40,8 @@ namespace Shared.Data.Entities.Product
 
         [MaxLength(20)]
         public WeightUnit? WeightUnit { get; set; }
-
-        // =========================
-        // Display
-        // =========================
-
         public bool IsFeatured { get; set; }
-
         public int DisplayOrder { get; set; }
-
-        // =========================
-        // SEO
-        // =========================
 
         [MaxLength(250)]
         public string? SeoTitle { get; set; }
@@ -82,15 +54,7 @@ namespace Shared.Data.Entities.Product
 
         public bool NoIndex { get; set; }
 
-        // =========================
-        // Business
-        // =========================
-
         public ProductStatus Status { get; set; }
-
-        // =========================
-        // Audit
-        // =========================
 
         [Required]
         public DateTime CreatedAt { get; set; }
@@ -99,14 +63,10 @@ namespace Shared.Data.Entities.Product
 
         public DateTime? PublishedAt { get; set; }
         public bool IsDeleted { get; set; }
-        // =========================
-        // Navigation
-        // =========================
-
+        
         [Required]
         public int CategoryId { get; set; }
 
-        // Navigation
         public ProductCategory Category { get; set; } = null!;
 
         public ICollection<ProductTagMapping> ProductTagMappings { get; set; } = [];

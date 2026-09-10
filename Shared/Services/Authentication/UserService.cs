@@ -29,14 +29,8 @@ namespace Shared.Services.Authentication
         private readonly ILogger<UserService> _logger;
         private readonly ISecurityLogger _securityLogger;
         private readonly IAppCache _cache;
-
-        public UserService(
-            AppDbContext dbContext,
-            UserManager<AppUser> userManager,
-            RoleManager<AppRole> roleManager,
-            ILogger<UserService> logger,
-            ISecurityLogger securityLogger,
-            IAppCache cache)
+        public UserService(AppDbContext dbContext, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager,
+            ILogger<UserService> logger, ISecurityLogger securityLogger, IAppCache cache)
         {
             _dbContext = dbContext;
             _userManager = userManager;
@@ -68,6 +62,8 @@ namespace Shared.Services.Authentication
 
             return roles.ToList();
         }
+        
+        #region Role
         public async Task AssignRoleAsync(string userId, string role, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -80,14 +76,7 @@ namespace Shared.Services.Authentication
 
             if (await _userManager.IsInRoleAsync(user, role))
                 return;
-            //var currentUser = await _userService.GetCurrentUserAsync();
-            //var currentRoles = await _userManager.GetRolesAsync(currentUser);
 
-            //var currentUserRole = await _roleService.GetHighestRoleAsync(currentRoles);
-            //var targetRole = await _roleManager.FindByNameAsync(role);
-
-            //if (currentUserRole.Level < targetRole.Level)
-            //    throw new UnauthorizedAccessException();
             var result = await _userManager.AddToRoleAsync(user, role);
 
             if (!result.Succeeded)
@@ -144,6 +133,8 @@ namespace Shared.Services.Authentication
             await IncreasePermissionVersionInternalAsync(user, SecurityActionType.RoleReplaced);
             await InvalidateUserCache(userId);
         }
+        #endregion Role
+
         public async Task ResetPasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -162,6 +153,8 @@ namespace Shared.Services.Authentication
 
             await InvalidateUserCache(userId);
         }
+
+        #region User Status
         public async Task LockAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -196,7 +189,7 @@ namespace Shared.Services.Authentication
         {
             return _userManager.IsLockedOutAsync(user);
         }
-        public async Task<bool> IsLockedAsync(string userId)
+        public async Task<bool> IsLockedIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -233,7 +226,9 @@ namespace Shared.Services.Authentication
 
             await _securityLogger.LogAsync(SecurityActionType.Enable, true, $"Tăng version quyền hạn khi mở hoạt động tài khoản: {user.Id} ");
         }
+        #endregion User Status
 
+        #region Permission
         public async Task IncreasePermissionVersionAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -261,7 +256,6 @@ namespace Shared.Services.Authentication
                 await InvalidateUserCache(userId);
             }
         }
-
         private async Task IncreasePermissionVersionInternalAsync(AppUser user, SecurityActionType action)
         {
             user.PermissionVersion++;
@@ -277,10 +271,9 @@ namespace Shared.Services.Authentication
             await _cache.RemoveAsync(CacheKeys.UserPermission(userId));
             await _cache.RemoveAsync(CacheKeys.UserRoles(userId));
         }
+        #endregion Permission
 
-        public async Task<PagedResult<UserListResponse>> GetUsersAsync(
-    UserQueryRequest request,
-    CancellationToken cancellationToken = default)
+        public async Task<PagedResult<UserListResponse>> GetUsersAsync(UserQueryRequest request, CancellationToken cancellationToken = default)
         {
             var query = _userManager.Users
                 .AsNoTracking()

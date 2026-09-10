@@ -1,5 +1,4 @@
-﻿
-namespace Shared.Constants.Permission
+﻿namespace Shared.Constants.Permission
 {
     public static class ClaimConstants
     {
@@ -10,6 +9,7 @@ namespace Shared.Constants.Permission
         public const string SecurityStamp = "security_stamp";
 
         public const string TokenVersion = "token_version";
+
         public const string PermissionVersion = "permission_version";
 
     }

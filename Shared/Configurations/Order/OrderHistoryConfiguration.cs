@@ -2,75 +2,36 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Order;
 
-public class OrderHistoryConfiguration
-    : IEntityTypeConfiguration<OrderHistory>
+namespace Shared.Configurations.Order
 {
-    public void Configure(EntityTypeBuilder<OrderHistory> builder)
+    public class OrderHistoryConfiguration : IEntityTypeConfiguration<OrderHistory>
     {
-        // =========================
-        // Table
-        // =========================
-
-        builder.ToTable("OrderHistories");
-
-        // =========================
-        // Primary Key
-        // =========================
-
-        builder.HasKey(x => x.Id);
-
-        builder.Property(x => x.Id)
-            .ValueGeneratedOnAdd();
-
-        // =========================
-        // OrderId
-        // =========================
-
-        builder.Property(x => x.OrderId)
-            .IsRequired();
-
-        // =========================
-        // Status
-        // =========================
-
-        builder.Property(x => x.Status)
-            .IsRequired()
-            .HasConversion<int>();
-
-        // =========================
-        // Note
-        // =========================
-
-        builder.Property(x => x.Note)
-            .HasMaxLength(1000)
-            .IsRequired(false);
-
-        // =========================
-        // CreatedAt
-        // =========================
-
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
-
-        // =========================
-        // Relationship
-        // =========================
-
-        builder.HasOne(x => x.Order)
-            .WithMany(x => x.Histories)
-            .HasForeignKey(x => x.OrderId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // =========================
-        // Index
-        // =========================
-
-        builder.HasIndex(x => x.OrderId);
-
-        builder.HasIndex(x => new
+        public void Configure(EntityTypeBuilder<OrderHistory> builder)
         {
-            x.OrderId,
-            x.CreatedAt
-        });
+            builder.ToTable("OrderHistories");
+
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            builder.Property(x => x.OrderId).IsRequired();
+
+            builder.Property(x => x.Status).IsRequired().HasConversion<int>();
+
+            builder.Property(x => x.Note).HasMaxLength(1000).IsRequired(false);
+
+            builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone").IsRequired();
+
+            builder.HasOne(x => x.Order).WithMany(x => x.Histories)
+                .HasForeignKey(x => x.OrderId).OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(x => x.OrderId);
+
+            builder.HasIndex(x => new
+            {
+                x.OrderId,
+                x.CreatedAt
+            });
+        }
     }
 }

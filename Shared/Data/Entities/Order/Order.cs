@@ -1,11 +1,6 @@
 ﻿using Shared.Data.Entities.Identity;
 using Shared.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Order
 {
@@ -50,10 +45,8 @@ namespace Shared.Data.Entities.Order
 
         public virtual OrderAddress Address { get; set; } = null!;
 
-        public virtual ICollection<OrderItem> Items { get; set; }
-            = new HashSet<OrderItem>();
+        public virtual ICollection<OrderItem> Items { get; set; } = new HashSet<OrderItem>();
 
-        public virtual ICollection<OrderHistory> Histories { get; set; }
-            = new HashSet<OrderHistory>();
+        public virtual ICollection<OrderHistory> Histories { get; set; } = new HashSet<OrderHistory>();
     }
 }

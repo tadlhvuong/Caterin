@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Data.Entities.Identity.Core
+﻿namespace Shared.Data.Entities.Identity.Core
 {
     public class Menu
     {
@@ -26,8 +20,7 @@ namespace Shared.Data.Entities.Identity.Core
 
         public virtual Menu? Parent { get; set; }
 
-        public virtual ICollection<Menu> Children { get; set; }
-            = new HashSet<Menu>();
+        public virtual ICollection<Menu> Children { get; set; } = new HashSet<Menu>();
 
         public virtual Permission? Permission { get; set; }
     }

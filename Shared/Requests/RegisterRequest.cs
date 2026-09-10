@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Requests
 {
@@ -31,8 +26,8 @@ namespace Shared.Requests
         [DataType(DataType.Password)]
         [Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = string.Empty;
-        [Range(typeof(bool), "true", "true",
-      ErrorMessage = "Bạn phải đồng ý với Điều khoản sử dụng.")]
+
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Bạn phải đồng ý với Điều khoản sử dụng.")]
         public bool AcceptTerms { get; set; }
     }
 }

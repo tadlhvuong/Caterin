@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Shared.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Shared.Data.Entities.Identity
 {
-    using Shared.Enums;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     public class CMSCatalog
     {
@@ -17,11 +12,11 @@ namespace Shared.Data.Entities.Identity
 
         [Required]
         [MaxLength(100)]
-        public string Code { get; set; } = default!; // product.create
+        public string Code { get; set; } = default!;
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; } = default!; // Create Product
+        public string Name { get; set; } = default!;
 
         [MaxLength(255)]
         public string? Description { get; set; }

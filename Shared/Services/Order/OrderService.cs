@@ -8,11 +8,6 @@ using Shared.Enums;
 using Shared.Interfaces.Core;
 using Shared.Requests.Order;
 using Shared.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Order
 {
@@ -88,7 +83,7 @@ namespace Shared.Services.Order
          Email = x.User.Email,
 
          Avatar = x.User.Avatar,
-         PaymentStatus =PaymentStatus.Processing,
+         PaymentStatus = PaymentStatus.Processing,
 
          Method = "Chưa rõ",
 
@@ -365,7 +360,7 @@ namespace Shared.Services.Order
                 throw;
             }
         }
-        public async Task<ServiceResult> UpdateAsync( int id, UpdateOrderRequest request)
+        public async Task<ServiceResult> UpdateAsync(int id, UpdateOrderRequest request)
         {
             var order = await _dbContext.Orders
                 .Include(x => x.Address)

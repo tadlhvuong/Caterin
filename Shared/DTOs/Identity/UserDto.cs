@@ -1,9 +1,4 @@
 ﻿using Shared.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.DTOs
 {
@@ -18,12 +13,10 @@ namespace Shared.DTOs
 
         public string? Avatar { get; set; }
 
-        // status
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public EntityStatus Status { get; set; }
 
-        // audit
         public DateTime CreatedAt { get; set; }
         public string? CreatedById { get; set; }
 

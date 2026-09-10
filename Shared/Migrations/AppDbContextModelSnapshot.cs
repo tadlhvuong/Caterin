@@ -493,6 +493,7 @@ namespace Shared.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<DateTime?>("RevokedAt")
+                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RevokedReason")
@@ -507,6 +508,7 @@ namespace Shared.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UsedAt")
+                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")

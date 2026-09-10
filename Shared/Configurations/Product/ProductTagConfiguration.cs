@@ -17,32 +17,21 @@ namespace Shared.Configurations.Product
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(100);
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
 
-            builder.Property(x => x.Slug)
-                .IsRequired()
-                .HasMaxLength(120);
+            builder.Property(x => x.Slug).IsRequired().HasMaxLength(120);
 
-            builder.Property(x => x.Description)
-                .HasMaxLength(300);
+            builder.Property(x => x.Description).HasMaxLength(300);
 
-            builder.Property(x => x.SeoTitle)
-                .HasMaxLength(180);
+            builder.Property(x => x.SeoTitle).HasMaxLength(180);
 
-            builder.Property(x => x.SeoDescription)
-                .HasMaxLength(320);
+            builder.Property(x => x.SeoDescription).HasMaxLength(320);
 
-            builder.Property(x => x.IsActive)
-                .HasDefaultValue(true);
+            builder.Property(x => x.IsActive).HasDefaultValue(true);
 
-            builder.Property(x => x.CreatedAt)
-            .HasColumnType("timestamp with time zone");
+            builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
 
-            // Slug unique
-            builder.HasIndex(x => x.Slug)
-                .IsUnique();
+            builder.HasIndex(x => x.Slug).IsUnique();
 
             builder.HasIndex(x => x.IsActive);
         }

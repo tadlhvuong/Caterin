@@ -2,15 +2,18 @@
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Enums;
-public static class SeedCatalogs
-{
-    public static async Task SeedAsync(AppDbContext db)
-    {
-        if (await db.CMSCatalogs.AnyAsync())
-            return;
 
-        var catalogs = new[]
+namespace Shared.Data.Seeders
+{
+    public static class SeedCatalogs
+    {
+        public static async Task SeedAsync(AppDbContext db)
         {
+            if (await db.CMSCatalogs.AnyAsync())
+                return;
+
+            var catalogs = new[]
+            {
         new CMSCatalog
         {
             Code = "view",
@@ -44,8 +47,9 @@ public static class SeedCatalogs
         }
     };
 
-        db.CMSCatalogs.AddRange(catalogs);
+            db.CMSCatalogs.AddRange(catalogs);
 
-        await db.SaveChangesAsync();
+            await db.SaveChangesAsync();
+        }
     }
 }

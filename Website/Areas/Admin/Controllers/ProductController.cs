@@ -13,6 +13,7 @@ using Shared.Interfaces.Log;
 using Shared.Requests;
 using Shared.Requests.Product;
 using Shared.Requests.Product.Category;
+using Shared.Responses.Datatables;
 using Shared.Services.Log;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
@@ -49,7 +50,7 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpPost("get-products")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetProducts([FromBody] DataTableRequest request)
+        public async Task<IActionResult> GetProducts([FromBody] DataTableResponse request)
         {
             var result = await _productService.GetProductsAsync(request);
 
@@ -131,7 +132,7 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("create")]
         [PermissionAction(ActionType.Create)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([FromForm] CreateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create([FromForm] ProductRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
@@ -215,7 +216,7 @@ namespace Website.Areas.Admin.Controllers
     int id,
     CancellationToken cancellationToken)
         {
-            var model = new CreateProductRequest
+            var model = new ProductRequest
             {
                 Id = id
             };
@@ -251,7 +252,7 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("edit")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> Update([FromForm] CreateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromForm] ProductRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
@@ -438,7 +439,7 @@ namespace Website.Areas.Admin.Controllers
                 });
             }
 
-            var result = await _productService.DeleteAsync(request);
+            var result = await _productService.DeleteCategoryAsync(request);
 
             if (!result.Succeeded)
             {
@@ -482,7 +483,7 @@ namespace Website.Areas.Admin.Controllers
         }
         [HttpPost("get-categories")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetCategoryList([FromBody] DataTableRequest request)
+        public async Task<IActionResult> GetCategoryList([FromBody] DataTableResponse request)
         {
             var result = await _productService.GetCategoryListAsync(request);
 

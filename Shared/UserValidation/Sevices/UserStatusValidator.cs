@@ -2,11 +2,6 @@
 using Shared.Data.Entities.Identity;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.UserValidation.Sevices
 {
@@ -14,28 +9,18 @@ namespace Shared.UserValidation.Sevices
     {
         private readonly UserManager<AppUser> _userManager;
 
-        public UserStatusValidator(
-            UserManager<AppUser> userManager)
+        public UserStatusValidator(UserManager<AppUser> userManager)
         {
             _userManager = userManager;
         }
 
-        public async Task<UserValidationResult> ValidateAsync(
-    UserValidationContext context,
-    AppUser user,
-    CancellationToken cancellationToken = default)
+        public async Task<UserValidationResult> ValidateAsync(UserValidationContext context, AppUser user, CancellationToken cancellationToken = default)
         {
             if (user is null)
-            {
-                return UserValidationResult.Fail(
-                    UserValidationError.UserNotFound);
-            }
+                return UserValidationResult.Fail(UserValidationError.UserNotFound);
 
             if (user.IsDeleted)
-            {
-                return UserValidationResult.Fail(
-                    UserValidationError.UserDeleted);
-            }
+                return UserValidationResult.Fail(UserValidationError.UserDeleted);
 
             if (!user.IsActive)
             {

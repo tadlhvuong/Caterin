@@ -3,38 +3,29 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Product;
 using Shared.Enums;
 
-public class ProductTagMappingConfiguration : IEntityTypeConfiguration<ProductTagMapping>
+namespace Shared.Configurations.Product
 {
-    public void Configure(EntityTypeBuilder<ProductTagMapping> builder)
+    public class ProductTagMappingConfiguration : IEntityTypeConfiguration<ProductTagMapping>
     {
-        // =========================
-        // Table
-        // =========================
-
-        builder.ToTable("ProductTagMappings");
-
-
-        builder.HasKey(x => new
+        public void Configure(EntityTypeBuilder<ProductTagMapping> builder)
         {
-            x.ProductId,
-            x.TagId
-        });
+            builder.ToTable("ProductTagMappings");
 
-        // Product -> ProductTagMapping
-        builder.HasOne(x => x.Product)
-            .WithMany(x => x.ProductTagMappings)
-            .HasForeignKey(x => x.ProductId)
-            .OnDelete(DeleteBehavior.Cascade);
+            builder.HasKey(x => new
+            {
+                x.ProductId,
+                x.TagId
+            });
 
-        // Tag -> ProductTagMapping
-        builder.HasOne(x => x.Tag)
-            .WithMany(x => x.ProductTagMappings)
-            .HasForeignKey(x => x.TagId)
-            .OnDelete(DeleteBehavior.Cascade);
+            builder.HasOne(x => x.Product).WithMany(x => x.ProductTagMappings)
+                .HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.DisplayOrder)
-            .HasDefaultValue(0);
+            builder.HasOne(x => x.Tag).WithMany(x => x.ProductTagMappings)
+                .HasForeignKey(x => x.TagId).OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(x => x.TagId);
+            builder.Property(x => x.DisplayOrder).HasDefaultValue(0);
+
+            builder.HasIndex(x => x.TagId);
+        }
     }
 }

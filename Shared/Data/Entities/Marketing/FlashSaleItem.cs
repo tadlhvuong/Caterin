@@ -1,20 +1,5 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Data.Entities.Marketing
+﻿namespace Shared.Data.Entities.Marketing
 {
-    //    - Id
-    //- EventId
-    //- ProductVariantId
-    //- SalePrice
-    //- QuantityLimit
-    //- SoldQuantity
-    //- CreatedAt
-
     public class FlashSaleItem
     {
         public int Id { get; set; }

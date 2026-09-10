@@ -1,101 +1,40 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Inventory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations.Inventory
 {
-    public sealed class InventoryTransactionConfiguration
-    : IEntityTypeConfiguration<InventoryTransaction>
+    public sealed class InventoryTransactionConfiguration : IEntityTypeConfiguration<InventoryTransaction>
     {
         public void Configure(EntityTypeBuilder<InventoryTransaction> builder)
         {
             builder.ToTable("InventoryTransactions");
 
-            // =========================
-            // Primary Key
-            // =========================
-
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-            // =========================
-            // Warehouse
-            // =========================
+            builder.Property(x => x.WarehouseId).IsRequired();
 
-            builder.Property(x => x.WarehouseId)
-                .IsRequired();
+            builder.HasOne(x => x.Warehouse).WithMany(x => x.InventoryTransactions)
+                .HasForeignKey(x => x.WarehouseId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(x => x.Warehouse)
-                .WithMany(x => x.InventoryTransactions)
-                .HasForeignKey(x => x.WarehouseId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(x => x.ProductVariantId).IsRequired();
 
-            // =========================
-            // Product Variant
-            // =========================
+            builder.HasOne(x => x.ProductVariant).WithMany(x => x.InventoryTransactions)
+                .HasForeignKey(x => x.ProductVariantId).OnDelete(DeleteBehavior.Restrict);
 
-            builder.Property(x => x.ProductVariantId)
-                .IsRequired();
+            builder.Property(x => x.Type).IsRequired().HasConversion<int>();
 
-            builder.HasOne(x => x.ProductVariant)
-                .WithMany(x => x.InventoryTransactions)
-                .HasForeignKey(x => x.ProductVariantId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(x => x.Quantity).IsRequired();
 
-            // =========================
-            // Transaction Type
-            // =========================
+            builder.Property(x => x.ReferenceId).IsRequired(false);
 
-            builder.Property(x => x.Type)
-                .IsRequired()
-                .HasConversion<int>();
+            builder.Property(x => x.Note).HasMaxLength(500).IsRequired(false);
 
-            // =========================
-            // Quantity
-            // =========================
+            builder.Property(x => x.CreatedBy).IsRequired(false);
 
-            builder.Property(x => x.Quantity)
-                .IsRequired();
-
-            // =========================
-            // Reference
-            // =========================
-
-            builder.Property(x => x.ReferenceId)
-                .IsRequired(false);
-
-            // =========================
-            // Note
-            // =========================
-
-            builder.Property(x => x.Note)
-                .HasMaxLength(500)
-                .IsRequired(false);
-
-            // =========================
-            // Created By
-            // =========================
-
-            builder.Property(x => x.CreatedBy)
-                .IsRequired(false);
-
-            // =========================
-            // Created At
-            // =========================
-
-            builder.Property(x => x.CreatedAt)
-                .IsRequired();
-
-            // =========================
-            // Indexes
-            // =========================
+            builder.Property(x => x.CreatedAt).IsRequired().HasColumnType("timestamp with time zone");
 
             builder.HasIndex(x => new
             {

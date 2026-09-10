@@ -2,11 +2,6 @@
 using Shared.Constants.Core;
 using Shared.Data.Context;
 using Shared.Data.Entities.Inventory;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Seeders
 {

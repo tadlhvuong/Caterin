@@ -1,25 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Data.Entities.Marketing
+﻿namespace Shared.Data.Entities.Marketing
 {
-//    - Id
-//- Code
-//- Name
-//- Description
-//- DiscountValue
-//- IsPercentage
-//- MaxDiscountAmount
-//- MinimumOrderAmount
-//- UsageLimit
-//- UsedCount
-//- StartDate
-//- EndDate
-//- IsActive
-//- CreatedAt
     public class Coupon
     {
         public int Id { get; set; }

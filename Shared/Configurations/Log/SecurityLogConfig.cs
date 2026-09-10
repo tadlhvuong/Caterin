@@ -14,8 +14,6 @@ namespace Shared.Configurations.Log
 
             builder.Property(x => x.Id).UseIdentityByDefaultColumn();
 
-            // ===== LogBase =====
-
             builder.Property(x => x.UserId).HasMaxLength(450);
 
             builder.Property(x => x.UserName).HasMaxLength(100);
@@ -39,8 +37,6 @@ namespace Shared.Configurations.Log
             builder.Property(x => x.Resource).HasMaxLength(200);
 
             builder.Property(x => x.MetadataJson).HasColumnType("jsonb");
-
-            // ===== Index =====
 
             builder.HasIndex(x => x.CreatedAt);
 

@@ -11,36 +11,20 @@ namespace Shared.Interfaces.Core
     {
         Task<int> GetAvailableStockAsync(int productId);
 
-        Task<bool> HasEnoughStockAsync(
-            int productId,
-            int quantity);
+        Task<bool> HasEnoughStockAsync(int productId, int quantity);
 
-        Task<ServiceResult> ValidateStockAsync(
-            IReadOnlyDictionary<int, int> items);
+        Task<ServiceResult> ValidateStockAsync(IReadOnlyDictionary<int, int> items);
 
-        Task<ServiceResult> ReserveAsync(
-            int orderId,
-            IReadOnlyDictionary<int, int> items);
+        Task<ServiceResult> ReserveAsync(int orderId, IReadOnlyDictionary<int, int> items);
 
-        Task<ServiceResult> ReleaseAsync(
-            int orderId);
+        Task<ServiceResult> ReleaseAsync( int orderId);
 
-        Task<ServiceResult> ConfirmAsync(
-            int orderId);
+        Task<ServiceResult> ConfirmAsync(int orderId);
 
-        Task<ServiceResult> IncreaseAsync(
-            int productId,
-            int quantity,
-            string? note = null);
+        Task<ServiceResult> IncreaseAsync(int productId, int quantity, string? note = null);
 
-        Task<ServiceResult> DecreaseAsync(
-            int productId,
-            int quantity,
-            string? note = null);
+        Task<ServiceResult> DecreaseAsync(int productId, int quantity, string? note = null);
 
-        Task<ServiceResult> AdjustAsync(
-            int productId,
-            int quantity,
-            string? note = null);
+        Task<ServiceResult> AdjustAsync(int productId, int quantity, string? note = null);
     }
 }

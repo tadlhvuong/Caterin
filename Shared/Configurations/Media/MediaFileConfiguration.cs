@@ -2,79 +2,35 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Media;
 
-public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
+namespace Shared.Configurations.Media
 {
-    public void Configure(EntityTypeBuilder<MediaFile> builder)
+    public class MediaFileConfiguration : IEntityTypeConfiguration<MediaFile>
     {
-        builder.ToTable("MediaFiles");
+        public void Configure(EntityTypeBuilder<MediaFile> builder)
+        {
+            builder.ToTable("MediaFiles");
 
-        // =====================================================
-        // Primary Key
-        // =====================================================
+            builder.HasKey(x => x.Id);
 
-        builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        builder.Property(x => x.Id)
-            .ValueGeneratedOnAdd();
+            builder.Property(x => x.FileName).IsRequired().HasMaxLength(255);
 
-        // =====================================================
-        // FileName
-        // =====================================================
+            builder.Property(x => x.StoragePath).IsRequired().HasMaxLength(500);
 
-        builder.Property(x => x.FileName)
-            .IsRequired()
-            .HasMaxLength(255);
+            builder.Property(x => x.ContentType).IsRequired().HasMaxLength(100);
 
-        // =====================================================
-        // StoragePath
-        // =====================================================
+            builder.Property(x => x.Size).IsRequired();
 
-        builder.Property(x => x.StoragePath)
-            .IsRequired()
-            .HasMaxLength(500);
+            builder.Property(x => x.OriginalFileName).HasMaxLength(255);
 
-        // =====================================================
-        // ContentType
-        // =====================================================
+            builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone").IsRequired();
 
-        builder.Property(x => x.ContentType)
-            .IsRequired()
-            .HasMaxLength(100);
+            builder.HasMany(x => x.ProductMedias).WithOne(x => x.MediaFile)
+                .HasForeignKey(x => x.MediaFileId).OnDelete(DeleteBehavior.Restrict);
 
-        // =====================================================
-        // Size
-        // =====================================================
-
-        builder.Property(x => x.Size)
-            .IsRequired();
-
-        // =====================================================
-        // OriginalFileName
-        // =====================================================
-
-        builder.Property(x => x.OriginalFileName)
-            .HasMaxLength(255);
-
-        // =====================================================
-        // CreatedAt
-        // =====================================================
-
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
-
-        // =====================================================
-        // ProductMedia
-        // MediaFile 1:N ProductMedia
-        // =====================================================
-
-        builder.HasMany(x => x.ProductMedias)
-            .WithOne(x => x.MediaFile)
-            .HasForeignKey(x => x.MediaFileId)
-            .OnDelete(DeleteBehavior.Restrict);
-        builder.HasMany(x => x.ProductVariantMedias)
-            .WithOne(x => x.MediaFile)
-            .HasForeignKey(x => x.MediaFileId)
-            .OnDelete(DeleteBehavior.Restrict);
-
+            builder.HasMany(x => x.ProductVariantMedias).WithOne(x => x.MediaFile)
+                .HasForeignKey(x => x.MediaFileId).OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

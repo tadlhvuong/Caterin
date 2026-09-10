@@ -1,10 +1,5 @@
 ﻿using Shared.Data.Entities.Media;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Product
 {
@@ -21,7 +16,6 @@ namespace Shared.Data.Entities.Product
         [Required]
         public long MediaFileId { get; set; }
         public int DisplayOrder { get; set; }
-        // Navigation
 
         public ProductVariant ProductVariant { get; set; } = null!;
         public AttributeValue AttributeValue { get; set; } = null!;

@@ -1,11 +1,6 @@
 ﻿using Shared.Data.Entities.Product;
 using Shared.Enums;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Data.Entities.Inventory
 {
@@ -33,9 +28,6 @@ namespace Shared.Data.Entities.Inventory
         public int? CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
-
-        // Navigation
-
         public Warehouse Warehouse { get; set; } = null!;
 
         public ProductVariant ProductVariant { get; set; } = null!;

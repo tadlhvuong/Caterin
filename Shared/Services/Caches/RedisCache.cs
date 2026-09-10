@@ -18,10 +18,7 @@ namespace Shared.Services.Caches
             _cache = cache;
         }
 
-        public async Task<T?> GetOrCreateAsync<T>(
-            string key,
-            Func<Task<T>> factory,
-            TimeSpan? ttl = null)
+        public async Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> factory, TimeSpan? ttl = null)
         {
             var cached = await _cache.GetStringAsync(key);
 
@@ -30,19 +27,15 @@ namespace Shared.Services.Caches
 
             var result = await factory();
 
-            await _cache.SetStringAsync(
-                key,
-                JsonSerializer.Serialize(result),
+            await _cache.SetStringAsync( key, JsonSerializer.Serialize(result),
                 new DistributedCacheEntryOptions
                 {
-                    AbsoluteExpirationRelativeToNow = ttl
-                        ?? TimeSpan.FromMinutes(30)
+                    AbsoluteExpirationRelativeToNow = ttl ?? TimeSpan.FromMinutes(30)
                 });
 
             return result;
         }
 
-        public Task RemoveAsync(string key)
-            => _cache.RemoveAsync(key);
+        public Task RemoveAsync(string key) => _cache.RemoveAsync(key);
     }
 }

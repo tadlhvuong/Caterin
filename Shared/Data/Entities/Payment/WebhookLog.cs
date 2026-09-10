@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Shared.Data.Entities.Payment
+﻿namespace Shared.Data.Entities.Payment
 {
-//    - Id
-//- Provider
-//- EventType
-//- Payload
-//- IsProcessed
-//- CreatedAt
     public class WebhookLog
     {
         public int Id { get; set; }

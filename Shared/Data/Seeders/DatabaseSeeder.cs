@@ -4,45 +4,47 @@ using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Interfaces.AuthServices;
 
-namespace Shared.Data.Seeders;
-
-public static class DatabaseSeeder
+namespace Shared.Data.Seeders
 {
-    public static async Task SeedAsync(IServiceProvider services)
+    public static class DatabaseSeeder
     {
-        using var scope = services.CreateScope();
+        public static async Task SeedAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
 
-        var serviceProvider = scope.ServiceProvider;
-        var dbContext = services.GetService<AppDbContext>();
-        var moduleService = serviceProvider.GetRequiredService<IModuleService>();
-        var permissionService = serviceProvider.GetRequiredService<IPermissionService>();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
-        if (dbContext == null) return;
+            var serviceProvider = scope.ServiceProvider;
+            var dbContext = services.GetService<AppDbContext>();
+            var moduleService = serviceProvider.GetRequiredService<IModuleService>();
+            var permissionService = serviceProvider.GetRequiredService<IPermissionService>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
+            if (dbContext == null) return;
 
-        await SeedLanguage.SeedAsync(dbContext);
+            await SeedLanguage.SeedAsync(dbContext);
 
-        await SeedCurrency.SeedAsync(dbContext);
+            await SeedCurrency.SeedAsync(dbContext);
 
-        await SeedSetting.SeedAsync(dbContext);
+            await SeedSetting.SeedAsync(dbContext);
 
-        await SeedWarehouse.SeedAsync(dbContext);
+            await SeedWarehouse.SeedAsync(dbContext);
 
-        await SeedCatalogs.SeedAsync(dbContext);
+            await SeedCatalogs.SeedAsync(dbContext);
 
-        await SeedModules.SeedAsync(dbContext);
+            await SeedModules.SeedAsync(dbContext);
 
-        await SeedPermission.SeedAsync(dbContext);
+            await SeedPermission.SeedAsync(dbContext);
 
-        await permissionService.SyncPermissionsAsync();
+            await permissionService.SyncPermissionsAsync();
 
-        await SeedRoles.SeedAsync( roleManager);
+            await SeedRoles.SeedAsync(roleManager);
 
-        await SeedUsers.SeedAsync(userManager);
+            await SeedUsers.SeedAsync(userManager);
 
-        await SeedUserRoles.SeedAsync(userManager, roleManager);
+            await SeedUserRoles.SeedAsync(userManager, roleManager);
 
-        await SeedRolePermissions.SeedAsync(dbContext, roleManager);
+            await SeedRolePermissions.SeedAsync(dbContext, roleManager);
 
+        }
     }
 }
+

@@ -1,11 +1,6 @@
 ﻿using Shared.Data.Entities.Identity.Core;
 using Shared.Enums;
 using Shared.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Email
 {

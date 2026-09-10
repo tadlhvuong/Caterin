@@ -7,23 +7,31 @@ namespace Shared.Interfaces.AuthServices
         /// <summary>
         /// Tạo permission
         /// </summary>
+        /// <param name="moduleId"></param>
+        /// <param name="saveChanges"></param>
+        /// <returns></returns>
         Task GeneratePermissionsAsync(int moduleId, bool saveChanges);
 
         /// <summary>
         /// Đồng bộ permission
         /// </summary>
+        /// <returns></returns>
         Task SyncPermissionsAsync();
 
         /// <summary>
-        /// Lấy permission theo code
+        /// Get permission theo code
         /// </summary>
+        /// <param name="permissionCode"></param>
+        /// <returns></returns>
         Task<int?> GetPermissionIdAsync(string permissionCode);
-        //Task<IReadOnlySet<int>> GetPermissionsAsync(string userId);
 
         /// <summary>
-        /// Lấy permission user theo snapshot
+        /// Get permission user theo snapshot
         /// </summary>
-        Task<UserPermissionSnapshot> GetUserPermissionSnapshotAsync(string userId, long permissionVersion,
-        CancellationToken cancellationToken = default);
+        /// <param name="userId"></param>
+        /// <param name="permissionVersion"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<UserPermissionSnapshot> GetUserPermissionSnapshotAsync(string userId, long permissionVersion, CancellationToken cancellationToken = default);
     }
 }

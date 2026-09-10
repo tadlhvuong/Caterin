@@ -2,60 +2,27 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Media;
 
-public class MediaAlbumConfiguration
-    : IEntityTypeConfiguration<MediaAlbum>
+namespace Shared.Configurations.Media
 {
-    public void Configure(EntityTypeBuilder<MediaAlbum> builder)
+    public class MediaAlbumConfiguration : IEntityTypeConfiguration<MediaAlbum>
     {
-        // =========================
-        // Table
-        // =========================
+        public void Configure(EntityTypeBuilder<MediaAlbum> builder)
+        {
+            builder.ToTable("MediaAlbums");
 
-        builder.ToTable("MediaAlbums");
+            builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
-        // =========================
-        // Primary Key
-        // =========================
+            builder.Property(x => x.Name).IsRequired().HasMaxLength(250);
 
-        builder.HasKey(x => x.Id);
+            builder.Property(x => x.Description).HasMaxLength(500);
 
-        builder.Property(x => x.Id)
-            .ValueGeneratedOnAdd();
+            builder.Property(x => x.CreatedAt).IsRequired().HasColumnType("timestamp with time zone");
 
+            builder.Property(x => x.UpdatedAt);
 
-        // =========================
-        // Basic information
-        // =========================
-
-        builder.Property(x => x.Name)
-            .IsRequired()
-            .HasMaxLength(250);
-
-        builder.Property(x => x.Description)
-            .HasMaxLength(500);
-
-
-        // =========================
-        // Audit
-        // =========================
-
-        builder.Property(x => x.CreatedAt)
-            .IsRequired()
-            .HasColumnType("timestamp with time zone");
-
-        builder.Property(x => x.UpdatedAt);
-
-
-        // =========================
-        // Relationships
-        // =========================
-
-
-        // =========================
-        // Indexes
-        // =========================
-
-        builder.HasIndex(x => x.Name);
+            builder.HasIndex(x => x.Name);
+        }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Shared.Constants.Permission;
 using Shared.Data.Entities.Identity;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
-using Shared.Services.Authentication;
-using Shared.Services.Caches;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
 
@@ -24,13 +21,11 @@ namespace Shared.UserValidation.Sevices
         private readonly ILogger<UserValidationService> _logger;
         private readonly IAppCache _cache;
 
-        public UserValidationService(
-            UserManager<AppUser> userManager,
-            IUserStatusValidator userStatusValidator,
-            Interface.ISecurityStampValidator securityStampValidator,
+        public UserValidationService(UserManager<AppUser> userManager,
+            IUserStatusValidator userStatusValidator, Interface.ISecurityStampValidator securityStampValidator,
             IRefreshTokenValidator refreshTokenValidator,
-            IPermissionVersionValidator permissionVersionValidator,
-            IPermissionService permissionService, ILogger<UserValidationService> logger,
+            IPermissionVersionValidator permissionVersionValidator, IPermissionService permissionService, 
+            ILogger<UserValidationService> logger,
             IAppCache cache)
         {
             _userManager = userManager;
@@ -52,49 +47,34 @@ namespace Shared.UserValidation.Sevices
             var user = await LoadUserAsync(context, cancellationToken);
 
             if (user is null)
-            {
                 return UserValidationResult.Fail(UserValidationError.UserNotFound);
-            }
 
             UserValidationResult result;
 
-            //------------------------------------
             // User Status
-            //------------------------------------
-
             result = await _userStatusValidator.ValidateAsync(context, user, cancellationToken);
 
             if (!result.Succeeded)
                 return result;
 
-            //------------------------------------
             // Security Stamp
-            //------------------------------------
-
             result = await _securityStampValidator.ValidateAsync(context, user, cancellationToken);
 
             if (!result.Succeeded)
                 return result;
 
-            //------------------------------------
             // Refresh Token
-            //------------------------------------
-
             result = await _refreshTokenValidator.ValidateAsync(context, user, cancellationToken);
 
             if (!result.Succeeded)
                 return result;
 
-            //------------------------------------
             // Permission Version
-            //------------------------------------
-
             result = await _permissionVersionValidator.ValidateAsync(context, user, cancellationToken);
 
             if (!result.Succeeded)
                 return result;
 
-            //------------------------------------
             context.PermissionSnapshot = await _permissionService.
                 GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
 
@@ -105,45 +85,29 @@ namespace Shared.UserValidation.Sevices
         {
             switch (context.Scenario)
             {
-                //--------------------------------
                 // Login
-                //--------------------------------
-
                 case UserValidationScenario.Login:
+                    return await _userManager.FindByIdAsync(context.UserId!);
 
-                    return await _userManager.FindByIdAsync(
-                        context.UserId!);
-
-                //--------------------------------
                 // Access Token
-                //--------------------------------
-
                 case UserValidationScenario.AccessToken:
 
-                    var id = _userManager.GetUserId(
-                        context.Principal!);
+                    var id = _userManager.GetUserId(context.Principal!);
 
                     if (string.IsNullOrWhiteSpace(id))
                         return null;
 
                     return await _userManager.FindByIdAsync(id);
 
-                //--------------------------------
                 // Refresh Token
-                //--------------------------------
-
                 case UserValidationScenario.RefreshToken:
-
-                    return await _userManager.FindByIdAsync(
-                        context.UserId!);
+                    return await _userManager.FindByIdAsync(context.UserId!);
 
                 default:
-
                     return null;
             }
         }
         #region Permission Check
-
         public async Task<bool> HasPermissionAsync(UserValidationContext context, string permissionCode)
         {
             var permissionId = await _permissionService.GetPermissionIdAsync(permissionCode);
@@ -168,7 +132,6 @@ namespace Shared.UserValidation.Sevices
         #endregion
 
         #region Root User Check
-
         public bool IsRootUserAsync(UserValidationContext context)
         {
             return context.PermissionSnapshot?.IsRoot ?? false;
@@ -177,7 +140,6 @@ namespace Shared.UserValidation.Sevices
         #endregion
 
         #region Admin Access Check
-
         public async Task<bool> HasAdminAccessAsync(UserValidationContext context)
         {
             if (context.PermissionSnapshot?.IsRoot == true)
@@ -191,7 +153,6 @@ namespace Shared.UserValidation.Sevices
 
             return context.PermissionSnapshot!.PermissionIds.Contains(permissionId.Value);
         }
-
         #endregion
 
     }

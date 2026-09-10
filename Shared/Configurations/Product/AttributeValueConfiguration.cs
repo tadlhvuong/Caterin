@@ -2,50 +2,28 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Product;
 
-public class AttributeValueConfiguration : IEntityTypeConfiguration<AttributeValue>
+namespace Shared.Configurations.Product
 {
-    public void Configure(EntityTypeBuilder<AttributeValue> builder)
+    public class AttributeValueConfiguration : IEntityTypeConfiguration<AttributeValue>
     {
-        builder.ToTable("AttributeValues");
-
-        builder.HasKey(x => x.Id);
-
-        // =========================
-        // Information
-        // =========================
-
-        builder.Property(x => x.Value)
-            .IsRequired()
-            .HasMaxLength(100);
-
-        // =========================
-        // Attribute relationship
-        // =========================
-
-        builder.HasOne(x => x.Attribute)
-            .WithMany(x => x.Values)
-            .HasForeignKey(x => x.AttributeId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // =========================
-        // Audit
-        // =========================
-
-        builder.Property(x => x.CreatedAt)
-            .IsRequired()
-            .HasColumnType("timestamp with time zone");
-
-        // =========================
-        // Index
-        // =========================
-
-        // Không cho phép cùng một Attribute
-        // có hai Value giống nhau
-        builder.HasIndex(x => new
+        public void Configure(EntityTypeBuilder<AttributeValue> builder)
         {
-            x.AttributeId,
-            x.Value
-        })
-        .IsUnique();
+            builder.ToTable("AttributeValues");
+
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Value).IsRequired().HasMaxLength(100);
+
+            builder.HasOne(x => x.Attribute).WithMany(x => x.Values)
+                .HasForeignKey(x => x.AttributeId).OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(x => x.CreatedAt).IsRequired().HasColumnType("timestamp with time zone");
+
+            builder.HasIndex(x => new
+            {
+                x.AttributeId,
+                x.Value
+            }).IsUnique();
+        }
     }
 }

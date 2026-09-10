@@ -175,9 +175,6 @@
         <div class="col-xl-8 col-lg-7 order-0 order-md-1">
             <partial name="_DetailsNav" model="@Model"  />
 
-            @* <div id="tab-content"
-                 hx-get="/admin/user/@url" hx-trigger="load">
-            </div> *@
             <div id="tab-content"
                  hx-get="@Url.Action(initAction, "User", new { id = Model.Id })"
                  hx-trigger="load" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">

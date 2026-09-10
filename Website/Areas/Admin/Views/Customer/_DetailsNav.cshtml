@@ -1,0 +1,51 @@
+﻿@using Website.Areas.Admin.Models
+@model UserDetailsViewModel
+@{
+    Layout = null;
+}
+
+<div class="nav-align-top">
+    <ul class="nav nav-pills flex-column flex-md-row mb-6 row-gap-2">
+        <li class="nav-item">
+            <a class="nav-link active" href="javascript:void(0);"><i class="ti ti-user ti-sm me-1_5"></i>Overview</a>
+            <a class="nav-link"
+               hx-get="/admin/customer/details-customer?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/customer/customer-details/@Model.Id?tab=overview" data-tab="overview" data-i18n="Overview">
+                Overview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               hx-get="/admin/customer/details-security?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/customer/customer-details/@Model.Id?tab=security" data-tab="security" data-i18n="Security">
+                Security
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               hx-get="/admin/customer/details-address?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/customer/customer-details/@Model.Id?tab=address" data-tab="address" data-i18n="Address">
+                Address & Billing
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               hx-get="/admin/customer/details-invoice?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/customer/customer-details/@Model.Id?tab=invoice" data-tab="invoice" data-i18n="Invoice">
+                Invoice
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               hx-get="/admin/customer/details-notification?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/customer/customer-details/@Model.Id?tab=notification" data-tab="notification" data-i18n="Notification Overview">
+                Notification
+            </a>
+        </li>
+    </ul>
+</div>

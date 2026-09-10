@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Logging;
 using Shared.Constants.Core;
 using Shared.Data.Context;
-using Shared.Data.Entities.Catelog;
 using Shared.Data.Entities.Inventory;
 using Shared.Data.Entities.Media;
 using Shared.Data.Entities.Product;
@@ -23,16 +20,9 @@ using Shared.Requests.Product.Category;
 using Shared.Responses;
 using Shared.Responses.Datatables;
 using Shared.Responses.Product;
-using Shared.Services.Order;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using static Shared.Common.CommonHelper;
-using static System.Net.Mime.MediaTypeNames;
+using AttributeEntity = Shared.Data.Entities.Product.Attribute;
 using ProductEntity = Shared.Data.Entities.Product.Product;
 
 namespace Shared.Services.Product
@@ -54,7 +44,7 @@ namespace Shared.Services.Product
             _logger = logger;
         }
 
-        public async Task<PagedResult<ProductListResult>> GetProductsAsync( DataTableResponse request)
+        public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request)
         {
             var query = _dbContext.Products.AsNoTracking().AsQueryable();
 
@@ -2072,7 +2062,7 @@ namespace Shared.Services.Product
         }
 
         #region Caterogy 
-        public async Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableResponse request)
+        public async Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableRequest request)
         {
             var query = _dbContext.ProductCategories.AsNoTracking().Where(x => !x.IsDeleted);
 
@@ -2209,8 +2199,8 @@ namespace Shared.Services.Product
                 return ServiceResult<int>.Fail(
                  new ServiceError
                  {
-                     Field = nameof(EditProductCategoryRequest.Slug),
-                     Message = $"Slug: '{request.Name}' đã tồn tại."
+                     Field = nameof(EditProductCategoryRequest.Name),
+                     Message = $"Name: '{request.Name}' đã tồn tại."
                  });
             var normalizedSlug = request.Slug.Trim().ToLower();
 
@@ -2243,10 +2233,9 @@ namespace Shared.Services.Product
             catch
             {
                 await transaction.RollbackAsync(cancellationToken);
-                return ServiceResult<int>.Fail("Thêm danh mục thất bại");
+                return ServiceResult<int>.Fail("Cập nhật danh mục thất bại");
             }
         }
-
         public async Task<ServiceResult<int>> DeleteCategoryAsync(DeleteFormRequest request)
         {
             var category = await _dbContext.ProductCategories.FirstOrDefaultAsync(x => x.Id == request.Id);
@@ -2280,5 +2269,165 @@ namespace Shared.Services.Product
             return ServiceResult<int>.Success(category.Id);
         }
         #endregion Category
+
+        #region Attribute
+        public async Task<PagedResult<ProductAttributeListResult>> GetAttributeListAsync(DataTableRequest request)
+        {
+            var query = _dbContext.Attributes.AsNoTracking();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var search = request.Search.Trim();
+
+                query = query.Where(x => EF.Functions.ILike(x.Name, $"%{search}%"));
+            }
+
+            var filteredCount = await query.CountAsync();
+
+            //query = query.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ThenBy(x => x.Name);
+            query = query.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.Name);
+
+            var totalCount = await _dbContext.Attributes.CountAsync();
+
+            var items = await query.Skip(request.Start).Take(request.Length)
+                .Select(x => new ProductAttributeListResult
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Code = x.Code,
+                    CreatedAt = x.CreatedAt,
+                }).ToListAsync();
+
+            return new PagedResult<ProductAttributeListResult>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                FilteredCount = filteredCount
+            };
+        }
+        public async Task<AttributeEntity> GetAttributeIdAsync(int attributeId)
+        {
+            var attribute = _dbContext.Attributes.SingleOrDefault(x => x.Id == attributeId);
+            var result = new AttributeEntity
+            {
+                Id = attribute.Id,
+                Name = attribute.Name,
+                Code = attribute.Code,
+                CreatedAt = attribute.CreatedAt,
+            };
+            return result;
+        }
+        public async Task<ServiceResult<int>> SaveAttributeAsync(AttributeEntity model, CancellationToken cancellationToken = default)
+        {
+            if (model.Id == 0)
+                return await CreateProductAttributeAsync(model, cancellationToken);
+
+            return await UpdateProductAttributeAsync(model, cancellationToken);
+        }
+        private async Task<ServiceResult<int>> CreateProductAttributeAsync(AttributeEntity request, CancellationToken cancellationToken = default)
+        {
+            var name = request.Name.Trim();
+            var code = request.Code.Trim().ToLower();
+
+            if (string.IsNullOrWhiteSpace(name))
+                return ServiceResult<int>.Fail($"Name: không để trống.");
+
+            if (string.IsNullOrWhiteSpace(code))
+                return ServiceResult<int>.Fail($"Code: không để trống.");
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+
+                var attribute = new AttributeEntity
+                {
+                    Name = name,
+                    Code = code,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _dbContext.Attributes.Add(attribute);
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return ServiceResult<int>.Success(attribute.Id);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return ServiceResult<int>.Fail("Thêm biến thể thất bại");
+            }
+        }
+        private async Task<ServiceResult<int>> UpdateProductAttributeAsync(AttributeEntity request, CancellationToken cancellationToken = default)
+        {
+            var attribute = await _dbContext.Attributes.FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            if (attribute == null)
+                return ServiceResult<int>.Fail($"Name: không tồn tại.");
+
+            var codeExists = await _dbContext.Attributes.AnyAsync(x => x.Id != request.Id && x.Code == request.Code);
+
+            if (codeExists)
+                return ServiceResult<int>.Fail(
+                 new ServiceError
+                 {
+                     Field = nameof(AttributeEntity.Code),
+                     Message = $"Code: '{request.Code}' đã tồn tại."
+                 });
+            var normalizedSlug = request.Code.Trim().ToLower();
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                attribute.Name = request.Name;
+                attribute.Code = request.Code;
+                //attribute.UpdatedAt = DateTime.UtcNow;.UpdatedAt = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return ServiceResult<int>.Success(attribute.Id);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return ServiceResult<int>.Fail("Cập nhật thất bại");
+            }
+        }
+        public async Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request)
+        {
+            var attribute = await _dbContext.Attributes.FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            if (attribute == null)
+            {
+                return ServiceResult<int>.Fail(
+                    new ServiceError
+                    {
+                        Message = "Attribute không tồn tại hoặc đã được xóa."
+                    });
+            }
+
+            // Nếu category đang được sử dụng bởi product
+            var hasProducts = await _dbContext.Products.AnyAsync(x => x.CategoryId == request.Id && !x.IsDeleted);
+
+            if (hasProducts)
+            {
+                return ServiceResult<int>.Fail(
+                    new ServiceError
+                    {
+                        Message = "Không thể xóa category đang có sản phẩm."
+                    });
+            }
+
+            //attribute.IsDeleted = true;
+            //attribute.UpdatedAt = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync();
+
+            return ServiceResult<int>.Success(attribute.Id);
+        }
+        #endregion
     }
 }

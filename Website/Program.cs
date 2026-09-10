@@ -1,18 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Serilog.Context;
-using Shared.Common;
 using Shared.Configurations.JWT;
-using Shared.Constants.JWT;
-using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Seeders;
@@ -30,6 +21,7 @@ using Shared.Resources;
 using Shared.Services;
 using Shared.Services.Authentication;
 using Shared.Services.Caches;
+using Shared.Services.Customer;
 using Shared.Services.Email;
 using Shared.Services.Log;
 using Shared.Services.Media;
@@ -152,8 +144,7 @@ builder.Services.AddScoped<IMediaService, MediaService>();
 
 services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IOrderService, OrderService>();
-
-
+services.AddScoped<ICustomerService, CustomerService>();
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)

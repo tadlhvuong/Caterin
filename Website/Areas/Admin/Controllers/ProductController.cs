@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
+using Shared.Data.Entities.Product;
 using Shared.Enums;
 using Shared.Interfaces.Core;
 using Shared.Interfaces.Log;
@@ -12,6 +13,7 @@ using Shared.Responses.Datatables;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Website.Areas.Admin.Models.Product;
+using AttributeEntity = Shared.Data.Entities.Product.Attribute;
 
 namespace Website.Areas.Admin.Controllers
 {
@@ -34,7 +36,8 @@ namespace Website.Areas.Admin.Controllers
 
             _dbContext = dbContext;
         }
-        // GET: HomeController1
+
+        #region Product
         [HttpGet]
         [PermissionAction(ActionType.View)]
         public ActionResult Index()
@@ -44,7 +47,7 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpPost("get-products")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetProducts([FromBody] DataTableResponse request)
+        public async Task<IActionResult> GetProducts([FromBody] ProductDataTableResquest request)
         {
             var result = await _productService.GetProductsAsync(request);
 
@@ -64,12 +67,11 @@ namespace Website.Areas.Admin.Controllers
             var statuses = Enum.GetValues<ProductStatus>()
                 .Select(x =>
                 {
-                    var member = typeof(ProductStatus)
+                    var productStatus = typeof(ProductStatus)
                         .GetMember(x.ToString())
                         .First();
 
-                    var display = member
-                        .GetCustomAttribute<DisplayAttribute>();
+                    var display = productStatus.GetCustomAttribute<DisplayAttribute>();
 
                     return new
                     {
@@ -83,7 +85,6 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("details/{id}")]
         [PermissionAction(ActionType.View)]
-
         public ActionResult Details(int id)
         {
             return View();
@@ -278,6 +279,28 @@ namespace Website.Areas.Admin.Controllers
             });
         }
 
+        [HttpGet("generate-slug-product")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GenerateSlugProduct(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Category name is required."
+                });
+            }
+
+            var slug = await _productService.GenerateUniqueSlugProductAsync(name);
+
+            return Json(new
+            {
+                success = true,
+                slug
+            });
+        }
+
         [HttpPost("toggle-suspend")]
         [PermissionAction(ActionType.Edit)]
         [ValidateAntiForgeryToken]
@@ -301,8 +324,9 @@ namespace Website.Areas.Admin.Controllers
                 status = result.Data
             });
         }
+        #endregion Product
 
-
+        #region Category
         [HttpGet("product-category")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> ProductCategory(int id = 0)
@@ -322,7 +346,7 @@ namespace Website.Areas.Admin.Controllers
                             Text = "Inactive"
                         }
                     ],
-                CreateProduct = new EditProductCategoryRequest()
+                EditCategory = new EditProductCategoryRequest()
             };
             ViewData["Statuses"] = new List<SelectListItem>
                    {
@@ -337,7 +361,7 @@ namespace Website.Areas.Admin.Controllers
                             Text = "Inactive"
                         }
             };
-            return View(model.CreateProduct);
+            return View(model.EditCategory);
        
         }
 
@@ -438,7 +462,7 @@ namespace Website.Areas.Admin.Controllers
         }
         [HttpPost("get-categories")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetCategoryList([FromBody] DataTableResponse request)
+        public async Task<IActionResult> GetCategoryList([FromBody] DataTableRequest request)
         {
             var result = await _productService.GetCategoryListAsync(request);
 
@@ -448,28 +472,6 @@ namespace Website.Areas.Admin.Controllers
                 recordsTotal = result.TotalCount,
                 recordsFiltered = result.FilteredCount,
                 data = result.Items
-            });
-        }
-
-        [HttpGet("generate-slug-product")]
-        [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GenerateSlugProduct(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Category name is required."
-                });
-            }
-
-            var slug = await _productService.GenerateUniqueSlugProductAsync(name);
-
-            return Json(new
-            {
-                success = true,
-                slug
             });
         }
 
@@ -494,5 +496,144 @@ namespace Website.Areas.Admin.Controllers
                 slug
             });
         }
+        #endregion Category
+
+        //public int Id { get; set; }
+        //public string Name { get; set; }
+        //public string Code { get; set; }
+        //public DateTime CreatedAt { get; set; }
+        //public ICollection<AttributeValue> Values { get; set; } = [];
+        #region Attribute
+        [HttpGet("product-attribute")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> ProductAttribute(int id = 0)
+        {
+            //var model = new ProductCategoryViewModel
+            //{
+            //    Statuses =
+            //        [
+            //            new SelectListItem
+            //            {
+            //                Value = "true",
+            //                Text = "Active"
+            //            },
+            //            new SelectListItem
+            //            {
+            //                Value = "false",
+            //                Text = "Inactive"
+            //            }
+            //        ],
+            //    CreateProduct = new EditProductCategoryRequest()
+            //};
+            //ViewData["Statuses"] = new List<SelectListItem>
+            //       {
+            //            new SelectListItem
+            //            {
+            //                Value = "true",
+            //                Text = "Active"
+            //            },
+            //            new SelectListItem
+            //            {
+            //                Value = "false",
+            //                Text = "Inactive"
+            //            }
+            //};
+            return View(new AttributeEntity());
+
+        }
+
+        [HttpPost("edit-product-attribute")]
+        [ValidateAntiForgeryToken]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> EditProductAttribute(AttributeEntity model, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            var result = await _productService.SaveAttributeAsync(model, cancellationToken);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Field ?? string.Empty, error.Message);
+                }
+                return ValidationProblem(ModelState);
+            }
+            return Json(new
+            {
+                success = true,
+                message = model.Id == 0 ? "Attribute created successfully." : "Attribute updated successfully.",
+                id = result.Data
+            });
+        }
+
+        [HttpPost("delete-attribute")]
+        [PermissionAction(ActionType.Delete)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAttribute([FromBody] DeleteFormRequest request)
+        {
+            if (request.Id <= 0)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Attribute ID không hợp lệ."
+                });
+            }
+
+            var result = await _productService.DeleteAttributeAsync(request);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = result.Errors.FirstOrDefault()?.Message ?? "Không thể xóa attribute."
+                });
+
+            }
+            var name = _dbContext.ProductCategories.FirstOrDefault(x => x.Id == result.Data)?.Name;
+            return Ok(new
+            {
+                success = true,
+                message = name + " đã được xóa thành công.",
+                data = result.Data
+            });
+        }
+
+        [HttpPost("get-attributes")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GetAttributeList([FromBody] DataTableRequest request)
+        {
+            var result = await _productService.GetAttributeListAsync(request);
+
+            return Json(new
+            {
+                draw = request.Draw,
+                recordsTotal = result.TotalCount,
+                recordsFiltered = result.FilteredCount,
+                data = result.Items
+            });
+        }
+
+        [HttpGet("get-attribute/{id:int}")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GetAttribute(int id)
+        {
+            var attribute = await _productService.GetAttributeIdAsync(id);
+
+            return Ok(new
+            {
+                success = true,
+                data = new
+                {
+                    id = attribute.Id,
+                    name = attribute.Name,
+                    code = attribute.Code,
+                    //isActive = category.IsActive
+                }
+            });
+        }
+        #endregion Attribute
     }
 }

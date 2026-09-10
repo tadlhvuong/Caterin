@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Responses.Datatables
 {
-    public class DataTableResponse
+    public class DataTableRequest
     {
         public int Draw { get; set; }
 
@@ -20,9 +20,15 @@ namespace Shared.Responses.Datatables
         public string? SortColumn { get; set; }
 
         public string? SortDirection { get; set; }
-
+    }
+    public class ProductDataTableResquest : DataTableRequest
+    {
         public int? Status { get; set; }
 
         public int? Stock { get; set; }
+    }
+    public class CustomerDataTableRequest : DataTableRequest
+    {
+        public int? Status { get; set; }
     }
 }

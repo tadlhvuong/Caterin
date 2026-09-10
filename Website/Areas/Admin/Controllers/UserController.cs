@@ -5,16 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
-using Shared.DTOs.Profile;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
-using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
 using Shared.Requests;
-using Shared.Services.Log;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using System.Threading.Tasks;
 using Website.Areas.Admin.Models;
 
 namespace Website.Areas.Admin.Controllers
@@ -25,24 +21,22 @@ namespace Website.Areas.Admin.Controllers
     [PermissionModule("Users")]
     public class UserController : Controller
     {
+        private readonly AppDbContext _dbContext;
+        private readonly IUserService _userService;
+
         private readonly ILogger<UserController> _logger;
         private readonly IActivityLogger _activityLogger;
 
-        private readonly AppDbContext _dbContext;
-        private readonly IAuthService _authService;
-        private readonly IUserService _userService;
-
         private readonly RoleManager<AppRole> _roleManager;
-        public UserController(ILogger<UserController> logger, IActivityLogger activityLogger, 
-            AppDbContext dbContext, IAuthService authService, IUserService userService, RoleManager<AppRole> roleManager)
+        public UserController(AppDbContext dbContext, IUserService userService, RoleManager<AppRole> roleManager,
+            ILogger<UserController> logger, IActivityLogger activityLogger)
         {
-            _logger = logger;
-            _activityLogger = activityLogger;
-
             _dbContext = dbContext;
-            _authService = authService;
             _userService = userService;
             _roleManager = roleManager;
+
+            _logger = logger;
+            _activityLogger = activityLogger;
         }
         [HttpGet("")]
         [PermissionAction(ActionType.View)]

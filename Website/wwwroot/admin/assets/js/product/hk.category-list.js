@@ -31,7 +31,7 @@ $(function () {
             modules: {
                 toolbar: '.comment-toolbar',
             },
-            placeholder: 'Write a Comment...',
+            placeholder: 'Miêu tả...',
             theme: 'snow'
         });
     }
@@ -67,15 +67,11 @@ $(function () {
                     draw: d.draw,
                     start: d.start,
                     length: d.length,
-
                     search: d.search?.value || '',
-
                     sortColumn: order ? columnMap[order.column] || 'id' : 'id',
-
                     sortDirection: order?.dir || 'asc'
                 });
             },
-
             dataSrc: 'data'
         },
 
@@ -276,11 +272,9 @@ $(function () {
     });
 
     setTimeout(() => {
-        $('.dt-search .form-control')
-            .removeClass('form-control-sm');
+        $('.dt-search .form-control').removeClass('form-control-sm');
 
-        $('.dt-length .form-select')
-            .removeClass('form-select-sm');
+        $('.dt-length .form-select').removeClass('form-select-sm');
     }, 300);
 
     const btnGenerateSlug = document.querySelector('#btn-generate-slug');
@@ -392,9 +386,7 @@ $(function () {
         }
 
         // Default status
-        $('#IsActive')
-            .val('true')
-            .trigger('change');
+        $('#IsActive').val('true').trigger('change');
 
         // Button
         $('.data-submit').text('Add');

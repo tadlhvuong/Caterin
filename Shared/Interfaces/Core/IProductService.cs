@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Shared.Data.Entities.Product;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Shared.DTOs.Identity;
 using Shared.DTOs.Product;
 using Shared.Enums;
@@ -10,11 +8,7 @@ using Shared.Requests.Product.Category;
 using Shared.Responses;
 using Shared.Responses.Datatables;
 using Shared.Responses.Product;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AttributeEntity = Shared.Data.Entities.Product.Attribute;
 
 namespace Shared.Interfaces.Core
 {
@@ -27,7 +21,7 @@ namespace Shared.Interfaces.Core
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<PagedResult<ProductListResult>> GetProductsAsync(DataTableResponse request);
+        Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request);
         /// <summary>
         /// Get category list for view _ProductForm 
         /// </summary>
@@ -101,7 +95,7 @@ namespace Shared.Interfaces.Core
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableResponse request);
+        Task<PagedResult<ProductCategoryListResult>> GetCategoryListAsync(DataTableRequest request);
         /// <summary>
         /// Get data follow id category
         /// </summary>
@@ -134,5 +128,34 @@ namespace Shared.Interfaces.Core
         /// <returns></returns>
         Task<ServiceResult<int>> DeleteCategoryAsync(DeleteFormRequest request);
         #endregion ICategory
+
+
+        #region IAttribute
+        /// <summary>
+        /// Get Attribute list
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<PagedResult<ProductAttributeListResult>> GetAttributeListAsync(DataTableRequest request);
+        /// <summary>
+        /// Get data follow id attribute
+        /// </summary>
+        /// <param name="attributeId"></param>
+        /// <returns></returns>
+        Task<AttributeEntity> GetAttributeIdAsync(int attributeId);
+        /// <summary>
+        /// Create/Update attribute
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> SaveAttributeAsync(AttributeEntity request, CancellationToken cancellationToken);
+        /// <summary>
+        /// Soft Delete attribute
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request);
+        #endregion IAttribute
     }
 }

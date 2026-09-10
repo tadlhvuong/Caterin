@@ -55,8 +55,8 @@ public class JwtService : IJwtService
         var claims =
             new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier,user.Id),
-                new( JwtRegisteredClaimNames.Sub,  user.Id),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new(JwtRegisteredClaimNames.Sub, user.Id),
                 new(ClaimConstants.UserId, user.Id ?? string.Empty),
                 new(ClaimConstants.UserName, user.UserName ?? string.Empty),
                 new Claim(ClaimConstants.SecurityStamp, user.SecurityStamp ?? string.Empty),

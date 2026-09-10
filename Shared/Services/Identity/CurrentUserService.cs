@@ -20,7 +20,7 @@ namespace Shared.Services
 
         public bool IsAuthenticated => User?.Identity?.IsAuthenticated == true;
 
-        public string? UserId => User?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        public string? UserId => User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
         public string? UserName => User?.FindFirstValue(ClaimConstants.UserName);
 

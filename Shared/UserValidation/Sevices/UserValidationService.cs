@@ -39,8 +39,7 @@ namespace Shared.UserValidation.Sevices
             _cache = cache;
         }
 
-        public async Task<UserValidationResult> ValidateAsync(UserValidationContext context,
-            CancellationToken cancellationToken = default)
+        public async Task<UserValidationResult> ValidateAsync(UserValidationContext context, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(context);
 

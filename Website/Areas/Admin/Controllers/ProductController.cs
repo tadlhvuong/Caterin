@@ -1,12 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
-using Shared.Data.Entities.Catelog;
-using Shared.Data.Entities.Product;
 using Shared.Enums;
 using Shared.Interfaces.Core;
 using Shared.Interfaces.Log;
@@ -14,7 +9,6 @@ using Shared.Requests;
 using Shared.Requests.Product;
 using Shared.Requests.Product.Category;
 using Shared.Responses.Datatables;
-using Shared.Services.Log;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Website.Areas.Admin.Models.Product;
@@ -87,33 +81,6 @@ namespace Website.Areas.Admin.Controllers
             return Ok(statuses);
         }
 
-        //[HttpPost("update-stock-status")]
-        //[PermissionAction(ActionType.Edit)]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> UpdateStockStatus([FromBody] UpdateProductStockRequest request)
-        //{
-        //    var result = await _productService.UpdateStockStatusAsync(request);
-
-        //    if (!result.Succeeded)
-        //    {
-        //        foreach (var error in result.Errors)
-        //        {
-        //            ModelState.AddModelError(error.Field ?? string.Empty,
-        //                error.Message);
-        //        }
-
-        //        return ValidationProblem(ModelState);
-        //    }
-
-        //    return Ok(new
-        //    {
-        //        success = true,
-        //        message = "Stock status đã được cập nhật.",
-        //        data = result.Data
-        //    });
-        //}
-
-        // GET: HomeController1/Details/5
         [HttpGet("details/{id}")]
         [PermissionAction(ActionType.View)]
 
@@ -122,7 +89,6 @@ namespace Website.Areas.Admin.Controllers
             return View();
         }
 
-        // GET: HomeController1/Edit/5
         [HttpGet("create")]
         [PermissionAction(ActionType.Create)]
         public ActionResult Create()
@@ -184,6 +150,7 @@ namespace Website.Areas.Admin.Controllers
                 redirectUrl = Url.Action(nameof(Index), "Product", new { area = "Admin" })
             });
         }
+        
         [HttpGet("get-create-product-categories")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> GetCreateProductCategories(CancellationToken cancellationToken)
@@ -209,27 +176,22 @@ namespace Website.Areas.Admin.Controllers
                 data = attributes
             });
         }
-        // GET: HomeController1/Edit/5
+        
         [HttpGet("edit/{id:int}")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> Update(
-    int id,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> Update(int id, CancellationToken cancellationToken)
         {
             var model = new ProductRequest
             {
                 Id = id
             };
 
-
             return View(model);
         }
 
         [HttpGet("get-update-product")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetUpdateProduct(
-    int id,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> GetUpdateProduct(int id, CancellationToken cancellationToken)
         {
             var result = await _productService.GetUpdateProductAsync(id, cancellationToken);
 
@@ -257,14 +219,9 @@ namespace Website.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            // =========================================================
             // UPDATE PRODUCT
-            // =========================================================
             var result = await _productService.UpdateAsync(request, cancellationToken);
 
-            // =========================================================
-            // BUSINESS ERROR
-            // =========================================================
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
@@ -291,15 +248,13 @@ namespace Website.Areas.Admin.Controllers
                 redirectUrl = Url.Action(nameof(Index), "Product", new { area = "Admin" })
             });
         }
-        // GET: HomeController1/Delete/5
+
         [HttpGet("delete/{id}")]
         [PermissionAction(ActionType.Delete)]
         public ActionResult Delete(int id)
         {
             return View();
         }
-
-        // POST: HomeController1/Delete/5
         [HttpPost("delete")]
         [PermissionAction(ActionType.Delete)]
         [ValidateAntiForgeryToken]

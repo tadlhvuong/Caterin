@@ -65,7 +65,6 @@ namespace Website.Areas.Admin.Controllers
             var result = await _userService.GetUsersAsync(request, cancellationToken);
             return Ok(result);
         }
-        // GET: MemberController/Details/5
         [HttpGet("user-details/{id?}")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Details(string id, string tab="personal")
@@ -125,6 +124,7 @@ namespace Website.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index), new { id = id, tab = "billing" });
         }
+
         [HttpGet("details-notification")]
         [PermissionAction(ActionType.View)]
         public IActionResult DetailsNotification(Guid id)
@@ -143,15 +143,13 @@ namespace Website.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index), new { id = id, tab = "connection" });
         }
-        // GET: MemberController/Create
+
         [HttpGet("user-create")]
         [PermissionAction(ActionType.Create)]
         public ActionResult Create()
         {
             return View();
         }
-
-        // POST: MemberController/Create
         [HttpPost("user-create")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Create)]
@@ -167,15 +165,13 @@ namespace Website.Areas.Admin.Controllers
             }
         }
 
-        // GET: MemberController/Edit/5
+
         [HttpGet("user-edit/{id?}")]
         [PermissionAction(ActionType.Edit)]
         public ActionResult Edit(int id)
         {
             return View();
         }
-
-        // POST: MemberController/Edit/5
         [HttpPost("user-edit/{id?}")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
@@ -191,15 +187,12 @@ namespace Website.Areas.Admin.Controllers
             }
         }
 
-        // GET: MemberController/Delete/5
         [HttpGet("user-delete/{id?}")]
         [PermissionAction(ActionType.Delete)]
         public ActionResult Delete(int id)
         {
             return View();
         }
-
-        // POST: MemberController/Delete/5
         [HttpPost("user-delete/{id?}")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Delete)]
@@ -214,6 +207,7 @@ namespace Website.Areas.Admin.Controllers
                 return View();
             }
         }
+
         [HttpPost("user-assign-role/{id?}/{role?}")]
         [PermissionAction(ActionType.Edit)]
         public async Task<IActionResult> AssignRole(string userId, string role)
@@ -231,31 +225,6 @@ namespace Website.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = userId });
         }
 
-        #region Lock-Unlock
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Lock(string id, CancellationToken cancellationToken)
-        //{
-        //    await _userService.LockAsync(id, cancellationToken);
-
-        //    TempData["Success"] = "Đã khóa tài khoản.";
-
-        //    return RedirectToAction(nameof(Index));
-        //}
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Unlock(string id, CancellationToken cancellationToken)
-        //{
-        //    await _userService.UnlockAsync(id, cancellationToken);
-
-        //    TempData["Success"] = "Đã mở khóa tài khoản.";
-
-        //    return RedirectToAction(nameof(Index));
-        //}
-        #endregion
-
         [HttpGet("roles")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> GetRoles()
@@ -265,9 +234,7 @@ namespace Website.Areas.Admin.Controllers
                 {
                     id = x.Id,
                     name = x.Name
-                })
-                .OrderBy(x => x.name)
-                .ToListAsync();
+                }).OrderBy(x => x.name).ToListAsync();
 
             return Ok(roles);
         }

@@ -1,16 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using Shared.Common;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
-using Shared.Data.Entities.Notification;
 using Shared.DTOs.Auth;
 using Shared.Enums;
 using Shared.Helpers;
@@ -80,9 +76,7 @@ namespace Website.Areas.Admin.Controllers
         public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
             var result = await _authService.LoginAsync(
                     new LoginRequest
                     {
@@ -170,16 +164,12 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpPost("resend-confirm-email")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResendConfirmEmail(
-    ResendConfirmEmailViewModel model,
-    CancellationToken cancellationToken = default)
+        public async Task<IActionResult> ResendConfirmEmail(ResendConfirmEmailViewModel model, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
                 return View(nameof(ConfirmEmail), model);
 
-            var result = await _authService.ResendConfirmEmailAsync(
-                model.Email,
-                cancellationToken);
+            var result = await _authService.ResendConfirmEmailAsync(model.Email, cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -193,14 +183,7 @@ namespace Website.Areas.Admin.Controllers
             TempData["Email"] = model.Email;
             TempData["Resent"] = "Đã gửi lại email xác thực. Vui lòng kiểm tra hộp thư.";
             return RedirectToAction(nameof(ConfirmEmail));
-            //return View("Feedback", new FeedbackViewModel
-            //{
-            //    Type = FeedbackType.Success,
-            //    Title = "Gửi lại email xác thực",
-            //    Message = "Nếu email tồn tại trong hệ thống và chưa được xác thực, chúng tôi đã gửi email xác thực.",
-            //});
         }
-
         #endregion register
 
         #region forgot password
@@ -302,10 +285,12 @@ namespace Website.Areas.Admin.Controllers
                 ModelState.AddModelError(string.Empty, "Liên kết đặt lại mật khẩu không hợp lệ.");
                 return View(model);
             }
+
             var request = new ResetPasswordRequest {
                 Key = model.Key,
                 NewPassword = model.Password
             };
+
             var result = await _authService.ResetPasswordByTokenAsync(request);
             if (!result.Succeeded)
             {
@@ -322,9 +307,8 @@ namespace Website.Areas.Admin.Controllers
         public ActionResult ResetPasswordConfirmation()
         {
             if (TempData["ResetPasswordSuccess"] is not true)
-            {
                 return RedirectToAction(nameof(Login));
-            }
+
             return View("Feedback", new FeedbackViewModel
             {
                 Type = FeedbackType.Success,
@@ -424,8 +408,7 @@ namespace Website.Areas.Admin.Controllers
         #endregion Logout
 
         [HttpGet("e/{key}")]
-        public async Task<IActionResult> EmailAction(string key,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> EmailAction(string key, CancellationToken cancellationToken)
         {
             var checkValid = await _emailActionService.GetValidAsync(key, cancellationToken);
             if (!checkValid.Succeeded)
@@ -437,6 +420,7 @@ namespace Website.Areas.Admin.Controllers
                     Message = string.Join("<br/>", checkValid.Errors)
                 });
             }
+
             var emailAction = checkValid.Data!;
             switch (emailAction.Type)
             {
@@ -460,7 +444,6 @@ namespace Website.Areas.Admin.Controllers
                             Message = "Bạn đã xác thực email thành công."
                         });
                     }
-
                 case EmailActionType.ResetPassword:
                     {
                         return RedirectToAction(nameof(ResetPassword), new { key });
@@ -491,13 +474,11 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("save-permission")]
         public async Task<IActionResult> SavePermission(string roleId, List<int> permissionIds)
         {
-            var old = _dbContext.RolePermissions
-                .Where(x => x.RoleId == roleId);
+            var old = _dbContext.RolePermissions.Where(x => x.RoleId == roleId);
 
             _dbContext.RolePermissions.RemoveRange(old);
 
-            _dbContext.RolePermissions.AddRange(
-                permissionIds.Select(id => new RolePermission
+            _dbContext.RolePermissions.AddRange(permissionIds.Select(id => new RolePermission
                 {
                     RoleId = roleId,
                     PermissionId = id
@@ -530,8 +511,7 @@ namespace Website.Areas.Admin.Controllers
         }
 
         [HttpGet("external-login-callback")]
-        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl, 
-            string? remoteError = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl, string? remoteError = null, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrEmpty(remoteError))
             {

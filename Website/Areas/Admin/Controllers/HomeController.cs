@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
-using Shared.Data.Entities.Identity.Core;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
-using System.Linq;
-using System.Reflection;
 
 namespace Website.Areas.Admin.Controllers
 {
@@ -53,7 +49,6 @@ namespace Website.Areas.Admin.Controllers
                 name,
                 claims
             });
-            //return RedirectToAction(nameof(Dashboard));
         }
 
         [HttpGet("dashboard")]
@@ -62,26 +57,5 @@ namespace Website.Areas.Admin.Controllers
         {
             return View();
         }
-
-        //public ActionResult Dashboard()
-        //{
-        //    return View();
-        //}
-
-        //private async Task<List<Menu>> GetMenusAsync(string userId)
-        //{
-        //    var permissions = await _permissionService.GetPermissionsAsync(userId);
-
-        //    var menus = await _dbContext.Menus
-        //        .AsNoTracking()
-        //        .OrderBy(x => x.SortOrder)
-        //        .ToListAsync();
-
-        //    return menus
-        //        .Where(m =>
-        //            m.Permission == null ||
-        //            permissions.Contains(m.Permission))
-        //        .ToList();
-        //}
     }
 }

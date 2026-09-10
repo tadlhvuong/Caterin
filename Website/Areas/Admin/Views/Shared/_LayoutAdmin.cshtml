@@ -2,6 +2,7 @@
     var culture = CultureInfo.CurrentCulture.Name;
 }
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration;
+
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact" data-assets-path="/admin/assets/" data-style="light"
       data-theme="theme-default" data-bs-theme="light">
@@ -60,21 +61,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Helpers -->
     <script src="~/admin/assets/vendor/js/helpers.js"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/admin/assets/js/config.js"></script>
     @RenderSection("Styles", false)
 </head>
 <body>
-    @* <partial name="_AdminModal" />
-    <input type="hidden" id="hideCulture" value="@culture" />
-    <div class="wrapper">
-        <partial name="_Preload">
-            <partial name="_Navbar">
-                <partial name="_Sidebar">
-                    @RenderBody()
-                    <partial name="_Footer" >
-    </div> *@
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
@@ -109,7 +99,7 @@
     <script src="~/admin/assets/vendor/libs/jquery/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.7"></script>
+    <script src="https://unpkg.com/htmx.org@@2.0.7"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/datatables-bootstrap5.min.js"></script>
     <script src="~/admin/assets/vendor/libs/datatables-bs5/dataTables.responsive.min.js"></script>
@@ -122,8 +112,6 @@
     <script src="~/admin/assets/vendor/libs/node-waves/node-waves.min.js"></script>
     <script src="~/admin/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.min.js"></script>
     <script src="~/admin/assets/vendor/libs/hammer/hammer.min.js"></script>
-    @* <script src="~/admin/assets/vendor/libs/i18n/i18n.js"></script> *@
-    @* <script src="https://cdn.jsdelivr.net/npm/i18n@0.15.3/index.min.js"></script> *@
     <script src="~/admin/assets/vendor/libs/i18n/i18next.min.js"></script>
     <script src="~/admin/assets//vendor/libs/i18n/i18nextHttpBackend.min.js"></script>
     <script src="~/admin/assets/vendor/libs/typeahead-js/typeahead.bundle.min.js"></script>
@@ -132,9 +120,6 @@
     <script src="~/admin/assets/vendor/libs/moment/moment.min.js"></script>
     <script src="~/admin/assets/vendor/libs/select2/select2.min.js"></script>
     <script src="~/admin/assets/vendor/libs/form-validation/form-validation.min.js"></script>
-    @* <script src="~/admin/assets/vendor/libs/form-validation/popular.js"></script>
-    <script src="~/admin/assets/vendor/libs/form-validation/bootstrap5.min.js"></script>
-    <script src="~/admin/assets/vendor/libs/form-validation/auto-focus.min.js"></script> *@
     <script src="~/admin/assets/vendor/libs/cleavejs/cleave.min.js"></script>
     <script src="~/admin/assets/vendor/libs/cleavejs/cleave-phone.i18n.js"></script>
     <!-- endbuild -->

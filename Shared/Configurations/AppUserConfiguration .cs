@@ -20,7 +20,11 @@ namespace Shared.Configurations
 
             builder.Property(x => x.UserName).HasMaxLength(200);
 
-            builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
+            builder.Property(x => x.CreatedAt).IsRequired(true).HasColumnType("timestamp with time zone");
+
+            builder.Property(x => x.UpdatedAt).IsRequired(false).HasColumnType("timestamp with time zone");
+
+            builder.Property(x => x.LastLogin).IsRequired(false).HasColumnType("timestamp with time zone");
         }
     }
 }

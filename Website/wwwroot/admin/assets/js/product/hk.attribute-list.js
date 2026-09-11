@@ -11,16 +11,16 @@ $(function () {
         bodyBg = config.colors.bodyBg;
         headingColor = config.colors.headingColor;
     }
-    //var statusObj = {
-    //    true: {
-    //        title: 'Hoạt động',
-    //        class: 'bg-label-success'
-    //    },
-    //    false: {
-    //        title: 'Tạm ngừng ',
-    //        class: 'bg-label-warning'
-    //    },
-    //};
+    var statusObj = {
+        true: {
+            title: 'Ngừng hoạt động',
+            class: 'bg-label-warning'
+        },
+        false: {
+            title: 'Hoạt động',
+            class: 'bg-label-success'
+        },
+    };
 
     //const commentEditor = document.querySelector('.comment-editor');
     //let commentQuill = null;
@@ -57,7 +57,9 @@ $(function () {
                     0: 'id',
                     1: 'Tên',
                     2: 'code',
-                    3: 'Ngày',
+                    3: 'SL Product',
+                    4: 'Trạng thái',
+                    5: 'Ngày tạo',
                 };
                 const order = d.order && d.order.length ? d.order[0] : null;
 
@@ -77,6 +79,8 @@ $(function () {
             { data: 'id' },
             { data: 'name' },
             { data: 'code' },
+            { data: 'productCount' },
+            { data: 'isDeleted' },
             { data: 'createdAt' },
             { data: null }
         ],
@@ -108,6 +112,7 @@ $(function () {
             // Code
             {
                 targets: 2,
+                responsivePriority: 2,
 
                 render: function (data) {
                     return '<span class="text-truncate d-flex align-items-center text-heading">' +
@@ -115,37 +120,52 @@ $(function () {
                         '</span>'
                 }
             },
-
-            //Status 
-            //{
-            //    targets: 3,
-            //    render: function (data, type, full) {
-
-            //        var status = full.isActive;
-
-            //        var item = statusObj[status];
-
-            //        if (!item) {
-            //            return '';
-            //        }
-
-            //        return (
-            //            '<span class="badge ' +
-            //            item.class +
-            //            '">' +
-            //            item.title +
-            //            '</span>'
-            //        );
-            //    }
-            //},
-
             // Product Count
             {
                 targets: 3,
-                responsivePriority: 2,
 
                 render: function (data) {
-                    var date = new Date(data).toLocaleDateString('vi-VN');
+                    return '<span class="text-truncate d-flex align-items-center text-heading">' +
+                        data +
+                        '</span>'
+                }
+            },
+            //Status
+            {
+                targets: 4,
+                render: function (data, type, full) {
+
+                    var status = full.isDeleted;
+
+                    var item = statusObj[status];
+
+                    if (!item) {
+                        return '';
+                    }
+
+                    return (
+                        '<span class="badge ' +
+                        item.class +
+                        '">' +
+                        item.title +
+                        '</span>'
+                    );
+                }
+            },
+            //CreatedAt
+            {
+                targets: 5,
+
+                render: function (data) {
+                    var date = new Date(data).toLocaleDateString('vi-VN', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
                     return '<span class="text-truncate d-flex align-items-center text-heading">' +
                         date +
                         '</span>'
@@ -153,13 +173,22 @@ $(function () {
             },
             // Actions
             {
-                targets: 4,
+                targets: 6,
                 title: 'Actions',
                 searchable: false,
                 orderable: false,
                 responsivePriority: 3,
 
                 render: function (data, type, full) {
+                    if (full.isDeleted) {
+                        return `
+                        <div class="d-flex align-items-sm-center justify-content-sm-center">
+                            <span class="badge bg-label-secondary">
+                                Đã xóa
+                            </span>
+                        </div>
+                        `;
+                    }
                     return `
                         <div class="d-flex align-items-sm-center justify-content-sm-center">
 
@@ -374,12 +403,12 @@ $(function () {
 
         const id = $(this).data('id');
         const confirmed = await Swal.fire({
-            title: 'Delete attribute?',
-            text: 'Bạn có chắc muốn xóa attribute này?',
+            title: 'Delete biến thể?',
+            text: 'Bạn có chắc muốn xóa biến thể này?',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, delete it',
-            cancelButtonText: 'Cancel'
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy'
         });
 
         if (!confirmed.isConfirmed) {
@@ -415,4 +444,18 @@ $(function () {
             Toast.error('Có lỗi xảy ra khi xóa attribute.');
         }
     });
+
+    function formatDateTime(data) {
+    if (!data) return '';
+
+    const match = data.match(
+        /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):/
+    );
+
+    if (!match) return data;
+
+    const [, year, month, day, hour, minute] = match;
+
+    return `${day}/${month}/${year} ${hour}:${minute}`;
+}
 });

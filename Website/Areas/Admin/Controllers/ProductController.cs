@@ -22,19 +22,21 @@ namespace Website.Areas.Admin.Controllers
     [PermissionModule("Products")]
     public class ProductController : Controller
     {
+        private readonly IProductService _productService;
+
         private readonly ILogger<ProductController> _logger;
         private readonly IActivityLogger _activityLogger;
 
-        private readonly IProductService _productService;
 
         private readonly AppDbContext _dbContext;
-        public ProductController(ILogger<ProductController> logger, IActivityLogger activityLogger, AppDbContext dbContext, IProductService productService) 
+        public ProductController(AppDbContext dbContext, IProductService productService,
+            ILogger<ProductController> logger, IActivityLogger activityLogger)
         {
-            _logger = logger;
-            _activityLogger = activityLogger;
+            _dbContext = dbContext;
             _productService = productService;
 
-            _dbContext = dbContext;
+            _logger = logger;
+            _activityLogger = activityLogger;
         }
 
         #region Product
@@ -373,17 +375,13 @@ namespace Website.Areas.Admin.Controllers
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-
-            if(model.Id  == 0)
+            var existsSlug = await _productService.ExistsBySlugCategoryAsync(model.Slug);
+            if (existsSlug)
             {
-                var existsSlug = await _productService.ExistsBySlugCategoryAsync(model.Slug);
-                if (existsSlug)
-                {
-                    ModelState.AddModelError(nameof(model.Slug), $"{model.Slug} đã tồn tại.");
-                    return ValidationProblem(ModelState);
-                }
-
+                ModelState.AddModelError(nameof(model.Slug), $"{model.Slug} đã tồn tại.");
+                return ValidationProblem(ModelState);
             }
+
             var result = await _productService.SaveCategoryAsync(model, cancellationToken);
             if (!result.Succeeded)
             {
@@ -399,7 +397,7 @@ namespace Website.Areas.Admin.Controllers
             return Json(new
             {
                 success = true,
-                message = model.Id == 0 ? "Category created successfully." : "Category updated successfully.",
+                message = model.Id == 0 ? "Thêm thành công" : "Cập nhật thành công",
                 id = result.Data
             });
         }
@@ -414,7 +412,7 @@ namespace Website.Areas.Admin.Controllers
                 return BadRequest(new
                 {
                     success = false,
-                    message = "Category ID không hợp lệ."
+                    message = "Danh mục không hợp lệ."
                 });
             }
 
@@ -425,7 +423,7 @@ namespace Website.Areas.Admin.Controllers
                 return BadRequest(new
                 {
                     success = false,
-                    message = result.Errors.FirstOrDefault()?.Message ?? "Không thể xóa category."
+                    message = result.Errors.FirstOrDefault()?.Message ?? "Không thể xóa danh mục."
                 });
 
             }
@@ -498,48 +496,12 @@ namespace Website.Areas.Admin.Controllers
         }
         #endregion Category
 
-        //public int Id { get; set; }
-        //public string Name { get; set; }
-        //public string Code { get; set; }
-        //public DateTime CreatedAt { get; set; }
-        //public ICollection<AttributeValue> Values { get; set; } = [];
         #region Attribute
         [HttpGet("product-attribute")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> ProductAttribute(int id = 0)
         {
-            //var model = new ProductCategoryViewModel
-            //{
-            //    Statuses =
-            //        [
-            //            new SelectListItem
-            //            {
-            //                Value = "true",
-            //                Text = "Active"
-            //            },
-            //            new SelectListItem
-            //            {
-            //                Value = "false",
-            //                Text = "Inactive"
-            //            }
-            //        ],
-            //    CreateProduct = new EditProductCategoryRequest()
-            //};
-            //ViewData["Statuses"] = new List<SelectListItem>
-            //       {
-            //            new SelectListItem
-            //            {
-            //                Value = "true",
-            //                Text = "Active"
-            //            },
-            //            new SelectListItem
-            //            {
-            //                Value = "false",
-            //                Text = "Inactive"
-            //            }
-            //};
             return View(new AttributeEntity());
-
         }
 
         [HttpPost("edit-product-attribute")]
@@ -549,6 +511,13 @@ namespace Website.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
+
+            var existsSlug = await _productService.ExistsByCodeAttributeAsync(model.Code);
+            if (existsSlug)
+            {
+                ModelState.AddModelError(nameof(model.Code), $"{model.Code} đã tồn tại.");
+                return ValidationProblem(ModelState);
+            }
 
             var result = await _productService.SaveAttributeAsync(model, cancellationToken);
             if (!result.Succeeded)
@@ -562,7 +531,7 @@ namespace Website.Areas.Admin.Controllers
             return Json(new
             {
                 success = true,
-                message = model.Id == 0 ? "Attribute created successfully." : "Attribute updated successfully.",
+                message = model.Id == 0 ? "Thêm thành công" : "Cập nhật thành công",
                 id = result.Data
             });
         }
@@ -570,18 +539,18 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("delete-attribute")]
         [PermissionAction(ActionType.Delete)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteAttribute([FromBody] DeleteFormRequest request)
+        public async Task<IActionResult> DeleteAttribute([FromBody] DeleteFormRequest request, CancellationToken cancellationToken)
         {
             if (request.Id <= 0)
             {
                 return BadRequest(new
                 {
                     success = false,
-                    message = "Attribute ID không hợp lệ."
+                    message = "Biến thể không hợp lệ."
                 });
             }
 
-            var result = await _productService.DeleteAttributeAsync(request);
+            var result = await _productService.DeleteAttributeAsync(request, cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -592,7 +561,7 @@ namespace Website.Areas.Admin.Controllers
                 });
 
             }
-            var name = _dbContext.ProductCategories.FirstOrDefault(x => x.Id == result.Data)?.Name;
+            var name = _dbContext.Attributes.FirstOrDefault(x => x.Id == result.Data)?.Name;
             return Ok(new
             {
                 success = true,
@@ -630,7 +599,6 @@ namespace Website.Areas.Admin.Controllers
                     id = attribute.Id,
                     name = attribute.Name,
                     code = attribute.Code,
-                    //isActive = category.IsActive
                 }
             });
         }

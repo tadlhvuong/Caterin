@@ -25,7 +25,7 @@ namespace Shared.Data.Entities.Identity
 
         [Display(Name = "Thời gian tạo")]
         [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy HH:mm}")]
-        public DateTime? CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
         [StringLength(128)]
         [Display(Name = "Người tạo")]
         public string? CreatedById { get; set; }

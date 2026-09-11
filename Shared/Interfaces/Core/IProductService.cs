@@ -144,6 +144,12 @@ namespace Shared.Interfaces.Core
         /// <returns></returns>
         Task<AttributeEntity> GetAttributeIdAsync(int attributeId);
         /// <summary>
+        /// Check code attribute exits
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<bool> ExistsByCodeAttributeAsync(string code);
+        /// <summary>
         /// Create/Update attribute
         /// </summary>
         /// <param name="request"></param>
@@ -155,7 +161,7 @@ namespace Shared.Interfaces.Core
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request);
+        Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request, CancellationToken cancellationToken);
         #endregion IAttribute
     }
 }

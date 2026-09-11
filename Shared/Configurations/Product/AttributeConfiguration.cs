@@ -16,9 +16,13 @@ namespace Shared.Configurations.Product
 
             builder.Property(x => x.Code).IsRequired().HasMaxLength(50);
 
-            builder.HasIndex(x => x.Code).IsUnique();
+            builder.Property(x => x.IsDeleted).IsRequired().HasDefaultValue(false);
 
             builder.Property(x => x.CreatedAt).IsRequired().HasColumnType("timestamp with time zone");
+
+            builder.Property(x => x.UpdatedAt).IsRequired(false).HasColumnType("timestamp with time zone");
+
+            builder.HasIndex(x => x.Code).IsUnique().HasFilter("\"IsDeleted\" = false");
         }
     }
 }

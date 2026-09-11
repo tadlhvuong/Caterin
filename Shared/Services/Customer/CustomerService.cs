@@ -100,7 +100,7 @@ namespace Shared.Services.Customer
                     Phone = x.PhoneNumber,
                     Email = x.Email,
                     Status = x.Status,
-                    CreatedAt = x.CreatedAt ?? DateTime.UtcNow,
+                    CreatedAt = x.CreatedAt,
 
                     //OrderCount = x.Orders.Count(),
 

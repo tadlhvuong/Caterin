@@ -51,6 +51,18 @@
         OrderCompleted,
 
         PaymentSuccess,
-        PaymentFailed
+        PaymentFailed,
+
+        ProductCreated,
+        ProductUpdated,
+        ProductDeleted,
+
+        ProductCategoryCreated,
+        ProductCategoryUpdated,
+        ProductCategoryDeleted,
+
+        ProductAttributeCreated,
+        ProductAttributeUpdated,
+        ProductAttributeDeleted,
     }
 }

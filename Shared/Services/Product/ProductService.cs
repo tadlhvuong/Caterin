@@ -13,6 +13,7 @@ using Shared.DTOs.Inventory;
 using Shared.DTOs.Product;
 using Shared.Enums;
 using Shared.Interfaces.Core;
+using Shared.Interfaces.Log;
 using Shared.Interfaces.Media;
 using Shared.Requests;
 using Shared.Requests.Product;
@@ -20,7 +21,10 @@ using Shared.Requests.Product.Category;
 using Shared.Responses;
 using Shared.Responses.Datatables;
 using Shared.Responses.Product;
+using System;
 using System.Text.Json;
+using System.Threading;
+using System.Xml.Linq;
 using static Shared.Common.CommonHelper;
 using AttributeEntity = Shared.Data.Entities.Product.Attribute;
 using ProductEntity = Shared.Data.Entities.Product.Product;
@@ -34,14 +38,16 @@ namespace Shared.Services.Product
         private readonly IMediaService _mediaService;
 
         private readonly ILogger<ProductService> _logger;
+        private readonly IActivityLogger _activityLogger;
         public ProductService(AppDbContext dbContext, IOptions<MediaStorageOptions> mediaStorage, IMediaService mediaService,
-            ILogger<ProductService> logger)
+            ILogger<ProductService> logger, IActivityLogger activityLogger)
         {
             _dbContext = dbContext;
             _mediaService = mediaService;
             _mediaStorage = mediaStorage.Value;
 
             _logger = logger;
+            _activityLogger = activityLogger;
         }
 
         public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request)
@@ -307,19 +313,19 @@ namespace Shared.Services.Product
                 }
 
                 await transaction.CommitAsync(cancellationToken);
-
+                await _activityLogger.LogAsync(ActivityType.ProductCreated, "Product", product.Id.ToString(), $"Tạo sản phẩm '{product.Name}'");
                 return ServiceResult<int>.Success(product.Id);
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-
+                _logger.LogError(ex, "Error creating product. SKU: {Sku}, Name: {ProductName}", sku, request.Name);
                 return ServiceResult<int>.Fail("Không thể lưu sản phẩm. Vui lòng thử lại.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-
+                _logger.LogError(ex, "Unexpected error creating product. SKU: {Sku}, Name: {ProductName}", sku, request.Name);
                 return ServiceResult<int>.Fail("Đã xảy ra lỗi khi tạo sản phẩm.");
             }
         }
@@ -393,7 +399,6 @@ namespace Shared.Services.Product
 
             return mediaFile;
         }
-
         private async Task<List<ProductVariant>> CreateVariantsAsync(ProductEntity product, ICollection<ProductVariantRequest>? requests,
         CancellationToken cancellationToken = default)
         {
@@ -503,7 +508,6 @@ namespace Shared.Services.Product
                 }
             }
         }
-
         private async Task CreateProductTagsAsync(ProductEntity product, string? tags, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(tags))
@@ -558,7 +562,6 @@ namespace Shared.Services.Product
 
             await _dbContext.ProductTagMappings.AddRangeAsync(mappings, cancellationToken);
         }
-        
         private async Task CreateInventoryForVariantsAsync(IEnumerable<InitialInventoryItem> items, int referenceId, CancellationToken cancellationToken)
         {
             var now = DateTime.UtcNow;
@@ -661,16 +664,23 @@ namespace Shared.Services.Product
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
-                
+
+                await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                    $"Cập nhật sản phẩm '{product.Name}'");
                 foreach (var mediaFile in filesToDelete)
                 {
                     try
                     {
                         await _mediaService.DeleteAsync(mediaFile, cancellationToken);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        return ServiceResult<int>.Fail("Cập nhật thành công!. Hình ảnh sản phẩm cũ xóa thất bại");
+                        _logger.LogError(ex,
+                            "Cập nhật sản phẩm thành công nhưng xóa file media thất bại. ProductId: {ProductId}, MediaFileId: {MediaFileId}",
+                            product.Id, mediaFile.Id);
+
+                        return ServiceResult<int>.Fail(
+                            "Cập nhật sản phẩm thành công. Hình ảnh sản phẩm cũ xóa thất bại.");
                     }
                 }
                 return ServiceResult<int>.Success(product.Id, "Cập nhật sản phẩm thành công.");
@@ -678,10 +688,11 @@ namespace Shared.Services.Product
             catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
-
+                _logger.LogError(ex, "Lỗi khi cập nhật sản phẩm. ProductId: {ProductId}, SKU: {Sku}", product.Id, product.Sku);
                 return ServiceResult<int>.Fail(ex.Message);
             }
         }
+        
         public async Task<ServiceResult<ProductResponse>> GetUpdateProductAsync(int id, CancellationToken cancellationToken = default)
         {
             // =========================================================
@@ -888,10 +899,7 @@ namespace Shared.Services.Product
 
             try
             {
-                return JsonSerializer.Deserialize<
-                    List<ProductOptionRequest>
-                >(
-                    optionsJson,
+                return JsonSerializer.Deserialize<List<ProductOptionRequest>>(optionsJson,
                     new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
@@ -900,9 +908,7 @@ namespace Shared.Services.Product
             }
             catch (JsonException ex)
             {
-                throw new InvalidOperationException(
-                    "Dữ liệu options không hợp lệ.",
-                    ex);
+                throw new InvalidOperationException("Dữ liệu options không hợp lệ.", ex);
             }
         }
         private static List<ProductVariantRequest> DeserializeVariants(string? variantsJson)
@@ -1120,6 +1126,108 @@ namespace Shared.Services.Product
                 firstImage.IsPrimary = true;
             }
         }
+        private async Task UpdateTagsAsync(ProductEntity product, string? tags, CancellationToken cancellationToken)
+        {
+            var tagValues = string.IsNullOrWhiteSpace(tags) ? [] : JsonSerializer.Deserialize<List<string>>(tags) ?? [];
+
+            var tagNames = tagValues.Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
+            //LẤY TAG ĐANG GẮN VỚI PRODUCT
+            var oldMappings = await _dbContext.ProductTagMappings.Where(x => x.ProductId == product.Id).ToListAsync(cancellationToken);
+
+            var oldTagIds = oldMappings.Select(x => x.TagId).ToHashSet();
+
+            //KHÔNG CÓ TAG MỚI
+            if (tagNames.Count == 0)
+            {
+                if (oldMappings.Count > 0)
+                {
+                    _dbContext.ProductTagMappings.RemoveRange(oldMappings);
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                }
+
+                return;
+            }
+
+            //LẤY PRODUCT TAG ĐÃ TỒN TẠI
+            var existingTags = await _dbContext.ProductTags.Where(x => tagNames.Contains(x.Name)).ToListAsync(cancellationToken);
+
+            var tagsByName = existingTags.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
+
+            //TẠO PRODUCT TAG MỚI NẾU CHƯA CÓ
+            foreach (var tagName in tagNames)
+            {
+                if (tagsByName.ContainsKey(tagName))
+                    continue;
+
+                var tag = new ProductTag
+                {
+                    Name = tagName,
+                    Slug = await GenerateUniqueSlugCategoryAsync(tagName)
+                };
+
+                await _dbContext.ProductTags.AddAsync(tag, cancellationToken);
+
+                tagsByName[tagName] = tag;
+            }
+
+            //SAVE TAG MỚI ĐỂ CÓ TagId
+            var hasNewTags = tagsByName.Values.Any(x => x.Id == 0);
+
+            if (hasNewTags)
+                await _dbContext.SaveChangesAsync(cancellationToken);
+
+            //TAG ID MỚI
+            var newTagIds = tagsByName.Values.Select(x => x.Id).ToHashSet();
+
+            //XÓA MAPPING CŨ KHÔNG CÒN ĐƯỢC CHỌN
+            var mappingsToRemove = oldMappings.Where(x => !newTagIds.Contains(x.TagId)).ToList();
+
+            if (mappingsToRemove.Count > 0)
+            {
+                _dbContext.ProductTagMappings.RemoveRange(
+                    mappingsToRemove);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            // CẬP NHẬT DISPLAY ORDER CHO MAPPING ĐÃ TỒN TẠI
+            var currentMappings = oldMappings.Where(x => newTagIds.Contains(x.TagId)).ToList();
+            foreach (var mapping in currentMappings)
+            {
+                var tag = tagsByName.Values.FirstOrDefault(x => x.Id == mapping.TagId);
+
+                if (tag == null)
+                    continue;
+
+                var displayOrder = tagNames.FindIndex(x => string.Equals(x, tag.Name, StringComparison.OrdinalIgnoreCase));
+                if (displayOrder >= 0)
+                    mapping.DisplayOrder = displayOrder;
+            }
+            //THÊM MAPPING MỚI CHƯA TỒN TẠI
+            var mappingsToAdd = tagNames
+                .Select((tagName, index) =>
+                {
+                    var tag = tagsByName[tagName];
+
+                    return new
+                    {
+                        TagId = tag.Id,
+                        DisplayOrder = index
+                    };
+                }).Where(x => !oldTagIds.Contains(x.TagId))
+                .Select(x => new ProductTagMapping
+                {
+                    ProductId = product.Id,
+                    TagId = x.TagId,
+                    DisplayOrder = x.DisplayOrder
+                }).ToList();
+
+            if (mappingsToAdd.Count > 0)
+            {
+                await _dbContext.ProductTagMappings.AddRangeAsync(mappingsToAdd, cancellationToken);
+            }
+        }
         private async Task UpdateVariantsAsync(ProductEntity product, List<ProductOptionRequest> options, List<ProductVariantRequest> requests, CancellationToken cancellationToken)
         {
             // =========================================================
@@ -1255,7 +1363,6 @@ namespace Shared.Services.Product
                 }
             }
         }
-
         private async Task UpdateInventoryAsync(ProductEntity product, int? productStock, List<ProductVariantRequest> variants, CancellationToken cancellationToken)
         {
             var warehouseId = WarehouseConstants.MainWarehouseId;
@@ -1612,7 +1719,7 @@ namespace Shared.Services.Product
             _dbContext.MediaFiles.Remove(mediaFile);
             filesToDelete.Add(mediaFile);
         }
-            private async Task AddNewVariantImageAsync(ProductEntity product, ProductVariantImageRequest request, CancellationToken cancellationToken)
+        private async Task AddNewVariantImageAsync(ProductEntity product, ProductVariantImageRequest request, CancellationToken cancellationToken)
             {
                 if (request.File == null)
                     return;
@@ -1702,7 +1809,6 @@ namespace Shared.Services.Product
                 filesToDelete.Add(oldMediaFile);
             }
         }
-
         private async Task<ServiceResult<int>> ValidateUpdateProductAsync(ProductEntity product, ProductRequest request, CancellationToken cancellationToken)
         {
             var sku = request.SKU.Trim();
@@ -1734,7 +1840,8 @@ namespace Shared.Services.Product
             product.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-
+            await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(), 
+                $"Chuyển sản phẩm '{product.Name}' về bản nháp");
             return ServiceResult.Success();
         }
 
@@ -1753,12 +1860,13 @@ namespace Shared.Services.Product
                     product.UpdatedAt = DateTime.UtcNow;
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
-
+                    await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                        $"Tạm ngưng sản phẩm '{product.Name}'");
                     return new ServiceResult<ProductStatus>
                     {
                         Succeeded = true,
                         Data = ProductStatus.Draft,
-                        Message = "Product suspended successfully."
+                        Message = $"Tạm ngưng sản phẩm '{product.Name}'"
                     };
                 }
 
@@ -1768,12 +1876,13 @@ namespace Shared.Services.Product
                     product.UpdatedAt = DateTime.UtcNow;
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
-
+                    await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                        $"Kích hoạt lại sản phẩm '{product.Name}'");
                     return new ServiceResult<ProductStatus>
                     {
                         Succeeded = true,
                         Data = ProductStatus.Active,
-                        Message = "Product unsuspended successfully."
+                        Message = $"Kích hoạt lại sản phẩm '{product.Name}'"
                     };
                 }
 
@@ -1784,126 +1893,27 @@ namespace Shared.Services.Product
                     Message = "Product cannot be suspended or unsuspended."
                 };
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
+                _logger.LogError(ex, "Lỗi DB khi thay đổi trạng thái sản phẩm. ProductId: {ProductId}, CurrentStatus: {Status}",
+                        product.Id, product.Status);
                 return new ServiceResult<ProductStatus>
                 {
                     Succeeded = false,
                     Data = product.Status,
-                    Message = "Unable to update product status."
+                    Message = $"Lỗi DB khi thay đổi trạng thái sản phẩm. ProductId: {product.Id}, CurrentStatus: {product.Status}"
                 };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái sản phẩm. ProductId: {ProductId}, CurrentStatus: {Status}",
+                        product.Id, product.Status);
                 return new ServiceResult<ProductStatus>
                 {
                     Succeeded = false,
                     Data = product.Status,
-                    Message = "An unexpected error occurred while updating the product."
+                    Message = $"Lỗi khi thay đổi trạng thái sản phẩm. ProductId: {product.Id}, CurrentStatus: {product.Status}"
                 };
-            }
-        }
-
-        private async Task UpdateTagsAsync(ProductEntity product, string? tags, CancellationToken cancellationToken)
-        {
-            var tagValues = string.IsNullOrWhiteSpace(tags) ? [] : JsonSerializer.Deserialize<List<string>>(tags) ?? [];
-
-            var tagNames = tagValues.Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-
-            //LẤY TAG ĐANG GẮN VỚI PRODUCT
-            var oldMappings = await _dbContext.ProductTagMappings.Where(x => x.ProductId == product.Id).ToListAsync(cancellationToken);
-
-            var oldTagIds = oldMappings.Select(x => x.TagId).ToHashSet();
-
-            //KHÔNG CÓ TAG MỚI
-            if (tagNames.Count == 0)
-            {
-                if (oldMappings.Count > 0)
-                {
-                    _dbContext.ProductTagMappings.RemoveRange(oldMappings);
-                    await _dbContext.SaveChangesAsync(cancellationToken);
-                }
-
-                return;
-            }
-
-            //LẤY PRODUCT TAG ĐÃ TỒN TẠI
-            var existingTags = await _dbContext.ProductTags.Where(x => tagNames.Contains(x.Name)).ToListAsync(cancellationToken);
-
-            var tagsByName = existingTags.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
-
-            //TẠO PRODUCT TAG MỚI NẾU CHƯA CÓ
-            foreach (var tagName in tagNames)
-            {
-                if (tagsByName.ContainsKey(tagName))
-                    continue;
-
-                var tag = new ProductTag
-                {
-                    Name = tagName,
-                    Slug = await GenerateUniqueSlugCategoryAsync(tagName)
-                };
-
-                await _dbContext.ProductTags.AddAsync(tag, cancellationToken);
-
-                tagsByName[tagName] = tag;
-            }
-
-            //SAVE TAG MỚI ĐỂ CÓ TagId
-            var hasNewTags = tagsByName.Values.Any(x => x.Id == 0);
-
-            if (hasNewTags)
-                await _dbContext.SaveChangesAsync(cancellationToken);
-
-            //TAG ID MỚI
-            var newTagIds = tagsByName.Values.Select(x => x.Id).ToHashSet();
-
-            //XÓA MAPPING CŨ KHÔNG CÒN ĐƯỢC CHỌN
-            var mappingsToRemove = oldMappings.Where(x => !newTagIds.Contains(x.TagId)).ToList();
-
-            if (mappingsToRemove.Count > 0)
-            {
-                _dbContext.ProductTagMappings.RemoveRange(
-                    mappingsToRemove);
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-
-            // CẬP NHẬT DISPLAY ORDER CHO MAPPING ĐÃ TỒN TẠI
-            var currentMappings = oldMappings.Where(x => newTagIds.Contains(x.TagId)).ToList();
-            foreach (var mapping in currentMappings)
-            {
-                var tag = tagsByName.Values.FirstOrDefault(x => x.Id == mapping.TagId);
-
-                if (tag == null)
-                    continue;
-
-                var displayOrder = tagNames.FindIndex(x => string.Equals(x, tag.Name, StringComparison.OrdinalIgnoreCase));
-                if (displayOrder >= 0)
-                    mapping.DisplayOrder = displayOrder;
-            }
-            //THÊM MAPPING MỚI CHƯA TỒN TẠI
-            var mappingsToAdd = tagNames
-                .Select((tagName, index) =>
-                {
-                    var tag = tagsByName[tagName];
-
-                    return new
-                    {
-                        TagId = tag.Id,
-                        DisplayOrder = index
-                    };
-                }).Where(x => !oldTagIds.Contains(x.TagId))
-                .Select(x => new ProductTagMapping
-                {
-                    ProductId = product.Id,
-                    TagId = x.TagId,
-                    DisplayOrder = x.DisplayOrder
-                }).ToList();
-
-            if (mappingsToAdd.Count > 0)
-            {
-                await _dbContext.ProductTagMappings.AddRangeAsync(mappingsToAdd, cancellationToken);
             }
         }
 
@@ -1920,10 +1930,12 @@ namespace Shared.Services.Product
             }
             return await _dbContext.Products.AnyAsync(x => x.Sku == sku && !x.IsDeleted);
         }
+        
         public async Task<bool> ExistsBySlugProductAsync(string slug)
         {
             return await _dbContext.Products.AnyAsync(x => x.Slug == slug && !x.IsDeleted);
         }
+        
         public async Task<string> GenerateUniqueSlugProductAsync(string name)
         {
             var baseSlug = SlugHelper.Generate(name);
@@ -1983,7 +1995,6 @@ namespace Shared.Services.Product
                     throw new InvalidOperationException($"SKU variant '{item.Sku}' đã tồn tại trong sản phẩm.");
             }
         }
-        
         private static ProductVariant BuildVariant(ProductEntity product, ProductVariantRequest request, int displayOrder = 0)
         {
             return new ProductVariant
@@ -2116,8 +2127,10 @@ namespace Shared.Services.Product
 
         public async Task<bool> ExistsBySlugCategoryAsync(string slug)
         {
-            return await _dbContext.ProductCategories.AnyAsync(x => x.Slug == slug && !x.IsDeleted);
+            var normalizedSlug = slug.Trim().ToLower();
+            return await _dbContext.ProductCategories.AnyAsync(x => x.Slug == normalizedSlug && !x.IsDeleted);
         }
+
         public async Task<string> GenerateUniqueSlugCategoryAsync(string name)
         {
             var baseSlug = SlugHelper.Generate(name);
@@ -2147,10 +2160,10 @@ namespace Shared.Services.Product
             var slug = request.Slug;
 
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResult<int>.Fail($"Name: không để trống.");
+                return ServiceResult<int>.Fail($"Tên không để trống.");
 
             if (string.IsNullOrWhiteSpace(slug))
-                return ServiceResult<int>.Fail($"Slug: không để trống.");
+                return ServiceResult<int>.Fail($"Đường dẫn không để trống.");
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
@@ -2177,12 +2190,14 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
+                await _activityLogger.LogAsync(ActivityType.ProductCategoryCreated, "ProductCategory",
+                    category.Id.ToString(), $"Tạo danh mục sản phẩm '{category.Name}'");
                 return ServiceResult<int>.Success(category.Id);
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Lỗi khi tạo danh mục sản phẩm. Name: {Name}, Slug: {Slug}", name, slug);
                 return ServiceResult<int>.Fail("Thêm danh mục thất bại");
             }
         }
@@ -2191,30 +2206,16 @@ namespace Shared.Services.Product
             var category = await _dbContext.ProductCategories.FirstOrDefaultAsync(x => x.Id == request.Id);
 
             if (category == null)
-                return ServiceResult<int>.Fail($"Name: không tồn tại.");
+                return ServiceResult<int>.Fail("Danh mục không tồn tại.");
 
-            var nameExists = await _dbContext.ProductCategories.AnyAsync(x => x.Id != request.Id && x.Name == request.Name && !x.IsDeleted);
+            var name = request.Name.Trim();
+            var slug = request.Slug;
 
-            if (nameExists)
-                return ServiceResult<int>.Fail(
-                 new ServiceError
-                 {
-                     Field = nameof(EditProductCategoryRequest.Name),
-                     Message = $"Name: '{request.Name}' đã tồn tại."
-                 });
-            var normalizedSlug = request.Slug.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(name))
+                return ServiceResult<int>.Fail($"Tên không để trống.");
 
-            // Check duplicate slug
-            var slugExists = await _dbContext.ProductCategories.AnyAsync(x => x.Id != request.Id && x.Slug == request.Slug && !x.IsDeleted && x.Slug.ToLower() == normalizedSlug);
-
-            if (slugExists)
-                return ServiceResult<int>.Fail(
-                 new ServiceError
-                 {
-                     Field = nameof(EditProductCategoryRequest.Slug),
-                     Message = $"Slug: '{request.Slug}' đã tồn tại."
-                 });
-
+            if (string.IsNullOrWhiteSpace(slug))
+                return ServiceResult<int>.Fail($"Đường dẫn không để trống.");
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
@@ -2227,12 +2228,15 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
+                await _activityLogger.LogAsync(ActivityType.ProductCategoryUpdated, "ProductCategory",
+                    category.Id.ToString(), $"Cập nhật danh mục sản phẩm '{category.Name}'");
                 return ServiceResult<int>.Success(category.Id);
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Lỗi khi cập nhật danh mục sản phẩm. CategoryId: {CategoryId}, Name: {Name}, Slug: {Slug}",
+                    category.Id, category.Name, category.Slug);
                 return ServiceResult<int>.Fail("Cập nhật danh mục thất bại");
             }
         }
@@ -2265,7 +2269,8 @@ namespace Shared.Services.Product
             category.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
-
+            await _activityLogger.LogAsync(ActivityType.ProductCategoryDeleted, "ProductCategory",
+                category.Id.ToString(), $"Xóa danh mục sản phẩm '{category.Name}'");
             return ServiceResult<int>.Success(category.Id);
         }
         #endregion Category
@@ -2285,18 +2290,19 @@ namespace Shared.Services.Product
 
             var filteredCount = await query.CountAsync();
 
-            //query = query.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ThenBy(x => x.Name);
-            query = query.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.Name);
+            query = query.OrderByDescending(x => x.UpdatedAt ?? x.CreatedAt).ThenBy(x => x.Name);
 
             var totalCount = await _dbContext.Attributes.CountAsync();
-
             var items = await query.Skip(request.Start).Take(request.Length)
                 .Select(x => new ProductAttributeListResult
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Code = x.Code,
-                    CreatedAt = x.CreatedAt,
+                    ProductCount = x.Values.SelectMany(v => v.VariantAttributes).Select(va => va.ProductVariant.ProductId)
+                    .Distinct().Count(),
+                    IsDeleted = x.IsDeleted,
+                    CreatedAt = x.CreatedAt
                 }).ToListAsync();
 
             return new PagedResult<ProductAttributeListResult>
@@ -2331,10 +2337,10 @@ namespace Shared.Services.Product
             var code = request.Code.Trim().ToLower();
 
             if (string.IsNullOrWhiteSpace(name))
-                return ServiceResult<int>.Fail($"Name: không để trống.");
+                return ServiceResult<int>.Fail($"Tên không để trống.");
 
             if (string.IsNullOrWhiteSpace(code))
-                return ServiceResult<int>.Fail($"Code: không để trống.");
+                return ServiceResult<int>.Fail($"Code không để trống.");
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
@@ -2351,12 +2357,14 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
+                await _activityLogger.LogAsync(ActivityType.ProductAttributeCreated, "Attribute",
+                    attribute.Id.ToString(), $"Tạo thuộc tính '{attribute.Name}'");
                 return ServiceResult<int>.Success(attribute.Id);
             }
-            catch
+            catch (Exception ex) 
             {
                 await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Lỗi khi tạo thuộc tính. Name: {Name}, Code: {Code}", name, code);
                 return ServiceResult<int>.Fail("Thêm biến thể thất bại");
             }
         }
@@ -2365,38 +2373,38 @@ namespace Shared.Services.Product
             var attribute = await _dbContext.Attributes.FirstOrDefaultAsync(x => x.Id == request.Id);
 
             if (attribute == null)
-                return ServiceResult<int>.Fail($"Name: không tồn tại.");
+                return ServiceResult<int>.Fail($"Biến thể không tồn tại.");
 
-            var codeExists = await _dbContext.Attributes.AnyAsync(x => x.Id != request.Id && x.Code == request.Code);
+            var name = request.Name.Trim();
+            var code = request.Code.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(name))
+                return ServiceResult<int>.Fail($"Tên không để trống.");
 
-            if (codeExists)
-                return ServiceResult<int>.Fail(
-                 new ServiceError
-                 {
-                     Field = nameof(AttributeEntity.Code),
-                     Message = $"Code: '{request.Code}' đã tồn tại."
-                 });
-            var normalizedSlug = request.Code.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(code))
+                return ServiceResult<int>.Fail($"Code không để trống.");
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                attribute.Name = request.Name;
-                attribute.Code = request.Code;
-                //attribute.UpdatedAt = DateTime.UtcNow;.UpdatedAt = DateTime.UtcNow;
+                attribute.Name = name;
+                attribute.Code = code;
+                attribute.UpdatedAt = DateTime.UtcNow;
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-
+                await _activityLogger.LogAsync(ActivityType.ProductAttributeUpdated, "Attribute",
+                    attribute.Id.ToString(), $"Cập nhật thuộc tính '{attribute.Name}'");
                 return ServiceResult<int>.Success(attribute.Id);
             }
-            catch
+            catch (Exception ex) 
             {
                 await transaction.RollbackAsync(cancellationToken);
+                _logger.LogError(ex, "Lỗi khi cập nhật thuộc tính. AttributeId: {AttributeId}, Name: {Name}, Code: {Code}",
+                    attribute.Id, name, code);
                 return ServiceResult<int>.Fail("Cập nhật thất bại");
             }
         }
-        public async Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request)
+        public async Task<ServiceResult<int>> DeleteAttributeAsync(DeleteFormRequest request, CancellationToken cancellationToken)
         {
             var attribute = await _dbContext.Attributes.FirstOrDefaultAsync(x => x.Id == request.Id);
 
@@ -2405,28 +2413,29 @@ namespace Shared.Services.Product
                 return ServiceResult<int>.Fail(
                     new ServiceError
                     {
-                        Message = "Attribute không tồn tại hoặc đã được xóa."
+                        Message = "Biến thể không tồn tại hoặc đã được xóa."
                     });
             }
 
-            // Nếu category đang được sử dụng bởi product
-            var hasProducts = await _dbContext.Products.AnyAsync(x => x.CategoryId == request.Id && !x.IsDeleted);
+            // Nếu attribute đang được sử dụng bởi product
+            var isUsed = await _dbContext.VariantAttributes.AnyAsync(x => x.AttributeValue.AttributeId == attribute.Id, cancellationToken);
 
-            if (hasProducts)
-            {
-                return ServiceResult<int>.Fail(
-                    new ServiceError
-                    {
-                        Message = "Không thể xóa category đang có sản phẩm."
-                    });
-            }
+            if (isUsed)
+                return ServiceResult<int>.Fail("Không thể xóa thuộc tính.\nThuộc tính đang được sử dụng.");
 
-            //attribute.IsDeleted = true;
-            //attribute.UpdatedAt = DateTime.UtcNow;
+            attribute.IsDeleted = true;
+            attribute.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
-
+            await _activityLogger.LogAsync(ActivityType.ProductAttributeDeleted, "Attribute",
+                attribute.Id.ToString(), $"Xóa thuộc tính '{attribute.Name}'");
             return ServiceResult<int>.Success(attribute.Id);
+        }
+        
+        public async Task<bool> ExistsByCodeAttributeAsync(string code)
+        {
+            var normalizedCode = code.Trim().ToLower();
+            return await _dbContext.Attributes.AnyAsync(x => x.Code == normalizedCode && !x.IsDeleted);
         }
         #endregion
     }

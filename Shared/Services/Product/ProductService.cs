@@ -52,6 +52,7 @@ namespace Shared.Services.Product
 
         public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request)
         {
+
             var query = _dbContext.Products.AsNoTracking().AsQueryable();
 
             var totalCount = await query.CountAsync();

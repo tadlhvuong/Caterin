@@ -19,9 +19,13 @@ namespace Shared.Services.Log
         {
             _scopeFactory = scopeFactory;
             _options = options.Value;
-
             _queue = queue;
+
             _logger = logger;
+        }
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            return base.StartAsync(cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -32,40 +36,55 @@ namespace Shared.Services.Log
             {
                 while (!stoppingToken.IsCancellationRequested)
                 {
-                    try
+                    batch.Clear();
+
+                    // Chờ log đầu tiên
+                    var firstItem = await _queue.Reader.ReadAsync(stoppingToken);
+
+                    batch.Add(firstItem);
+
+                    // Gom thêm log trong khoảng FlushInterval
+                    var deadline = DateTime.UtcNow.AddSeconds(_options.FlushIntervalSeconds);
+
+                    while (batch.Count < _options.BatchSize)
                     {
-                        var readTask = _queue.Reader.ReadAsync(stoppingToken).AsTask();
-                        var delayTask = Task.Delay(
-                            TimeSpan.FromSeconds(_options.FlushIntervalSeconds),
+                        var remaining = deadline - DateTime.UtcNow;
+
+                        if (remaining <= TimeSpan.Zero)
+                            break;
+
+                        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(
                             stoppingToken);
 
-                        var completed = await Task.WhenAny(readTask, delayTask);
+                        timeoutCts.CancelAfter(remaining);
 
-                        if (completed == readTask)
+                        try
                         {
-                            batch.Add(await readTask);
+                            var item = await _queue.Reader.ReadAsync(
+                                timeoutCts.Token);
 
-                            while (batch.Count < _options.BatchSize &&
-                                   _queue.Reader.TryRead(out var item))
-                            {
-                                batch.Add(item);
-                            }
+                            batch.Add(item);
                         }
-
-                        if (batch.Count >= _options.BatchSize || completed == delayTask)
+                        catch (OperationCanceledException)
+                            when (!stoppingToken.IsCancellationRequested)
                         {
-                            await FlushAsync(batch, stoppingToken);
+                            // Hết thời gian gom batch
+                            break;
                         }
                     }
-                    catch (OperationCanceledException)
+
+                    if (batch.Count > 0)
                     {
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error in log worker loop");
+                        await FlushAsync(batch, stoppingToken);
                     }
                 }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Fatal error in log background worker.");
             }
             finally
             {
@@ -87,7 +106,6 @@ namespace Shared.Services.Log
 
                 db.AddRange(batch);
                 await db.SaveChangesAsync(ct);
-
                 batch.Clear();
             }
             catch (Exception ex)

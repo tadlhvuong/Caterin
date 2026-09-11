@@ -52,6 +52,7 @@ services.AddScoped<IActivityLogger, ActivityLogger>();
 services.AddScoped<ISecurityLogger, SecurityLogger>();
 
 services.Configure<LogWorkerOptions>(builder.Configuration.GetSection("LogWorker"));
+Console.WriteLine(">>> REGISTER LogBackgroundWorker");
 services.AddHostedService<LogBackgroundWorker>();
 
 services.AddScoped<AuditInterceptor>();

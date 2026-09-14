@@ -33,7 +33,7 @@ namespace Shared.Configurations.Product
 
             builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone");
 
-            builder.HasIndex(x => x.Slug).IsUnique().HasFilter("\"IsDeleted\" = false"); ;
+            builder.HasIndex(x => x.Slug).IsUnique().HasFilter("\"IsDeleted\" = false");
 
             builder.HasIndex(x => x.IsActive);
 

@@ -2158,7 +2158,7 @@ namespace Shared.Services.Product
         private async Task<ServiceResult<int>> CreateProductCategoryAsync(EditProductCategoryRequest request, CancellationToken cancellationToken = default)
         {
             var name = request.Name.Trim();
-            var slug = request.Slug;
+            var slug = SlugHelper.Generate(request.Slug);
 
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResult<int>.Fail($"Tên không để trống.");
@@ -2173,7 +2173,9 @@ namespace Shared.Services.Product
                 var category = new ProductCategory
                 {
                     Name = name,
+
                     Slug = slug,
+
                     Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
 
                     SeoTitle = string.IsNullOrWhiteSpace(request.SeoTitle) ? null : request.SeoTitle.Trim(),
@@ -2210,7 +2212,7 @@ namespace Shared.Services.Product
                 return ServiceResult<int>.Fail("Danh mục không tồn tại.");
 
             var name = request.Name.Trim();
-            var slug = request.Slug;
+            var slug = SlugHelper.Generate(request.Slug);
 
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResult<int>.Fail($"Tên không để trống.");
@@ -2221,8 +2223,8 @@ namespace Shared.Services.Product
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                category.Name = request.Name;
-                category.Slug = request.Slug;
+                category.Name = name;
+                category.Slug = slug;
                 category.Description = request.Description;
                 category.IsActive = request.IsActive;
                 category.UpdatedAt = DateTime.UtcNow;
@@ -2267,6 +2269,7 @@ namespace Shared.Services.Product
             }
 
             category.IsDeleted = true;
+            category.IsActive = false;
             category.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
@@ -2377,7 +2380,7 @@ namespace Shared.Services.Product
                 return ServiceResult<int>.Fail($"Biến thể không tồn tại.");
 
             var name = request.Name.Trim();
-            var code = request.Code.Trim().ToLower();
+            var code = SlugHelper.Generate(request.Code);
             if (string.IsNullOrWhiteSpace(name))
                 return ServiceResult<int>.Fail($"Tên không để trống.");
 

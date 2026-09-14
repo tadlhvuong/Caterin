@@ -163,15 +163,9 @@ namespace Shared.Common
 
                 text = RemoveVietnameseCharacters(text);
 
-                text = Regex.Replace(
-                    text,
-                    @"[^a-z0-9\s-]",
-                    "");
+                text = Regex.Replace(text, @"[^a-z0-9\s-]", "");
 
-                text = Regex.Replace(
-                    text,
-                    @"[\s-]+",
-                    "-");
+                text = Regex.Replace(text, @"[\s-]+", "-");
 
                 return text.Trim('-');
             }

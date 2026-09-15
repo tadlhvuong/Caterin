@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace Shared.Providers
 {
-    public class PermissionPolicyProvider
-    : DefaultAuthorizationPolicyProvider
+    public class PermissionPolicyProvider : DefaultAuthorizationPolicyProvider
     {
         public PermissionPolicyProvider(IOptions<AuthorizationOptions> options)
             : base(options) { }

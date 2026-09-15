@@ -17,8 +17,9 @@ namespace Shared.Data.Seeders
             {
                 Key = "site.name",
                 Value = "Caterin",
+                Group = Enums.SettingGroup.General,
                 Description = "Website name",
-                IsSystem = true,
+                IsPublic = true,
                 CreatedAt = DateTime.UtcNow
             },
 
@@ -26,8 +27,9 @@ namespace Shared.Data.Seeders
             {
                 Key = "site.language",
                 Value = "vi-VN",
+                Group = Enums.SettingGroup.General,
                 Description = "Default language",
-                IsSystem = true,
+                IsPublic = true,
                 CreatedAt = DateTime.UtcNow
             },
 
@@ -35,8 +37,9 @@ namespace Shared.Data.Seeders
             {
                 Key = "site.currency",
                 Value = "VND",
+                Group = Enums.SettingGroup.General,
                 Description = "Default currency",
-                IsSystem = true,
+                IsPublic = true,
                 CreatedAt = DateTime.UtcNow
             },
 
@@ -44,8 +47,9 @@ namespace Shared.Data.Seeders
             {
                 Key = "site.timezone",
                 Value = "Asia/Ho_Chi_Minh",
+                Group = Enums.SettingGroup.General,
                 Description = "Default timezone",
-                IsSystem = true,
+                IsPublic = true,
                 CreatedAt = DateTime.UtcNow
             }
             ]);

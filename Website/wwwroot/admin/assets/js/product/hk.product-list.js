@@ -49,7 +49,6 @@ $(function () {
 
     $.fn.dataTable.ext.pager.numbers_length = 7;
     if (dt_product_table.length) {
-
         var dt_products = dt_product_table.DataTable({
             processing: true,
             serverSide: true,

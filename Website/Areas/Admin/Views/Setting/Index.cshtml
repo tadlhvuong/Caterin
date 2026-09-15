@@ -1,0 +1,93 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Cài đặt";
+    // var currentTab = (ViewData["CurrentTab"] as string ?? "personal").ToLower();
+    var curent = Model.CurrentTab;
+    var initAction = Model.CurrentTab;
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="nav-align-top">
+                <ul class="nav nav-pills flex-column flex-md-row mb-6 gap-2 gap-lg-0">
+                   @*  <li class="nav-item">
+                        <a class="nav-link active" href="javascript:void(0);"><i class="ti-sm ti ti-users me-1_5"></i> Store Details</a>
+                    </li> *@
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/general"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=personal" data-tab="general" data-i18n="General">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Store Details
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/payment"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=payment" data-tab="payment" data-i18n="Payments">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Payments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/checkout"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=checkout" data-tab="checkout" data-i18n="Checkout">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Checkout
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/delivery"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=delivery" data-tab="delivery" data-i18n="Delivery">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/location"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=location" data-tab="location" data-i18n="Location">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Location
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           hx-get="/admin/setting/notification"
+                           hx-target="#tab-content"
+                           hx-push-url="/admin/setting?tab=notification" data-tab="notification" data-i18n="Notification">
+                            <i class="ti-sm ti ti-lock me-1_5"></i> Notification
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+        </div>
+        <div class="col-12">
+            <div id="tab-content"
+                 hx-get="/admin/setting/general?tab=@initAction"
+                 hx-trigger="load" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/admin/assets/js/core/setting-store.js"></script>
+    <script>
+            document.body.addEventListener("htmx:afterRequest", function (e) {
+            const url = new URL(window.location.href);
+            const currentTab = url.searchParams.get("tab") || "general";
+
+            document.querySelectorAll("[data-tab]").forEach(el => {
+                el.classList.toggle("active", el.dataset.tab === currentTab);
+            });
+        });
+    </script>
+
+}

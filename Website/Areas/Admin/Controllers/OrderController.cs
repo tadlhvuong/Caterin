@@ -5,6 +5,10 @@ using Shared.Data.Context;
 using Shared.Enums;
 using Shared.Interfaces.Core;
 using Shared.Requests.Order;
+using Shared.Responses.Datatables;
+using Shared.Services.Product;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 
 namespace Website.Areas.Admin.Controllers
 {
@@ -33,59 +37,63 @@ namespace Website.Areas.Admin.Controllers
 
         [PermissionAction(ActionType.View)]
         [HttpPost("get-orders")]
-        public async Task<IActionResult> Data([FromBody] OrderDataTableRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProducts([FromBody] OrderDataTableRequest request)
         {
-            var pageSize = request.Length <= 0 ? 20 : request.Length;
-
-            var page = request.Start / pageSize + 1;
-
-            var sort = request.Order.FirstOrDefault();
-
-            var sortColumn = sort?.Column switch
-            {
-                0 => "OrderCode",
-                1 => "Status",
-                2 => "TotalAmount",
-                3 => "ItemCount",
-                4 => "CreatedAt",
-                _ => "CreatedAt"
-            };
-
-            var serviceRequest = new OrderListRequest
-            {
-                Page = page,
-                PageSize = pageSize,
-                Search = request.Search?.Value,
-                Status = request.Status,
-                SortColumn = sortColumn,
-                SortDescending = sort?.Dir == "desc"
-            };
-
-
-            var result = await _orderService.GetOrdersAsync(serviceRequest, cancellationToken);
-
-            if (!result.Succeeded)
-            {
-                return Json(new
-                {
-                    draw = request.Draw,
-                    recordsTotal = 0,
-                    recordsFiltered = 0,
-                    data = Array.Empty<object>(),
-                    errors = result.Errors
-                });
-            }
-
-            var data = result.Data!;
-
+            var result = await _orderService.GetOrdersAsync(request);
 
             return Json(new
             {
                 draw = request.Draw,
-                recordsTotal = data.TotalCount,
-                recordsFiltered = data.FilteredCount,
-                data = data.Items
+                recordsTotal = result.TotalCount,
+                recordsFiltered = result.FilteredCount,
+                data = result.Items
             });
+        }
+
+        [HttpGet("order-statuses")]
+        [PermissionAction(ActionType.View)]
+        public IActionResult GetOrderStatuses()
+        {
+            var statuses = Enum.GetValues<OrderStatus>()
+                .Select(x =>
+                {
+                    var orderStatus = typeof(OrderStatus)
+                        .GetMember(x.ToString())
+                        .First();
+
+                    var display = orderStatus.GetCustomAttribute<DisplayAttribute>();
+
+                    return new
+                    {
+                        value = (int)x,
+                        name = display?.GetShortName() ?? x.ToString()
+                    };
+                });
+
+            return Ok(statuses);
+        }
+
+        [HttpGet("payment-statuses")]
+        [PermissionAction(ActionType.View)]
+        public IActionResult GetPaymentStatuses()
+        {
+            var statuses = Enum.GetValues<PaymentStatus>()
+                .Select(x =>
+                {
+                    var paymentStatus = typeof(PaymentStatus)
+                        .GetMember(x.ToString())
+                        .First();
+
+                    var display = paymentStatus.GetCustomAttribute<DisplayAttribute>();
+
+                    return new
+                    {
+                        value = (int)x,
+                        name = display?.GetShortName() ?? x.ToString()
+                    };
+                });
+
+            return Ok(statuses);
         }
         [HttpGet("order-details/{id?}")]
         [PermissionAction(ActionType.View)]

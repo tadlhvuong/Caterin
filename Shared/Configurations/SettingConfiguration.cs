@@ -12,7 +12,9 @@ namespace Shared.Configurations
 
             builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Key).IsRequired().HasMaxLength(200);
+            builder.Property(x => x.Key).IsRequired().HasMaxLength(150);
+
+            builder.Property(x => x.Group).HasMaxLength(50).IsRequired();
 
             builder.Property(x => x.Value).IsRequired().HasMaxLength(4000);
 

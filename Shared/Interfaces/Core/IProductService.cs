@@ -21,7 +21,7 @@ namespace Shared.Interfaces.Core
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request);
+        Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableRequest request);
         /// <summary>
         /// Get category list for view _ProductForm 
         /// </summary>

@@ -50,7 +50,7 @@ namespace Shared.Services.Product
             _activityLogger = activityLogger;
         }
 
-        public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableResquest request)
+        public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableRequest request)
         {
 
             var query = _dbContext.Products.AsNoTracking().AsQueryable();

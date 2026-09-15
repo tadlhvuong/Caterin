@@ -5,8 +5,7 @@ namespace Shared.Extensions
 {
     public static class PermissionMiddlewareExtensions
     {
-        public static IApplicationBuilder
-            UsePermissionMiddleware(this IApplicationBuilder app)
+        public static IApplicationBuilder UsePermissionMiddleware(this IApplicationBuilder app)
         {
             return app.UseMiddleware<PermissionMiddleware>();
         }

@@ -4,10 +4,12 @@ using Shared.Data.Context;
 using Shared.Data.Entities.Order;
 using Shared.DTOs.Identity;
 using Shared.DTOs.Order;
+using Shared.DTOs.Product;
 using Shared.Enums;
 using Shared.Interfaces.Core;
 using Shared.Requests.Order;
 using Shared.Responses;
+using Shared.Responses.Datatables;
 
 namespace Shared.Services.Order
 {
@@ -21,56 +23,52 @@ namespace Shared.Services.Order
             _dbContext = dbContext;
             _logger = logger;
         }
-        public async Task<ServiceResult<PagedResult<OrderListItemResult>>> GetOrdersAsync(
-        OrderListRequest request, CancellationToken cancellationToken = default)
+        public async Task<PagedResult<OrderListItemResult>> GetOrdersAsync(OrderDataTableRequest request)
         {
-            var page = request.Page < 1 ? 1 : request.Page;
-
-            var pageSize = request.PageSize is < 1 or > 100 ? 20 : request.PageSize;
-            var totalCount = await _dbContext.Orders.CountAsync(cancellationToken);
             var query = _dbContext.Orders.AsNoTracking().AsQueryable();
+
+            var totalCount = await query.CountAsync();
 
             if (!string.IsNullOrWhiteSpace(request.Search))
             {
                 var search = request.Search.Trim();
 
-                query = query.Where(x =>
-                    x.OrderCode.Contains(search));
+                query = query.Where(x => x.OrderCode.Contains(search));
             }
 
-            if (request.Status.HasValue)
+            if (request.OrderStatus.HasValue && Enum.IsDefined(typeof(ProductStatus), request.OrderStatus.Value))
             {
-                query = query.Where(x =>
-                    x.Status == request.Status.Value);
+                var status = (OrderStatus)request.OrderStatus.Value;
+
+                query = query.Where(x => x.Status == status);
             }
+
+            var filteredCount = await query.CountAsync();
+            var sortColumn = request.SortColumn?.ToLower();
+
             query = request.SortColumn switch
             {
-                "OrderCode" => request.SortDescending
+                "OrderCode" => request.SortDirection == "desc"
                     ? query.OrderByDescending(x => x.OrderCode)
                     : query.OrderBy(x => x.OrderCode),
 
-                "Status" => request.SortDescending
+                "Status" => request.SortDirection == "desc"
                     ? query.OrderByDescending(x => x.Status)
                     : query.OrderBy(x => x.Status),
 
-                "TotalAmount" => request.SortDescending
+                "TotalAmount" => request.SortDirection == "desc"
                     ? query.OrderByDescending(x => x.TotalAmount)
                     : query.OrderBy(x => x.TotalAmount),
 
-                "ItemCount" => request.SortDescending
+                "ItemCount" => request.SortDirection == "desc"
                     ? query.OrderByDescending(x => x.Items.Count)
                     : query.OrderBy(x => x.Items.Count),
 
-                _ => request.SortDescending
+                _ => request.SortDirection == "desc"
                     ? query.OrderByDescending(x => x.CreatedAt)
                     : query.OrderBy(x => x.CreatedAt)
             };
-            var filteredCount = await query.CountAsync(cancellationToken);
-
-            var items = await query
-     .Skip((page - 1) * pageSize)
-     .Take(pageSize)
-     .Select(x => new OrderListItemResult
+            var items = await query.Skip(request.Start).Take(request.Length).Select(x => new OrderListItemResult
      {
          Id = x.Id,
          Order = x.OrderCode,
@@ -100,19 +98,21 @@ namespace Shared.Services.Order
 
          ItemCount = x.Items.Count
      })
-     .ToListAsync(cancellationToken);
+     .ToListAsync();
 
-            var result = new PagedResult<OrderListItemResult>
+            return new PagedResult<OrderListItemResult>
             {
                 Items = items,
-                Page = page,
-                PageSize = pageSize,
+
+                Page = request.Length > 0 ? request.Start / request.Length + 1 : 1,
+
+                PageSize = request.Length,
+
                 TotalCount = totalCount,
+
                 FilteredCount = filteredCount
             };
 
-            return ServiceResult<PagedResult<OrderListItemResult>>
-                .Success(result);
         }
 
         public async Task<OrderDetailsDto?> GetDetailsAsync(int orderId, CancellationToken cancellationToken = default)

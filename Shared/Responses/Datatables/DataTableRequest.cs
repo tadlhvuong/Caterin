@@ -21,7 +21,7 @@ namespace Shared.Responses.Datatables
 
         public string? SortDirection { get; set; }
     }
-    public class ProductDataTableResquest : DataTableRequest
+    public class ProductDataTableRequest : DataTableRequest
     {
         public int? Status { get; set; }
 
@@ -30,5 +30,12 @@ namespace Shared.Responses.Datatables
     public class CustomerDataTableRequest : DataTableRequest
     {
         public int? Status { get; set; }
+    }
+    public class OrderDataTableRequest : DataTableRequest
+    {
+        public string OrderCode { get; set; }
+        public int? OrderStatus { get; set; }
+        public int? PaymentStatus { get; set; }
+
     }
 }

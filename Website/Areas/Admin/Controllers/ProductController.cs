@@ -49,7 +49,7 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpPost("get-products")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetProducts([FromBody] ProductDataTableResquest request)
+        public async Task<IActionResult> GetProducts([FromBody] ProductDataTableRequest request)
         {
             var result = await _productService.GetProductsAsync(request);
 

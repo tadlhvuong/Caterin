@@ -1,0 +1,142 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row">
+        <!-- Navigation -->
+        <div class="col-12">
+            <div class="card mb-6">
+                <div class="card-header">
+                    <div class="card-title m-0">
+                        <h5 class="m-0">Customer contact method</h5>
+                        <p class="my-0 card-subtitle">Select what contact method customers use to check out.</p>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="form-check my-2 ms-2">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="contactMethod"
+                               id="contactPhone"
+                               checked />
+                        <label class="form-check-label text-heading" for="contactPhone"> Phone number </label>
+                    </div>
+                    <div class="form-check mb-6 mt-4 ms-2">
+                        <input class="form-check-input" type="radio" name="contactMethod" id="contactMail" />
+                        <label class="form-check-label text-heading" for="contactMail"> Email </label>
+                    </div>
+                    <div class="alert d-flex align-items-center alert-info mb-0 h5" role="alert">
+                        <span class="alert-icon rounded-2">
+                            <i class="ti ti-info-circle ti-md"></i>
+                        </span>
+                        To send SMS updates, you need to install an SMS App.
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-6">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Customer information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <p class="mb-0">Full name</p>
+                        <div class="form-check my-2 ms-2">
+                            <input class="form-check-input" type="radio" name="fullName" id="last_name" checked />
+                            <label class="form-check-label text-heading" for="last_name">
+                                Only require last name
+                            </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input" type="radio" name="fullName" id="last_and_first_name" />
+                            <label class="form-check-label text-heading" for="last_and_first_name">
+                                Require first and last name
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="mb-0">Company name</p>
+                        <div class="form-check my-2 ms-2">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="companyName"
+                                   id="dont_include_name"
+                                   checked />
+                            <label class="form-check-label text-heading" for="dont_include_name">
+                                Don't include name
+                            </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input" type="radio" name="companyName" id="optional_name" />
+                            <label class="form-check-label text-heading" for="optional_name"> Optional </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input" type="radio" name="companyName" id="required_name" />
+                            <label class="form-check-label text-heading" for="required_name"> Required </label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="mb-0">Address line 2 (apartment, unit, etc.)</p>
+                        <div class="form-check my-2 ms-2">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="addressLine"
+                                   id="dont_include_address"
+                                   checked />
+                            <label class="form-check-label text-heading" for="dont_include_address">
+                                Don't include name
+                            </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input" type="radio" name="addressLine" id="optional_address" />
+                            <label class="form-check-label text-heading" for="optional_address"> Optional </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input" type="radio" name="addressLine" id="required_address" />
+                            <label class="form-check-label text-heading" for="required_address"> Required </label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="mb-0">Shipping address phone number</p>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="shippingAddress"
+                                   id="dont_include_ship_address"
+                                   checked />
+                            <label class="form-check-label text-heading" for="dont_include_ship_address">
+                                Don't include name
+                            </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="shippingAddress"
+                                   id="optional_ship_address" />
+                            <label class="form-check-label text-heading" for="optional_ship_address">
+                                Optional
+                            </label>
+                        </div>
+                        <div class="form-check mt-4 ms-2">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="shippingAddress"
+                                   id="required_ship_address" />
+                            <label class="form-check-label text-heading" for="required_ship_address">
+                                Required
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-4">
+                <button type="reset" class="btn btn-label-secondary">Discard</button>
+                <a class="btn btn-primary" href="app-ecommerce-settings-shipping.html">Save Changes</a>
+            </div>
+        </div>
+        <!-- /Navigation -->
+    </div>
+</div>

@@ -3,6 +3,7 @@ using Shared.DTOs.Order;
 using Shared.Enums;
 using Shared.Requests.Order;
 using Shared.Responses;
+using Shared.Responses.Datatables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,8 @@ namespace Shared.Interfaces.Core
 {
     public interface IOrderService
     {
-        Task<ServiceResult<PagedResult<OrderListItemResult>>> GetOrdersAsync(OrderListRequest request, CancellationToken cancellationToken = default);
-        
+        Task<PagedResult<OrderListItemResult>> GetOrdersAsync(OrderDataTableRequest request);
+
         Task<OrderDetailsDto?> GetDetailsAsync(int orderId, CancellationToken cancellationToken = default);
         
         Task<ServiceResult<int>> CreateAsync(CreateOrderRequest request);

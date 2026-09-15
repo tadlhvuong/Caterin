@@ -1,0 +1,125 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row g-6">
+        <div class="col-12">
+            <div class="tab-content p-0">
+                <!-- Locations Tab -->
+                <div class="tab-pane fade show active" id="locations" role="tabpanel">
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Location Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="col-12 mb-6">
+                                <label for="locationName" class="form-label mb-1">Location Name</label>
+                                <input class="form-control"
+                                       type="text"
+                                       name="locationName"
+                                       id="locationName"
+                                       placeholder="Shop location" />
+                            </div>
+                            <div class="form-check mb-6 ms-2">
+                                <input class="form-check-input" type="checkbox" value="" id="def_location" checked />
+                                <label class="form-check-label" for="def_location">
+                                    Fulfill online orders from this location
+                                </label>
+                            </div>
+                            <div class="alert d-flex align-items-start alert-info mb-0 h5" role="alert">
+                                <span class="alert-icon me-4 rounded-2">
+                                    <i class="ti ti-info-circle ti-md"></i>
+                                </span>
+                                This is your default location. To change whether you fulfill online orders from this
+                                location, select another default location first.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <h5 class="card-title m-0">Address</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-6">
+                                <div class="col-12">
+                                    <label class="form-label mb-1" for="country_region">Country/region</label>
+                                    <select id="country_region" class="select2 form-select" data-placeholder="United States">
+                                        <option value="">United States</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="Bangladesh">Bangladesh</option>
+                                        <option value="Belarus">Belarus</option>
+                                        <option value="Brazil">Brazil</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="China">China</option>
+                                        <option value="France">France</option>
+                                        <option value="Germany">Germany</option>
+                                        <option value="India">India</option>
+                                        <option value="Indonesia">Indonesia</option>
+                                        <option value="Israel">Israel</option>
+                                        <option value="Italy">Italy</option>
+                                        <option value="Japan">Japan</option>
+                                        <option value="Korea">Korea, Republic of</option>
+                                        <option value="Mexico">Mexico</option>
+                                        <option value="Philippines">Philippines</option>
+                                        <option value="Russia">Russian Federation</option>
+                                        <option value="South Africa">South Africa</option>
+                                        <option value="Thailand">Thailand</option>
+                                        <option value="Turkey">Turkey</option>
+                                        <option value="Ukraine">Ukraine</option>
+                                        <option value="United Arab Emirates">United Arab Emirates</option>
+                                        <option value="United Kingdom">United Kingdom</option>
+                                        <option value="United States">United States</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-1" for="loc_address">Address</label>
+                                    <input type="text" id="loc_address" class="form-control" placeholder="Address" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-1" for="loc_apa_suite">Apartment, suite, etc.</label>
+                                    <input type="text"
+                                           id="loc_apa_suite"
+                                           class="form-control"
+                                           placeholder="Apartment, suite, etc." />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-0" for="loc_phone">Phone</label>
+                                    <input type="tel"
+                                           class="form-control phone-mask"
+                                           id="loc_phone"
+                                           placeholder="Phone"
+                                           name="loc_phone"
+                                           aria-label="loc_phone" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-1" for="loc_city">City</label>
+                                    <input type="text" id="loc_city" class="form-control" placeholder="City" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-1" for="loc_state">State</label>
+                                    <input type="text" id="loc_state" class="form-control" placeholder="State" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label mb-1" for="loc_pincode">PIN Code</label>
+                                    <input type="number"
+                                           id="loc_pincode"
+                                           class="form-control"
+                                           placeholder="PIN Code"
+                                           min="0"
+                                           max="999999" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-4">
+                        <button type="reset" class="btn btn-label-secondary">Discard</button>
+                        <a class="btn btn-primary" href="app-ecommerce-settings-notifications.html">Save Changes</a>
+                    </div>
+                </div>
+            </div>
+            <!-- /Options-->
+        </div>
+    </div>
+</div>

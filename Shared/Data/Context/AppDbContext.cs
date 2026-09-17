@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Shared.Data.Entities.Chat;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Data.Entities.Identity.Log;
@@ -53,6 +54,18 @@ namespace Shared.Data.Context
         public virtual DbSet<InventoryStock> InventoryStocks { get; set; }
         public virtual DbSet<InventoryTransaction> InventoryTransactions { get; set; }
 
+        public virtual DbSet<ChatInbox> ChatInboxes { get; set; }
+        public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+        public virtual DbSet<ChatLabel> ChatLabels { get; set; }
+        public virtual DbSet<ChatConversation> ChatConversations { get; set; }
+        public virtual DbSet<ChatConversationLabel> ChatConversationLabels { get; set; }
+        public virtual DbSet<ChatContact> ChatContacts { get; set; }
+        public virtual DbSet<ChatContactInbox> ChatContactInboxes { get; set; }
+        public virtual DbSet<ChatAttachment> ChatAttachments { get; set; }
+        public virtual DbSet<ChatTeam> ChatTeams { get; set; }
+        public virtual DbSet<ChatTeamMember> ChatTeamMembers { get; set; }
+
+        public virtual DbSet<ChatGuestSession> ChatGuestSessions { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Shared.Data.Context;
@@ -11,9 +12,11 @@ using Shared.Data.Context;
 namespace Shared.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260916023912_ChatDB")]
+    partial class ChatDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,10 +213,6 @@ namespace Shared.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
-                    b.Property<string>("GuestToken")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
                     b.Property<string>("Name")
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
@@ -222,7 +221,7 @@ namespace Shared.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
@@ -309,7 +308,7 @@ namespace Shared.Migrations
                     b.Property<int?>("TeamId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -354,46 +353,6 @@ namespace Shared.Migrations
                     b.ToTable("chat_conversation_labels", (string)null);
                 });
 
-            modelBuilder.Entity("Shared.Data.Entities.Chat.ChatGuestSession", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ContactId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRevoked")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime>("LastSeenAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
-
-                    b.HasIndex("ContactId", "IsRevoked", "ExpiresAt");
-
-                    b.ToTable("chat_guest_sessions", (string)null);
-                });
-
             modelBuilder.Entity("Shared.Data.Entities.Chat.ChatInbox", b =>
                 {
                     b.Property<long>("Id")
@@ -421,7 +380,7 @@ namespace Shared.Migrations
                     b.Property<string>("SettingsJson")
                         .HasColumnType("jsonb");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -509,7 +468,7 @@ namespace Shared.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserId")
@@ -565,7 +524,7 @@ namespace Shared.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -2547,17 +2506,6 @@ namespace Shared.Migrations
                     b.Navigation("Conversation");
 
                     b.Navigation("Label");
-                });
-
-            modelBuilder.Entity("Shared.Data.Entities.Chat.ChatGuestSession", b =>
-                {
-                    b.HasOne("Shared.Data.Entities.Chat.ChatContact", "Contact")
-                        .WithMany()
-                        .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Contact");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Chat.ChatMessage", b =>

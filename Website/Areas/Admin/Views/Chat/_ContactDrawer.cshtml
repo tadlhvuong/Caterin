@@ -1,0 +1,195 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<!-- =====================================================
+     CONTACT DRAWER
+====================================================== -->
+<aside class="chat-contact-drawer" data-perfect-scrollbar
+       id="chatContactDrawer">
+
+    <div class="chat-contact-drawer-header border-bottom">
+
+        <div>
+            <h5 class="mb-0">
+                Contact
+            </h5>
+
+            <small class="text-muted">
+                Customer information
+            </small>
+        </div>
+
+        <button type="button"
+                class="btn btn-icon btn-text-secondary rounded-pill"
+                id="closeContactDrawer">
+
+            <i class="ti ti-x"></i>
+
+        </button>
+
+    </div>
+
+
+    <div class="chat-contact-drawer-body">
+
+        <!-- Profile -->
+        <div class="contact-profile text-center">
+
+            <div class="avatar avatar-xl avatar-online mx-auto">
+
+                <img src="~/admin/assets/img/avatars/4.png"
+                     alt="Nguyễn Văn A"
+                     class="rounded-circle" />
+
+            </div>
+
+            <h5 class="mt-3 mb-1">
+                Nguyễn Văn A
+            </h5>
+
+            <span class="text-muted">
+                Customer
+            </span>
+
+        </div>
+
+
+        <!-- Information -->
+        <div class="contact-section">
+
+            <p class="contact-section-title">
+                CUSTOMER INFORMATION
+            </p>
+
+            <ul class="list-unstyled contact-info-list">
+
+                <li>
+                    <i class="ti ti-mail"></i>
+
+                    <div>
+                        <small>Email</small>
+                        <span>nguyenvana@email.com</span>
+                    </div>
+                </li>
+
+                <li>
+                    <i class="ti ti-phone"></i>
+
+                    <div>
+                        <small>Phone</small>
+                        <span>0901 234 567</span>
+                    </div>
+                </li>
+
+                <li>
+                    <i class="ti ti-calendar"></i>
+
+                    <div>
+                        <small>Customer since</small>
+                        <span>12/06/2026</span>
+                    </div>
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- Labels -->
+        <div class="contact-section">
+
+            <div class="d-flex justify-content-between align-items-center">
+
+                <p class="contact-section-title mb-0">
+                    LABELS
+                </p>
+
+                <button type="button"
+                        class="btn btn-icon btn-sm btn-text-secondary rounded-pill">
+
+                    <i class="ti ti-plus"></i>
+
+                </button>
+
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+
+                <span class="badge bg-label-primary">
+                    Order
+                </span>
+
+                <span class="badge bg-label-success">
+                    Returning
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Orders -->
+        <div class="contact-section">
+
+            <p class="contact-section-title">
+                RECENT ORDERS
+            </p>
+
+            <div class="contact-order">
+
+                <div>
+                    <strong>
+                        #CTN-10231
+                    </strong>
+
+                    <small>
+                        15/09/2026
+                    </small>
+                </div>
+
+                <span class="badge bg-label-success">
+                    Delivered
+                </span>
+
+            </div>
+
+            <div class="contact-order">
+
+                <div>
+                    <strong>
+                        #CTN-10192
+                    </strong>
+
+                    <small>
+                        10/09/2026
+                    </small>
+                </div>
+
+                <span class="badge bg-label-warning">
+                    Shipping
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- Notes -->
+        <div class="contact-section">
+
+            <p class="contact-section-title">
+                NOTES
+            </p>
+
+            <textarea class="form-control"
+                      rows="4"
+                      placeholder="Add customer note..."></textarea>
+
+        </div>
+
+    </div>
+
+</aside>

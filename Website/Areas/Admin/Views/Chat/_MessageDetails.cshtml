@@ -1,0 +1,249 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+<section class="chat-detail-panel d-none"
+         id="chatDetailPanel">
+
+    <div class="chat-history-wrapper">
+
+        <!-- Header -->
+        <header class="chat-history-header border-bottom">
+
+            <div class="d-flex align-items-center overflow-hidden">
+
+                <button type="button"
+                        class="btn btn-icon btn-text-secondary rounded-pill me-2"
+                        id="backToConversations">
+
+                    <i class="ti ti-arrow-left"></i>
+
+                </button>
+
+                <div class="flex-shrink-0 avatar avatar-sm avatar-online">
+
+                    <img src="~/admin/assets/img/avatars/4.png"
+                         alt="Nguyễn Văn A"
+                         class="rounded-circle" />
+
+                </div>
+
+                <div class="chat-contact-info flex-grow-1 ms-3">
+
+                    <h6 class="m-0 fw-normal"
+                        id="chatContactName">
+                        Nguyễn Văn A
+                    </h6>
+
+                    <small class="text-muted"
+                           id="chatContactStatus">
+                        Online
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="d-flex align-items-center">
+
+                <button type="button"
+                        class="btn btn-sm btn-text-secondary rounded-pill me-1"
+                        id="chatContactButton">
+
+                    <i class="ti ti-user-circle me-1"></i>
+
+                    <span class="d-none d-md-inline">
+                        Contact
+                    </span>
+
+                </button>
+
+                <div class="dropdown">
+
+                    <button class="btn btn-sm btn-icon btn-text-secondary rounded-pill"
+                            data-bs-toggle="dropdown">
+
+                        <i class="ti ti-dots-vertical"></i>
+
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end">
+
+                        <li>
+                            <button class="dropdown-item">
+                                <i class="ti ti-check me-2"></i>
+                                Mark as resolved
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item">
+                                <i class="ti ti-clock me-2"></i>
+                                Snooze
+                            </button>
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item">
+                                <i class="ti ti-user-plus me-2"></i>
+                                Assign conversation
+                            </button>
+                        </li>
+
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <button class="dropdown-item text-danger">
+                                <i class="ti ti-trash me-2"></i>
+                                Delete
+                            </button>
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Messages -->
+        <div class="chat-history-body"
+             id="chatHistoryBody" data-perfect-scrollbar>
+
+            <ul class="list-unstyled chat-history"
+                id="chatHistory">
+
+                <li class="chat-message">
+
+                    <div class="d-flex overflow-hidden">
+
+                        <div class="user-avatar flex-shrink-0 me-3">
+
+                            <div class="avatar avatar-sm">
+
+                                <img src="~/admin/assets/img/avatars/4.png"
+                                     alt="Avatar"
+                                     class="rounded-circle" />
+
+                            </div>
+
+                        </div>
+
+                        <div class="chat-message-wrapper">
+
+                            <div class="chat-message-text">
+
+                                <p class="mb-0">
+                                    Cho mình hỏi đơn hàng này bao giờ giao?
+                                </p>
+
+                            </div>
+
+                            <div class="text-muted mt-1">
+                                <small>10:30 AM</small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </li>
+
+
+                <li class="chat-message chat-message-right">
+
+                    <div class="d-flex overflow-hidden">
+
+                        <div class="chat-message-wrapper">
+
+                            <div class="chat-message-text">
+
+                                <p class="mb-0">
+                                    Dạ em kiểm tra đơn hàng giúp anh/chị ngay ạ.
+                                </p>
+
+                            </div>
+
+                            <div class="text-end text-muted mt-1">
+
+                                <i class="ti ti-checks ti-16px text-success me-1"></i>
+
+                                <small>10:31 AM</small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="user-avatar flex-shrink-0 ms-3">
+
+                            <div class="avatar avatar-sm">
+
+                                <img src="~/admin/assets/img/avatars/1.png"
+                                     alt="Avatar"
+                                     class="rounded-circle" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        <!-- Composer -->
+        <footer class="chat-history-footer">
+
+            <form class="form-send-message d-flex align-items-center"
+                  id="sendMessageForm">
+
+                <input type="text"
+                       class="form-control message-input border-0 shadow-none"
+                       id="messageInput"
+                       placeholder="Type your message here..."
+                       autocomplete="off" />
+
+                <div class="message-actions d-flex align-items-center">
+
+                    <label for="attach-doc"
+                           class="btn btn-sm btn-icon btn-text-secondary rounded-pill">
+
+                        <i class="ti ti-paperclip"></i>
+
+                    </label>
+
+                    <input type="file"
+                           id="attach-doc"
+                           hidden
+                           multiple />
+
+                    <button type="submit"
+                            class="btn btn-primary send-msg-btn">
+
+                        <span class="d-none d-md-inline">
+                            Send
+                        </span>
+
+                        <i class="ti ti-send ms-md-2"></i>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </footer>
+
+    </div>
+
+</section>

@@ -7,6 +7,8 @@
         Edit = 3,
         Delete = 4,
         Approve = 5,
-        Export = 6
+        Export = 6,
+        Reply,
+            
     }
 }

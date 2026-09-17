@@ -8,6 +8,9 @@
     <link rel="shortcut icon" href="~/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2/src/regular/style.css">
     <link href="~/css/app.min.css" rel="stylesheet" asp-append-version="true">
+
+    <link href="~/css/chat.css" rel="stylesheet" asp-append-version="true">
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -569,62 +572,229 @@
 
         </div>
     </div>
+
+    @* CHATBOBX *@
+
+    <!-- =========================================
+         CATERIN CHATBOX
+    ========================================= -->
+
+    <div class="caterin-chat">
+        <!-- Floating Button -->
+        <button class="chat-toggle" id="chatToggle" aria-label="Mở chat" data-inbox-id="1">
+            <span class="chat-icon">
+                <svg viewBox="0 0 24 24" fill="green">
+                    <path d="M20 11.5C20 16.194 16.194 20 11.5 20C9.84 20 8.3 19.525 7 18.7L3.5 20L4.8 16.7C3.98 15.4 3.5 13.86 3.5 12.2C3.5 7.506 7.306 3.7 12 3.7C16.694 3.7 20 6.806 20 11.5Z"
+                          stroke="currentColor"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round" />
+                    <path d="M8 11.5H8.01M12 11.5H12.01M16 11.5H16.01"
+                          stroke="currentColor"
+                          stroke-width="2.2"
+                          stroke-linecap="round" />
+                </svg>
+            </span>
+
+            <span class="chat-badge" id="chatBadge">2</span>
+        </button>
+
+
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow" data-inbox-id="1"
+             data-name=""
+             data-email=""
+             data-phone="">
+
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="chat-header-left">
+
+                    <div class="agent-avatar">
+                        <span>C</span>
+                        <i class="online-dot"></i>
+                    </div>
+
+                    <div class="agent-info">
+                        <div class="agent-name">
+                            Caterin
+                            <span class="verified">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 2L14.8 4.1L18.2 4.2L19.5 7.4L22 9.7L20.7 12.8L21.3 16.1L18.3 17.8L16.6 20.7L13.3 20.1L10.2 21.4L7.9 18.9L4.6 17.6L4.7 14.2L2.6 11.4L4.7 8.6L4.6 5.3L7.9 4L10.2 1.5L12 2Z" />
+                                </svg>
+                            </span>
+                        </div>
+
+                        <div class="admin-status">
+                            <span></span>
+                            Đang trực tuyến
+                        </div>
+                    </div>
+
+                </div>
+
+                <button class="chat-close" id="chatClose" aria-label="Đóng chat">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6L18 18M18 6L6 18"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                              stroke-linecap="round" />
+                    </svg>
+                </button>
+
+            </div>
+
+            <!-- Body -->
+            <div class="chat-body" id="chatBody">
+                <!-- Welcome -->
+                <div class="welcome-message">
+
+                    <div class="welcome-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 3L19 6V11.5C19 16 16.1 19.5 12 21C7.9 19.5 5 16 5 11.5V6L12 3Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.6"
+                                  stroke-linejoin="round" />
+                            <path d="M9 12L11 14L15 10"
+                                  stroke="currentColor"
+                                  stroke-width="1.6"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <strong>Xin chào 👋</strong>
+                        <p>
+                            Caterin rất vui được hỗ trợ bạn.
+                            Bạn cần tư vấn sản phẩm hay đơn hàng?
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <!-- Date -->
+                <div class="chat-date">
+                    <span>Hôm nay</span>
+                </div>
+
+
+                <!-- Agent message -->
+                <div class="message-row admin">
+
+                    <div class="mini-avatar">C</div>
+
+                    <div>
+                        <div class="message admin-message">
+                            Chào bạn! Mình có thể giúp gì cho bạn hôm nay? 🌿
+                        </div>
+
+                        <div class="message-time">
+                            10:32
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- Quick replies -->
+                <div class="quick-replies">
+
+                    <button data-message="Tư vấn sản phẩm">
+                        🧴 Tư vấn sản phẩm
+                    </button>
+
+                    <button data-message="Kiểm tra đơn hàng">
+                        📦 Kiểm tra đơn hàng
+                    </button>
+
+                    <button data-message="Tư vấn combo">
+                        🏠 Tư vấn combo
+                    </button>
+
+                    <button data-message="Chính sách giao hàng">
+                        🚚 Giao hàng
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- Typing -->
+            <div class="typing" id="typing">
+
+                <div class="typing-avatar">C</div>
+
+                <div class="typing-bubble">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+            <div class="chat-footer">
+
+                <div class="chat-input-wrapper">
+
+                    <button class="input-action" id="attachmentBtn">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M21 11.5L12.5 20C10 22.5 6 22.5 3.5 20C1 17.5 1 13.5 3.5 11L12.5 2C14.5 0 17.5 0 19.5 2C21.5 4 21.5 7 19.5 9L11 17.5C9.5 19 7 19 5.5 17.5C4 16 4 13.5 5.5 12L13.5 4"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round" />
+                        </svg>
+                    </button>
+
+                    <input type="text"
+                           id="chatInput"
+                           placeholder="Nhập tin nhắn..."
+                           autocomplete="off" />
+
+                    <button class="emoji-btn" id="emojiBtn"> 😊 </button>
+
+                </div>
+
+                <button class="send-btn" id="sendBtn">
+
+                    <svg viewBox="0 0 24 24" fill="green">
+                        <path d="M21 3L10.5 13.5"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+
+                        <path d="M21 3L14.3 21L10.5 13.5L3 9.7L21 3Z"
+                              stroke="currentColor"
+                              stroke-width="1.8"
+                              stroke-linejoin="round" />
+                    </svg>
+
+                </button>
+
+            </div>
+
+            <div class="chat-powered">
+                <span>Được hỗ trợ bởi</span>
+                <strong>Caterin</strong>
+            </div>
+
+        </div>
+
+    </div>
+
     <script>
-                const popup = document.getElementById("promoPopup");
-
-        const hideToday = document.getElementById("hideToday");
-
-        if (!localStorage.getItem("hidePromo")) {
-
-            setTimeout(() => {
-
-                popup.classList.add("show");
-
-            }, 1800);
-
-        }
-
-        function closePopup() {
-
-            popup.classList.remove("show");
-
-            if (hideToday.checked) {
-
-                const tomorrow = new Date();
-
-                tomorrow.setHours(23,59,59,999);
-
-                localStorage.setItem(
-                    "hidePromo",
-                    tomorrow.getTime()
-                );
-
-            }
-
-        }
-
-        document.getElementById("closePopup")
-        .addEventListener("click", closePopup);
-
-        document.getElementById("laterBtn")
-        .addEventListener("click", closePopup);
-
-        const hideTime = localStorage.getItem("hidePromo");
-
-        if(hideTime){
-
-            if(Date.now() > hideTime){
-
-                localStorage.removeItem("hidePromo");
-
-            }
-
-        }
-
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+    <script src="~/js/chat.js"></script>
     <script defer="defer" src="~/js/app.bundle.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

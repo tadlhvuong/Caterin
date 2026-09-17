@@ -1,0 +1,439 @@
+﻿@using Website.Areas.Admin.Models
+@model ChatWorkspaceViewModel
+
+@section Styles {
+    <link rel="stylesheet" href="~/admin/assets/css/hk.chat-workspace.css" />
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <div class="app-chat card overflow-hidden" id="chatWorkspace" data-inbox-id="@Model.InboxId">
+
+        <div class="chat-workspace">
+
+            <!-- =====================================================
+                 FILTER SIDEBAR
+            ====================================================== -->
+            <aside class="chat-filter-sidebar border-end"
+                   id="chatFilterSidebar" data-perfect-scrollbar>
+
+                <div class="chat-filter-header">
+                    <h5 class="mb-0">Conversations</h5>
+
+                    <button type="button"
+                            class="btn btn-icon btn-text-secondary rounded-pill d-lg-none"
+                            id="chatFilterClose">
+                        <i class="ti ti-x"></i>
+                    </button>
+                </div>
+
+                <div class="chat-filter-body">
+
+                    <!-- Search -->
+                    <div class="chat-filter-search mb-4">
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text">
+                                <i class="ti ti-search"></i>
+                            </span>
+
+                            <input type="text"
+                                   class="form-control"
+                                   id="conversationSearch"
+                                   placeholder="Search conversations..."
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <!-- Inbox -->
+                    <div class="chat-filter-section">
+
+                        <div class="chat-filter-title">
+                            <span>INBOX</span>
+                        </div>
+
+                        <ul class="chat-filter-list">
+
+                            <li class="active"
+                                data-filter-type="inbox"
+                                data-filter-value="all">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-inbox"></i>
+
+                                    <span>All</span>
+
+                                    <span class="chat-filter-count">
+                                        12
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="inbox"
+                                data-filter-value="mine">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-user-check"></i>
+
+                                    <span>Mine</span>
+
+                                    <span class="chat-filter-count">
+                                        4
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="inbox"
+                                data-filter-value="unassigned">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-user-x"></i>
+
+                                    <span>Unassigned</span>
+
+                                    <span class="chat-filter-count">
+                                        3
+                                    </span>
+                                </a>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <!-- Status -->
+                    <div class="chat-filter-section">
+
+                        <div class="chat-filter-title">
+                            <span>STATUS</span>
+                        </div>
+
+                        <ul class="chat-filter-list">
+
+                            <li data-filter-type="status"
+                                data-filter-value="open">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-message-circle-2"></i>
+                                    <span>Open</span>
+                                    <span class="chat-filter-count">8</span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="status"
+                                data-filter-value="pending">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-clock"></i>
+                                    <span>Pending</span>
+                                    <span class="chat-filter-count">3</span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="status"
+                                data-filter-value="resolved">
+
+                                <a href="javascript:void(0);">
+                                    <i class="ti ti-circle-check"></i>
+                                    <span>Resolved</span>
+                                </a>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <!-- Labels -->
+                    <div class="chat-filter-section">
+
+                        <div class="chat-filter-title d-flex justify-content-between align-items-center">
+                            <span>LABELS</span>
+
+                            <button type="button"
+                                    class="btn btn-icon btn-text-secondary btn-sm">
+                                <i class="ti ti-plus"></i>
+                            </button>
+                        </div>
+
+                        <ul class="chat-filter-list">
+
+                            <li data-filter-type="label"
+                                data-filter-value="new">
+
+                                <a href="javascript:void(0);">
+                                    <span class="chat-label-dot bg-success"></span>
+                                    <span>New</span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="label"
+                                data-filter-value="order">
+
+                                <a href="javascript:void(0);">
+                                    <span class="chat-label-dot bg-primary"></span>
+                                    <span>Order</span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="label"
+                                data-filter-value="product">
+
+                                <a href="javascript:void(0);">
+                                    <span class="chat-label-dot bg-warning"></span>
+                                    <span>Product</span>
+                                </a>
+                            </li>
+
+                            <li data-filter-type="label"
+                                data-filter-value="complaint">
+
+                                <a href="javascript:void(0);">
+                                    <span class="chat-label-dot bg-danger"></span>
+                                    <span>Complaint</span>
+                                </a>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                </div>
+            </aside>
+
+
+            <!-- =====================================================
+                 MAIN CONTENT
+            ====================================================== -->
+            <main class="chat-main" id="chatMain">
+
+                <!-- =================================================
+                     CONVERSATION LIST
+                ================================================== -->
+                <section class="conversation-panel"
+                         id="conversationPanel">
+
+                    <div class="conversation-header border-bottom">
+
+                        <div class="d-flex align-items-center">
+
+                            <button type="button"
+                                    class="btn btn-icon btn-text-secondary rounded-pill d-lg-none me-2"
+                                    id="openChatFilters">
+                                <i class="ti ti-menu-2"></i>
+                            </button>
+
+                            <div>
+                                <h5 class="mb-0">
+                                    All Conversations
+                                </h5>
+
+                                <small class="text-muted"
+                                       id="conversationTotal">
+                                    12 conversations
+                                </small>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex align-items-center">
+
+                            <button type="button"
+                                    class="btn btn-icon btn-text-secondary rounded-pill"
+                                    id="refreshConversations">
+                                <i class="ti ti-refresh"></i>
+                            </button>
+
+                            <div class="dropdown ms-1">
+
+                                <button class="btn btn-icon btn-text-secondary rounded-pill"
+                                        type="button"
+                                        data-bs-toggle="dropdown">
+
+                                    <i class="ti ti-dots-vertical"></i>
+
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end">
+
+                                    <li>
+                                        <button class="dropdown-item">
+                                            Mark all as read
+                                        </button>
+                                    </li>
+
+                                    <li>
+                                        <button class="dropdown-item">
+                                            Archive all
+                                        </button>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="conversation-list" id="conversationList" data-perfect-scrollbar>
+                        <article class="conversation-item"
+                                 data-conversation-id="4"
+                                 data-status="resolved"
+                                 data-inbox="all"
+                                 data-label="new">
+
+                            <div class="conversation-avatar">
+
+                                <div class="avatar avatar-sm avatar-offline">
+
+                                    <img src="~/admin/assets/img/avatars/6.png"
+                                         alt="Phạm Minh"
+                                         class="rounded-circle" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="conversation-content">
+
+                                <div class="conversation-top">
+
+                                    <h6 class="conversation-name">
+                                        Phạm Minh
+                                    </h6>
+
+                                    <time class="conversation-time">
+                                        Yesterday
+                                    </time>
+
+                                </div>
+
+                                <div class="conversation-bottom">
+
+                                    <p class="conversation-preview">
+                                        Cảm ơn shop nhé!
+                                    </p>
+
+                                </div>
+
+                                <div class="conversation-meta">
+
+                                    <span class="chat-label badge bg-label-success">
+                                        New
+                                    </span>
+
+                                    <span class="conversation-status">
+                                        Resolved
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </article>
+                        @foreach (var conversation in Model.Conversations)
+                        {
+                            <article class="conversation-item"
+                                     data-conversation-id="@conversation.Id"
+                                     data-status="@conversation.Status"
+                                     data-inbox="all"
+                                     data-label="@conversation.Labels.FirstOrDefault()?.Id">
+                                <div class="conversation-avatar">
+                                    <div class="avatar avatar-sm avatar-online">
+                                        @if (!string.IsNullOrEmpty(conversation.ContactAvatarUrl))
+                                        {
+                                            <img src="@conversation.ContactAvatarUrl"
+                                                 alt="@conversation.ContactName"
+                                                 class="rounded-circle" />
+                                        }
+                                        else
+                                        {
+                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                @(conversation.ContactName?.FirstOrDefault())
+                                            </span>
+                                        }
+                                    </div>
+                                </div>
+                            <div class="conversation-content">
+                                <div class="conversation-top">
+                                        <h6 class="conversation-name">
+                                            @conversation.ContactName
+                                        </h6>
+
+                                    <time class="conversation-time">
+                                            @conversation.LastMessageAt.ToString("HH:mm")
+                                        </time>
+                                    </div>
+
+                                    <div class="conversation-bottom">
+
+                                        <p class="conversation-message">
+                                            @(string.IsNullOrWhiteSpace(conversation.LastMessage)
+                                                                                    ? conversation.Subject
+                                                                                    : conversation.LastMessage)
+                                        </p>
+                                        @* UnreadCoutn thêm sau này *@
+                                            @* @if (conversation.UnreadCount > 0)
+                                            {
+                                                <span class="badge rounded-pill bg-primary">
+                                                    @conversation.UnreadCount
+                                                </span>
+                                            } *@
+                                        </div>
+
+                                    @if (conversation.Labels.Any())
+                                        {
+                                           @*  <div class="conversation-item-labels">
+
+                                                @foreach (var label in conversation.Labels)
+                                                {
+                                                    <span class="badge"
+                                                          style="background-color:@label.Color">
+                                                        @label.Name
+                                                    </span>
+                                                }
+
+                                            </div> *@
+                                            <div class="conversation-meta">
+                                                @foreach (var label in conversation.Labels)
+                                                {
+                                                    <span class="chat-label badge bg-label-success">
+                                                        @label.Name
+                                                    </span>
+                                                }
+
+
+                                            <span class="conversation-status">
+                                                Resolved
+                                            </span>
+
+                                            </div>
+                                        }
+
+                                    </div>
+                            </article>
+                        }
+
+                    </div>
+                </section>
+
+                <!-- =================================================
+                     CHAT DETAIL
+                ================================================== -->
+                <partial name="_MessageDetails"></partial>
+
+            </main>
+
+            <partial name="_ContactDrawer"></partial>
+            <div class="chat-workspace-overlay" id="chatWorkspaceOverlay"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="~/admin/assets/js/core/hk.chat-workspace.js"></script>
+}

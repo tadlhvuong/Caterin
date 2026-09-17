@@ -12,6 +12,7 @@ using Shared.DTOs.Identity;
 using Shared.Extensions;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
+using Shared.Interfaces.Chat;
 using Shared.Interfaces.Core;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
@@ -21,6 +22,7 @@ using Shared.Resources;
 using Shared.Services;
 using Shared.Services.Authentication;
 using Shared.Services.Caches;
+using Shared.Services.Chat;
 using Shared.Services.Customer;
 using Shared.Services.Email;
 using Shared.Services.Log;
@@ -147,6 +149,9 @@ services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IOrderService, OrderService>();
 services.AddScoped<ICustomerService, CustomerService>();
 
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)
     services.AddSingleton<IAppCache, RedisCache>();
@@ -236,6 +241,9 @@ app.Use(async (context, next) =>
 
     await next();
 });
+
+app.MapHub<ChatHub>("/hubs/chat");
+
 app.MapControllerRoute(
     name: "admin_area",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"

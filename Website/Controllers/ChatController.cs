@@ -43,7 +43,7 @@ namespace Website.Controllers
             return Ok(conversation);
         }
 
-        [HttpGet("conversations/{conversationId:long}/messages")]
+        [HttpGet("{conversationId:long}/messages")]
         public async Task<IActionResult> GetConversationMessages(
         long conversationId,
         [FromHeader(Name = "X-Chat-Contact-Id")] long contactId,
@@ -91,6 +91,42 @@ namespace Website.Controllers
                         cancellationToken);
 
             return Ok(messages);
+        }
+
+        [HttpGet("{conversationId}/unread-count")]
+        public async Task<IActionResult> GetUnreadCount(
+    long conversationId,
+    [FromHeader(Name = "X-Chat-Contact-Id")] long? contactId,
+    [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
+    CancellationToken cancellationToken)
+        {
+            var result = await _chatMessageService.GetUnreadCountAsync(
+                conversationId,
+                contactId,
+                guestToken,
+                cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpPost("{conversationId}/read")]
+        public async Task<IActionResult> MarkAsRead(
+    long conversationId,
+    [FromHeader(Name = "X-Chat-Contact-Id")] long? contactId,
+    [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
+    CancellationToken cancellationToken)
+        {
+            var result =
+                await _chatMessageService.MarkConversationAsReadAsync(
+                    conversationId,
+                    contactId,
+                    guestToken,
+                    cancellationToken);
+
+            if (!result.Succeeded)
+                return BadRequest(result);
+
+            return Ok(result);
         }
     }
 }

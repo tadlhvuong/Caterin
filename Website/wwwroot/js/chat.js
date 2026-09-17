@@ -77,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = windowEl.dataset.email || null;
 
     const phone = windowEl.dataset.phone || null;
-
     // =====================================
     // SIGNALR
     // =====================================
@@ -99,16 +98,130 @@ document.addEventListener("DOMContentLoaded", () => {
     const processedMessageIds = new Set();
     const MAX_PROCESSED_MESSAGE_IDS = 500;
 
+
+    let unreadMessageCount = 0;
+
+    let typingTimeout = null;
+    let isTyping = false;
+
+    const TYPING_TIMEOUT = 1500;
+    // =====================================
+    // UNREAD MESSAGE BADGE
+    // =====================================
+
+    function updateUnreadBadge() {
+
+        if (!badge) {
+            return;
+        }
+
+        if (unreadMessageCount <= 0) {
+
+            unreadMessageCount = 0;
+
+            badge.textContent = "";
+            badge.hidden = true;
+
+            return;
+        }
+
+        badge.textContent =
+            unreadMessageCount > 99
+                ? "99+"
+                : String(unreadMessageCount);
+
+        badge.hidden = false;
+    }
+
+    // =====================================
+    // TYPING
+    // =====================================
+
+    async function sendTypingStatus(isTypingNow) {
+        console.log(isTypingNow);
+        if (
+            !currentConversationId ||
+            !currentContactId
+        ) {
+            return;
+        }
+
+        if (
+            chatConnection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
+
+        try {
+            console.log(currentConversationId + " : " + currentContactId + " : " + currentGuestToken + " : " + isTypingNow);
+            await chatConnection.invoke(
+                "SendTyping",
+                currentConversationId,
+                currentContactId,
+                currentGuestToken,
+                isTypingNow
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "SEND TYPING ERROR:",
+                error
+            );
+
+        }
+    }
+    function handleTyping() {
+        if (!input.value.trim()) {
+            stopTyping();
+            return;
+        }
+
+        // Chỉ gửi true một lần khi bắt đầu gõ
+        if (!isTyping) {
+            isTyping = true;
+            sendTypingStatus(true);
+        }
+
+        clearTimeout(typingTimeout);
+
+        typingTimeout = setTimeout(() => {
+            stopTyping();
+        }, TYPING_TIMEOUT);
+    }
+
+    function stopTyping() {
+
+        clearTimeout(typingTimeout);
+
+        typingTimeout = null;
+
+        if (!isTyping) {
+            return;
+        }
+
+        isTyping = false;
+
+        sendTypingStatus(false);
+    }
     // =====================================
     // OPEN / CLOSE
     // =====================================
 
-    function openChat() {
+    async function openChat() {
 
         windowEl.classList.add("open");
         toggle.classList.add("active");
 
-        badge.style.display = "none";
+        await loadConversationMessages();
+        const marked = await markConversationAsRead();
+
+        if (marked) {
+            setUnreadMessageCount(0);
+        }
+
 
         setTimeout(() => {
             input.focus();
@@ -117,11 +230,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function closeChat() {
+        stopTyping();
+        hideTyping();
 
         windowEl.classList.remove("open");
         toggle.classList.remove("active");
     }
 
+    function setUnreadMessageCount(count) {
+        unreadMessageCount = Math.max(
+            0,
+            Number(count) || 0
+        );
+
+        updateUnreadBadge();
+    }
+
+    function incrementUnreadMessage() { 
+        unreadMessageCount++;
+
+        updateUnreadBadge();
+    }
+
+    function updateUnreadBadge() {
+        if (!badge) {
+            return;
+        }
+
+        if (unreadMessageCount <= 0) {
+            badge.textContent = "";
+            badge.hidden = true;
+            return;
+        }
+
+        badge.textContent =
+            unreadMessageCount > 99
+                ? "99+"
+                : String(unreadMessageCount);
+
+        badge.hidden = false;
+    }
 
     toggle.addEventListener("click", () => {
 
@@ -141,6 +289,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // =====================================
     // SIGNALR EVENTS
     // =====================================
+    chatConnection.on("chat.admin.online", function (data) {
+        console.log("ONLINE");
+        console.log(data);
+        setChatAdminStatus(true);
+    });
+
+    chatConnection.on("chat.admin.offline", function (data) {
+        console.log("OFFLINE");
+        console.log(data);
+        setChatAdminStatus(false);
+    });
 
     chatConnection.on(
         "chat.message.received",
@@ -153,22 +312,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
             hideTyping();
 
-            addMessage(message);
+            const added = addMessage(message, true);
+            if (!added) {
+                return;
+            }
+            // Chỉ tính tin nhắn của Admin/Bot
+            // và chỉ tăng khi chat đang đóng.
+            const isIncomingMessage =
+                message.senderType == 2 ||
+                message.senderType == 4;
+
+            const isChatClosed =
+                !windowEl.classList.contains("open");
+
+            if (
+                isIncomingMessage &&
+                isChatClosed
+            ) {
+                incrementUnreadMessage();
+            }
         }
     );
-
 
     chatConnection.onreconnecting(() => {
 
         console.log("Chat reconnecting...");
-
+        stopTyping();
+        hideTyping();
     });
-
 
     chatConnection.onreconnected(async () => {
 
         console.log("Chat reconnected.");
-
+        hideTyping();
         // Sau khi SignalR reconnect,
         // connection cũ không còn giữ group.
         if (
@@ -177,14 +353,18 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
 
             try {
-
                 await chatConnection.invoke(
                     "JoinConversation",
                     currentConversationId,
                     currentContactId,
                     currentGuestToken
                 );
+                await loadConversationMessages();
 
+                await loadUnreadCount();
+                console.log(
+                    "Conversation synchronized."
+                );
             }
             catch (error) {
 
@@ -199,13 +379,60 @@ document.addEventListener("DOMContentLoaded", () => {
 
     });
 
+    chatConnection.on("chat.conversation.status.updated",
+        function (data) {
+
+            const conversationId = data.conversationId;
+            const status = data.status;
+
+            updateConversationStatus(
+                conversationId,
+                status
+            );
+        }
+    );
+
+    chatConnection.on(
+        "chat.conversation.read",
+        function (data) {
+            if (Number(data.conversationId) !== Number(currentConversationId)
+            ) {
+                return;
+            }
+
+            setUnreadMessageCount(0);
+        }
+    );
+
+    chatConnection.on("chat.typing",
+        function (data) {
+            console.log("CHATTYPING");
+            console.log(data);
+            console.log(currentConversationId);
+            if (Number(data.conversationId) !== Number(currentConversationId)) {
+                return;
+            }
+
+            // Chỉ xử lý typing của Admin/Bot
+            if (data.senderType != 2 && data.senderType != 4) {
+                return;
+            }
+
+            if (data.isTyping) {
+                showTyping();
+            }
+            else {
+                hideTyping();
+            }
+
+        }
+    );
 
     chatConnection.onclose(() => {
 
         console.log("Chat connection closed.");
 
     });
-
 
     // =====================================
     // START CHAT
@@ -225,7 +452,8 @@ document.addEventListener("DOMContentLoaded", () => {
             ) {
 
                 await chatConnection.start();
-
+                const isAdminOnline =  await chatConnection.invoke("IsAnyAdminOnline");
+                setChatAdminStatus(isAdminOnline);
                 console.log("Chat connected");
 
             }
@@ -269,6 +497,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Existing chat session found."
                 );
 
+                await loadUnreadCount();
+
                 await chatConnection.invoke(
                     "JoinConversation",
                     currentConversationId,
@@ -279,6 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Joined existing conversation:",
                     currentConversationId
                 );
+
                 await loadConversationMessages();
                 return;
             }
@@ -399,7 +630,58 @@ document.addEventListener("DOMContentLoaded", () => {
     // =====================================
 // LOAD CONVERSATION MESSAGES
 // =====================================
+    function setChatAdminStatus(isOnline) {
+        const dot = document.getElementById("chatAdminStatusDot");
+        const status = document.getElementById("chatStatusText");
 
+        if (!dot || !status) {
+            return;
+        }
+        const statusDot = status.querySelector("span:first-child");
+        const statusLabel = status.querySelector(".status-label");
+
+        const label = status.querySelector(".status-label");
+
+        dot.classList.toggle("online", isOnline);
+        dot.classList.toggle("offline", !isOnline);
+
+        status.classList.toggle("online", isOnline);
+        status.classList.toggle("offline", !isOnline);
+        if (statusDot) {
+            statusDot.classList.toggle("online", isOnline);
+            statusDot.classList.toggle("offline", !isOnline);
+        }
+        if (label) {
+            label.textContent = isOnline
+                ? "Đang trực tuyến"
+                : "Đang ngoại tuyến";
+        }
+    }
+
+
+    function updateAdminPresence(adminId, isOnline) {
+        document
+            .querySelectorAll(`[data-admin-id="${adminId}"]`)
+            .forEach(element => {
+                element.classList.toggle("is-online", isOnline);
+                element.classList.toggle("is-offline", !isOnline);
+
+                const dot =
+                    element.querySelector(".admin-status-dot");
+
+                if (dot) {
+                    dot.classList.toggle("online", isOnline);
+                }
+
+                const text =
+                    element.querySelector(".admin-status-text");
+
+                if (text) {
+                    text.textContent =
+                        isOnline ? "Online" : "Offline";
+                }
+            });
+    }
 async function loadConversationMessages() {
 
     if (
@@ -414,7 +696,7 @@ async function loadConversationMessages() {
 
         const response =
             await fetch(
-                `/chat/conversations/${currentConversationId}/messages`,
+                `/chat/${currentConversationId}/messages`,
                 {
                     method: "GET",
 
@@ -459,7 +741,7 @@ async function loadConversationMessages() {
          */
         body.innerHTML = "";
 
-
+        processedMessageIds.clear();
         /*
          * Render theo thứ tự:
          *
@@ -480,12 +762,12 @@ async function loadConversationMessages() {
              * sau khi load history thì addMessage()
              * sẽ bỏ qua.
              */
-            addMessage(message);
+            addMessage(message, false);
 
         });
 
 
-        scrollBottom();
+        scrollBottom(false);
 
     }
     catch (error) {
@@ -496,7 +778,101 @@ async function loadConversationMessages() {
         );
 
     }
-}
+    }
+
+    async function markConversationAsRead() {
+
+        if (
+            !currentConversationId ||
+            !currentContactId ||
+            !currentGuestToken
+        ) {
+            return false;
+        }
+
+        try {
+
+            const response = await fetch(
+                `/chat/${currentConversationId}/read`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Chat-Contact-Id":
+                            String(currentContactId),
+                        "X-Chat-Guest-Token":
+                            currentGuestToken
+                    },
+
+                    credentials: "same-origin"
+                }
+            );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Mark read failed. Status: ${response.status}`
+                );
+            }
+
+            return true;
+
+        }
+        catch (error) {
+
+            console.error(
+                "MARK CONVERSATION READ ERROR:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+    async function loadUnreadCount() {
+        console.log("LOAD UNREAD COUNT");
+        console.log('id converssation: ' + currentConversationId);
+        if (!currentConversationId) {
+            setUnreadMessageCount(0);
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/chat/${currentConversationId}/unread-count`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Chat-Contact-Id":
+                            currentContactId ?? "",
+                        "X-Chat-Guest-Token":
+                            currentGuestToken ?? ""
+                    },
+                    credentials: "same-origin"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    "Failed to load unread count."
+                );
+            }
+
+            const result = await response.json();
+
+            setUnreadMessageCount(
+                result.data ?? result
+            );
+        }
+        catch (error) {
+            console.error(
+                "Load unread count error:",
+                error
+            );
+        }
+    }
     // =====================================
     // SEND MESSAGE
     // =====================================
@@ -510,7 +886,7 @@ async function loadConversationMessages() {
         if (!text) {
             return;
         }
-
+        stopTyping();
         if (
             !currentConversationId ||
             !currentContactId
@@ -598,7 +974,10 @@ async function loadConversationMessages() {
 
         }
     );
-
+    input.addEventListener(
+        "input",
+        handleTyping
+    );
 
     // =====================================
     // QUICK REPLIES
@@ -661,14 +1040,13 @@ async function loadConversationMessages() {
 
         return false;
     }
-    function addMessage(message) {
-        console.log(message);
+    function addMessage(message, shouldScroll = true) {
         if (!message?.id) {
-            return;
+            return false;
         }
 
         if (isMessageProcessed(message.id)) {
-            return;
+            return false;
         }
 
         const row = document.createElement("div");
@@ -706,7 +1084,7 @@ async function loadConversationMessages() {
                 message.senderType
             );
 
-            return;
+            return false;
         }
 
         let messageClass;
@@ -739,26 +1117,146 @@ async function loadConversationMessages() {
 
         body.appendChild(row);
 
-        scrollBottom();
+        if (shouldScroll) {
+            scrollBottom(true);
+        }
+        return true;
     }
 
+    // =====================================
+    // UPDATE CONVERSATION STATUS
+    // =====================================
+
+    function updateConversationStatus(conversationId, status) {
+        //const item = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+
+        //if (item) {
+        //    item.dataset.status = status;
+
+        //    const badge = item.querySelector(".conversation-status"
+        //    );
+
+        //    if (badge) {
+        //        badge.textContent = status;
+        //    }
+        //}
+
+        //if (currentConversationId === conversationId) {
+        //    updateCurrentConversationStatus(status);
+        //}
+        console.log("START UPDATE STATUS");
+        if (
+            Number(currentConversationId) !==
+            Number(conversationId)
+        ) {
+            return;
+        }
+
+        console.log(
+            "Conversation status updated:",
+            {
+                conversationId: conversationId,
+                status: status
+            }
+        );
+
+        updateCurrentConversationStatus(status);
+    }
+    function updateCurrentConversationStatus(status) {
+
+        const normalizedStatus = getConversationStatusName(status);
+
+        // =====================================
+        // STATUS TEXT
+        // =====================================
+
+        const statusText =
+            document.getElementById("chatStatusText");
+
+        if (statusText) {
+            const statusMap = {
+                open: "Đang hỗ trợ",
+                pending: "Đang chờ",
+                resolved: "Đã giải quyết",
+                closed: "Đã đóng"
+            };
+
+            statusText.textContent = statusMap[normalizedStatus] ?? status;
+        }
+
+
+        // =====================================
+        // STATUS BADGE
+        // =====================================
+
+        const statusBadge = document.getElementById("chatStatusBadge");
+
+        if (statusBadge) {
+
+            statusBadge.dataset.status =
+                normalizedStatus;
+
+            statusBadge.classList.remove(
+                "open",
+                "pending",
+                "resolved",
+                "closed"
+            );
+
+            statusBadge.classList.add(
+                normalizedStatus
+            );
+        }
+
+
+        // =====================================
+        // CHAT WINDOW
+        // =====================================
+
+        windowEl.dataset.status = normalizedStatus;
+        const isEnded =
+            normalizedStatus === "resolved" ||
+            normalizedStatus === "closed";
+
+
+        // =====================================
+        // INPUT STATE
+        // =====================================
+
+        const isClosed =
+            normalizedStatus === "closed";
+
+        const isResolved =
+            normalizedStatus === "resolved";
+
+        input.disabled = isEnded;
+        send.disabled = isEnded;
+
+        input.placeholder = isEnded ? "Cuộc trò chuyện đã kết thúc" : "Nhập tin nhắn...";
+    }
+    function getConversationStatusName(status) {
+        const statusMap = {
+            1: "open",
+            2: "pending",
+            3: "resolved",
+            4: "closed"
+        };
+
+        return statusMap[Number(status)] ?? "open";
+    }
     // =====================================
     // TYPING
     // =====================================
 
     function showTyping() {
-
-        typing.classList.add("show");
-
+        typing.hidden = false;
         scrollBottom();
 
     }
 
 
     function hideTyping() {
-
-        typing.classList.remove("show");
-
+        typing.hidden = true;
     }
 
 
@@ -766,13 +1264,12 @@ async function loadConversationMessages() {
     // SCROLL
     // =====================================
 
-    function scrollBottom() {
-
+    function scrollBottom(smooth = true) {
         requestAnimationFrame(() => {
 
             body.scrollTo({
                 top: body.scrollHeight,
-                behavior: "smooth"
+                behavior: smooth ? "smooth" : "auto"
             });
 
         });

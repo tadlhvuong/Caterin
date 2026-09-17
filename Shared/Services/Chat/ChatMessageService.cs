@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Constants.Core;
 using Shared.Data.Context;
 using Shared.Data.Entities.Chat;
@@ -8,7 +9,9 @@ using Shared.Enums.Chat;
 using Shared.Extensions;
 using Shared.Interfaces.Chat;
 using Shared.Interfaces.IdentityServices;
+using Shared.Interfaces.Notification;
 using Shared.Requests.Chat;
+using Shared.Responses;
 using System.Security.Claims;
 
 namespace Shared.Services.Chat
@@ -16,12 +19,19 @@ namespace Shared.Services.Chat
     public class ChatMessageService : IChatMessageService
     {
         private readonly AppDbContext _dbContext;
+        private readonly IChatRealtimeNotifier _chatNotifier;
         private readonly IHubContext<ChatHub> _hubContext;
 
-        public ChatMessageService(AppDbContext dbContext, IHubContext<ChatHub> hubContext)
+        private readonly ILogger<ChatMessageService> _logger;
+
+        public ChatMessageService(AppDbContext dbContext, IHubContext<ChatHub> hubContext, 
+            IChatRealtimeNotifier chatNotifier, ILogger<ChatMessageService> logger)
         {
             _dbContext = dbContext;
             _hubContext = hubContext;
+
+            _chatNotifier = chatNotifier;
+            _logger = logger;
         }
 
         public async Task<ChatConversationDto> StartConversationAsync(
@@ -447,18 +457,13 @@ namespace Shared.Services.Chat
 
                 CreatedAt = message.CreatedAt
             };
-            await _hubContext.Clients
-    .Group(ChatHubGroups.Conversation(conversation.Id))
-    .SendAsync(
-        ChatHubEvents.MessageReceived,
-        dto,
-        cancellationToken);
-            await _hubContext.Clients
-    .Group(ChatHubGroups.Inbox(conversation.InboxId))
-    .SendAsync(
-        ChatHubEvents.MessageReceived,
-        dto,
-        cancellationToken);
+
+            await _hubContext.Clients.Group(ChatHubGroups.Conversation(conversation.Id))
+            .SendAsync(ChatHubEvents.MessageReceived, dto, cancellationToken);
+
+            await _hubContext.Clients.Group(ChatHubGroups.Inbox(conversation.InboxId))
+            .SendAsync(ChatHubEvents.ConversationUpdated, dto, cancellationToken);
+
             return dto;
         }
         public async Task<ChatConversationDto?> GetConversationAsync(long conversationId, CancellationToken cancellationToken = default)
@@ -872,5 +877,108 @@ namespace Shared.Services.Chat
                 })
                 .ToListAsync(cancellationToken);
         }
+
+
+        #region Update Status 
+
+        public async Task<ServiceResult> UpdateStatusAsync(
+    int conversationId,
+    ChatConversationStatus status,
+    CancellationToken cancellationToken = default)
+        {
+            var conversation = await _dbContext.ChatConversations
+                .FirstOrDefaultAsync(
+                    x => x.Id == conversationId,
+                    cancellationToken);
+
+            if (conversation == null)
+                return ServiceResult.Fail("Conversation không tồn tại.");
+
+            if (conversation.Status == status)
+                return ServiceResult.Success();
+
+            conversation.Status = status;
+            conversation.UpdatedAt = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            //await _chatNotifier.NotifyConversationStatusUpdatedAsync(
+            //    conversation.Id,
+            //    conversation.Status,
+            //    conversation.UpdatedAt);
+
+            return ServiceResult.Success();
+        }
+        public async Task<int> GetUnreadCountAsync(
+    long conversationId,
+    long? contactId,
+    string? guestToken,
+    CancellationToken cancellationToken = default)
+        {
+            var conversation = await _dbContext.ChatConversations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x =>
+                        x.Id == conversationId &&
+                        (
+                            x.ContactId == contactId ||
+                            x.Contact.GuestToken == guestToken
+                        ),
+                    cancellationToken);
+
+            if (conversation == null)
+                return 0;
+
+            return await _dbContext.ChatMessages
+                .CountAsync(
+                    x =>
+                        x.ConversationId == conversationId &&
+                        x.SenderType == ChatSenderType.Admin &&
+                        x.Status != ChatMessageStatus.Read,
+                    cancellationToken);
+        }
+        public async Task<ServiceResult> MarkConversationAsReadAsync(
+    long conversationId,
+    long? contactId,
+    string? guestToken,
+    CancellationToken cancellationToken = default)
+        {
+            var conversation =
+                await _dbContext.ChatConversations
+                    .Include(x => x.Contact)
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Id == conversationId &&
+                            (
+                                x.ContactId == contactId ||
+                                x.Contact.GuestToken == guestToken
+                            ),
+                        cancellationToken);
+
+            if (conversation == null)
+            {
+                return ServiceResult.Fail(
+                    "Conversation not found.");
+            }
+
+            var messages =
+                await _dbContext.ChatMessages
+                    .Where(x =>
+                        x.ConversationId == conversationId &&
+                        x.SenderType == ChatSenderType.Admin &&
+                        x.Status != ChatMessageStatus.Read)
+                    .ToListAsync(cancellationToken);
+
+            foreach (var message in messages)
+            {
+                message.Status = ChatMessageStatus.Read;
+            }
+
+            await _dbContext.SaveChangesAsync(
+                cancellationToken);
+
+            return ServiceResult.Success();
+        }
+        #endregion Update Status
     }
 }

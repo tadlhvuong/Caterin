@@ -6,10 +6,11 @@ namespace Shared.Data.Entities.Notification
     {
         public int Id { get; set; }
         public int NotificationId { get; set; }
-        public int Channel { get; set; }
-        public EntityStatus Status { get; set; }
-        public DateTime SendAt { get; set; }
-        public string ErrorMessage { get; set; }
+        public NotificationChannel Channel { get; set; }
+        public DeliveryStatus Status { get; set; }
+        public DateTime? SendAt { get; set; }
+        public string? ErrorMessage { get; set; }
         public DateTime CreatedAt { get; set; }
+        public Notification Notification { get; set; } = null!;
     }
 }

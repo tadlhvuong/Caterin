@@ -596,7 +596,7 @@
                 </svg>
             </span>
 
-            <span class="chat-badge" id="chatBadge">2</span>
+            <span class="chat-badge" id="chatBadge" hidden>0</span>
         </button>
 
 
@@ -609,28 +609,26 @@
             <!-- Header -->
             <div class="chat-header">
                 <div class="chat-header-left">
-
                     <div class="agent-avatar">
                         <span>C</span>
-                        <i class="online-dot"></i>
+                        <i id="chatAdminStatusDot" class="online-dot"></i>
                     </div>
 
                     <div class="agent-info">
                         <div class="agent-name">
                             Caterin
-                            <span class="verified">
+                            @* <span class="verified">
                                 <svg viewBox="0 0 24 24">
                                     <path d="M12 2L14.8 4.1L18.2 4.2L19.5 7.4L22 9.7L20.7 12.8L21.3 16.1L18.3 17.8L16.6 20.7L13.3 20.1L10.2 21.4L7.9 18.9L4.6 17.6L4.7 14.2L2.6 11.4L4.7 8.6L4.6 5.3L7.9 4L10.2 1.5L12 2Z" />
                                 </svg>
-                            </span>
+                            </span> *@
                         </div>
 
-                        <div class="admin-status">
+                        <div id="chatStatusText" class="admin-status">
                             <span></span>
-                            Đang trực tuyến
+                            <span class="status-label">Đang trực tuyến</span>
                         </div>
                     </div>
-
                 </div>
 
                 <button class="chat-close" id="chatClose" aria-label="Đóng chat">
@@ -723,16 +721,14 @@
 
 
             <!-- Typing -->
-            <div class="typing" id="typing">
-
+            <div class="typing" id="typing" hidden>
                 <div class="typing-avatar">C</div>
-
                 <div class="typing-bubble">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
-
+                <span class="typing-text">Đang nhập</span>
             </div>
 
 

@@ -17,6 +17,7 @@ using Shared.Interfaces.Core;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
 using Shared.Interfaces.Media;
+using Shared.Interfaces.Notification;
 using Shared.Middlewares;
 using Shared.Resources;
 using Shared.Services;
@@ -27,6 +28,7 @@ using Shared.Services.Customer;
 using Shared.Services.Email;
 using Shared.Services.Log;
 using Shared.Services.Media;
+using Shared.Services.Notification;
 using Shared.Services.Order;
 using Shared.Services.Product;
 using Shared.UserValidation.Interface;
@@ -151,6 +153,9 @@ services.AddScoped<ICustomerService, CustomerService>();
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+
+builder.Services.AddScoped<IChatRealtimeNotifier, ChatRealtimeNotifier>();
+builder.Services.AddSingleton<IChatPresenceService, ChatPresenceService>();
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)

@@ -3,9 +3,7 @@
 *@
 @{
 }
-<section class="chat-detail-panel d-none"
-         id="chatDetailPanel">
-
+<section class="chat-detail-panel d-none" id="chatDetailPanel">
     <div class="chat-history-wrapper">
 
         <!-- Header -->
@@ -116,10 +114,8 @@
         <div class="chat-history-body"
              id="chatHistoryBody" data-perfect-scrollbar>
 
-            <ul class="list-unstyled chat-history"
-                id="chatHistory">
-
-                <li class="chat-message">
+            <ul class="list-unstyled chat-history" id="chatHistory">
+                @* <li class="chat-message">
 
                     <div class="d-flex overflow-hidden">
 
@@ -154,8 +150,6 @@
                     </div>
 
                 </li>
-
-
                 <li class="chat-message chat-message-right">
 
                     <div class="d-flex overflow-hidden">
@@ -194,10 +188,14 @@
 
                     </div>
 
-                </li>
-
+                </li> *@
             </ul>
-
+            <div id="typing" class="typing-indicator" hidden>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span>Đang trả lời...</span>
+            </div>
         </div>
 
 

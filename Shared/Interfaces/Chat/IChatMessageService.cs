@@ -1,6 +1,8 @@
 ﻿using Shared.Data.Entities.Chat;
 using Shared.DTOs.Chat;
+using Shared.Enums.Chat;
 using Shared.Requests.Chat;
+using Shared.Responses;
 
 namespace Shared.Interfaces.Chat
 {
@@ -60,5 +62,14 @@ namespace Shared.Interfaces.Chat
         Task<List<ChatMessageDto>> GetCustomerMessagesAsync(
     long conversationId,
     CancellationToken cancellationToken = default);
+
+
+        //UPDATE STATUS MESSAGE
+        Task<ServiceResult> UpdateStatusAsync(int conversationId, ChatConversationStatus status, 
+            CancellationToken cancellationToken = default);
+       Task<int> GetUnreadCountAsync(long conversationId, long? contactId, string? guestToken, 
+           CancellationToken cancellationToken = default);
+        Task<ServiceResult> MarkConversationAsReadAsync(long conversationId, long? contactId,
+            string? guestToken, CancellationToken cancellationToken = default);
     }
 }

@@ -4,7 +4,13 @@
     {
         public const string MessageReceived = "chat.message.received";
 
+        public const string MessageRead = "chat.message.read";
+
+        public const string ConversationRead = "chat.conversation.read";
+
         public const string ConversationUpdated = "chat.conversation.updated";
+
+        public const string ConversationStatusUpdated = "chat.conversation.status.updated";
 
         public const string ConversationAssigned = "chat.conversation.assigned";
 
@@ -12,8 +18,9 @@
 
         public const string Typing = "chat.typing";
 
-        public const string UserOnline = "chat.user.online";
+        public const string AdminOnline = "chat.admin.online";
 
-        public const string UserOffline = "chat.user.offline";
+        public const string AdminOffline = "chat.admin.offline";
+
     }
 }

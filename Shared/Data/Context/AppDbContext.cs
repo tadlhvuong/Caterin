@@ -7,6 +7,7 @@ using Shared.Data.Entities.Identity.Core;
 using Shared.Data.Entities.Identity.Log;
 using Shared.Data.Entities.Inventory;
 using Shared.Data.Entities.Media;
+using Shared.Data.Entities.Notification;
 using Shared.Data.Entities.Order;
 using Shared.Data.Entities.Product;
 using Attribute = Shared.Data.Entities.Product.Attribute;
@@ -66,6 +67,10 @@ namespace Shared.Data.Context
         public virtual DbSet<ChatTeamMember> ChatTeamMembers { get; set; }
 
         public virtual DbSet<ChatGuestSession> ChatGuestSessions { get; set; }
+
+        public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

@@ -107,6 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterSidebar =
         document.getElementById('chatFilterSidebar');
 
+    const filterBody =
+        document.getElementById('chatFilterBody');
     const filterClose =
         document.getElementById('chatFilterClose');
 
@@ -145,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const messageInput =
         document.getElementById('messageInput');
-
     const chatHistoryBody =
         document.getElementById('chatHistoryBody');
 
@@ -165,6 +166,12 @@ document.addEventListener('DOMContentLoaded', function () {
     let joinedConversationId = null;
     const processedMessageIds = new Set();
     const MAX_PROCESSED_MESSAGE_IDS = 500;
+
+    let currentConversationId = null;
+    let typingTimeout = null;
+    let isTyping = false;
+
+    const TYPING_TIMEOUT = 1500;
     let currentFilters = {
         inbox: 'all',
         status: null,
@@ -172,6 +179,12 @@ document.addEventListener('DOMContentLoaded', function () {
         search: ''
     };
 
+    if (messageInput) {
+        messageInput.addEventListener(
+            "input",
+            handleAdminTyping
+        );
+    }
     /* =========================================================
    SIGNALR
 ========================================================= */
@@ -189,7 +202,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 .withAutomaticReconnect()
                 .build();
 
+        //adminChatConnection.on("chat.admin.online", function (data) {
+        //    updateAdminPresence(data.adminId, true);
+        //});
 
+        //adminChatConnection.on("chat.admin.offline", function (data) {
+        //    updateAdminPresence(data.adminId, false);
+        //});
         /* =====================================================
            RECEIVE MESSAGE
         ===================================================== */
@@ -250,7 +269,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         );
 
-
         /* =====================================================
            CONNECTION EVENTS
         ===================================================== */
@@ -262,7 +280,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Chat SignalR reconnecting...',
                     error
                 );
-
+                stopTyping();
+                hideTyping();
             }
         );
 
@@ -311,7 +330,27 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         );
 
+        adminChatConnection.on("chat.typing",
+            function (data) {
+                if (Number(data.conversationId) !== Number(selectedConversationId)
+                ) {
+                    return;
+                }
 
+                // Admin chỉ quan tâm typing từ Contact/Bot
+                if (data.senderType != 1 &&  data.senderType != 4
+                ) {
+                    return;
+                }
+
+                if (data.isTyping) {
+                    showTyping();
+                }
+                else {
+                    hideTyping();
+                }
+            }
+        );
         /* =====================================================
            START CONNECTION
         ===================================================== */
@@ -319,7 +358,20 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
 
             await adminChatConnection.start();
-
+            OnConnectedAsync();
+            await _chatPresenceService.AddConnectionAsync(
+                userId,
+                Context.ConnectionId);
+            //if (Context.User?.Identity?.IsAuthenticated == true &&
+            //    Context.User.IsInRole("Admin")) {
+            //    await _chatPresenceService.AddConnectionAsync(
+            //        userId,
+            //        Context.ConnectionId);
+            //}
+            //const onlineAdmins = await adminChatConnection.invoke("GetOnlineAdmins");
+            //onlineAdmins.forEach(adminId => {
+            //    updateAdminPresence(adminId, true);
+            //});
             console.log(
                 'Chat SignalR connected.'
             );
@@ -337,6 +389,100 @@ document.addEventListener('DOMContentLoaded', function () {
 
         }
 
+    }
+
+    async function sendAdminTyping(isTypingNow) {
+        if (!selectedConversationId) return;
+
+        if (
+            !adminChatConnection ||
+            adminChatConnection.state !== signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
+
+        try {
+            await adminChatConnection.invoke(
+                "SendAdminTyping",
+                Number(selectedConversationId),
+                isTypingNow
+            );
+        } catch (error) {
+            console.error("SEND ADMIN TYPING ERROR:", error);
+        }
+    }
+    function handleAdminTyping() {
+        if (!messageInput) return;
+
+        if (!messageInput.value.trim()) {
+            stopAdminTyping();
+            return;
+        }
+
+        // Chỉ gửi true một lần khi bắt đầu gõ
+        if (!isTyping) {
+            isTyping = true;
+            sendAdminTyping(true);
+        }
+
+        clearTimeout(typingTimeout);
+
+        typingTimeout = setTimeout(() => {
+            stopAdminTyping();
+        }, TYPING_TIMEOUT);
+    }
+    function stopAdminTyping() {
+        clearTimeout(typingTimeout);
+        typingTimeout = null;
+
+        if (!isTyping) return;
+
+        isTyping = false;
+        sendAdminTyping(false);
+    }
+    function showTyping() {
+        const typing = document.getElementById("typing");
+        console.log('show typing');
+        console.log(typing);
+        if (!typing) {
+            return;
+        }
+
+        typing.hidden = false;
+    }
+
+    function hideTyping() {
+        const typing = document.getElementById("typing");
+
+        if (!typing) {
+            return;
+        }
+
+        typing.hidden = true;
+    }
+    async function selectConversation(
+        conversationId,
+        contactId
+    ) {
+        if (currentConversationId) {
+            await adminChatConnection.invoke(
+                "LeaveConversation",
+                currentConversationId
+            );
+        }
+
+        currentConversationId = conversationId;
+
+        hideTyping();
+
+        await adminChatConnection.invoke(
+            "JoinConversation",
+            currentConversationId,
+            contactId,
+            null
+        );
+
+        await loadConversationMessages();
     }
 
     async function joinInbox() {
@@ -398,13 +544,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function openConversation(conversationItem) {
-
+        stopAdminTyping();
+        hideTyping();
         if (!conversationItem) {
             return;
         }
 
-        selectedConversationId =
-            conversationItem.dataset.conversationId;
+        selectedConversationId = conversationItem.dataset.conversationId;
 
 
         document
@@ -442,11 +588,10 @@ document.addEventListener('DOMContentLoaded', function () {
         await loadConversation(
             selectedConversationId
         );
-
+        currentConversationId = selectedConversationId;
     }
 
-    async function joinConversation(
-        conversationId
+    async function joinConversation(conversationId
     ) {
 
         if (
@@ -546,9 +691,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const isBot =
             message.senderType === 4;
 
-        console.log('Rendering message:', message.id, message.senderType, message.content
-        );
-
         if (isSystem) {
             li.className = 'chat-message text-center';
 
@@ -622,9 +764,6 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
         chatHistory.appendChild(li);
-
-        console.log('Message appended:', message.id
-        );
     }
     function formatMessageTime(value) {
 
@@ -848,7 +987,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     async function closeConversation() {
-
+        stopTyping();
+        hideTyping();
         if (
             joinedConversationId &&
             adminChatConnection &&
@@ -877,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         joinedConversationId = null;
         selectedConversationId = null;
+        currentConversationId = null;
 
         closeContactDrawer();
 
@@ -988,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 appendChatMessage(message);
             });
 
-            ChatScroll.update(chatHistoryBody);
+            ChatScroll.update(chatHistoryBody); 
             scrollChatToBottom();
 
         } catch (error) {
@@ -1308,13 +1449,10 @@ document.addEventListener('DOMContentLoaded', function () {
     ========================================================= */
 
     if (backToConversationsButton) {
-
         backToConversationsButton.addEventListener(
             'click',
             function () {
-
                 closeConversation();
-
             }
         );
 
@@ -1326,17 +1464,13 @@ document.addEventListener('DOMContentLoaded', function () {
     ========================================================= */
 
     if (chatContactButton) {
-
         chatContactButton.addEventListener(
             'click',
             function () {
-
                 if (!selectedConversationId) {
                     return;
                 }
-
                 contactDrawer.classList.add('show');
-
                 updateOverlay();
 
             }
@@ -1427,7 +1561,70 @@ document.addEventListener('DOMContentLoaded', function () {
     /* =========================================================
        SEND MESSAGE
     ========================================================= */
+    async function sendTypingStatus(isTypingNow) {
+        if (
+            !selectedConversationId ||
+            !adminChatConnection
+        ) {
+            return;
+        }
 
+        if (
+            adminChatConnection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
+
+        try {
+            await adminChatConnection.invoke(
+                "SendAdminTyping",
+                Number(selectedConversationId),
+                isTypingNow
+            );
+        }
+        catch (error) {
+            console.error(
+                "SEND ADMIN TYPING ERROR:",
+                error
+            );
+        }
+    }
+    function handleTyping() {
+        if (!messageInput.value.trim()) {
+            stopTyping();
+            return;
+        }
+
+        if (!isTyping) {
+            isTyping = true;
+
+            sendTypingStatus(true);
+        }
+
+        clearTimeout(typingTimeout);
+
+        typingTimeout = setTimeout(() => {
+            stopTyping();
+        }, TYPING_TIMEOUT);
+    }
+    function stopTyping() {
+        clearTimeout(typingTimeout);
+
+        typingTimeout = null;
+
+        if (!isTyping) {
+            return;
+        }
+
+        isTyping = false;
+
+        sendTypingStatus(false);
+    }
+    messageInput.addEventListener(
+        'input',
+        handleTyping
+    );
     if (sendMessageForm) {
         sendMessageForm.addEventListener(
             'submit',
@@ -1440,7 +1637,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!content) {
                     return;
                 }
-
+                stopAdminTyping();
                 if (!selectedConversationId) {
                     return;
                 }
@@ -1499,6 +1696,14 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
+    // =====================================
+    // ENTER
+    // =====================================
+
+    messageInput.addEventListener(
+        "input",
+        handleTyping
+    );
 
     /* =========================================================
        APPEND OUTGOING MESSAGE
@@ -1829,6 +2034,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Conversation không mở -> đưa lên đầu
         conversationList.prepend(item);
         ChatScroll.update(conversationList);
+
         // Tăng unread
         let unread = item.querySelector('.conversation-unread');
 
@@ -1848,36 +2054,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         unread.textContent = currentCount + 1;
     }
-
-
-    function updateConversationItem(conversation) {
-
-        const item =
-            document.querySelector(
-                `.conversation-item[data-conversation-id="${conversation.id}"]`
-            );
-
-        if (!item) {
-            return;
-        }
-
-        if (conversation.status) {
-            item.dataset.status =
-                conversation.status;
-        }
-
-        if (conversation.inbox) {
-            item.dataset.inbox =
-                conversation.inbox;
-        }
-
-        if (conversation.label) {
-            item.dataset.label =
-                conversation.label;
-        }
-
-    }
-
 
     /* =========================================================
        INITIAL

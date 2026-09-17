@@ -289,7 +289,14 @@
     flex-direction: column;
     background: var(--bs-tertiary-bg);
 }
-
+.typing-indicator {
+    display: flex;
+    text-align: center;
+    margin: 0 auto;
+}
+    .typing-indicator[hidden] {
+        display: none !important;
+    }
 .chat-history-header {
     min-height: 75px;
     padding: 1rem 1.25rem;

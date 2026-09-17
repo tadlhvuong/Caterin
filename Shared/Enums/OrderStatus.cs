@@ -27,7 +27,7 @@ namespace Shared.Enums
 
     public enum DeliveryStatus
     {
-        Pending =1,
+        Pending,
         Shipped,
         OutForDelivery,
         Delivered,

@@ -33,7 +33,7 @@ namespace Shared.DTOs.Chat
 
         public int? TeamId { get; set; }
 
-        //public int UnreadCount { get; set; }
+        public int UnreadCount { get; set; }
 
         public bool IsAssignedToCurrentUser { get; set; }
 

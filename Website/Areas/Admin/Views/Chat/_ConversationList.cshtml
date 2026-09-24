@@ -1,0 +1,80 @@
+﻿@using Shared.DTOs.Chat
+@{
+}
+
+<div class="conversation-list" id="conversationList" data-perfect-scrollbar>
+    @foreach (var conversation in Model)
+    {
+        <article class="conversation-item"
+                 data-conversation-id="@conversation.Id"
+                 data-status="@conversation.Status"
+                 data-inbox="all"
+                 data-label="@conversation.Labels.FirstOrDefault()?.Id"
+                 data-assigned-user-id="@conversation.AssignedUserId"
+                 data-unread-count="@conversation.UnreadCount">
+            <div class="conversation-avatar">
+                <div class="avatar avatar-sm avatar-online">
+                    @if (!string.IsNullOrEmpty(conversation.ContactAvatarUrl))
+                    {
+                        <img src="@conversation.ContactAvatarUrl"
+                             alt="@conversation.ContactName"
+                             class="rounded-circle" />
+                    }
+                    else
+                    {
+                        <span class="avatar-initial rounded-circle bg-label-primary">
+                            @(conversation.ContactName?.FirstOrDefault())
+                        </span>
+                    }
+            </div>
+        </div>
+        <div class="conversation-content">
+            <div class="conversation-top">
+                <h6 class="conversation-name">
+                    @conversation.ContactName
+                </h6>
+
+                <time class="conversation-time">
+                    @conversation.LastMessageAt.ToString("HH:mm")
+                </time>
+            </div>
+
+            <div class="conversation-bottom">
+
+                <p class="conversation-message">
+                    @(string.IsNullOrWhiteSpace(conversation.LastMessage)
+                                        ? conversation.Subject
+                                        : conversation.LastMessage)
+                </p>
+                @* UnreadCoutn thêm sau này *@
+                @if (conversation.UnreadCount > 0)
+                    {
+                        <span class="badge rounded-pill bg-primary">
+                            @conversation.UnreadCount
+                        </span>
+                    }
+                </div>
+
+                @if (conversation.Labels.Any())
+                {
+                    <div class="conversation-meta">
+                        @foreach (var label in conversation.Labels)
+                        {
+                            <span class="chat-label badge bg-label-success">
+                                @label.Name
+                            </span>
+                        }
+
+
+                        <span class="conversation-status">
+                            Resolved
+                        </span>
+
+                    </div>
+                }
+
+            </div>
+        </article>
+    }
+
+</div>

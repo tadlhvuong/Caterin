@@ -3,6 +3,7 @@ using Shared.DTOs.Chat;
 using Shared.Enums.Chat;
 using Shared.Requests.Chat;
 using Shared.Responses;
+using System.Threading.Tasks;
 
 namespace Shared.Interfaces.Chat
 {
@@ -29,10 +30,18 @@ namespace Shared.Interfaces.Chat
         Task<ChatConversationDto?> GetConversationAsync(
             long conversationId,
             CancellationToken cancellationToken = default);
-        Task<List<ChatConversationListItemDto>> GetConversationsAsync(
-    long inboxId, string? currentUserId,
+        Task<object> GetConversationListAsync(
+    long? inboxId,
+    string? currentUserId,
+    int limit = 30,
+    DateTime? beforeLastMessageAt = null,
+    long? beforeId = null,
     CancellationToken cancellationToken = default);
-
+        Task<ChatConversationCountsDto> GetConversationCountsAsync(long? inboxId,
+     string? search = null,
+     string? assignedUserId = null,
+     long? labelId = null,
+    CancellationToken cancellationToken = default);
         Task<bool> CanAccessConversationAsync(
             long conversationId,
             long? contactId,
@@ -55,17 +64,20 @@ namespace Shared.Interfaces.Chat
         Task<ChatConversationContactDto?> GetConversationContactAsync(
     long conversationId,
     CancellationToken cancellationToken = default);
-        Task<List<ChatMessageDto>> GetMessagesAsync(
-        long conversationId,
-        CancellationToken cancellationToken = default);
-
-        Task<List<ChatMessageDto>> GetCustomerMessagesAsync(
+        Task<object> GetAdminMessagesAsync(
     long conversationId,
+    int limit,
+    long? before,
+    CancellationToken cancellationToken = default);
+        Task<object> GetCustomerMessagesAsync(
+    long conversationId,
+    int limit,
+    long? before,
     CancellationToken cancellationToken = default);
 
 
         //UPDATE STATUS MESSAGE
-        Task<ServiceResult> UpdateStatusAsync(int conversationId, ChatConversationStatus status, 
+        Task<ServiceResult> UpdateStatusAsync(long conversationId, ChatConversationStatus status, 
             CancellationToken cancellationToken = default);
        Task<int> GetUnreadCountAsync(long conversationId, long? contactId, string? guestToken, 
            CancellationToken cancellationToken = default);

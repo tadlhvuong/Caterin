@@ -12,6 +12,7 @@ using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Notification;
 using Shared.Requests.Chat;
 using Shared.Responses;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
 namespace Shared.Services.Chat
@@ -19,18 +20,20 @@ namespace Shared.Services.Chat
     public class ChatMessageService : IChatMessageService
     {
         private readonly AppDbContext _dbContext;
+        private readonly IChatPresenceService _chatPresenceService;
         private readonly IChatRealtimeNotifier _chatNotifier;
         private readonly IHubContext<ChatHub> _hubContext;
 
         private readonly ILogger<ChatMessageService> _logger;
 
-        public ChatMessageService(AppDbContext dbContext, IHubContext<ChatHub> hubContext, 
+        public ChatMessageService(AppDbContext dbContext, IHubContext<ChatHub> hubContext,IChatPresenceService chatPresenceService,
             IChatRealtimeNotifier chatNotifier, ILogger<ChatMessageService> logger)
         {
             _dbContext = dbContext;
+            _chatPresenceService = chatPresenceService;
+            _chatNotifier = chatNotifier;
             _hubContext = hubContext;
 
-            _chatNotifier = chatNotifier;
             _logger = logger;
         }
 
@@ -57,10 +60,7 @@ namespace Shared.Services.Chat
             // =========================================================
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                contact = await _dbContext.ChatContacts
-                    .FirstOrDefaultAsync(
-                        x => x.UserId == userId,
-                        cancellationToken);
+                contact = await _dbContext.ChatContacts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
             }
 
             // =========================================================
@@ -325,11 +325,30 @@ namespace Shared.Services.Chat
 
             _dbContext.ChatMessages.Add(message);
 
-            conversation.LastMessageAt = now;
-            conversation.UpdatedAt = now;
+            conversation.UpdatedAt = message.CreatedAt;
+            conversation.Subject = message.Content;
+            conversation.LastMessageAt = message.CreatedAt;
 
+            var isAdminViewing = _chatPresenceService.IsConversationActive(
+        conversation.Id);
+            var statusChanged = false;
+
+            if (!isAdminViewing &&
+                conversation.Status != ChatConversationStatus.Pending)
+            {
+                conversation.Status =
+                    ChatConversationStatus.Pending;
+                statusChanged = true;
+            }
             await _dbContext.SaveChangesAsync(cancellationToken);
-
+            if (statusChanged)
+            {
+                await _chatNotifier.NotifyConversationStatusUpdatedAsync(
+                    conversation.Id,
+                    conversation.InboxId,
+                    conversation.Status,
+                    conversation.UpdatedAt);
+            }
             var dto = new ChatMessageDto
             {
                 Id = message.Id,
@@ -493,14 +512,40 @@ namespace Shared.Services.Chat
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
-        public async Task<List<ChatConversationListItemDto>> GetConversationsAsync(
-    long inboxId, string? currentUserId,
+        public async Task<object> GetConversationListAsync(
+    long? inboxId,
+    string? currentUserId,
+    int limit = 30,
+    DateTime? beforeLastMessageAt = null,
+    long? beforeId = null,
     CancellationToken cancellationToken = default)
         {
-            var result = await _dbContext.ChatConversations
-                .AsNoTracking()
-                .Where(x => x.InboxId == inboxId)
+            limit = Math.Clamp(limit, 1, 100);
+
+            var query = _dbContext.ChatConversations
+                .AsNoTracking().AsQueryable();
+            if (inboxId.HasValue)
+            {
+                query = query.Where(x =>
+                    x.InboxId == inboxId.Value);
+            }
+            // Cursor:
+            // LastMessageAt nhỏ hơn
+            // hoặc cùng LastMessageAt nhưng Id nhỏ hơn
+            if (beforeLastMessageAt.HasValue && beforeId.HasValue)
+            {
+                query = query.Where(x =>
+                    x.LastMessageAt < beforeLastMessageAt.Value ||
+                    (
+                        x.LastMessageAt == beforeLastMessageAt.Value &&
+                        x.Id < beforeId.Value
+                    ));
+            }
+
+            var conversations = await query
                 .OrderByDescending(x => x.LastMessageAt)
+                .ThenByDescending(x => x.Id)
+                .Take(limit + 1)
                 .Select(x => new ChatConversationListItemDto
                 {
                     Id = x.Id,
@@ -524,8 +569,9 @@ namespace Shared.Services.Chat
                         .Select(m => m.Content)
                         .FirstOrDefault(),
 
-                    //UnreadCount = x.Messages.Count(m =>
-                    //    !m.IsRead),
+                    UnreadCount = x.Messages.Count(m =>
+                        m.SenderType == ChatSenderType.Contact &&
+                        m.Status != ChatMessageStatus.Read),
 
                     Labels = x.Labels
                         .Select(l => new ChatContactLabelDto
@@ -538,13 +584,90 @@ namespace Shared.Services.Chat
                 })
                 .ToListAsync(cancellationToken);
 
-            foreach (var item in result)
+            var hasMore = conversations.Count > limit;
+
+            if (hasMore)
             {
-                item.IsAssignedToCurrentUser =
-                    !string.IsNullOrEmpty(currentUserId) &&
-                    item.AssignedUserId == currentUserId;
+                conversations.RemoveAt(conversations.Count - 1);
             }
-            return result;
+
+            return new ChatConversationListResponse
+            {
+                Items = conversations,
+                HasMore = hasMore,
+
+                OldestLastMessageAt = conversations.Count > 0
+        ? conversations[^1].LastMessageAt
+        : null,
+
+                OldestId = conversations.Count > 0
+        ? conversations[^1].Id
+        : null
+            };
+        }
+
+        public async Task<ChatConversationCountsDto> GetConversationCountsAsync(
+     long? inboxId,
+     string? search = null,
+     string? assignedUserId = null,
+     long? labelId = null,
+     CancellationToken cancellationToken = default)
+        {
+            var query = _dbContext.ChatConversations
+                .AsNoTracking()
+        .AsQueryable();
+            if (inboxId.HasValue)
+            {
+                query = query.Where(x =>
+                    x.InboxId == inboxId.Value);
+            }
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
+                query = query.Where(x =>
+                    x.Contact.Name.Contains(search) ||
+                    x.Contact.Email.Contains(search) ||
+                    x.Contact.Phone.Contains(search) ||
+                    (x.Subject != null && x.Subject.Contains(search)));
+            }
+
+            // Assigned user
+            if (!string.IsNullOrWhiteSpace(assignedUserId))
+            {
+                query = query.Where(x =>
+                    x.AssignedUserId == assignedUserId);
+            }
+
+            // Label
+            if (labelId.HasValue)
+            {
+                query = query.Where(x =>
+                    x.Labels.Any(l => l.LabelId == labelId.Value));
+            }
+
+            var all = await query.CountAsync(cancellationToken);
+
+            var open = await query.CountAsync(
+                x => x.Status == ChatConversationStatus.Open,
+                cancellationToken);
+
+            var pending = await query.CountAsync(
+                x => x.Status == ChatConversationStatus.Pending,
+                cancellationToken);
+
+            var resolved = await query.CountAsync(
+                x => x.Status == ChatConversationStatus.Resolved,
+                cancellationToken);
+
+            return new ChatConversationCountsDto
+            {
+                All = all,
+                Open = open,
+                Pending = pending,
+                Resolved = resolved
+            };
         }
         public async Task<bool> CanAccessConversationAsync(long conversationId, long? contactId,
             string? userId, bool isAdmin, CancellationToken cancellationToken = default)
@@ -698,31 +821,7 @@ namespace Shared.Services.Chat
                     Priority = x.Priority,
 
                     LastMessageAt = x.LastMessageAt,
-                    CreatedAt = x.CreatedAt,
-                    
-                    Messages = x.Messages
-                        .OrderBy(m => m.CreatedAt)
-                        .Select(m => new ChatMessageDto
-                        {
-                            Id = m.Id,
-                            ConversationId = m.ConversationId,
-                            InboxId = m.InboxId,
-
-                            ContactId = m.ContactId,
-                            SenderId = m.UserId,
-
-                            MessageType = m.MessageType,
-                            ContentType = m.ContentType,
-                            Status = m.Status,
-                            SenderType = m.SenderType,
-
-                            Content = m.Content,
-
-                            IsPrivate = m.IsPrivate,
-
-                            CreatedAt = m.CreatedAt
-                        })
-                        .ToList()
+                    CreatedAt = x.CreatedAt
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
@@ -803,21 +902,36 @@ namespace Shared.Services.Chat
 
             return result;
         }
-        public async Task<List<ChatMessageDto>> GetMessagesAsync(
+        public async Task<object> GetAdminMessagesAsync(
     long conversationId,
+    int limit,
+    long? before,
     CancellationToken cancellationToken = default)
         {
-            return await _dbContext.ChatMessages
+            limit = Math.Clamp(limit, 1, 100);
+
+            var query = _dbContext.ChatMessages
                 .AsNoTracking()
-                .Where(x => x.ConversationId == conversationId)
-                .OrderBy(x => x.CreatedAt)
+                .Where(x =>
+                    x.ConversationId == conversationId);
+
+            if (before.HasValue)
+            {
+                query = query.Where(x => x.Id < before.Value);
+            }
+
+            var messages = await query
+                .OrderByDescending(x => x.Id)
+                .Take(limit + 1)
                 .Select(x => new ChatMessageDto
                 {
                     Id = x.Id,
                     ConversationId = x.ConversationId,
                     InboxId = x.InboxId,
+
                     ContactId = x.ContactId,
                     SenderId = x.UserId,
+
                     SenderName =
                         x.SenderType == ChatSenderType.Contact
                             ? x.Contact!.Name
@@ -832,23 +946,57 @@ namespace Shared.Services.Chat
                     ContentType = x.ContentType,
                     Status = x.Status,
                     SenderType = x.SenderType,
+
                     Content = x.Content,
                     IsPrivate = x.IsPrivate,
                     CreatedAt = x.CreatedAt
                 })
                 .ToListAsync(cancellationToken);
+
+            var hasMore = messages.Count > limit;
+
+            if (hasMore)
+            {
+                messages.RemoveAt(messages.Count - 1);
+            }
+
+            messages.Reverse();
+
+            return new
+            {
+                Items = messages,
+                HasMore = hasMore,
+                OldestMessageId = messages.Count > 0
+                    ? messages[0].Id
+                    : (long?)null,
+                NewestMessageId = messages.Count > 0
+                    ? messages[^1].Id
+                    : (long?)null
+            };
         }
 
-        public async Task<List<ChatMessageDto>> GetCustomerMessagesAsync(
+        public async Task<object> GetCustomerMessagesAsync(
     long conversationId,
+    int limit,
+    long? before,
     CancellationToken cancellationToken = default)
         {
-            return await _dbContext.ChatMessages
+            var query = _dbContext.ChatMessages
                 .AsNoTracking()
                 .Where(x =>
                     x.ConversationId == conversationId &&
-                    !x.IsPrivate)
-                .OrderBy(x => x.CreatedAt)
+                    !x.IsPrivate);
+
+            // Load các message cũ hơn message hiện tại
+            if (before.HasValue)
+            {
+                query = query.Where(x => x.Id < before.Value);
+            }
+
+            // Lấy thêm 1 message để xác định còn dữ liệu hay không
+            var messages = await query
+                .OrderByDescending(x => x.Id)
+                .Take(limit + 1)
                 .Select(x => new ChatMessageDto
                 {
                     Id = x.Id,
@@ -876,13 +1024,29 @@ namespace Shared.Services.Chat
                     CreatedAt = x.CreatedAt
                 })
                 .ToListAsync(cancellationToken);
+
+            var hasMore = messages.Count > limit;
+
+            if (hasMore)
+            {
+                messages.RemoveAt(messages.Count - 1);
+            }
+
+            // API trả về theo thứ tự cũ -> mới
+            messages.Reverse();
+
+            return new
+            {
+                Items = messages,
+                HasMore = hasMore
+            };
         }
 
 
         #region Update Status 
 
         public async Task<ServiceResult> UpdateStatusAsync(
-    int conversationId,
+    long conversationId,
     ChatConversationStatus status,
     CancellationToken cancellationToken = default)
         {
@@ -892,7 +1056,17 @@ namespace Shared.Services.Chat
                     cancellationToken);
 
             if (conversation == null)
-                return ServiceResult.Fail("Conversation không tồn tại.");
+            {
+                Console.WriteLine(
+                    $"[Chat] Conversation {conversationId} NOT FOUND.");
+
+                return ServiceResult.Fail(
+                    "Conversation không tồn tại.");
+            }
+
+            Console.WriteLine(
+                $"[Chat] Conversation {conversationId}: " +
+                $"{conversation.Status} -> {status}");
 
             if (conversation.Status == status)
                 return ServiceResult.Success();
@@ -901,19 +1075,17 @@ namespace Shared.Services.Chat
             conversation.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-
-            //await _chatNotifier.NotifyConversationStatusUpdatedAsync(
-            //    conversation.Id,
-            //    conversation.Status,
-            //    conversation.UpdatedAt);
+            Console.WriteLine(
+        $"[Chat] Conversation {conversationId} saved: {conversation.Status}");
+            await _chatNotifier.NotifyConversationStatusUpdatedAsync(
+                conversation.Id, conversation.InboxId,
+                conversation.Status,
+                conversation.UpdatedAt);
 
             return ServiceResult.Success();
         }
-        public async Task<int> GetUnreadCountAsync(
-    long conversationId,
-    long? contactId,
-    string? guestToken,
-    CancellationToken cancellationToken = default)
+        public async Task<int> GetUnreadCountAsync(long conversationId, long? contactId,
+            string? guestToken, CancellationToken cancellationToken = default)
         {
             var conversation = await _dbContext.ChatConversations
                 .AsNoTracking()
@@ -937,6 +1109,7 @@ namespace Shared.Services.Chat
                         x.Status != ChatMessageStatus.Read,
                     cancellationToken);
         }
+
         public async Task<ServiceResult> MarkConversationAsReadAsync(
     long conversationId,
     long? contactId,
@@ -947,8 +1120,7 @@ namespace Shared.Services.Chat
                 await _dbContext.ChatConversations
                     .Include(x => x.Contact)
                     .FirstOrDefaultAsync(
-                        x =>
-                            x.Id == conversationId &&
+                        x => x.Id == conversationId &&
                             (
                                 x.ContactId == contactId ||
                                 x.Contact.GuestToken == guestToken
@@ -957,8 +1129,7 @@ namespace Shared.Services.Chat
 
             if (conversation == null)
             {
-                return ServiceResult.Fail(
-                    "Conversation not found.");
+                return ServiceResult.Fail("Conversation not found.");
             }
 
             var messages =
@@ -969,13 +1140,33 @@ namespace Shared.Services.Chat
                         x.Status != ChatMessageStatus.Read)
                     .ToListAsync(cancellationToken);
 
+            if (messages.Count == 0)
+            {
+                return ServiceResult.Success();
+            }
+
+            var now = DateTime.UtcNow;
+
             foreach (var message in messages)
             {
                 message.Status = ChatMessageStatus.Read;
+                message.ReadAt = now;
+                message.UpdatedAt = now;
             }
 
-            await _dbContext.SaveChangesAsync(
-                cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _hubContext.Clients
+                .Group(ChatHubGroups.Conversation(conversationId))
+                .SendAsync(
+                    ChatHubEvents.MessageStatusUpdated,
+                    new
+                    {
+                        ConversationId = conversationId,
+                        MessageIds = messages.Select(x => x.Id).ToList(),
+                        Status = ChatMessageStatus.Read
+                    },
+                    cancellationToken);
 
             return ServiceResult.Success();
         }

@@ -6,6 +6,7 @@ using Shared.Enums;
 using Shared.Interfaces.Chat;
 using Shared.Requests.Chat;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace Website.Controllers
 {
@@ -45,10 +46,12 @@ namespace Website.Controllers
 
         [HttpGet("{conversationId:long}/messages")]
         public async Task<IActionResult> GetConversationMessages(
-        long conversationId,
-        [FromHeader(Name = "X-Chat-Contact-Id")] long contactId,
-        [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
-        CancellationToken cancellationToken)
+    long conversationId,
+    [FromHeader(Name = "X-Chat-Contact-Id")] long contactId,
+    [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
+    [FromQuery] int limit = 30,
+    [FromQuery] long? before = null,
+    CancellationToken cancellationToken = default)
         {
             var userId = User?
                 .FindFirst(ClaimTypes.NameIdentifier)?
@@ -70,6 +73,9 @@ namespace Website.Controllers
                 });
             }
 
+            // Giới hạn để client không yêu cầu quá nhiều message
+            limit = Math.Clamp(limit, 1, 50);
+
             var allowed =
                 await _chatMessageService
                     .CanCustomerAccessConversationAsync(
@@ -84,13 +90,15 @@ namespace Website.Controllers
                 return Forbid();
             }
 
-            var messages =
+            var result =
                 await _chatMessageService
                     .GetCustomerMessagesAsync(
                         conversationId,
+                        limit,
+                        before,
                         cancellationToken);
 
-            return Ok(messages);
+            return Ok(result);
         }
 
         [HttpGet("{conversationId}/unread-count")]
@@ -112,10 +120,17 @@ namespace Website.Controllers
         [HttpPost("{conversationId}/read")]
         public async Task<IActionResult> MarkAsRead(
     long conversationId,
-    [FromHeader(Name = "X-Chat-Contact-Id")] long? contactId,
-    [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
     CancellationToken cancellationToken)
         {
+            var contactIdHeader = Request.Headers["X-Chat-Contact-Id"]
+                .FirstOrDefault();
+
+            var guestToken = Request.Headers["X-Chat-Guest-Token"]
+                .FirstOrDefault();
+            if (!long.TryParse(contactIdHeader, out var contactId))
+            {
+                return Unauthorized();
+            }
             var result =
                 await _chatMessageService.MarkConversationAsReadAsync(
                     conversationId,

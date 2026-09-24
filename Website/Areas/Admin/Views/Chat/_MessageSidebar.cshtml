@@ -3,3 +3,189 @@
 *@
 @{
 }
+<aside class="chat-filter-sidebar border-end"
+       id="chatFilterSidebar">
+
+    <div class="chat-filter-header">
+        <h5 class="mb-0">Conversations</h5>
+
+        <button type="button"
+                class="btn btn-icon btn-text-secondary rounded-pill d-lg-none"
+                id="chatFilterClose">
+            <i class="ti ti-x"></i>
+        </button>
+    </div>
+
+    <div class="chat-filter-body" id="chatFilterBody" data-perfect-scrollbar>
+
+        <!-- Search -->
+        <div class="chat-filter-search mb-4">
+            <div class="input-group input-group-merge">
+                <span class="input-group-text">
+                    <i class="ti ti-search"></i>
+                </span>
+
+                <input type="text"
+                       class="form-control"
+                       id="conversationSearch"
+                       placeholder="Search conversations..."
+                       autocomplete="off" />
+            </div>
+        </div>
+
+        <!-- Inbox -->
+        <div class="chat-filter-section">
+
+            <div class="chat-filter-title">
+                <span>INBOX</span>
+            </div>
+
+            <ul class="chat-filter-list">
+
+                <li class="active"
+                    data-filter-type="inbox"
+                    data-filter-value="all">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-inbox"></i>
+
+                        <span>Tất cả</span>
+
+                        <span class="chat-filter-count">
+                            0
+                        </span>
+                    </a>
+                </li>
+
+                <li data-filter-type="inbox"
+                    data-filter-value="mine">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-user-check"></i>
+
+                        <span>Website</span>
+
+                        <span class="chat-filter-count">
+                            4
+                        </span>
+                    </a>
+                </li>
+
+                <li data-filter-type="inbox"
+                    data-filter-value="unassigned">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-user-x"></i>
+
+                        <span>Facebook</span>
+
+                        <span class="chat-filter-count">
+                            3
+                        </span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <!-- Status -->
+        <div class="chat-filter-section">
+
+            <div class="chat-filter-title">
+                <span>STATUS</span>
+            </div>
+
+            <ul class="chat-filter-list">
+
+                <li data-filter-type="status"
+                    data-filter-value="open">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-message-circle-2"></i>
+                        <span>Open</span>
+                        <span class="chat-filter-count" data-status-count="open">0</span>
+                    </a>
+                </li>
+
+                <li data-filter-type="status"
+                    data-filter-value="pending">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-clock"></i>
+                        <span>Pending</span>
+                        <span class="chat-filter-count" data-status-count="pending">0</span>
+                    </a>
+                </li>
+
+                <li data-filter-type="status"
+                    data-filter-value="resolved">
+
+                    <a href="javascript:void(0);">
+                        <i class="ti ti-circle-check"></i>
+                        <span>Resolved</span>
+                        <span class="chat-filter-count"
+                                   data-status-count="resolved">0</span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+        <!-- Labels -->
+        <div class="chat-filter-section">
+
+            <div class="chat-filter-title d-flex justify-content-between align-items-center">
+                <span>LABELS</span>
+
+                <button type="button"
+                        class="btn btn-icon btn-text-secondary btn-sm">
+                    <i class="ti ti-plus"></i>
+                </button>
+            </div>
+
+            <ul class="chat-filter-list">
+
+                <li data-filter-type="label"
+                    data-filter-value="new">
+
+                    <a href="javascript:void(0);">
+                        <span class="chat-label-dot bg-success"></span>
+                        <span>New</span>
+                    </a>
+                </li>
+
+                <li data-filter-type="label"
+                    data-filter-value="order">
+
+                    <a href="javascript:void(0);">
+                        <span class="chat-label-dot bg-primary"></span>
+                        <span>Order</span>
+                    </a>
+                </li>
+
+                <li data-filter-type="label"
+                    data-filter-value="product">
+
+                    <a href="javascript:void(0);">
+                        <span class="chat-label-dot bg-warning"></span>
+                        <span>Product</span>
+                    </a>
+                </li>
+
+                <li data-filter-type="label"
+                    data-filter-value="complaint">
+
+                    <a href="javascript:void(0);">
+                        <span class="chat-label-dot bg-danger"></span>
+                        <span>Complaint</span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+</aside>

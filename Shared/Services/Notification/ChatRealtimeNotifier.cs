@@ -21,19 +21,22 @@ namespace Shared.Services.Notification
         }
 
         public async Task NotifyConversationStatusUpdatedAsync(
-            long conversationId, long inboxId,
-            ChatConversationStatus status,
-            DateTime? updatedAt)
+     long conversationId,
+     long inboxId,
+     ChatConversationStatus status,
+     DateTime? updatedAt)
         {
-            await _hubContext.Clients.Group($"conversation:{conversationId}").SendAsync(
-           "ConversationStatusUpdated",
-           new
-           {
-               InboxId = inboxId,
-               ConversationId = conversationId,
-               Status = status,
-               UpdatedAt = updatedAt
-           });
+            await _hubContext.Clients
+                .Group(ChatHubGroups.Inbox(inboxId))
+                .SendAsync(
+                    ChatHubEvents.ConversationStatusUpdated,
+                    new
+                    {
+                        InboxId = inboxId,
+                        ConversationId = conversationId,
+                        Status = status.ToString(),
+                        UpdatedAt = updatedAt
+                    });
         }
 
         public async Task NotifyConversationReadAsync(

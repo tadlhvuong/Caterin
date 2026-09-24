@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
+using Shared.DTOs.Chat;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Chat;
@@ -33,43 +34,61 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Index(
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
             var inbox = await _chatService.GetDefaultInboxAsync(cancellationToken);
 
             if (inbox == null)
+            {
                 return NotFound();
-            var conversations = await _chatService.GetConversationsAsync(inbox.Id, _currentUserService.UserId,
-            cancellationToken);
+            }
+
             var model = new ChatWorkspaceViewModel
             {
-                InboxId = inbox.Id,
-                Conversations = conversations
+                InboxId = inbox.Id
             };
 
             return View(model);
         }
 
-
-        [HttpGet("conversation")]
+        [HttpGet("conversations")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Conversation(
-            long id,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Conversations(
+    long? inboxId,
+    int limit = 30,
+    DateTime? beforeLastMessageAt = null,
+    long? beforeId = null,
+    CancellationToken cancellationToken = default)
         {
-            var result = await _chatService
-                .GetConversationDetailAsync(
-                    id,
-                    cancellationToken);
+            var result = await _chatService.GetConversationListAsync(
+                inboxId,
+                _currentUserService.UserId,
+                limit,
+                beforeLastMessageAt,
+                beforeId,
+                cancellationToken);
 
-            if (result == null)
-                return NotFound();
-
-            return PartialView(
-                "_ConversationDetail",
-                result);
+            return Ok(result);
         }
+
+        //    [HttpGet("conversation/{id:long}")]
+        //    [PermissionAction(ActionType.View)]
+        //    public async Task<IActionResult> Conversation(
+        //long id,
+        //CancellationToken cancellationToken)
+        //    {
+        //        var result = await _chatService
+        //            .GetConversationDetailAsync(
+        //                id,
+        //                cancellationToken);
+
+        //        if (result == null)
+        //            return NotFound();
+
+        //        return PartialView(
+        //            "_ConversationDetail",
+        //            result);
+        //    }
 
 
         [HttpGet("contact")]
@@ -93,12 +112,36 @@ namespace Website.Areas.Admin.Controllers
         [HttpGet("{conversationId:long}/messages")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Messages(
-            long conversationId,
-            CancellationToken cancellationToken)
+    long conversationId,
+    int limit = 30,
+    long? before = null,
+    CancellationToken cancellationToken = default)
         {
-            var messages = await _chatService.GetMessagesAsync(conversationId, cancellationToken);
+            var result = await _chatService.GetAdminMessagesAsync(
+                conversationId,
+                limit,
+                before,
+                cancellationToken);
 
-            return Ok(messages);
+            return Ok(result);
+        }
+        [HttpGet("conversations/counts")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> Counts(
+    long? inboxId,
+    string? search = null,
+    string? assignedUserId = null,
+    long? labelId = null,
+    CancellationToken cancellationToken = default)
+        {
+            var result = await _chatService.GetConversationCountsAsync(
+                inboxId,
+                search,
+                assignedUserId,
+                labelId,
+                cancellationToken);
+
+            return Ok(result);
         }
     }
 }

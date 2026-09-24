@@ -1,231 +1,422 @@
-﻿
+﻿(() => {
+    "use strict";
 
-const popup = document.getElementById("promoPopup");
+    // ============================================================
+    // CONFIG
+    // ============================================================
 
-const hideToday = document.getElementById("hideToday");
+    const CONFIG = {
+        storage: {
+            hidePromo: "hidePromo",
+            contactId: "caterin_chat_contact_id",
+            conversationId: "caterin_chat_conversation_id",
+            guestToken: "caterin_chat_guest_token"
+        },
 
-if (!localStorage.getItem("hidePromo")) {
+        timing: {
+            promoDelay: 1800,
+            typingTimeout: 1500,
+            focusDelay: 250,
+            reconnectDelay: 3000
+        },
 
-    setTimeout(() => {
+        limits: {
+            processedMessageIds: 500
+        },
 
-        popup.classList.add("show");
+        senderType: {
+            contact: 1,
+            admin: 2,
+            system: 3,
+            bot: 4
+        },
 
-    }, 1800);
+        messageStatus: {
+            pending: 1,
+            sent: 2,
+            delivered: 3,
+            read: 4,
+            failed: 5
+        },
 
-}
-
-function closePopup() {
-
-    popup.classList.remove("show");
-
-    if (hideToday.checked) {
-
-        const tomorrow = new Date();
-
-        tomorrow.setHours(23, 59, 59, 999);
-
-        localStorage.setItem(
-            "hidePromo",
-            tomorrow.getTime()
-        );
-
-    }
-
-}
-
-document.getElementById("closePopup")
-    .addEventListener("click", closePopup);
-
-document.getElementById("laterBtn")
-    .addEventListener("click", closePopup);
-
-const hideTime = localStorage.getItem("hidePromo");
-
-if (hideTime) {
-
-    if (Date.now() > hideTime) {
-
-        localStorage.removeItem("hidePromo");
-
-    }
-
-}
+        conversationStatus: {
+            open: 1,
+            pending: 2,
+            resolved: 3,
+            closed: 4
+        }
+    };
 
 
-// CHATBOX
-document.addEventListener("DOMContentLoaded", () => {
+    // ============================================================
+    // DOM
+    // ============================================================
 
-    // =====================================
-    // ELEMENTS
-    // =====================================
+    const DOM = {
+        popup: document.getElementById("promoPopup"),
+        hideToday: document.getElementById("hideToday"),
+        closePopup: document.getElementById("closePopup"),
+        laterButton: document.getElementById("laterBtn"),
 
-    const toggle = document.getElementById("chatToggle");
-    const windowEl = document.getElementById("chatWindow");
-    const close = document.getElementById("chatClose");
+        chatToggle: document.getElementById("chatToggle"),
+        chatWindow: document.getElementById("chatWindow"),
+        chatClose: document.getElementById("chatClose"),
 
-    const input = document.getElementById("chatInput");
-    const send = document.getElementById("sendBtn");
+        chatInput: document.getElementById("chatInput"),
+        sendButton: document.getElementById("sendBtn"),
 
-    const body = document.getElementById("chatBody");
-    const typing = document.getElementById("typing");
-    const badge = document.getElementById("chatBadge");
+        chatBody: document.getElementById("chatBody"),
+        typing: document.getElementById("typing"),
+        chatBadge: document.getElementById("chatBadge"),
 
-    const inboxId = Number(windowEl.dataset.inboxId);
+        attachmentButton: document.getElementById("attachmentBtn"),
+        emojiButton: document.getElementById("emojiBtn"),
 
-    const name = windowEl.dataset.name || null;
+        adminStatusDot: document.getElementById("chatAdminStatusDot"),
+        chatStatusText: document.getElementById("chatStatusText"),
+        chatStatusBadge: document.getElementById("chatStatusBadge")
+    };
 
-    const email = windowEl.dataset.email || null;
 
-    const phone = windowEl.dataset.phone || null;
-    // =====================================
+    // ============================================================
+    // CHAT CONFIG FROM HTML
+    // ============================================================
+
+    const CHAT_CONFIG = {
+        inboxId: Number(DOM.chatWindow?.dataset.inboxId) || null,
+        name: DOM.chatWindow?.dataset.name || null,
+        email: DOM.chatWindow?.dataset.email || null,
+        phone: DOM.chatWindow?.dataset.phone || null
+    };
+
+
+    // ============================================================
+    // STATE
+    // ============================================================
+
+    const state = {
+        currentConversationId: null,
+        currentContactId: null,
+        guestToken: null,
+
+        unreadMessageCount: 0,
+
+        isTyping: false,
+        typingTimer: null,
+
+        reconnectTimer: null,
+
+        processedMessageIds: new Set(),
+        messages: {
+            limit: 30,
+            oldestMessageId: null,
+            hasMore: true,
+            loading: false
+        },
+        initialized: false
+    };
+
+
+    // ============================================================
     // SIGNALR
-    // =====================================
+    // ============================================================
 
-    const chatConnection =
+    const connection =
         new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/chat")
+            .withUrl("/hubs/chat?clientType=customer")
             .withAutomaticReconnect()
             .build();
 
 
-    // =====================================
-    // CHAT STATE
-    // =====================================
+    // ============================================================
+    // STORAGE
+    // ============================================================
 
-    let currentConversationId = null;
-    let currentContactId = null;
-    let currentGuestToken = getGuestToken();
-    const processedMessageIds = new Set();
-    const MAX_PROCESSED_MESSAGE_IDS = 500;
+    function getGuestToken() {
+        let token =
+            localStorage.getItem(CONFIG.storage.guestToken);
 
+        if (!token) {
+            token = crypto.randomUUID();
 
-    let unreadMessageCount = 0;
-
-    let typingTimeout = null;
-    let isTyping = false;
-
-    const TYPING_TIMEOUT = 1500;
-    // =====================================
-    // UNREAD MESSAGE BADGE
-    // =====================================
-
-    function updateUnreadBadge() {
-
-        if (!badge) {
-            return;
+            localStorage.setItem(
+                CONFIG.storage.guestToken,
+                token
+            );
         }
 
-        if (unreadMessageCount <= 0) {
-
-            unreadMessageCount = 0;
-
-            badge.textContent = "";
-            badge.hidden = true;
-
-            return;
-        }
-
-        badge.textContent =
-            unreadMessageCount > 99
-                ? "99+"
-                : String(unreadMessageCount);
-
-        badge.hidden = false;
+        return token;
     }
 
-    // =====================================
-    // TYPING
-    // =====================================
 
-    async function sendTypingStatus(isTypingNow) {
-        console.log(isTypingNow);
-        if (
-            !currentConversationId ||
-            !currentContactId
-        ) {
-            return;
-        }
+    function loadStoredSession() {
+        state.currentContactId =
+            Number(
+                localStorage.getItem(
+                    CONFIG.storage.contactId
+                )
+            ) || null;
 
-        if (
-            chatConnection.state !==
+        state.currentConversationId =
+            Number(
+                localStorage.getItem(
+                    CONFIG.storage.conversationId
+                )
+            ) || null;
+
+        state.guestToken = getGuestToken();
+    }
+
+
+    function saveSession(conversation) {
+        state.currentContactId =
+            Number(conversation.contactId) || null;
+
+        state.currentConversationId =
+            Number(conversation.id) || null;
+
+        localStorage.setItem(
+            CONFIG.storage.contactId,
+            String(state.currentContactId)
+        );
+
+        localStorage.setItem(
+            CONFIG.storage.conversationId,
+            String(state.currentConversationId)
+        );
+
+        localStorage.setItem(
+            CONFIG.storage.guestToken,
+            state.guestToken
+        );
+    }
+
+
+    // ============================================================
+    // GENERIC HELPERS
+    // ============================================================
+
+    function isConnectionReady() {
+        return (
+            connection.state ===
             signalR.HubConnectionState.Connected
-        ) {
+        );
+    }
+
+
+    function isChatOpen() {
+        return DOM.chatWindow?.classList.contains("open") ?? false;
+    }
+
+
+    function isValidChatSession() {
+        return Boolean(
+            state.currentConversationId &&
+            state.currentContactId &&
+            state.guestToken
+        );
+    }
+
+
+    function normalizeNumber(value) {
+        const number = Number(value);
+
+        return Number.isFinite(number)
+            ? number
+            : null;
+    }
+
+
+    function isSameConversation(conversationId) {
+        return (
+            Number(state.currentConversationId) ===
+            Number(conversationId)
+        );
+    }
+
+
+    function escapeHtml(value) {
+        const element =
+            document.createElement("div");
+
+        element.textContent =
+            value ?? "";
+
+        return element.innerHTML;
+    }
+
+
+    function scrollBottom(smooth = true) {
+        if (!DOM.chatBody) {
             return;
         }
 
-        try {
-            console.log(currentConversationId + " : " + currentContactId + " : " + currentGuestToken + " : " + isTypingNow);
-            await chatConnection.invoke(
-                "SendTyping",
-                currentConversationId,
-                currentContactId,
-                currentGuestToken,
-                isTypingNow
+        requestAnimationFrame(() => {
+            DOM.chatBody.scrollTo({
+                top: DOM.chatBody.scrollHeight,
+                behavior: smooth ? "smooth" : "auto"
+            });
+        });
+    }
+
+
+    function formatMessageTime(date) {
+        return new Date(date).toLocaleTimeString(
+            "vi-VN",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+    }
+
+
+    // ============================================================
+    // PROMO POPUP
+    // ============================================================
+
+    function initPromoPopup() {
+        if (!DOM.popup) {
+            return;
+        }
+
+        cleanupPromoStorage();
+
+        const hiddenUntil =
+            localStorage.getItem(
+                CONFIG.storage.hidePromo
             );
 
+        if (hiddenUntil) {
+            return;
         }
-        catch (error) {
 
-            console.error(
-                "SEND TYPING ERROR:",
-                error
+        setTimeout(() => {
+            DOM.popup?.classList.add("show");
+        }, CONFIG.timing.promoDelay);
+
+
+        DOM.closePopup?.addEventListener(
+            "click",
+            closePromoPopup
+        );
+
+        DOM.laterButton?.addEventListener(
+            "click",
+            closePromoPopup
+        );
+    }
+
+
+    function cleanupPromoStorage() {
+        const hiddenUntil =
+            localStorage.getItem(
+                CONFIG.storage.hidePromo
             );
 
-        }
-    }
-    function handleTyping() {
-        if (!input.value.trim()) {
-            stopTyping();
+        if (!hiddenUntil) {
             return;
         }
 
-        // Chỉ gửi true một lần khi bắt đầu gõ
-        if (!isTyping) {
-            isTyping = true;
-            sendTypingStatus(true);
+        if (Date.now() > Number(hiddenUntil)) {
+            localStorage.removeItem(
+                CONFIG.storage.hidePromo
+            );
         }
-
-        clearTimeout(typingTimeout);
-
-        typingTimeout = setTimeout(() => {
-            stopTyping();
-        }, TYPING_TIMEOUT);
     }
 
-    function stopTyping() {
 
-        clearTimeout(typingTimeout);
+    function closePromoPopup() {
+        DOM.popup?.classList.remove("show");
 
-        typingTimeout = null;
-
-        if (!isTyping) {
+        if (!DOM.hideToday?.checked) {
             return;
         }
 
-        isTyping = false;
+        const tomorrow =
+            new Date();
 
-        sendTypingStatus(false);
+        tomorrow.setHours(
+            23,
+            59,
+            59,
+            999
+        );
+
+        localStorage.setItem(
+            CONFIG.storage.hidePromo,
+            String(tomorrow.getTime())
+        );
     }
-    // =====================================
-    // OPEN / CLOSE
-    // =====================================
+
+
+    // ============================================================
+    // UNREAD BADGE
+    // ============================================================
+
+    function setUnreadMessageCount(count) {
+        state.unreadMessageCount =
+            Math.max(
+                0,
+                Number(count) || 0
+            );
+
+        renderUnreadBadge();
+    }
+
+
+    function incrementUnreadMessage() {
+        state.unreadMessageCount++;
+
+        renderUnreadBadge();
+    }
+
+
+    function renderUnreadBadge() {
+        if (!DOM.chatBadge) {
+            return;
+        }
+
+        if (state.unreadMessageCount <= 0) {
+            DOM.chatBadge.textContent = "";
+            DOM.chatBadge.hidden = true;
+
+            return;
+        }
+
+        DOM.chatBadge.textContent =
+            state.unreadMessageCount > 99
+                ? "99+"
+                : String(state.unreadMessageCount);
+
+        DOM.chatBadge.hidden = false;
+    }
+
+
+    // ============================================================
+    // CHAT OPEN / CLOSE
+    // ============================================================
 
     async function openChat() {
+        if (!DOM.chatWindow) {
+            return;
+        }
 
-        windowEl.classList.add("open");
-        toggle.classList.add("active");
+        DOM.chatWindow.classList.add("open");
+        DOM.chatToggle?.classList.add("active");
 
         await loadConversationMessages();
-        const marked = await markConversationAsRead();
+
+        const marked =
+            await markConversationAsRead();
 
         if (marked) {
             setUnreadMessageCount(0);
         }
 
-
         setTimeout(() => {
-            input.focus();
-        }, 250);
+            DOM.chatInput?.focus();
+        }, CONFIG.timing.focusDelay);
     }
 
 
@@ -233,596 +424,819 @@ document.addEventListener("DOMContentLoaded", () => {
         stopTyping();
         hideTyping();
 
-        windowEl.classList.remove("open");
-        toggle.classList.remove("active");
+        DOM.chatWindow?.classList.remove("open");
+        DOM.chatToggle?.classList.remove("active");
     }
 
-    function setUnreadMessageCount(count) {
-        unreadMessageCount = Math.max(
-            0,
-            Number(count) || 0
+
+    function initChatToggle() {
+        DOM.chatToggle?.addEventListener(
+            "click",
+            () => {
+                if (isChatOpen()) {
+                    closeChat();
+                } else {
+                    openChat();
+                }
+            }
         );
 
-        updateUnreadBadge();
+        DOM.chatClose?.addEventListener(
+            "click",
+            closeChat
+        );
     }
 
-    function incrementUnreadMessage() { 
-        unreadMessageCount++;
 
-        updateUnreadBadge();
-    }
+    // ============================================================
+    // ADMIN PRESENCE
+    // ============================================================
 
-    function updateUnreadBadge() {
-        if (!badge) {
+    function setChatAdminStatus(isOnline) {
+        const status =
+            DOM.chatStatusText;
+
+        if (!status) {
             return;
         }
 
-        if (unreadMessageCount <= 0) {
-            badge.textContent = "";
-            badge.hidden = true;
-            return;
-        }
-
-        badge.textContent =
-            unreadMessageCount > 99
-                ? "99+"
-                : String(unreadMessageCount);
-
-        badge.hidden = false;
-    }
-
-    toggle.addEventListener("click", () => {
-
-        if (windowEl.classList.contains("open")) {
-            closeChat();
-        }
-        else {
-            openChat();
-        }
-
-    });
-
-
-    close.addEventListener("click", closeChat);
-
-
-    // =====================================
-    // SIGNALR EVENTS
-    // =====================================
-    chatConnection.on("chat.admin.online", function (data) {
-        console.log("ONLINE");
-        console.log(data);
-        setChatAdminStatus(true);
-    });
-
-    chatConnection.on("chat.admin.offline", function (data) {
-        console.log("OFFLINE");
-        console.log(data);
-        setChatAdminStatus(false);
-    });
-
-    chatConnection.on(
-        "chat.message.received",
-        function (message) {
-
-            console.log(
-                "MESSAGE RECEIVED:",
-                message
+        const dot =
+            DOM.adminStatusDot ||
+            status.querySelector(
+                "span:first-child"
             );
 
-            hideTyping();
+        const label =
+            status.querySelector(
+                ".status-label"
+            );
 
-            const added = addMessage(message, true);
-            if (!added) {
-                return;
-            }
-            // Chỉ tính tin nhắn của Admin/Bot
-            // và chỉ tăng khi chat đang đóng.
-            const isIncomingMessage =
-                message.senderType == 2 ||
-                message.senderType == 4;
+        DOM.adminStatusDot?.classList.toggle(
+            "online",
+            isOnline
+        );
 
-            const isChatClosed =
-                !windowEl.classList.contains("open");
+        DOM.adminStatusDot?.classList.toggle(
+            "offline",
+            !isOnline
+        );
 
-            if (
-                isIncomingMessage &&
-                isChatClosed
-            ) {
-                incrementUnreadMessage();
-            }
+        status.classList.toggle(
+            "online",
+            isOnline
+        );
+
+        status.classList.toggle(
+            "offline",
+            !isOnline
+        );
+
+        dot?.classList.toggle(
+            "online",
+            isOnline
+        );
+
+        dot?.classList.toggle(
+            "offline",
+            !isOnline
+        );
+
+        if (label) {
+            label.textContent =
+                isOnline
+                    ? "Đang trực tuyến"
+                    : "Đang ngoại tuyến";
         }
-    );
+    }
 
-    chatConnection.onreconnecting(() => {
 
-        console.log("Chat reconnecting...");
-        stopTyping();
-        hideTyping();
-    });
+    // ============================================================
+    // TYPING
+    // ============================================================
 
-    chatConnection.onreconnected(async () => {
+    function handleTyping() {
+        const value =
+            DOM.chatInput?.value.trim();
 
-        console.log("Chat reconnected.");
-        hideTyping();
-        // Sau khi SignalR reconnect,
-        // connection cũ không còn giữ group.
+        if (!value) {
+            stopTyping();
+
+            return;
+        }
+
+        if (!state.isTyping) {
+            state.isTyping = true;
+
+            sendTypingStatus(true);
+        }
+
+        clearTimeout(
+            state.typingTimer
+        );
+
+        state.typingTimer =
+            setTimeout(
+                stopTyping,
+                CONFIG.timing.typingTimeout
+            );
+    }
+
+
+    function stopTyping() {
+        clearTimeout(
+            state.typingTimer
+        );
+
+        state.typingTimer = null;
+
+        if (!state.isTyping) {
+            return;
+        }
+
+        state.isTyping = false;
+
+        sendTypingStatus(false);
+    }
+
+
+    async function sendTypingStatus(isTyping) {
         if (
-            currentConversationId &&
-            currentContactId
+            !isValidChatSession() ||
+            !isConnectionReady()
         ) {
-
-            try {
-                await chatConnection.invoke(
-                    "JoinConversation",
-                    currentConversationId,
-                    currentContactId,
-                    currentGuestToken
-                );
-                await loadConversationMessages();
-
-                await loadUnreadCount();
-                console.log(
-                    "Conversation synchronized."
-                );
-            }
-            catch (error) {
-
-                console.error(
-                    "Join conversation after reconnect failed:",
-                    error
-                );
-
-            }
-
+            return;
         }
-
-    });
-
-    chatConnection.on("chat.conversation.status.updated",
-        function (data) {
-
-            const conversationId = data.conversationId;
-            const status = data.status;
-
-            updateConversationStatus(
-                conversationId,
-                status
-            );
-        }
-    );
-
-    chatConnection.on(
-        "chat.conversation.read",
-        function (data) {
-            if (Number(data.conversationId) !== Number(currentConversationId)
-            ) {
-                return;
-            }
-
-            setUnreadMessageCount(0);
-        }
-    );
-
-    chatConnection.on("chat.typing",
-        function (data) {
-            console.log("CHATTYPING");
-            console.log(data);
-            console.log(currentConversationId);
-            if (Number(data.conversationId) !== Number(currentConversationId)) {
-                return;
-            }
-
-            // Chỉ xử lý typing của Admin/Bot
-            if (data.senderType != 2 && data.senderType != 4) {
-                return;
-            }
-
-            if (data.isTyping) {
-                showTyping();
-            }
-            else {
-                hideTyping();
-            }
-
-        }
-    );
-
-    chatConnection.onclose(() => {
-
-        console.log("Chat connection closed.");
-
-    });
-
-    // =====================================
-    // START CHAT
-    // =====================================
-
-    async function startChatConnection() {
 
         try {
-
-            // -----------------------------
-            // 1. Connect SignalR
-            // -----------------------------
-
-            if (
-                chatConnection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-
-                await chatConnection.start();
-                const isAdminOnline =  await chatConnection.invoke("IsAnyAdminOnline");
-                setChatAdminStatus(isAdminOnline);
-                console.log("Chat connected");
-
-            }
-
-
-            // -----------------------------
-            // 2. Get existing session
-            // -----------------------------
-
-            currentContactId = Number(
-                    localStorage.getItem(
-                        "caterin_chat_contact_id"
-                    )
-                ) || null;
+            await connection.invoke(
+                "SendTyping",
+                state.currentConversationId,
+                state.currentContactId,
+                state.guestToken,
+                isTyping
+            );
+        }
+        catch (error) {
+            console.error(
+                "Send typing failed:",
+                error
+            );
+        }
+    }
 
 
-            currentConversationId =
-                Number(
-                    localStorage.getItem(
-                        "caterin_chat_conversation_id"
-                    )
-                ) || null;
+    function showTyping() {
+        if (!DOM.typing) {
+            return;
+        }
+
+        DOM.typing.hidden = false;
+
+        scrollBottom();
+    }
 
 
-            currentGuestToken = getGuestToken();
+    function hideTyping() {
+        if (!DOM.typing) {
+            return;
+        }
+
+        DOM.typing.hidden = true;
+    }
 
 
-            console.log("Existing chat session:", {
-                inboxId: inboxId,
-                contactId: currentContactId,
-                conversationId: currentConversationId,
-                hasGuestToken: !!currentGuestToken
-            });
-            // -----------------------------
-            // 3. Existing chat
-            // -----------------------------
+    // ============================================================
+    // SIGNALR CONNECTION
+    // ============================================================
 
-            if (currentContactId && currentConversationId) {
+    async function startChatConnection() {
+        try {
+            loadStoredSession();
 
-                console.log(
-                    "Existing chat session found."
-                );
+            await ensureSignalRConnection();
 
-                await loadUnreadCount();
-
-                await chatConnection.invoke(
-                    "JoinConversation",
-                    currentConversationId,
-                    currentContactId,
-                    currentGuestToken
-                );
-                console.log(
-                    "Joined existing conversation:",
-                    currentConversationId
-                );
-
-                await loadConversationMessages();
-                return;
-            }
-            // ==========================================
-            // NEW SESSION
-            // ==========================================
-
-            console.log(
-                "No existing chat session. Starting..."
+            await initializeChatSession();
+        }
+        catch (error) {
+            console.error(
+                "Chat initialization failed:",
+                error
             );
 
-            // -----------------------------
-            // 4. Create new chat
-            // -----------------------------
-            const response = await fetch("/chat/start",
+            scheduleReconnect();
+        }
+    }
+
+
+    async function ensureSignalRConnection() {
+        if (isConnectionReady()) {
+            return;
+        }
+
+        await connection.start();
+
+        const isAdminOnline =
+            await connection.invoke(
+                "IsAnyAdminOnline"
+            );
+
+        setChatAdminStatus(
+            Boolean(isAdminOnline)
+        );
+    }
+
+
+    async function initializeChatSession() {
+
+        if (
+            state.currentContactId &&
+            state.currentConversationId
+        ) {
+            await joinConversation();
+
+            await loadUnreadCount();
+
+            await loadConversationMessages({
+                initial: true
+            });
+
+            return;
+        }
+
+        await createConversation();
+
+        await joinConversation();
+
+        await loadConversationMessages({
+            initial: true
+        });
+    }
+
+
+    async function joinConversation() {
+        if (
+            !isConnectionReady() ||
+            !isValidChatSession()
+        ) {
+            return;
+        }
+
+        await connection.invoke(
+            "JoinConversation",
+            state.currentConversationId,
+            state.currentContactId,
+            state.guestToken
+        );
+    }
+
+
+    async function createConversation() {
+        if (!CHAT_CONFIG.inboxId) {
+            throw new Error(
+                "Chat inboxId không hợp lệ."
+            );
+        }
+
+        const response =
+            await fetch(
+                "/chat/start",
                 {
                     method: "POST",
+
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
 
                     body: JSON.stringify({
-                        inboxId: inboxId,
-                        name: name,
-                        email: email,
-                        phone: phone,
-                        guestToken: currentGuestToken
+                        inboxId:
+                            CHAT_CONFIG.inboxId,
+
+                        name:
+                            CHAT_CONFIG.name,
+
+                        email:
+                            CHAT_CONFIG.email,
+
+                        phone:
+                            CHAT_CONFIG.phone,
+
+                        guestToken:
+                            state.guestToken
                     })
                 }
             );
 
-
-            if (!response.ok) {
-                throw new Error("Không thể bắt đầu cuộc trò chuyện." );
-
-            }
-
-
-            const conversation =
-                await response.json();
-
-
-            // -----------------------------
-            // 5. Save chat session
-            // -----------------------------
-
-            currentContactId =
-                conversation.contactId;
-
-            currentConversationId =
-                conversation.id;
-
-            localStorage.setItem(
-                "caterin_chat_contact_id",
-                String(currentContactId)
-            );
-
-            localStorage.setItem(
-                "caterin_chat_conversation_id",
-                String(currentConversationId)
-            );
-
-            localStorage.setItem(
-                "caterin_chat_guest_token",
-                currentGuestToken
-            );
-
-
-            // -----------------------------
-            // 6. Join conversation
-            // -----------------------------
-
-            await chatConnection.invoke(
-                "JoinConversation",
-                currentConversationId,
-                currentContactId,
-                currentGuestToken
-            );
-            await loadConversationMessages();
-
-            console.log(
-                "Joined new conversation:",
-                currentConversationId
-            );
-
-        }
-        catch (error) {
-
-            console.error(
-                "SignalR connection failed:",
-                error
-            );
-
-            setTimeout(
-                startChatConnection,
-                3000
-            );
-        }
-
-    }
-    function getGuestToken() {
-        let token = localStorage.getItem(
-            "caterin_chat_guest_token"
-        );
-
-        if (!token) {
-            token = crypto.randomUUID();
-
-            localStorage.setItem(
-                "caterin_chat_guest_token",
-                token
-            );
-        }
-
-        return token;
-    }
-    // =====================================
-// LOAD CONVERSATION MESSAGES
-// =====================================
-    function setChatAdminStatus(isOnline) {
-        const dot = document.getElementById("chatAdminStatusDot");
-        const status = document.getElementById("chatStatusText");
-
-        if (!dot || !status) {
-            return;
-        }
-        const statusDot = status.querySelector("span:first-child");
-        const statusLabel = status.querySelector(".status-label");
-
-        const label = status.querySelector(".status-label");
-
-        dot.classList.toggle("online", isOnline);
-        dot.classList.toggle("offline", !isOnline);
-
-        status.classList.toggle("online", isOnline);
-        status.classList.toggle("offline", !isOnline);
-        if (statusDot) {
-            statusDot.classList.toggle("online", isOnline);
-            statusDot.classList.toggle("offline", !isOnline);
-        }
-        if (label) {
-            label.textContent = isOnline
-                ? "Đang trực tuyến"
-                : "Đang ngoại tuyến";
-        }
-    }
-
-
-    function updateAdminPresence(adminId, isOnline) {
-        document
-            .querySelectorAll(`[data-admin-id="${adminId}"]`)
-            .forEach(element => {
-                element.classList.toggle("is-online", isOnline);
-                element.classList.toggle("is-offline", !isOnline);
-
-                const dot =
-                    element.querySelector(".admin-status-dot");
-
-                if (dot) {
-                    dot.classList.toggle("online", isOnline);
-                }
-
-                const text =
-                    element.querySelector(".admin-status-text");
-
-                if (text) {
-                    text.textContent =
-                        isOnline ? "Online" : "Offline";
-                }
-            });
-    }
-async function loadConversationMessages() {
-
-    if (
-        !currentConversationId ||
-        !currentContactId ||
-        !currentGuestToken
-    ) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                `/chat/${currentConversationId}/messages`,
-                {
-                    method: "GET",
-
-                    headers: {
-                        "Accept": "application/json",
-                        "X-Chat-Contact-Id":
-                            String(currentContactId),
-                        "X-Chat-Guest-Token":
-                            currentGuestToken
-                    },
-
-                    credentials: "same-origin"
-                }
-            );
-
-
         if (!response.ok) {
-
             throw new Error(
-                `Không thể tải tin nhắn. Status: ${response.status}`
+                "Không thể bắt đầu cuộc trò chuyện."
             );
         }
 
-
-        const messages =
+        const conversation =
             await response.json();
 
+        saveSession(
+            conversation
+        );
+    }
 
-        if (!Array.isArray(messages)) {
 
+    function scheduleReconnect() {
+        if (state.reconnectTimer) {
+            return;
+        }
+
+        state.reconnectTimer =
+            setTimeout(
+                async () => {
+                    state.reconnectTimer = null;
+
+                    await startChatConnection();
+                },
+                CONFIG.timing.reconnectDelay
+            );
+    }
+
+
+    // ============================================================
+    // SIGNALR EVENTS
+    // ============================================================
+
+    function registerSignalREvents() {
+        connection.on(
+            "chat.admin.online",
+            () => {
+                setChatAdminStatus(true);
+            }
+        );
+
+
+        connection.on(
+            "chat.admin.offline",
+            () => {
+                setChatAdminStatus(false);
+            }
+        );
+
+
+        connection.onreconnecting(
+            () => {
+                stopTyping();
+                hideTyping();
+            }
+        );
+
+
+        connection.onreconnected(
+            handleSignalRReconnected
+        );
+
+
+        connection.on(
+            "chat.message.received",
+            handleMessageReceived
+        );
+
+
+        connection.on(
+            "chat.message.status.updated",
+            handleMessageStatusUpdated
+        );
+
+
+        connection.on(
+            "chat.conversation.status.updated",
+            handleConversationStatusUpdated
+        );
+
+
+        connection.on(
+            "chat.typing",
+            handleTypingEvent
+        );
+
+
+        connection.onclose(
+            () => {
+                hideTyping();
+            }
+        );
+    }
+
+
+    async function handleSignalRReconnected() {
+
+        hideTyping();
+
+        if (!isValidChatSession()) {
+            return;
+        }
+
+        try {
+            await joinConversation();
+
+            await loadConversationMessages({
+                initial: true
+            });
+
+            await loadUnreadCount();
+        }
+        catch (error) {
             console.error(
-                "Messages response không hợp lệ:",
-                messages
+                "Conversation synchronization failed:",
+                error
+            );
+        }
+    }
+
+
+    function handleMessageReceived(message) {
+        hideTyping();
+
+        const added =
+            addMessage(
+                message,
+                true
+            );
+
+        if (!added) {
+            return;
+        }
+
+        acknowledgeMessageDelivered(
+            message
+        );
+
+        const isIncoming =
+            Number(message.senderType) ===
+            CONFIG.senderType.admin ||
+            Number(message.senderType) ===
+            CONFIG.senderType.bot;
+
+        if (
+            isIncoming &&
+            !isChatOpen()
+        ) {
+            incrementUnreadMessage();
+        }
+    }
+
+
+    function handleMessageStatusUpdated(data) {
+        if (
+            Array.isArray(data.messageIds)
+        ) {
+            data.messageIds.forEach(
+                messageId => {
+                    updateMessageStatus(
+                        messageId,
+                        data.status
+                    );
+                }
             );
 
             return;
         }
 
+        updateMessageStatus(
+            data.messageId,
+            data.status
+        );
+    }
 
-        /*
-         * Clear message UI trước khi render history.
-         */
-        body.innerHTML = "";
 
-        processedMessageIds.clear();
-        /*
-         * Render theo thứ tự:
-         *
-         * message cũ
-         *      ↓
-         * message mới
-         */
-        messages.forEach(message => {
+    function handleConversationStatusUpdated(data) {
+        if (
+            !isSameConversation(
+                data.conversationId
+            )
+        ) {
+            return;
+        }
 
-            if (!message?.id) {
+        updateCurrentConversationStatus(
+            data.status
+        );
+    }
+
+
+    function handleTypingEvent(data) {
+        if (
+            !isSameConversation(
+                data.conversationId
+            )
+        ) {
+            return;
+        }
+
+        const senderType =
+            Number(data.senderType);
+
+        const isAdminOrBot =
+            senderType ===
+            CONFIG.senderType.admin ||
+            senderType ===
+            CONFIG.senderType.bot;
+
+        if (!isAdminOrBot) {
+            return;
+        }
+
+        if (data.isTyping) {
+            showTyping();
+        } else {
+            hideTyping();
+        }
+    }
+
+
+    // ============================================================
+    // API
+    // ============================================================
+
+    function getChatHeaders() {
+        return {
+            "Accept": "application/json",
+
+            "X-Chat-Contact-Id":
+                state.currentContactId
+                    ? String(
+                        state.currentContactId
+                    )
+                    : "",
+
+            "X-Chat-Guest-Token":
+                state.guestToken || ""
+        };
+    }
+
+
+    async function loadConversationMessages({
+        initial = false
+    } = {}) {
+
+        if (
+            !isValidChatSession() ||
+            state.messages.loading
+        ) {
+            return;
+        }
+
+        if (
+            !initial &&
+            !state.messages.hasMore
+        ) {
+            return;
+        }
+
+        state.messages.loading = true;
+
+        try {
+            const params =
+                new URLSearchParams();
+
+            params.set(
+                "limit",
+                String(
+                    state.messages.limit
+                )
+            );
+
+            if (
+                !initial &&
+                state.messages.oldestMessageId
+            ) {
+                params.set(
+                    "before",
+                    String(
+                        state.messages.oldestMessageId
+                    )
+                );
+            }
+
+            const response =
+                await fetch(
+                    `/chat/${state.currentConversationId}/messages?${params}`,
+                    {
+                        method: "GET",
+
+                        headers:
+                            getChatHeaders(),
+
+                        credentials:
+                            "same-origin"
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Không thể tải tin nhắn. Status: ${response.status}`
+                );
+            }
+
+            const result =
+                await response.json();
+
+            const messages =
+                Array.isArray(result)
+                    ? result
+                    : result.items ?? [];
+
+            const hasMore =
+                Array.isArray(result)
+                    ? messages.length >=
+                    state.messages.limit
+                    : Boolean(
+                        result.hasMore
+                    );
+
+            if (initial) {
+                clearMessages();
+            }
+
+            if (!messages.length) {
+                state.messages.hasMore = false;
+
                 return;
             }
 
-            /*
-             * Đánh dấu message đã được xử lý.
-             *
-             * Nếu SignalR gửi lại message này
-             * sau khi load history thì addMessage()
-             * sẽ bỏ qua.
-             */
-            addMessage(message, false);
+            if (initial) {
+                renderInitialMessages(
+                    messages
+                );
+            }
+            else {
+                prependMessages(
+                    messages
+                );
+            }
 
+            state.messages.oldestMessageId =
+                messages[0]?.id ?? null;
+
+            state.messages.hasMore =
+                hasMore;
+
+        }
+        catch (error) {
+            console.error(
+                "Load messages failed:",
+                error
+            );
+        }
+        finally {
+            state.messages.loading = false;
+        }
+    }
+    function renderInitialMessages(messages) {
+        DOM.chatBody.innerHTML = '';
+
+        if (!messages || messages.length === 0) {
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+
+        messages.forEach(message => {
+            const element = createMessageElement(message);
+
+            if (element) {
+                fragment.appendChild(element);
+            }
         });
 
+        DOM.chatBody.appendChild(fragment);
 
-        scrollBottom(false);
-
+        scrollToBottom();
     }
-    catch (error) {
+    function scrollToBottom() {
+        if (!DOM.chatBody) return;
 
-        console.error(
-            "LOAD MESSAGES ERROR:",
-            error
-        );
+        DOM.chatBody.scrollTop = DOM.chatBody.scrollHeight;
+    }
+    function prependMessages(messages) {
+        if (!DOM.chatBody) {
+            return;
+        }
 
+        const previousHeight =
+            DOM.chatBody.scrollHeight;
+
+        const previousTop =
+            DOM.chatBody.scrollTop;
+
+        const fragment =
+            document.createDocumentFragment();
+
+        messages.forEach(message => {
+
+            const row =
+                createMessageElement(
+                    message
+                );
+
+            if (row) {
+                fragment.appendChild(row);
+            }
+        });
+
+        DOM.chatBody.prepend(fragment);
+
+        const newHeight =
+            DOM.chatBody.scrollHeight;
+
+        DOM.chatBody.scrollTop =
+            previousTop +
+            (newHeight - previousHeight);
     }
+
+    function clearMessages() {
+        if (!DOM.chatBody) {
+            return;
+        }
+
+        DOM.chatBody.innerHTML = "";
+
+        state.processedMessageIds.clear();
     }
+
+
+    async function loadUnreadCount() {
+        if (!state.currentConversationId) {
+            setUnreadMessageCount(0);
+
+            return;
+        }
+
+        try {
+            const response =
+                await fetch(
+                    `/chat/${state.currentConversationId}/unread-count`,
+                    {
+                        method: "GET",
+
+                        headers:
+                            getChatHeaders(),
+
+                        credentials:
+                            "same-origin"
+                    }
+                );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to load unread count. Status: ${response.status}`
+                );
+            }
+
+            const result =
+                await response.json();
+
+            setUnreadMessageCount(
+                result?.data ?? result
+            );
+        }
+        catch (error) {
+            console.error(
+                "Load unread count failed:",
+                error
+            );
+        }
+    }
+
 
     async function markConversationAsRead() {
-
-        if (
-            !currentConversationId ||
-            !currentContactId ||
-            !currentGuestToken
-        ) {
+        if (!isValidChatSession()) {
             return false;
         }
 
         try {
+            const response =
+                await fetch(
+                    `/chat/${state.currentConversationId}/read`,
+                    {
+                        method: "POST",
 
-            const response = await fetch(
-                `/chat/${currentConversationId}/read`,
-                {
-                    method: "POST",
+                        headers:
+                            getChatHeaders(),
 
-                    headers: {
-                        "Accept": "application/json",
-                        "X-Chat-Contact-Id":
-                            String(currentContactId),
-                        "X-Chat-Guest-Token":
-                            currentGuestToken
-                    },
-
-                    credentials: "same-origin"
-                }
-            );
+                        credentials:
+                            "same-origin"
+                    }
+                );
 
             if (!response.ok) {
-
                 throw new Error(
                     `Mark read failed. Status: ${response.status}`
                 );
             }
 
             return true;
-
         }
         catch (error) {
-
             console.error(
-                "MARK CONVERSATION READ ERROR:",
+                "Mark conversation read failed:",
                 error
             );
 
@@ -830,369 +1244,488 @@ async function loadConversationMessages() {
         }
     }
 
-    async function loadUnreadCount() {
-        console.log("LOAD UNREAD COUNT");
-        console.log('id converssation: ' + currentConversationId);
-        if (!currentConversationId) {
-            setUnreadMessageCount(0);
+
+    async function acknowledgeMessageDelivered(
+        message
+    ) {
+        if (
+            !message?.id ||
+            !state.currentContactId ||
+            !state.guestToken ||
+            !isConnectionReady()
+        ) {
             return;
         }
 
         try {
-            const response = await fetch(
-                `/chat/${currentConversationId}/unread-count`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json",
-                        "X-Chat-Contact-Id":
-                            currentContactId ?? "",
-                        "X-Chat-Guest-Token":
-                            currentGuestToken ?? ""
-                    },
-                    credentials: "same-origin"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    "Failed to load unread count."
-                );
-            }
-
-            const result = await response.json();
-
-            setUnreadMessageCount(
-                result.data ?? result
+            await connection.invoke(
+                "CustomerMessageDelivered",
+                Number(message.id),
+                Number(state.currentContactId),
+                state.guestToken
             );
         }
         catch (error) {
             console.error(
-                "Load unread count error:",
+                "Acknowledge message delivered failed:",
                 error
             );
         }
     }
-    // =====================================
+
+
+    // ============================================================
     // SEND MESSAGE
-    // =====================================
+    // ============================================================
 
     async function sendMessage(text) {
+        const message =
+            String(text ?? "").trim();
 
-        console.log("SEND MESSAGE START");
-
-        text = text.trim();
-
-        if (!text) {
+        if (!message) {
             return;
         }
+
         stopTyping();
-        if (
-            !currentConversationId ||
-            !currentContactId
-        ) {
+
+        if (!isValidChatSession()) {
             console.error(
                 "Chat session chưa được khởi tạo."
             );
+
             return;
         }
 
-        if (
-            chatConnection.state !==
-            signalR.HubConnectionState.Connected
-        ) {
+        if (!isConnectionReady()) {
             console.error(
                 "SignalR chưa kết nối."
             );
+
             return;
         }
 
-        input.value = "";
+        if (DOM.chatInput) {
+            DOM.chatInput.value = "";
+        }
 
         try {
-
-            await chatConnection.invoke(
+            await connection.invoke(
                 "SendCustomerMessage",
-                currentConversationId,
-                currentContactId,
-                text,
-                currentGuestToken
+
+                state.currentConversationId,
+
+                state.currentContactId,
+
+                message,
+
+                state.guestToken
             );
-
-            console.log("MESSAGE SENT");
-
         }
         catch (error) {
-
             console.error(
-                "SEND MESSAGE ERROR:",
+                "Send message failed:",
                 error
             );
 
-            input.value = text;
-            input.focus();
+            if (DOM.chatInput) {
+                DOM.chatInput.value =
+                    message;
+
+                DOM.chatInput.focus();
+            }
         }
     }
 
 
-    // =====================================
-    // SEND BUTTON
-    // =====================================
-
-    send.addEventListener(
-        "click",
-        async () => {
-
-            await sendMessage(
-                input.value
-            );
-
-        }
-    );
-
-
-    // =====================================
-    // ENTER
-    // =====================================
-
-    input.addEventListener(
-        "keydown",
-        async e => {
-
-            if (
-                e.key === "Enter" &&
-                !e.shiftKey
-            ) {
-
-                e.preventDefault();
-
-                await sendMessage(
-                    input.value
-                );
-
-            }
-
-        }
-    );
-    input.addEventListener(
-        "input",
-        handleTyping
-    );
-
-    // =====================================
-    // QUICK REPLIES
-    // =====================================
-
-    document
-        .querySelectorAll(
-            ".quick-replies button"
-        )
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                async () => {
-
-                    const message =
-                        button.dataset.message;
-
-                    await sendMessage(
-                        message
-                    );
-
-                }
-            );
-
-        });
-
-
-    // =====================================
-    // ADD MESSAGE FROM SIGNALR
-    // =====================================
+    // ============================================================
+    // MESSAGE RENDERING
+    // ============================================================
 
     function isMessageProcessed(messageId) {
-
         if (!messageId) {
             return true;
         }
 
-        if (processedMessageIds.has(messageId)) {
+        if (
+            state.processedMessageIds.has(
+                messageId
+            )
+        ) {
             return true;
         }
 
-        processedMessageIds.add(messageId);
+        state.processedMessageIds.add(
+            messageId
+        );
 
         if (
-            processedMessageIds.size >
-            MAX_PROCESSED_MESSAGE_IDS
+            state.processedMessageIds.size >
+            CONFIG.limits.processedMessageIds
         ) {
-
             const firstId =
-                processedMessageIds
+                state.processedMessageIds
                     .values()
                     .next()
                     .value;
 
             if (firstId !== undefined) {
-                processedMessageIds.delete(firstId);
+                state.processedMessageIds.delete(
+                    firstId
+                );
             }
         }
 
         return false;
     }
-    function addMessage(message, shouldScroll = true) {
+
+    function createMessageElement(message) {
+
         if (!message?.id) {
-            return false;
+            return null;
         }
 
-        if (isMessageProcessed(message.id)) {
-            return false;
-        }
+        const senderType =
+            Number(message.senderType);
 
-        const row = document.createElement("div");
-
-        const isContact = message.senderType == 1;
-
-        const isAdmin = message.senderType == 2;
-
-        const isSystem = message.senderType == 3;
-
-        const isBot = message.senderType == 4;
-
-        if (isContact) {
-            row.className = "message-row contact";
-        }
-        else if (isAdmin) {
-
-            row.className = "message-row admin";
-
-        }
-        else if (isBot) {
-
-            row.className = "message-row bot";
-
-        }
-        else if (isSystem) {
-
-            row.className = "message-row system";
-
-        }
-        else {
-
-            console.warn(
-                "Unknown sender type:",
-                message.senderType
+        const rowClass =
+            getMessageRowClass(
+                senderType
             );
 
-            return false;
+        if (!rowClass) {
+            return null;
         }
 
-        let messageClass;
+        const messageClass =
+            getMessageClass(
+                senderType
+            );
 
-        if (isContact) {
-            messageClass = "contact-message";
-        }
-        else if (isAdmin) {
-            messageClass = "admin-message";
-        }
-        else if (isBot) {
-            messageClass = "bot-message";
-        }
-        else {
-            messageClass = "system-message";
-        }
+        const isCustomer =
+            senderType ===
+            CONFIG.senderType.contact;
 
+        const statusHtml =
+            isCustomer
+                ? buildMessageStatusHtml(
+                    message.status
+                )
+                : "";
+
+        const avatarHtml =
+            isCustomer
+                ? ""
+                : buildAdminAvatar();
+
+        const row =
+            document.createElement("div");
+
+        row.className =
+            `message-row ${rowClass}`;
+
+        row.dataset.messageId =
+            String(message.id);
 
         row.innerHTML = `
-        <div>
-            <div class="message ${messageClass}">
-                ${escapeHtml(message.content ?? "")}
-            </div>
+        ${avatarHtml}
 
-            <div class="message-time">
-                ${formatMessageTime(message.createdAt)}
+        <div class="message-content">
+            <div class="message ${messageClass}">${escapeHtml(message.content)}</div>
+
+            <div class="message-meta">
+                <span class="message-time">${formatMessageTime(message.createdAt)}</span>
+                ${statusHtml}
             </div>
         </div>
     `;
 
-        body.appendChild(row);
+        return row;
+    }
+
+    function addMessage(
+        message,
+        shouldScroll = true
+    ) {
+        if (!message?.id) {
+            return false;
+        }
+
+        if (
+            isMessageProcessed(
+                message.id
+            )
+        ) {
+            return false;
+        }
+
+        const row =
+            createMessageElement(
+                message
+            );
+
+        if (!row) {
+            return false;
+        }
+
+        DOM.chatBody?.appendChild(row);
 
         if (shouldScroll) {
             scrollBottom(true);
         }
+
         return true;
     }
 
-    // =====================================
-    // UPDATE CONVERSATION STATUS
-    // =====================================
 
-    function updateConversationStatus(conversationId, status) {
-        //const item = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+    function getMessageRowClass(senderType) {
+        switch (senderType) {
+            case CONFIG.senderType.contact:
+                return "contact";
 
-        //if (item) {
-        //    item.dataset.status = status;
+            case CONFIG.senderType.admin:
+                return "admin";
 
-        //    const badge = item.querySelector(".conversation-status"
-        //    );
+            case CONFIG.senderType.bot:
+                return "bot";
 
-        //    if (badge) {
-        //        badge.textContent = status;
-        //    }
-        //}
+            case CONFIG.senderType.system:
+                return "system";
 
-        //if (currentConversationId === conversationId) {
-        //    updateCurrentConversationStatus(status);
-        //}
-        console.log("START UPDATE STATUS");
-        if (
-            Number(currentConversationId) !==
-            Number(conversationId)
-        ) {
+            default:
+                return null;
+        }
+    }
+
+
+    function getMessageClass(senderType) {
+        switch (senderType) {
+            case CONFIG.senderType.contact:
+                return "contact-message";
+
+            case CONFIG.senderType.admin:
+                return "admin-message";
+
+            case CONFIG.senderType.bot:
+                return "bot-message";
+
+            case CONFIG.senderType.system:
+                return "system-message";
+
+            default:
+                return "";
+        }
+    }
+
+
+    function buildAdminAvatar() {
+        return `
+            <span class="avatar-initial rounded-circle bg-label-success">
+                C
+            </span>
+        `;
+    }
+
+
+    // ============================================================
+    // MESSAGE STATUS
+    // ============================================================
+
+    function buildMessageStatusHtml(
+        status,
+        showStatus = true
+    ) {
+        if (!showStatus) {
+            return "";
+        }
+
+        const statusConfig =
+            getMessageStatusConfig(
+                status
+            );
+
+        if (!statusConfig) {
+            return "";
+        }
+
+        return `
+            <span class="message-status ${statusConfig.className}" data-message-status="${statusConfig.status}" title="${statusConfig.title}">
+                ${statusConfig.content}
+            </span>
+        `;
+    }
+
+
+    function getMessageStatusConfig(status) {
+        switch (Number(status)) {
+            case CONFIG.messageStatus.pending:
+                return {
+                    status:
+                        CONFIG.messageStatus.pending,
+
+                    className:
+                        "pending",
+
+                    title:
+                        "Đang gửi",
+
+                    content:
+                        `<i class="ph ph-spinner"></i>`
+                };
+
+            case CONFIG.messageStatus.sent:
+                return {
+                    status:
+                        CONFIG.messageStatus.sent,
+
+                    className:
+                        "sent",
+
+                    title:
+                        "Đã gửi",
+
+                    content:
+                        "✓"
+                };
+
+            case CONFIG.messageStatus.delivered:
+                return {
+                    status:
+                        CONFIG.messageStatus.delivered,
+
+                    className:
+                        "delivered",
+
+                    title:
+                        "Đã nhận",
+
+                    content:
+                        "✓✓"
+                };
+
+            case CONFIG.messageStatus.read:
+                return {
+                    status:
+                        CONFIG.messageStatus.read,
+
+                    className:
+                        "read",
+
+                    title:
+                        "Đã đọc",
+
+                    content:
+                        "[●]"
+                };
+
+            case CONFIG.messageStatus.failed:
+                return {
+                    status:
+                        CONFIG.messageStatus.failed,
+
+                    className:
+                        "failed",
+
+                    title:
+                        "Gửi thất bại",
+
+                    content:
+                        `<i class="ph ph-warning-circle"></i>`
+                };
+
+            default:
+                return null;
+        }
+    }
+
+
+    function updateMessageStatus(
+        messageId,
+        status
+    ) {
+        if (!DOM.chatBody) {
             return;
         }
 
-        console.log(
-            "Conversation status updated:",
-            {
-                conversationId: conversationId,
-                status: status
-            }
-        );
+        const row =
+            DOM.chatBody.querySelector(
+                `.message-row[data-message-id="${messageId}"]`
+            );
 
-        updateCurrentConversationStatus(status);
-    }
-    function updateCurrentConversationStatus(status) {
-
-        const normalizedStatus = getConversationStatusName(status);
-
-        // =====================================
-        // STATUS TEXT
-        // =====================================
-
-        const statusText =
-            document.getElementById("chatStatusText");
-
-        if (statusText) {
-            const statusMap = {
-                open: "Đang hỗ trợ",
-                pending: "Đang chờ",
-                resolved: "Đã giải quyết",
-                closed: "Đã đóng"
-            };
-
-            statusText.textContent = statusMap[normalizedStatus] ?? status;
+        if (!row) {
+            return;
         }
 
+        const statusElement =
+            row.querySelector(
+                ".message-status"
+            );
 
-        // =====================================
-        // STATUS BADGE
-        // =====================================
+        if (!statusElement) {
+            return;
+        }
 
-        const statusBadge = document.getElementById("chatStatusBadge");
+        const config =
+            getMessageStatusConfig(
+                status
+            );
+
+        if (!config) {
+            statusElement.className =
+                "message-status";
+
+            statusElement.innerHTML = "";
+            statusElement.title = "";
+
+            return;
+        }
+
+        statusElement.className =
+            `message-status ${config.className}`;
+
+        statusElement.dataset.messageStatus =
+            String(config.status);
+
+        statusElement.innerHTML =
+            config.content;
+
+        statusElement.title =
+            config.title;
+    }
+
+
+    // ============================================================
+    // CONVERSATION STATUS
+    // ============================================================
+
+    function updateCurrentConversationStatus(
+        status
+    ) {
+        const normalizedStatus =
+            getConversationStatusName(
+                status
+            );
+
+        const statusText =
+            DOM.chatStatusText;
+
+        const statusBadge =
+            DOM.chatStatusBadge;
+
+        const statusLabels = {
+            open: "Đang hỗ trợ",
+            pending: "Đang chờ",
+            resolved: "Đã giải quyết",
+            closed: "Đã đóng"
+        };
+
+        if (statusText) {
+            statusText.textContent =
+                statusLabels[
+                normalizedStatus
+                ] ?? normalizedStatus;
+        }
 
         if (statusBadge) {
-
             statusBadge.dataset.status =
                 normalizedStatus;
 
@@ -1208,172 +1741,247 @@ async function loadConversationMessages() {
             );
         }
 
+        if (DOM.chatWindow) {
+            DOM.chatWindow.dataset.status =
+                normalizedStatus;
+        }
 
-        // =====================================
-        // CHAT WINDOW
-        // =====================================
-
-        windowEl.dataset.status = normalizedStatus;
         const isEnded =
             normalizedStatus === "resolved" ||
             normalizedStatus === "closed";
 
+        if (DOM.chatInput) {
+            DOM.chatInput.disabled =
+                isEnded;
 
-        // =====================================
-        // INPUT STATE
-        // =====================================
+            DOM.chatInput.placeholder =
+                isEnded
+                    ? "Cuộc trò chuyện đã kết thúc"
+                    : "Nhập tin nhắn...";
+        }
 
-        const isClosed =
-            normalizedStatus === "closed";
-
-        const isResolved =
-            normalizedStatus === "resolved";
-
-        input.disabled = isEnded;
-        send.disabled = isEnded;
-
-        input.placeholder = isEnded ? "Cuộc trò chuyện đã kết thúc" : "Nhập tin nhắn...";
+        if (DOM.sendButton) {
+            DOM.sendButton.disabled =
+                isEnded;
+        }
     }
-    function getConversationStatusName(status) {
+
+
+    function getConversationStatusName(
+        status
+    ) {
         const statusMap = {
-            1: "open",
-            2: "pending",
-            3: "resolved",
-            4: "closed"
+            [CONFIG.conversationStatus.open]:
+                "open",
+
+            [CONFIG.conversationStatus.pending]:
+                "pending",
+
+            [CONFIG.conversationStatus.resolved]:
+                "resolved",
+
+            [CONFIG.conversationStatus.closed]:
+                "closed"
         };
 
-        return statusMap[Number(status)] ?? "open";
-    }
-    // =====================================
-    // TYPING
-    // =====================================
-
-    function showTyping() {
-        typing.hidden = false;
-        scrollBottom();
-
+        return (
+            statusMap[
+            Number(status)
+            ] ?? "open"
+        );
     }
 
 
-    function hideTyping() {
-        typing.hidden = true;
-    }
+    // ============================================================
+    // INPUT EVENTS
+    // ============================================================
+
+    function initInputEvents() {
+        DOM.sendButton?.addEventListener(
+            "click",
+            () => sendMessage(
+                DOM.chatInput?.value
+            )
+        );
 
 
-    // =====================================
-    // SCROLL
-    // =====================================
+        DOM.chatInput?.addEventListener(
+            "keydown",
+            async event => {
+                if (
+                    event.key !== "Enter" ||
+                    event.shiftKey
+                ) {
+                    return;
+                }
 
-    function scrollBottom(smooth = true) {
-        requestAnimationFrame(() => {
+                event.preventDefault();
 
-            body.scrollTo({
-                top: body.scrollHeight,
-                behavior: smooth ? "smooth" : "auto"
-            });
-
-        });
-
-    }
-
-
-    // =====================================
-    // TIME
-    // =====================================
-
-    function getCurrentTime() {
-
-        return new Date().toLocaleTimeString(
-            "vi-VN",
-            {
-                hour: "2-digit",
-                minute: "2-digit"
+                await sendMessage(
+                    DOM.chatInput.value
+                );
             }
         );
 
+
+        DOM.chatInput?.addEventListener(
+            "input",
+            handleTyping
+        );
     }
 
 
-    function formatMessageTime(date) {
+    // ============================================================
+    // QUICK REPLIES
+    // ============================================================
 
-        return new Date(date)
-            .toLocaleTimeString(
-                "vi-VN",
-                {
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            );
-
+    function initQuickReplies() {
+        document
+            .querySelectorAll(
+                ".quick-replies button"
+            )
+            .forEach(button => {
+                button.addEventListener(
+                    "click",
+                    () => {
+                        sendMessage(
+                            button.dataset.message
+                        );
+                    }
+                );
+            });
     }
 
 
-    // =====================================
-    // ESCAPE HTML
-    // =====================================
+    // ============================================================
+    // ATTACHMENT / EMOJI
+    // ============================================================
 
-    function escapeHtml(value) {
-
-        const div =
-            document.createElement("div");
-
-        div.textContent = value;
-
-        return div.innerHTML;
-
-    }
-
-
-    // =====================================
-    // ATTACHMENT
-    // =====================================
-
-    document
-        .getElementById("attachmentBtn")
-        .addEventListener(
+    function initAttachment() {
+        DOM.attachmentButton?.addEventListener(
             "click",
             () => {
-
                 alert(
                     "Chức năng gửi file sẽ được tích hợp sau."
                 );
-
             }
         );
+    }
 
 
-    // =====================================
-    // EMOJI
-    // =====================================
-
-    document
-        .getElementById("emojiBtn")
-        .addEventListener(
+    function initEmoji() {
+        DOM.emojiButton?.addEventListener(
             "click",
             () => {
+                if (!DOM.chatInput) {
+                    return;
+                }
 
-                input.value += " 😊";
+                DOM.chatInput.value +=
+                    " 😊";
 
-                input.focus();
+                DOM.chatInput.focus();
 
+                handleTyping();
             }
         );
-    document.addEventListener(
-        "keydown",
-        e => {
+    }
 
-            if (e.key === "Escape" && windowEl.classList.contains("open")) {
-                closeChat();
+
+    // ============================================================
+    // KEYBOARD
+    // ============================================================
+
+    function initKeyboardEvents() {
+        document.addEventListener(
+            "keydown",
+            event => {
+                if (
+                    event.key === "Escape" &&
+                    isChatOpen()
+                ) {
+                    closeChat();
+                }
             }
+        );
+    }
+    function initMessageLazyLoading() {
 
+        DOM.chatBody?.addEventListener(
+            "scroll",
+            handleMessageScroll,
+            {
+                passive: true
+            }
+        );
+    }
+
+    function handleMessageScroll() {
+
+        if (
+            state.messages.loading ||
+            !state.messages.hasMore
+        ) {
+            return;
         }
-    );
+
+        if (
+            DOM.chatBody.scrollTop >
+            120
+        ) {
+            return;
+        }
+
+        loadConversationMessages();
+    }
+
+    // ============================================================
+    // INITIALIZATION
+    // ============================================================
+
+    function init() {
+
+        if (state.initialized) {
+            return;
+        }
+
+        state.initialized = true;
+
+        state.guestToken =
+            getGuestToken();
+
+        initPromoPopup();
+        initChatToggle();
+        initInputEvents();
+        initQuickReplies();
+        initAttachment();
+        initEmoji();
+        initKeyboardEvents();
+
+        initMessageLazyLoading();
+
+        registerSignalREvents();
+
+        startChatConnection();
+    }
 
 
-    // =====================================
-    // INIT
-    // =====================================
+    // ============================================================
+    // START
+    // ============================================================
 
-    startChatConnection();
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            { once: true }
+        );
+    }
+    else {
+        init();
+    }
 
-});
+})();

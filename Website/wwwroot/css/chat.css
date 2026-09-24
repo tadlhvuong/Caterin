@@ -340,15 +340,22 @@
 
 .message-row {
     display: flex;
+    align-items: flex-end;
     gap: 8px;
     margin-bottom: 12px;
+    min-width: 0;
 }
+    .message-row > div {
+        max-width: 75%;
+        min-width: 0;
+    }
 
     .message-row.contact {
         justify-content: flex-end;
     }
     .message-row.admin {
         justify-content: flex-start;
+        align-items: baseline;
     }
 
     .message-row.bot {
@@ -358,6 +365,89 @@
     .message-row.system {
         justify-content: center;
     }
+.message-content {
+    min-width: 0;
+    max-width: 75%;
+}
+
+
+.message {
+    width: fit-content;
+    max-width: 100%;
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: normal;
+}
+.message-row.contact .message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+
+
+.message-row.admin .message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.message-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.message-time {
+    opacity: .6;
+}
+
+.message-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    line-height: 1;
+    transition: opacity .2s ease, transform .2s ease;
+}
+
+    .message-status.pending {
+        opacity: .5;
+        animation: message-status-spin 1s linear infinite;
+    }
+
+    .message-status.sent {
+        opacity: .65;
+    }
+
+    .message-status.delivered {
+        opacity: .8;
+    }
+
+    .message-status.read {
+        opacity: 1;
+    }
+
+    .message-status.failed {
+        opacity: 1;
+    }
+
+@keyframes message-status-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 .mini-avatar {
     width: 27px;
     height: 27px;
@@ -370,17 +460,6 @@
     justify-content: center;
     font-size: 11px;
     font-weight: 800;
-}
-
-
-.message {
-    max-width: 75%;
-    padding: 10px 13px;
-    border-radius: 14px;
-    font-size: 13px;
-    line-height: 1.5;
-
-    word-break: normal;
 }
 
 .admin-message {

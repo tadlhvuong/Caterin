@@ -39,7 +39,7 @@ namespace Website.Controllers
     //    cancellationToken);
             //request.InboxId = inbox.Id;
             var conversation =
-                await _chatMessageService.StartConversationAsync(request, userId, cancellationToken);
+                await _chatMessageService.StartClientConversationAsync(request, userId, cancellationToken);
 
             return Ok(conversation);
         }

@@ -573,6 +573,44 @@
         </div>
     </div>
 
+    <!-- NOTIFICATION BROWSER -->
+    <div id="chatNotificationPrompt"
+         class="chat-notification-prompt"
+         hidden>
+
+        <div class="chat-notification-prompt__content">
+
+            <div class="chat-notification-prompt__icon">
+                🔔
+            </div>
+
+            <div>
+                <strong>Nhận thông báo tin nhắn</strong>
+
+                <p>
+                    Cho phép Caterin thông báo khi bạn nhận được
+                    tin nhắn mới.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="chat-notification-prompt__actions">
+
+            <button type="button"
+                    id="chatNotificationLater">
+                Để sau
+            </button>
+
+            <button type="button"
+                    id="chatNotificationAllow">
+                Cho phép
+            </button>
+
+        </div>
+
+    </div>
+
     @* CHATBOBX *@
 
     <!-- =========================================
@@ -601,7 +639,7 @@
 
 
         <!-- Chat Window -->
-        <div class="chat-window" id="chatWindow" data-inbox-id="1"
+        <div class="chat-window" id="chatWindow" data-inbox-id="1" data-authenticated="@User.Identity?.IsAuthenticated.ToString().ToLower()"
              data-name=""
              data-email=""
              data-phone="">
@@ -642,9 +680,9 @@
 
             </div>
 
-            <!-- Body -->
-            <div class="chat-body" id="chatBody">
-                <!-- Welcome -->
+            <!-- Quick replies -->
+            <div class="quick-replies" hidden>
+
                 <div class="welcome-message">
 
                     <div class="welcome-icon">
@@ -670,12 +708,31 @@
                     </div>
 
                 </div>
+                <button data-message="Tư vấn sản phẩm">
+                    🧴 Tư vấn sản phẩm
+                </button>
 
+                <button data-message="Kiểm tra đơn hàng">
+                    📦 Kiểm tra đơn hàng
+                </button>
 
-                <!-- Date -->
-                <div class="chat-date">
-                    <span>Hôm nay</span>
-                </div>
+                <button data-message="Tư vấn combo">
+                    🏠 Tư vấn combo
+                </button>
+
+                <button data-message="Chính sách giao hàng">
+                    🚚 Chính sách giao hàng
+                </button>
+
+                @* <button data-message="Tư vấn làm đại lý">
+                        🤝 Làm đại lý
+                    </button> *@
+            </div>
+
+            <!-- Body -->
+            <div class="chat-body" id="chatBody">
+                <!-- Welcome -->
+            
 
 
                 <!-- Agent message -->
@@ -695,30 +752,7 @@
 
                 </div>
 
-
-                <!-- Quick replies -->
-                <div class="quick-replies">
-
-                    <button data-message="Tư vấn sản phẩm">
-                        🧴 Tư vấn sản phẩm
-                    </button>
-
-                    <button data-message="Kiểm tra đơn hàng">
-                        📦 Kiểm tra đơn hàng
-                    </button>
-
-                    <button data-message="Tư vấn combo">
-                        🏠 Tư vấn combo
-                    </button>
-
-                    <button data-message="Chính sách giao hàng">
-                        🚚 Giao hàng
-                    </button>
-
-                </div>
-
             </div>
-
 
             <!-- Typing -->
             <div class="typing" id="typing" hidden>

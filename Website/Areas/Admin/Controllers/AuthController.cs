@@ -417,7 +417,7 @@ namespace Website.Areas.Admin.Controllers
                 {
                     Type = FeedbackType.Danger,
                     Title = "Liên kết không hợp lệ",
-                    Message = string.Join("<br/>", checkValid.Errors)
+                    Message = string.Join("<br/>", checkValid.Errors[0].Message)
                 });
             }
 

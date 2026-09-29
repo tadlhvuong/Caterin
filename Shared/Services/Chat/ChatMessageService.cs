@@ -8,12 +8,9 @@ using Shared.DTOs.Chat;
 using Shared.Enums.Chat;
 using Shared.Extensions;
 using Shared.Interfaces.Chat;
-using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Notification;
 using Shared.Requests.Chat;
 using Shared.Responses;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
 
 namespace Shared.Services.Chat
 {
@@ -37,77 +34,82 @@ namespace Shared.Services.Chat
             _logger = logger;
         }
 
-        public async Task<ChatConversationDto> StartConversationAsync(
-    StartChatRequest request,
-    string? userId,
-    CancellationToken cancellationToken = default)
+        public async Task<ChatConversationDto> StartConversationAsync(StartChatRequest request, string? userId, CancellationToken cancellationToken = default)
         {
-            var inbox = await _dbContext.ChatInboxes
-                .FirstOrDefaultAsync(
-                    x => x.Id == request.InboxId && x.IsActive,
-                    cancellationToken);
+            var inbox = await _dbContext.ChatInboxes.FirstOrDefaultAsync(x => x.Id == request.InboxId && x.IsActive, cancellationToken);
 
             if (inbox == null)
-                throw new InvalidOperationException(
-                    "Chat inbox không tồn tại hoặc đã bị tắt.");
+                throw new InvalidOperationException("Chat inbox không tồn tại hoặc đã bị tắt.");
 
             var now = DateTime.UtcNow;
 
             ChatContact? contact = null;
 
+            var guestTokenHash = "";
+            if(request.GuestToken != null)
+                guestTokenHash = Common.CommonHelper.Hash(request.GuestToken);
+
             // =========================================================
-            // 1. LOGGED-IN CUSTOMER
+            // 1. LOGGED-IN CUSTOMER + EXISTING GUEST SESSION
             // =========================================================
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                contact = await _dbContext.ChatContacts.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
-            }
-
-            // =========================================================
-            // 2. GUEST
-            // =========================================================
-            string? guestToken = null;
-            string? guestTokenHash = null;
-
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                if (string.IsNullOrWhiteSpace(request.GuestToken))
-                    throw new InvalidOperationException(
-                        "Guest token không hợp lệ.");
-
-                // Không nên lấy contact theo Email làm identity
-                // GuestToken mới là identity của guest session.
-
-                //var token = request.GuestToken != null ? request.GuestToken : Common.CommonHelper.GenerateSecureToken();
-                guestToken = request.GuestToken;
-                guestTokenHash = Common.CommonHelper.Hash(guestToken);
-
-                var guestSession = await _dbContext.ChatGuestSessions
-                    .FirstOrDefaultAsync(
-                        x =>
-                            x.TokenHash == guestTokenHash &&
-                            !x.IsRevoked &&
-                            x.ExpiresAt > now,
-                        cancellationToken);
-
-                if (guestSession != null)
+                // Nếu user vừa đăng nhập từ một guest session,
+                // cố gắng claim guest contact hiện tại.
+                if (!string.IsNullOrWhiteSpace(request.GuestToken))
                 {
-                    contact = await _dbContext.ChatContacts.FirstOrDefaultAsync(x => x.Id == guestSession.ContactId,
-                    cancellationToken);
-                    guestSession.LastSeenAt = now;
-                }
-            }
+                    var guestSession =
+                        await _dbContext.ChatGuestSessions
+                            .FirstOrDefaultAsync(
+                                x =>
+                                    x.TokenHash == guestTokenHash &&
+                                    !x.IsRevoked &&
+                                    x.ExpiresAt > now,
+                                cancellationToken);
 
-            // =========================================================
-            // 3. FALLBACK CONTACT
-            // =========================================================
-            // Chỉ nên dùng email để tìm contact trong trường hợp
-            // customer đăng nhập / hoặc flow identity của bạn cho phép.
-            if (contact == null &&
-                !string.IsNullOrWhiteSpace(userId) &&
-                !string.IsNullOrWhiteSpace(request.Email))
-            {
-                contact = await _dbContext.ChatContacts.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                    if (guestSession != null)
+                    {
+                        contact =
+                            await _dbContext.ChatContacts
+                                .FirstOrDefaultAsync(
+                                    x => x.Id == guestSession.ContactId,
+                                    cancellationToken);
+
+                        if (contact != null)
+                        {
+                            // Guest contact chưa thuộc user nào
+                            if (string.IsNullOrWhiteSpace(contact.UserId))
+                            {
+                                contact.UserId = userId;
+                            }
+                            else if (contact.UserId != userId)
+                            {
+                                // Contact này đã thuộc user khác
+                                contact = null;
+                            }
+
+                            if (contact != null)
+                            {
+                                contact.UpdatedAt = now;
+                            }
+                        }
+
+                        guestSession.LastSeenAt = now;
+                    }
+                }
+
+                // =========================================================
+                // 2. FALLBACK: EXISTING USER CONTACT
+                // =========================================================
+
+                if (contact == null)
+                {
+                    contact =
+                        await _dbContext.ChatContacts
+                            .FirstOrDefaultAsync(
+                                x => x.UserId == userId,
+                                cancellationToken);
+                }
             }
 
             // =========================================================
@@ -217,6 +219,8 @@ namespace Shared.Services.Chat
             // =========================================================
             // 8. CREATE CONVERSATION
             // =========================================================
+            bool isNewConversation = false;
+
             if (conversation == null)
             {
                 conversation = new ChatConversation
@@ -231,6 +235,8 @@ namespace Shared.Services.Chat
                 };
 
                 _dbContext.ChatConversations.Add(conversation);
+
+                isNewConversation = true;
             }
             else
             {
@@ -242,7 +248,7 @@ namespace Shared.Services.Chat
             // =========================================================
             // 9. RESULT
             // =========================================================
-            return new ChatConversationDto
+            var conversationDto = new ChatConversationDto
             {
                 Id = conversation.Id,
                 InboxId = conversation.InboxId,
@@ -261,14 +267,447 @@ namespace Shared.Services.Chat
                 LastMessageAt = conversation.LastMessageAt,
                 CreatedAt = conversation.CreatedAt
             };
+
+            // =========================================================
+            // 10. REALTIME - NEW CONVERSATION
+            // =========================================================
+
+            if (isNewConversation)
+            {
+                await _hubContext.Clients
+                    .Group(ChatHubGroups.Inbox(conversation.InboxId))
+                    .SendAsync(
+                        "chat.conversation.created",
+                        conversationDto,
+                        cancellationToken);
+            }
+
+            return conversationDto;
+        }
+        public async Task<ChatConversationDto> StartClientConversationAsync(
+    StartChatRequest request,
+    string? userId,
+    CancellationToken cancellationToken = default)
+        {
+            var inbox = await _dbContext.ChatInboxes
+                .FirstOrDefaultAsync(
+                    x => x.Id == request.InboxId && x.IsActive,
+                    cancellationToken);
+
+            if (inbox == null)
+            {
+                throw new InvalidOperationException(
+                    "Chat inbox không tồn tại hoặc đã bị tắt.");
+            }
+
+            var now = DateTime.UtcNow;
+
+            ChatContact? contact = null;
+
+            // =========================================================
+            // 1. LOGGED-IN CUSTOMER
+            //    - Try to claim existing guest contact
+            //    - Fallback to existing customer contact
+            // =========================================================
+
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                if (!string.IsNullOrWhiteSpace(request.GuestToken))
+                {
+                    var guestTokenHash =
+                        Common.CommonHelper.Hash(request.GuestToken);
+
+                    var guestSession =
+                        await _dbContext.ChatGuestSessions
+                            .FirstOrDefaultAsync(
+                                x =>
+                                    x.TokenHash == guestTokenHash &&
+                                    !x.IsRevoked &&
+                                    x.ExpiresAt > now,
+                                cancellationToken);
+
+                    if (guestSession != null)
+                    {
+                        contact =
+                            await _dbContext.ChatContacts
+                                .FirstOrDefaultAsync(
+                                    x => x.Id == guestSession.ContactId,
+                                    cancellationToken);
+
+                        if (contact != null)
+                        {
+                            // Guest contact chưa được claim
+                            if (string.IsNullOrWhiteSpace(contact.UserId))
+                            {
+                                contact.UserId = userId;
+                            }
+                            // Contact đã thuộc user khác
+                            else if (contact.UserId != userId)
+                            {
+                                contact = null;
+                            }
+
+                            if (contact != null)
+                            {
+                                contact.UpdatedAt = now;
+                                guestSession.LastSeenAt = now;
+                            }
+                        }
+                    }
+                }
+
+                // Fallback:
+                // Customer đã có ChatContact từ trước
+                if (contact == null)
+                {
+                    contact = await _dbContext.ChatContacts
+                        .FirstOrDefaultAsync(
+                            x => x.UserId == userId,
+                            cancellationToken);
+                }
+            }
+
+            // =========================================================
+            // 2. CREATE CONTACT
+            // =========================================================
+
+            if (contact == null)
+            {
+                contact = new ChatContact
+                {
+                    UserId = userId,
+                    Name = request.Name,
+                    Email = request.Email,
+                    Phone = request.Phone,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                _dbContext.ChatContacts.Add(contact);
+
+                // Cần Id để tạo ChatGuestSession / ChatContactInbox
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(request.Name))
+                {
+                    contact.Name = request.Name;
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Email))
+                {
+                    contact.Email = request.Email;
+                }
+
+                if (!string.IsNullOrWhiteSpace(request.Phone))
+                {
+                    contact.Phone = request.Phone;
+                }
+
+                if (!string.IsNullOrWhiteSpace(userId) &&
+                    string.IsNullOrWhiteSpace(contact.UserId))
+                {
+                    contact.UserId = userId;
+                }
+
+                contact.UpdatedAt = now;
+            }
+
+            // =========================================================
+            // 3. GUEST SESSION
+            // =========================================================
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                if (string.IsNullOrWhiteSpace(request.GuestToken))
+                {
+                    throw new InvalidOperationException(
+                        "GuestToken là bắt buộc đối với guest.");
+                }
+
+                var guestTokenHash =
+                    Common.CommonHelper.Hash(request.GuestToken);
+
+                var guestSession =
+                    await _dbContext.ChatGuestSessions
+                        .FirstOrDefaultAsync(
+                            x =>
+                                x.ContactId == contact.Id &&
+                                x.TokenHash == guestTokenHash &&
+                                !x.IsRevoked &&
+                                x.ExpiresAt > now,
+                            cancellationToken);
+
+                if (guestSession == null)
+                {
+                    guestSession = new ChatGuestSession
+                    {
+                        ContactId = contact.Id,
+                        TokenHash = guestTokenHash,
+                        ExpiresAt = now.AddDays(30),
+                        IsRevoked = false,
+                        CreatedAt = now,
+                        LastSeenAt = now
+                    };
+
+                    _dbContext.ChatGuestSessions.Add(guestSession);
+                }
+                else
+                {
+                    guestSession.LastSeenAt = now;
+                }
+            }
+
+            // =========================================================
+            // 4. CONTACT - INBOX
+            // =========================================================
+
+            var contactInbox =
+                await _dbContext.ChatContactInboxes
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.ContactId == contact.Id &&
+                            x.InboxId == inbox.Id,
+                        cancellationToken);
+
+            if (contactInbox == null)
+            {
+                contactInbox = new ChatContactInbox
+                {
+                    ContactId = contact.Id,
+                    InboxId = inbox.Id,
+                    CreatedAt = now
+                };
+
+                _dbContext.ChatContactInboxes.Add(contactInbox);
+            }
+
+            // =========================================================
+            // 5. FIND OPEN CONVERSATION
+            // =========================================================
+
+            var conversation =
+                await _dbContext.ChatConversations
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.InboxId == inbox.Id &&
+                            x.ContactId == contact.Id &&
+                            x.Status != ChatConversationStatus.Closed &&
+                            x.Status != ChatConversationStatus.Resolved,
+                        cancellationToken);
+
+            // =========================================================
+            // 6. CREATE CONVERSATION
+            // =========================================================
+
+            var isNewConversation = false;
+
+            if (conversation == null)
+            {
+                conversation = new ChatConversation
+                {
+                    InboxId = inbox.Id,
+                    ContactId = contact.Id,
+                    Status = ChatConversationStatus.Open,
+                    Priority = ChatConversationPriority.Low,
+                    LastMessageAt = now,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                _dbContext.ChatConversations.Add(conversation);
+
+                isNewConversation = true;
+            }
+            else
+            {
+                conversation.UpdatedAt = now;
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // =========================================================
+            // 7. RESULT
+            // =========================================================
+
+            var conversationDto = new ChatConversationDto
+            {
+                Id = conversation.Id,
+                InboxId = conversation.InboxId,
+                ContactId = conversation.ContactId,
+
+                ContactName = contact.Name,
+                ContactAvatar = contact.AvatarUrl,
+
+                AssignedUserId = conversation.AssignedUserId,
+
+                Status = conversation.Status,
+                Priority = conversation.Priority,
+
+                Subject = conversation.Subject,
+
+                LastMessageAt = conversation.LastMessageAt,
+                CreatedAt = conversation.CreatedAt
+            };
+
+            // =========================================================
+            // 8. REALTIME - NEW CONVERSATION
+            // =========================================================
+
+            if (isNewConversation)
+            {
+                await _hubContext.Clients
+                    .Group(ChatHubGroups.Inbox(conversation.InboxId))
+                    .SendAsync(
+                        "chat.conversation.created",
+                        conversationDto,
+                        cancellationToken);
+            }
+
+            return conversationDto;
         }
 
-        public async Task<ChatMessageDto> SendCustomerMessageAsync(
-    long conversationId,
+        public async Task<ChatConversationDto> StartAdminConversationAsync(
+    long inboxId,
     long contactId,
-    string content,
-    string? guestToken,
     CancellationToken cancellationToken = default)
+        {
+            var inbox = await _dbContext.ChatInboxes
+                .FirstOrDefaultAsync(
+                    x => x.Id == inboxId && x.IsActive,
+                    cancellationToken);
+
+            if (inbox == null)
+            {
+                throw new InvalidOperationException(
+                    "Chat inbox không tồn tại hoặc đã bị tắt.");
+            }
+
+            var contact = await _dbContext.ChatContacts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    x => x.Id == contactId,
+                    cancellationToken);
+
+            if (contact == null)
+            {
+                throw new InvalidOperationException(
+                    "Contact không tồn tại.");
+            }
+
+            var now = DateTime.UtcNow;
+
+            // =========================================================
+            // 1. CONTACT - INBOX
+            // =========================================================
+
+            var contactInbox =
+                await _dbContext.ChatContactInboxes
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.ContactId == contactId &&
+                            x.InboxId == inboxId,
+                        cancellationToken);
+
+            if (contactInbox == null)
+            {
+                contactInbox = new ChatContactInbox
+                {
+                    ContactId = contactId,
+                    InboxId = inboxId,
+                    CreatedAt = now
+                };
+
+                _dbContext.ChatContactInboxes.Add(contactInbox);
+            }
+
+            // =========================================================
+            // 2. FIND OPEN CONVERSATION
+            // =========================================================
+
+            var conversation =
+                await _dbContext.ChatConversations
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.InboxId == inboxId &&
+                            x.ContactId == contactId &&
+                            x.Status != ChatConversationStatus.Closed &&
+                            x.Status != ChatConversationStatus.Resolved,
+                        cancellationToken);
+
+            var isNewConversation = false;
+
+            // =========================================================
+            // 3. CREATE CONVERSATION
+            // =========================================================
+
+            if (conversation == null)
+            {
+                conversation = new ChatConversation
+                {
+                    InboxId = inboxId,
+                    ContactId = contactId,
+                    Status = ChatConversationStatus.Open,
+                    Priority = ChatConversationPriority.Low,
+                    LastMessageAt = now,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+
+                _dbContext.ChatConversations.Add(conversation);
+
+                isNewConversation = true;
+            }
+            else
+            {
+                conversation.UpdatedAt = now;
+            }
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // =========================================================
+            // 4. RESULT
+            // =========================================================
+
+            var conversationDto = new ChatConversationDto
+            {
+                Id = conversation.Id,
+                InboxId = conversation.InboxId,
+                ContactId = conversation.ContactId,
+
+                ContactName = contact.Name,
+                ContactAvatar = contact.AvatarUrl,
+
+                AssignedUserId = conversation.AssignedUserId,
+
+                Status = conversation.Status,
+                Priority = conversation.Priority,
+
+                Subject = conversation.Subject,
+
+                LastMessageAt = conversation.LastMessageAt,
+                CreatedAt = conversation.CreatedAt
+            };
+
+            // =========================================================
+            // 5. REALTIME - NEW CONVERSATION
+            // =========================================================
+
+            if (isNewConversation)
+            {
+                await _hubContext.Clients
+                    .Group(ChatHubGroups.Inbox(conversation.InboxId))
+                    .SendAsync(
+                        "chat.conversation.created",
+                        conversationDto,
+                        cancellationToken);
+            }
+
+            return conversationDto;
+        }
+        public async Task<ChatMessageDto> SendCustomerMessageAsync(long conversationId, long contactId, string content, string? guestToken,
+            CancellationToken cancellationToken = default)
         {
             content = content.Trim();
 
@@ -485,6 +924,8 @@ namespace Shared.Services.Chat
 
             return dto;
         }
+
+
         public async Task<ChatConversationDto?> GetConversationAsync(long conversationId, CancellationToken cancellationToken = default)
         {
             return await _dbContext.ChatConversations
@@ -512,22 +953,27 @@ namespace Shared.Services.Chat
                 })
                 .FirstOrDefaultAsync(cancellationToken);
         }
-        public async Task<object> GetConversationListAsync(
-    long? inboxId,
-    string? currentUserId,
-    int limit = 30,
-    DateTime? beforeLastMessageAt = null,
-    long? beforeId = null,
+        public async Task<object> GetConversationListAsync(long? inboxId, string? search, string? currentUserId, int limit = 30, DateTime? beforeLastMessageAt = null,
+        long? beforeId = null,
     CancellationToken cancellationToken = default)
         {
             limit = Math.Clamp(limit, 1, 100);
 
-            var query = _dbContext.ChatConversations
-                .AsNoTracking().AsQueryable();
-            if (inboxId.HasValue)
+            var query = _dbContext.ChatConversations.AsNoTracking().AsQueryable();
+
+            if (inboxId.HasValue && inboxId.Value > 0)
             {
+                query = query.Where(x => x.InboxId == inboxId.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+
                 query = query.Where(x =>
-                    x.InboxId == inboxId.Value);
+                    x.Contact.Name.Contains(search) ||
+                    x.Contact.Email.Contains(search) ||
+                    x.Contact.Phone.Contains(search) || (x.Subject != null && x.Subject.Contains(search)) ||
+                     x.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault().Contains(search));
             }
             // Cursor:
             // LastMessageAt nhỏ hơn
@@ -542,10 +988,7 @@ namespace Shared.Services.Chat
                     ));
             }
 
-            var conversations = await query
-                .OrderByDescending(x => x.LastMessageAt)
-                .ThenByDescending(x => x.Id)
-                .Take(limit + 1)
+            var conversations = await query.OrderByDescending(x => x.LastMessageAt).ThenByDescending(x => x.Id).Take(limit + 1)
                 .Select(x => new ChatConversationListItemDto
                 {
                     Id = x.Id,
@@ -596,31 +1039,16 @@ namespace Shared.Services.Chat
                 Items = conversations,
                 HasMore = hasMore,
 
-                OldestLastMessageAt = conversations.Count > 0
-        ? conversations[^1].LastMessageAt
-        : null,
+                OldestLastMessageAt = conversations.Count > 0 ? conversations[^1].LastMessageAt : null,
 
-                OldestId = conversations.Count > 0
-        ? conversations[^1].Id
-        : null
+                OldestId = conversations.Count > 0 ? conversations[^1].Id : null
             };
         }
 
-        public async Task<ChatConversationCountsDto> GetConversationCountsAsync(
-     long? inboxId,
-     string? search = null,
-     string? assignedUserId = null,
-     long? labelId = null,
-     CancellationToken cancellationToken = default)
+        public async Task<ChatConversationCountsDto> GetConversationCountsAsync(long? inboxId, string? search = null, string? assignedUserId = null, long? labelId = null, CancellationToken cancellationToken = default)
         {
-            var query = _dbContext.ChatConversations
-                .AsNoTracking()
-        .AsQueryable();
-            if (inboxId.HasValue)
-            {
-                query = query.Where(x =>
-                    x.InboxId == inboxId.Value);
-            }
+            var query = _dbContext.ChatConversations.AsNoTracking().AsQueryable();
+
             // Search
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -630,7 +1058,8 @@ namespace Shared.Services.Chat
                     x.Contact.Name.Contains(search) ||
                     x.Contact.Email.Contains(search) ||
                     x.Contact.Phone.Contains(search) ||
-                    (x.Subject != null && x.Subject.Contains(search)));
+                    (x.Subject != null && x.Subject.Contains(search)) ||
+                     x.Messages.OrderByDescending(m => m.CreatedAt).Select(m => m.Content).FirstOrDefault().Contains(search));
             }
 
             // Assigned user
@@ -649,6 +1078,10 @@ namespace Shared.Services.Chat
 
             var all = await query.CountAsync(cancellationToken);
 
+            var website = await query.CountAsync(x => x.InboxId == 1, cancellationToken);
+
+            var facebook = await query.CountAsync(x => x.InboxId == 2, cancellationToken);
+
             var open = await query.CountAsync(
                 x => x.Status == ChatConversationStatus.Open,
                 cancellationToken);
@@ -664,6 +1097,8 @@ namespace Shared.Services.Chat
             return new ChatConversationCountsDto
             {
                 All = all,
+                Website = website,
+                Facebook = facebook,
                 Open = open,
                 Pending = pending,
                 Resolved = resolved
@@ -751,31 +1186,39 @@ namespace Shared.Services.Chat
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (conversation == null ||
-                conversation.ContactId != contactId)
+            if (conversation == null)
             {
                 return false;
             }
 
-            // Logged-in customer
+            // Customer đã đăng nhập
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                return conversation.ContactUserId == userId;
+                return conversation.ContactId == contactId
+                    && conversation.ContactUserId == userId;
             }
 
             // Guest
-            if (string.IsNullOrWhiteSpace(guestToken))
+            if (conversation.ContactId != contactId)
+            {
                 return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(guestToken))
+            {
+                return false;
+            }
 
             var tokenHash = Common.CommonHelper.Hash(guestToken);
 
             return await _dbContext.ChatGuestSessions
                 .AsNoTracking()
-                .AnyAsync(x =>
-                    x.ContactId == contactId &&
-                    x.TokenHash == tokenHash &&
-                    !x.IsRevoked &&
-                    x.ExpiresAt > DateTime.UtcNow,
+                .AnyAsync(
+                    x =>
+                        x.ContactId == contactId &&
+                        x.TokenHash == tokenHash &&
+                        !x.IsRevoked &&
+                        x.ExpiresAt > DateTime.UtcNow,
                     cancellationToken);
         }
         public async Task<ChatInbox?> GetDefaultInboxAsync(
@@ -826,8 +1269,8 @@ namespace Shared.Services.Chat
                 .FirstOrDefaultAsync(cancellationToken);
         }
         public async Task<ChatConversationContactDto?> GetConversationContactAsync(
-    long conversationId,
-    CancellationToken cancellationToken = default)
+     long conversationId,
+     CancellationToken cancellationToken = default)
         {
             var conversation = await _dbContext.ChatConversations
                 .AsNoTracking()
@@ -852,18 +1295,21 @@ namespace Shared.Services.Chat
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (conversation == null)
+            {
                 return null;
+            }
 
             var result = new ChatConversationContactDto
             {
                 ConversationId = conversation.ConversationId,
-                ContactId = conversation.Contact.Id,
+                ContactId = conversation.ContactId,
 
                 Name = conversation.Contact.Name,
                 Email = conversation.Contact.Email,
                 Phone = conversation.Contact.Phone,
                 AvatarUrl = conversation.Contact.AvatarUrl,
-                CustomAttributesJson = conversation.Contact.CustomAttributesJson,
+                CustomAttributesJson =
+                    conversation.Contact.CustomAttributesJson,
                 CreatedAt = conversation.Contact.CreatedAt
             };
 
@@ -1064,9 +1510,7 @@ namespace Shared.Services.Chat
                     "Conversation không tồn tại.");
             }
 
-            Console.WriteLine(
-                $"[Chat] Conversation {conversationId}: " +
-                $"{conversation.Status} -> {status}");
+            Console.WriteLine($"[Chat] Conversation {conversationId}: " + $"{conversation.Status} -> {status}");
 
             if (conversation.Status == status)
                 return ServiceResult.Success();
@@ -1075,8 +1519,7 @@ namespace Shared.Services.Chat
             conversation.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-            Console.WriteLine(
-        $"[Chat] Conversation {conversationId} saved: {conversation.Status}");
+            Console.WriteLine($"[Chat] Conversation {conversationId} saved: {conversation.Status}");
             await _chatNotifier.NotifyConversationStatusUpdatedAsync(
                 conversation.Id, conversation.InboxId,
                 conversation.Status,
@@ -1116,6 +1559,13 @@ namespace Shared.Services.Chat
     string? guestToken,
     CancellationToken cancellationToken = default)
         {
+            //var userId = Context.User?.FindFirstValue(
+            //ClaimTypes.NameIdentifier);
+
+            //if (string.IsNullOrWhiteSpace(userId))
+            //{
+            //    throw new HubException("Unauthenticated.");
+            //}
             var conversation =
                 await _dbContext.ChatConversations
                     .Include(x => x.Contact)
@@ -1167,6 +1617,70 @@ namespace Shared.Services.Chat
                         Status = ChatMessageStatus.Read
                     },
                     cancellationToken);
+
+            return ServiceResult.Success();
+        }
+
+        public async Task<ServiceResult> MarkAllConversationsAsReadAsync(CancellationToken cancellationToken = default)
+        {
+            var messages =
+                await _dbContext.ChatMessages
+                    .Where(x =>
+                        x.SenderType == ChatSenderType.Contact &&
+                        x.Status != ChatMessageStatus.Read)
+                    .ToListAsync(cancellationToken);
+
+            if (messages.Count == 0)
+            {
+                return ServiceResult.Success();
+            }
+
+            var now = DateTime.UtcNow;
+
+            foreach (var message in messages)
+            {
+                message.Status = ChatMessageStatus.Read;
+                message.ReadAt = now;
+                message.UpdatedAt = now;
+            }
+
+            await _dbContext.SaveChangesAsync(
+                cancellationToken);
+
+            // Group theo conversation để broadcast
+            var conversationIds =
+                messages
+                    .Select(x => x.ConversationId)
+                    .Distinct()
+                    .ToList();
+
+            foreach (var conversationId in conversationIds)
+            {
+                var messageIds =
+                    messages
+                        .Where(x =>
+                            x.ConversationId ==
+                            conversationId)
+                        .Select(x => x.Id)
+                        .ToList();
+
+                await _hubContext.Clients
+                    .Group(
+                        ChatHubGroups.Conversation(
+                            conversationId))
+                    .SendAsync(
+                        ChatHubEvents.MessageStatusUpdated,
+                        new
+                        {
+                            ConversationId =
+                                conversationId,
+                            MessageIds =
+                                messageIds,
+                            Status =
+                                ChatMessageStatus.Read
+                        },
+                        cancellationToken);
+            }
 
             return ServiceResult.Success();
         }

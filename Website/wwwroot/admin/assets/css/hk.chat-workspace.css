@@ -188,15 +188,38 @@
     cursor: pointer;
     transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
-
-    .conversation-item:hover {
+    .conversation-item.is-read {
         background: var(--bs-tertiary-bg);
+        box-shadow: 0 2px 6px rgba(47, 43, 61, 0.06);
+        /*border-radius: 0.45rem;
+        border: 1px solid var(--bs-border-color);
+        margin: 0.25rem 0.5rem;*/
     }
 
-    .conversation-item.active {
-        background: rgba(var(--bs-primary-rgb), 0.075);
-        box-shadow: inset 3px 0 0 var(--bs-primary);
-    }
+        .conversation-item.is-read:hover {
+            background: var(--bs-tertiary-bg);
+            box-shadow: 0 3px 8px rgba(47, 43, 61, 0.08);
+        }
+        .conversation-item.is-read.active {
+            background: rgba(var(--bs-primary-rgb), 0.075);
+            border-color: var(--bs-border-color);
+            box-shadow: inset 3px 0 0 var(--bs-primary);
+        }
+.dark-style .conversation-item.is-read {
+    background: #25293c;
+    border-color: #454a61;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+
+.conversation-item:hover {
+    background: var(--bs-tertiary-bg);
+}
+
+.conversation-item.active {
+    background: rgba(var(--bs-primary-rgb), 0.075);
+    box-shadow: inset 3px 0 0 var(--bs-primary);
+}
 
 .conversation-avatar {
     flex-shrink: 0;
@@ -674,7 +697,7 @@ small {
 .chat-contact-drawer {
     position: absolute;
     top: 0;
-    right: -390px;
+    right: -30rem;
     width: 390px;
     height: 100%;
     background: var(--bs-body-bg);

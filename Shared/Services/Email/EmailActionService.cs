@@ -7,6 +7,7 @@ using Shared.Responses;
 namespace Shared.Services.Email
 {
     using Microsoft.EntityFrameworkCore;
+    using System.Net.WebSockets;
 
     public sealed class EmailActionService : IEmailActionService
     {
@@ -20,24 +21,32 @@ namespace Shared.Services.Email
         public async Task<string> CreateAsync(string userId, EmailActionType type, string token,
             TimeSpan lifetime, CancellationToken cancellationToken = default)
         {
-            var key = CommonHelper.GenerateSecureToken();
-
-            var entity = new EmailAction
+            try
             {
-                Id = Guid.NewGuid(),
-                KeyHash = CommonHelper.Hash(key),
-                UserId = userId,
-                Type = type,
-                Token = token,
-                CreatedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.Add(lifetime)
-            };
+                var key = CommonHelper.GenerateSecureToken();
 
-            _dbcontext.EmailActions.Add(entity);
+                var entity = new EmailAction
+                {
+                    Id = Guid.NewGuid(),
+                    KeyHash = CommonHelper.Hash(key),
+                    UserId = userId,
+                    Type = type,
+                    Token = token,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiredAt = DateTime.UtcNow.Add(lifetime)
+                };
 
-            await _dbcontext.SaveChangesAsync(cancellationToken);
+                _dbcontext.EmailActions.Add(entity);
 
-            return key;
+                await _dbcontext.SaveChangesAsync(cancellationToken);
+
+                return key;
+            }
+            catch (Exception ex)
+            {
+                var error = ex.Message;
+                throw;
+            }
         }
 
         public async Task<ServiceResult<EmailAction>> GetValidAsync(string key, CancellationToken cancellationToken = default)

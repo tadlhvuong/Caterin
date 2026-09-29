@@ -44,30 +44,20 @@ namespace Shared.Services.Notification
     long inboxId,
     CancellationToken cancellationToken = default)
         {
-            await _hubContext
-                .Clients
-                .Group(
-                    ChatHubGroups.Conversation(
-                        conversationId))
-                .SendAsync(
-                    ChatHubEvents.ConversationRead,
+            await _hubContext.Clients
+                .Group(ChatHubGroups.Conversation(conversationId))
+                .SendAsync(ChatHubEvents.ConversationRead,
                     new
                     {
                         conversationId
-                    },
-                    cancellationToken);
+                    }, cancellationToken);
 
-            await _hubContext
-                .Clients
-                .Group(
-                    ChatHubGroups.Inbox(inboxId))
-                .SendAsync(
-                    ChatHubEvents.ConversationRead,
+            await _hubContext.Clients.Group(ChatHubGroups.Inbox(inboxId))
+                .SendAsync(ChatHubEvents.ConversationRead,
                     new
                     {
                         conversationId
-                    },
-                    cancellationToken);
+                    }, cancellationToken);
         }
     }
 }

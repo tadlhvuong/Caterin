@@ -26,9 +26,9 @@ namespace Shared.Configurations
 
             builder.Property(x => x.ExpiredAt).HasColumnType("timestamp with time zone").IsRequired();
 
-            builder.Property(x => x.UsedAt).HasColumnType("timestamp with time zone").IsRequired();
+            builder.Property(x => x.UsedAt).HasColumnType("timestamp with time zone");
 
-            builder.Property(x => x.RevokedAt).HasColumnType("timestamp with time zone").IsRequired();
+            builder.Property(x => x.RevokedAt).HasColumnType("timestamp with time zone");
 
             builder.Property(x => x.RevokedReason).HasMaxLength(500);
 

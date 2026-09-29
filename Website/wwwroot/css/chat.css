@@ -378,7 +378,7 @@
     border-radius: 14px;
     font-size: 13px;
     line-height: 1.5;
-    white-space: pre-wrap;
+    /*white-space: pre-wrap;*/
     overflow-wrap: break-word;
     word-break: normal;
 }
@@ -511,8 +511,13 @@
 .quick-replies {
     display: flex;
     flex-wrap: wrap;
-    gap: 7px;
-    margin: 3px 0 16px 35px;
+    gap: 5px;
+    margin: 1rem;
+    justify-content: center;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(31, 147, 69, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    padding-bottom: 1rem;
 }
 
     .quick-replies button {
@@ -532,7 +537,172 @@
             border-color: #a9cfb4;
             transform: translateY(-1px);
         }
+    .quick-replies .show, .quick-replies[hidden], notificationPrompt[hidden] {
+        display: flex;
+    }
 
+    .quick-replies .hidden, .quick-replies[hidden], notificationPrompt[hidden] {
+        display: none !important;
+    }
+
+
+/* =========================================
+           NOTIFICATION
+        ========================================= */
+/* =========================================================
+   CHAT NOTIFICATION PROMPT
+========================================================= */
+
+.chat-notification-prompt {
+    position: fixed;
+    right: 24px;
+    top: 24px;
+    z-index: 9999;
+    width: min(360px, calc(100vw - 32px));
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+    .chat-notification-prompt[hidden] {
+        display: none !important;
+    }
+
+.chat-notification-prompt__content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.chat-notification-prompt__icon {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0fdf4;
+    border-radius: 10px;
+    font-size: 20px;
+    transform-origin: top center;
+    animation: notificationBellShake 1.5s ease-in-out infinite;
+}
+
+@keyframes notificationBellShake {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+
+    10% {
+        transform: rotate(12deg);
+    }
+
+    20% {
+        transform: rotate(-12deg);
+    }
+
+    30% {
+        transform: rotate(9deg);
+    }
+
+    40% {
+        transform: rotate(-9deg);
+    }
+
+    50% {
+        transform: rotate(5deg);
+    }
+
+    60% {
+        transform: rotate(-5deg);
+    }
+
+    70%, 100% {
+        transform: rotate(0deg);
+    }
+}
+
+.chat-notification-prompt__content strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.chat-notification-prompt__content p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+.chat-notification-prompt__actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+    .chat-notification-prompt__actions button {
+        min-height: 36px;
+        padding: 7px 14px;
+        border: 0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+        .chat-notification-prompt__actions button:active {
+            transform: scale(0.97);
+        }
+
+#chatNotificationLater {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+    #chatNotificationLater:hover {
+        background: #e5e7eb;
+    }
+
+#chatNotificationAllow {
+    background: #1f9345;
+    color: #fff;
+}
+
+    #chatNotificationAllow:hover {
+        background: #177a38;
+    }
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+    .chat-notification-prompt {
+        right: 16px;
+        bottom: 16px;
+        width: calc(100vw - 32px);
+    }
+
+    .chat-notification-prompt__actions {
+        margin-top: 12px;
+    }
+
+        .chat-notification-prompt__actions button {
+            flex: 1;
+        }
+}
 
 /* =========================================
            TYPING
@@ -681,32 +851,57 @@
 /* Send */
 
 .send-btn {
-    width: 43px;
-    height: 43px;
+    width: 44px;
+    height: 44px;
     flex-shrink: 0;
-    border: none;
-    border-radius: 13px;
-    background: var(--caterin-green);
-    color: white;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient( 135deg, var(--caterin-green), #238f43 );
+    color: #fff;
     cursor: pointer;
-    transition: transform .2s, background .2s, box-shadow .2s;
+    box-shadow: 0 4px 10px rgba(31, 147, 69, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
     .send-btn:hover {
-        background: var(--caterin-green-dark);
-        transform: translateY(-1px);
-        box-shadow: 0 5px 13px rgba(31,147,69,.25);
+        transform: translateY(-2px);
+        background: linear-gradient( 135deg, #96d84b, var(--caterin-green) );
+        box-shadow: 0 7px 16px rgba(31, 147, 69, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 
     .send-btn:active {
-        transform: scale(.94);
+        transform: translateY(0) scale(0.94);
+        box-shadow: 0 3px 7px rgba(31, 147, 69, 0.2);
     }
 
+    .send-btn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(140, 198, 63, 0.25), 0 5px 12px rgba(31, 147, 69, 0.25);
+    }
+
+    .send-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /*.send-btn:active {
+        transform: scale(.94);
+    }*/
+
     .send-btn svg {
-        width: 18px;
+        width: 19px;
+        height: 19px;
+        stroke-width: 2.2;
+        transition: transform 0.18s ease;
+    }
+
+    .send-btn:hover svg {
+        transform: translateX(1px) translateY(-1px);
     }
 
 

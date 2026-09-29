@@ -10,14 +10,21 @@
             hidePromo: "hidePromo",
             contactId: "caterin_chat_contact_id",
             conversationId: "caterin_chat_conversation_id",
-            guestToken: "caterin_chat_guest_token"
+            guestToken: "caterin_chat_guest_token",
+            notificationPrompt: "caterin_notification"
+        },
+
+        notification: {
+            pendingMessage: null
         },
 
         timing: {
             promoDelay: 1800,
             typingTimeout: 1500,
             focusDelay: 250,
-            reconnectDelay: 3000
+            reconnectDelay: 3000,
+            quickReplyInactivity: 30 * 60 * 1000, //30' show quick reply 
+            notificationPromptDelay: 7 * 24 * 60 * 60 * 1000
         },
 
         limits: {
@@ -68,13 +75,23 @@
         chatBody: document.getElementById("chatBody"),
         typing: document.getElementById("typing"),
         chatBadge: document.getElementById("chatBadge"),
+        quickReplies: document.querySelector(".quick-replies"),
 
         attachmentButton: document.getElementById("attachmentBtn"),
         emojiButton: document.getElementById("emojiBtn"),
 
         adminStatusDot: document.getElementById("chatAdminStatusDot"),
         chatStatusText: document.getElementById("chatStatusText"),
-        chatStatusBadge: document.getElementById("chatStatusBadge")
+        chatStatusBadge: document.getElementById("chatStatusBadge"),
+         
+        notificationPrompt:
+            document.querySelector("#chatNotificationPrompt"),
+
+        notificationAllow:
+            document.querySelector("#chatNotificationAllow"),
+
+        notificationLater:
+            document.querySelector("#chatNotificationLater")
     };
 
 
@@ -86,7 +103,8 @@
         inboxId: Number(DOM.chatWindow?.dataset.inboxId) || null,
         name: DOM.chatWindow?.dataset.name || null,
         email: DOM.chatWindow?.dataset.email || null,
-        phone: DOM.chatWindow?.dataset.phone || null
+        phone: DOM.chatWindow?.dataset.phone || null,
+        isAuthenticated: DOM.chatWindow?.dataset.authenticated === "true"
     };
 
 
@@ -106,16 +124,30 @@
 
         reconnectTimer: null,
 
+        quickReplies: {
+            visible: false,
+            timer: null,
+            lastMessageAt: null
+        },
+
         processedMessageIds: new Set(),
+
         messages: {
             limit: 30,
             oldestMessageId: null,
             hasMore: true,
             loading: false
         },
+
+        tabTitle: {
+            original: document.title,
+            timer: null,
+            active: false,
+            frame: 0
+        },
+
         initialized: false
     };
-
 
     // ============================================================
     // SIGNALR
@@ -212,8 +244,7 @@
     function isValidChatSession() {
         return Boolean(
             state.currentConversationId &&
-            state.currentContactId &&
-            state.guestToken
+            state.currentContactId
         );
     }
 
@@ -349,6 +380,41 @@
         );
     }
 
+    //TITLE ANIMATION
+    function startUnreadTitle() {
+        if (state.tabTitle.active) return;
+
+        state.tabTitle.active = true;
+        state.tabTitle.frame = 0;
+
+        state.tabTitle.timer = setInterval(() => {
+            const count = state.unreadMessageCount;
+
+            if (count <= 0) {
+                stopUnreadTitle();
+                return;
+            }
+
+            state.tabTitle.frame++;
+
+            document.title =
+                state.tabTitle.frame % 2 === 0
+                    ? state.tabTitle.original
+                    : `💬 (${count}) Tin nhắn mới`;
+        }, 1200);
+    }
+
+    function stopUnreadTitle() {
+        if (state.tabTitle.timer) {
+            clearInterval(state.tabTitle.timer);
+            state.tabTitle.timer = null;
+        }
+
+        state.tabTitle.active = false;
+        state.tabTitle.frame = 0;
+
+        document.title = state.tabTitle.original;
+    }
 
     // ============================================================
     // UNREAD BADGE
@@ -362,6 +428,13 @@
             );
 
         renderUnreadBadge();
+
+        if (state.unreadMessageCount > 0) {
+            startUnreadTitle();
+        }
+        else {
+            stopUnreadTitle();
+        }
     }
 
 
@@ -369,6 +442,8 @@
         state.unreadMessageCount++;
 
         renderUnreadBadge();
+
+        startUnreadTitle();
     }
 
 
@@ -444,6 +519,50 @@
         DOM.chatClose?.addEventListener(
             "click",
             closeChat
+        );
+
+        //DOM.chatForm?.addEventListener("submit", handleSendMessage);
+        // Notification
+        DOM.notificationLater?.addEventListener(
+            "click",
+            () => {
+                markNotificationPrompted();
+            }
+        );
+
+        DOM.notificationAllow?.addEventListener(
+            "click",
+            async () => {
+                if (!("Notification" in window)) {
+                    DOM.notificationPrompt.hidden = true;
+                    return;
+                }
+
+                const permission =
+                    await Notification.requestPermission();
+
+                if (permission === "granted") {
+                    localStorage.setItem(
+                        CONFIG.storage.notificationPrompt,
+                        "true"
+                    );
+
+                    const message =
+                        state.notification.pendingMessage;
+
+                    state.notification.pendingMessage = null;
+
+                    DOM.notificationPrompt.hidden = true;
+
+                    if (message) {
+                        showMessageNotification(message);
+                    }
+
+                    return;
+                }
+
+                markNotificationPrompted();
+            }
         );
     }
 
@@ -648,10 +767,9 @@
 
     async function initializeChatSession() {
 
-        if (
-            state.currentContactId &&
-            state.currentConversationId
-        ) {
+        console.log(state.currentContactId);
+        console.log(state.currentConversationId);
+        if (state.currentContactId &&state.currentConversationId) {
             await joinConversation();
 
             await loadUnreadCount();
@@ -662,7 +780,6 @@
 
             return;
         }
-
         await createConversation();
 
         await joinConversation();
@@ -794,8 +911,7 @@
 
 
         connection.on(
-            "chat.message.received",
-            handleMessageReceived
+            "chat.message.received", handleMessageReceived
         );
 
 
@@ -853,7 +969,7 @@
 
     function handleMessageReceived(message) {
         hideTyping();
-
+        console.log("handleMessageReceived");
         const added =
             addMessage(
                 message,
@@ -863,23 +979,36 @@
         if (!added) {
             return;
         }
+        const senderType = Number(message.senderType);
 
         acknowledgeMessageDelivered(
             message
         );
 
-        const isIncoming =
-            Number(message.senderType) ===
-            CONFIG.senderType.admin ||
-            Number(message.senderType) ===
-            CONFIG.senderType.bot;
-
-        if (
-            isIncoming &&
-            !isChatOpen()
-        ) {
-            incrementUnreadMessage();
+        const isIncoming = senderType === CONFIG.senderType.admin || senderType === CONFIG.senderType.bot;
+        if (!isIncoming) {
+            return;
         }
+        acknowledgeMessageDelivered(message);
+
+        if (isChatOpen()) {
+            markConversationAsRead();
+            setUnreadMessageCount(0);
+        }
+        incrementUnreadMessage();
+
+        // Hiện popup xin quyền thông báo
+        if (shouldShowNotificationPrompt()) {
+            state.notification.pendingMessage = message;
+
+            showNotificationPrompt();
+
+            return;
+        }
+
+
+        // Nếu đã được cấp quyền thì hiện notification
+        showMessageNotification(message);
     }
 
 
@@ -1055,28 +1184,26 @@
                 clearMessages();
             }
 
-            if (!messages.length) {
+            if (messages.length == 0) {
                 state.messages.hasMore = false;
+                console.log('d');
+                if (initial) {
+                    initializeQuickRepliesFromMessages([]);
+                }
 
                 return;
             }
 
             if (initial) {
-                renderInitialMessages(
-                    messages
-                );
+                renderInitialMessages(messages);
             }
             else {
-                prependMessages(
-                    messages
-                );
+                prependMessages(messages);
             }
 
-            state.messages.oldestMessageId =
-                messages[0]?.id ?? null;
+            state.messages.oldestMessageId = messages[0]?.id ?? null;
 
-            state.messages.hasMore =
-                hasMore;
+            state.messages.hasMore = hasMore;
 
         }
         catch (error) {
@@ -1093,22 +1220,90 @@
         DOM.chatBody.innerHTML = '';
 
         if (!messages || messages.length === 0) {
+            initializeQuickRepliesFromMessages(
+                messages
+            );
+
             return;
         }
 
         const fragment = document.createDocumentFragment();
 
-        messages.forEach(message => {
-            const element = createMessageElement(message);
+        let previousMessage = null;
 
-            if (element) {
-                fragment.appendChild(element);
-            }
+        messages.forEach(message => {
+
+            appendMessageWithDate(
+                fragment,
+                message,
+                previousMessage
+            );
+
+            previousMessage = message;
         });
 
         DOM.chatBody.appendChild(fragment);
 
+        initializeQuickRepliesFromMessages(
+            messages
+        );
+
         scrollToBottom();
+    }
+    function normalizeDateSeparators() {
+        if (!DOM.chatBody) {
+            return;
+        }
+
+        const children =
+            Array.from(
+                DOM.chatBody.children
+            );
+
+        let previousMessage = null;
+
+        children.forEach(element => {
+
+            if (
+                !element.classList.contains(
+                    "message-row"
+                )
+            ) {
+                return;
+            }
+
+            const messageId =
+                element.dataset.messageId;
+
+            if (!messageId) {
+                return;
+            }
+
+            const separator =
+                element.previousElementSibling;
+
+            if (
+                separator?.classList.contains(
+                    "chat-date"
+                )
+            ) {
+                if (
+                    previousMessage &&
+                    isSameMessageDate(
+                        previousMessage.createdAt,
+                        element.dataset.createdAt
+                    )
+                ) {
+                    separator.remove();
+                }
+            }
+
+            previousMessage = {
+                id: messageId,
+                createdAt:
+                    element.dataset.createdAt
+            };
+        });
     }
     function scrollToBottom() {
         if (!DOM.chatBody) return;
@@ -1129,16 +1324,17 @@
         const fragment =
             document.createDocumentFragment();
 
+        let previousMessage = null;
+
         messages.forEach(message => {
 
-            const row =
-                createMessageElement(
-                    message
-                );
+            appendMessageWithDate(
+                fragment,
+                message,
+                previousMessage
+            );
 
-            if (row) {
-                fragment.appendChild(row);
-            }
+            previousMessage = message;
         });
 
         DOM.chatBody.prepend(fragment);
@@ -1152,13 +1348,12 @@
     }
 
     function clearMessages() {
-        if (!DOM.chatBody) {
-            return;
-        }
+        DOM.chatBody?.replaceChildren();
 
-        DOM.chatBody.innerHTML = "";
-
+        clearQuickReplyTimer();
         state.processedMessageIds.clear();
+        state.quickReplies.lastMessageAt =
+            null;
     }
 
 
@@ -1192,7 +1387,11 @@
 
             const result =
                 await response.json();
+            console.log("unread-count response:", result);
 
+            const unreadCount = result?.data ?? result;
+
+            console.log("unread count:", unreadCount);
             setUnreadMessageCount(
                 result?.data ?? result
             );
@@ -1377,7 +1576,118 @@
 
         return false;
     }
+    function createDateSeparator(date) {
+        const separator =
+            document.createElement("div");
 
+        separator.className =
+            "chat-date";
+
+        const label =
+            getDateSeparatorLabel(date);
+
+        separator.innerHTML = `
+        <span>${escapeHtml(label)}</span>
+    `;
+
+        return separator;
+    }
+
+
+    function getDateSeparatorLabel(date) {
+        const messageDate =
+            new Date(date);
+
+        const now =
+            new Date();
+
+        const messageDay =
+            new Date(
+                messageDate.getFullYear(),
+                messageDate.getMonth(),
+                messageDate.getDate()
+            );
+
+        const today =
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
+
+        const diffDays =
+            Math.floor(
+                (
+                    today.getTime() -
+                    messageDay.getTime()
+                ) /
+                86400000
+            );
+
+        if (diffDays === 0) {
+            return "Hôm nay";
+        }
+
+        if (diffDays === 1) {
+            return "Hôm qua";
+        }
+
+        return messageDate.toLocaleDateString(
+            "vi-VN",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }
+        );
+    }
+    function appendMessageWithDate(
+        fragment,
+        message,
+        previousMessage
+    ) {
+        if (
+            !previousMessage ||
+            !isSameMessageDate(
+                previousMessage.createdAt,
+                message.createdAt
+            )
+        ) {
+            fragment.appendChild(
+                createDateSeparator(
+                    message.createdAt
+                )
+            );
+        }
+
+        const element =
+            createMessageElement(message);
+
+        if (element) {
+            fragment.appendChild(element);
+        }
+    }
+
+
+    function isSameMessageDate(
+        firstDate,
+        secondDate
+    ) {
+        const first =
+            new Date(firstDate);
+
+        const second =
+            new Date(secondDate);
+
+        return (
+            first.getFullYear() ===
+            second.getFullYear() &&
+            first.getMonth() ===
+            second.getMonth() &&
+            first.getDate() ===
+            second.getDate()
+        );
+    }
     function createMessageElement(message) {
 
         if (!message?.id) {
@@ -1425,7 +1735,8 @@
 
         row.dataset.messageId =
             String(message.id);
-
+        row.dataset.createdAt =
+            message.createdAt;
         row.innerHTML = `
         ${avatarHtml}
 
@@ -1468,6 +1779,10 @@
         }
 
         DOM.chatBody?.appendChild(row);
+        console.log("addMessage");
+        updateQuickRepliesActivity(
+            message
+        );
 
         if (shouldScroll) {
             scrollBottom(true);
@@ -1518,11 +1833,7 @@
 
 
     function buildAdminAvatar() {
-        return `
-            <span class="avatar-initial rounded-circle bg-label-success">
-                C
-            </span>
-        `;
+        return `<img src="/favicon.ico" width="20" alt="Favicon" class="avatar-initial rounded-circle">`;
     }
 
 
@@ -1530,18 +1841,13 @@
     // MESSAGE STATUS
     // ============================================================
 
-    function buildMessageStatusHtml(
-        status,
-        showStatus = true
-    ) {
+    function buildMessageStatusHtml(status, showStatus = true) {
         if (!showStatus) {
             return "";
         }
 
         const statusConfig =
-            getMessageStatusConfig(
-                status
-            );
+            getMessageStatusConfig(status);
 
         if (!statusConfig) {
             return "";
@@ -1830,7 +2136,147 @@
         );
     }
 
+    // ============================================================
+    // QUICK REPLIES STATE
+    // ============================================================
 
+    function showQuickReplies() {
+        if (!DOM.quickReplies) {
+            return;
+        }
+
+        DOM.quickReplies.hidden = false;
+
+        DOM.quickReplies.classList.add("show");
+
+        state.quickReplies.visible = true;
+    }
+
+
+    function hideQuickReplies() {
+        if (!DOM.quickReplies) {
+            return;
+        }
+
+        DOM.quickReplies.hidden = true;
+
+        DOM.quickReplies.classList.remove("show");
+
+        state.quickReplies.visible = false;
+    }
+
+
+    function clearQuickReplyTimer() {
+        if (state.quickReplies.timer) {
+            clearTimeout(
+                state.quickReplies.timer
+            );
+
+            state.quickReplies.timer = null;
+        }
+    }
+
+
+    function updateQuickRepliesActivity(message) {
+        if (!message?.createdAt) {
+            return;
+        }
+
+        const messageTime =
+            new Date(message.createdAt).getTime();
+
+        if (!Number.isFinite(messageTime)) {
+            return;
+        }
+
+        if (
+            !state.quickReplies.lastMessageAt ||
+            messageTime >
+            state.quickReplies.lastMessageAt
+        ) {
+            state.quickReplies.lastMessageAt =
+                messageTime;
+        }
+
+        scheduleQuickReplies();
+    }
+
+
+    function scheduleQuickReplies() {
+        clearQuickReplyTimer();
+
+        if (!state.quickReplies.lastMessageAt) {
+            showQuickReplies();
+
+            return;
+        }
+
+        const inactivity =
+            Date.now() -
+            state.quickReplies.lastMessageAt;
+
+        const remaining =
+            CONFIG.timing.quickReplyInactivity -
+            inactivity;
+
+        if (remaining <= 0) {
+            showQuickReplies();
+
+            return;
+        }
+
+        hideQuickReplies();
+
+        state.quickReplies.timer =
+            setTimeout(
+                showQuickReplies,
+                remaining
+            );
+    }
+
+
+    function initializeQuickRepliesFromMessages(
+        messages
+    ) {
+        if (
+            !Array.isArray(messages) ||
+            messages.length === 0
+        ) {
+            state.quickReplies.lastMessageAt =
+                null;
+            console.log('c');
+            showQuickReplies();
+
+            return;
+        }
+
+        const latestMessage =
+            messages.reduce(
+                (latest, message) => {
+                    if (!latest) {
+                        return message;
+                    }
+
+                    return new Date(message.createdAt) >
+                        new Date(latest.createdAt)
+                        ? message
+                        : latest;
+                },
+                null
+            );
+        if (!latestMessage) {
+            showQuickReplies();
+
+            return;
+        }
+
+        state.quickReplies.lastMessageAt =
+            new Date(
+                latestMessage.createdAt
+            ).getTime();
+
+        scheduleQuickReplies();
+    }
     // ============================================================
     // QUICK REPLIES
     // ============================================================
@@ -1843,8 +2289,10 @@
             .forEach(button => {
                 button.addEventListener(
                     "click",
-                    () => {
-                        sendMessage(
+                    async () => {
+                        hideQuickReplies();
+
+                        await sendMessage(
                             button.dataset.message
                         );
                     }
@@ -1934,7 +2382,103 @@
 
         loadConversationMessages();
     }
+    // ============================================================
+    // NOTIFICATION BROWSER
+    // ============================================================
+    function shouldShowNotificationPrompt() {
+        const value = localStorage.getItem(CONFIG.storage.notificationPrompt);
+        console.log(value);
 
+        if (!value) {
+            return true;
+        }
+
+        const expiresAt = Number(value);
+
+        console.log(expiresAt);
+        if (!Number.isFinite(expiresAt)) {
+            localStorage.removeItem(
+                CONFIG.storage.notificationPrompt
+            );
+
+            return true;
+        }
+
+        if (Date.now() >= expiresAt) {
+            localStorage.removeItem(
+                CONFIG.storage.notificationPrompt
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+    function showNotificationPrompt() {
+        console.log(DOM.notificationPrompt);
+        if (!DOM.notificationPrompt) {
+            return;
+        }
+
+        if (!("Notification" in window)) {
+            return;
+        }
+        if (Notification.permission !== "default") {
+            return;
+        }
+
+        if (!shouldShowNotificationPrompt()) {
+            return;
+        }
+        DOM.notificationPrompt.hidden = false;
+    }
+
+    function markNotificationPrompted() {
+        const expiresAt =
+            Date.now() + CONFIG.timing.notificationPromptDelay;
+
+        localStorage.setItem(
+            CONFIG.storage.notificationPrompt,
+            String(expiresAt)
+        );
+
+        DOM.notificationPrompt.hidden = true;
+    }
+
+    function showMessageNotification(message) {
+        if (!("Notification" in window)) {
+            return;
+        }
+
+        if (Notification.permission !== "granted") {
+            return;
+        }
+
+        if (!message) {
+            return;
+        }
+
+        const senderName = message.senderName || "Caterin";
+        const content = message.content || "Bạn có tin nhắn mới.";
+
+        const notification = new Notification(
+            `${senderName} đã gửi tin nhắn`,
+            {
+                body: content,
+                icon: "/favicon.ico"
+            }
+        );
+
+        notification.onclick = () => {
+            window.focus();
+
+            if (!isChatOpen()) {
+                openChat();
+            }
+
+            notification.close();
+        };
+    }
     // ============================================================
     // INITIALIZATION
     // ============================================================

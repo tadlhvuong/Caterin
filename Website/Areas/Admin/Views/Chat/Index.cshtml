@@ -20,12 +20,10 @@
                  MAIN CONTENT
             ====================================================== -->
             <main class="chat-main" id="chatMain">
-
                 <!-- =================================================
                      CONVERSATION LIST
                 ================================================== -->
-                <section class="conversation-panel"
-                         id="conversationPanel">
+                <section class="conversation-panel" id="conversationPanel">
 
                     <div class="conversation-header border-bottom">
 
@@ -44,7 +42,7 @@
 
                                 <small class="text-muted"
                                        id="conversationTotal">
-                                    12 conversations
+                                    0 conversations
                                 </small>
                             </div>
 
@@ -71,7 +69,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end">
 
                                     <li>
-                                        <button class="dropdown-item">
+                                        <button class="dropdown-item" id="markAllAsRead">
                                             Mark all as read
                                         </button>
                                     </li>
@@ -92,9 +90,7 @@
 
                     @* <partial name="_ConversationList" /> *@
 
-                    <div id="conversationList"
-                         class="conversation-list"
-                         data-perfect-scrollbar>
+                    <div id="conversationList" class="conversation-list" data-perfect-scrollbar>
                     </div>
                 </section>
 

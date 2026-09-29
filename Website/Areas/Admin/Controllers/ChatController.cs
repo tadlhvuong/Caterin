@@ -53,15 +53,11 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("conversations")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Conversations(
-    long? inboxId,
-    int limit = 30,
-    DateTime? beforeLastMessageAt = null,
-    long? beforeId = null,
-    CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Conversations(long? inboxId, string? search, int limit = 30, DateTime? beforeLastMessageAt = null, long? beforeId = null, CancellationToken cancellationToken = default)
         {
             var result = await _chatService.GetConversationListAsync(
                 inboxId,
+                search,
                 _currentUserService.UserId,
                 limit,
                 beforeLastMessageAt,
@@ -91,31 +87,22 @@ namespace Website.Areas.Admin.Controllers
         //    }
 
 
-        [HttpGet("contact")]
+        [HttpGet("{conversationId:long}/contact")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Contact(
-            long conversationId,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Contact(long conversationId, CancellationToken cancellationToken)
         {
-            var result = await _chatService
-                .GetConversationContactAsync(
-                    conversationId,
-                    cancellationToken);
+            var result = await _chatService.GetConversationContactAsync(conversationId, cancellationToken);
 
             if (result == null)
+            {
                 return NotFound();
+            }
 
-            return PartialView(
-                "_ContactDrawer",
-                result);
+            return Ok(result);
         }
         [HttpGet("{conversationId:long}/messages")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Messages(
-    long conversationId,
-    int limit = 30,
-    long? before = null,
-    CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Messages(long conversationId, int limit = 30, long? before = null, CancellationToken cancellationToken = default)
         {
             var result = await _chatService.GetAdminMessagesAsync(
                 conversationId,

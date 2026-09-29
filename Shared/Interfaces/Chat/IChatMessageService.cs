@@ -13,7 +13,14 @@ namespace Shared.Interfaces.Chat
             StartChatRequest request,
             string? userId,
             CancellationToken cancellationToken = default);
-
+        Task<ChatConversationDto> StartClientConversationAsync(
+    StartChatRequest request,
+    string? userId,
+    CancellationToken cancellationToken = default);
+        Task<ChatConversationDto> StartAdminConversationAsync(
+      long inboxId,
+      long contactId,
+      CancellationToken cancellationToken = default);
         Task<ChatMessageDto> SendCustomerMessageAsync(
             long conversationId,
             long contactId,
@@ -32,6 +39,7 @@ namespace Shared.Interfaces.Chat
             CancellationToken cancellationToken = default);
         Task<object> GetConversationListAsync(
     long? inboxId,
+    string?  search,
     string? currentUserId,
     int limit = 30,
     DateTime? beforeLastMessageAt = null,
@@ -83,5 +91,6 @@ namespace Shared.Interfaces.Chat
            CancellationToken cancellationToken = default);
         Task<ServiceResult> MarkConversationAsReadAsync(long conversationId, long? contactId,
             string? guestToken, CancellationToken cancellationToken = default);
+        Task<ServiceResult> MarkAllConversationsAsReadAsync(CancellationToken cancellationToken = default);
     }
 }

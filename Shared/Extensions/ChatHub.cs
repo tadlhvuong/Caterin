@@ -122,8 +122,7 @@ namespace Shared.Extensions
 
             if (!allowed)
             {
-                throw new HubException(
-                    "Bạn không có quyền truy cập conversation này.");
+                throw new HubException("Bạn không có quyền truy cập conversation này.");
             }
 
             await Groups.AddToGroupAsync(
@@ -413,8 +412,7 @@ namespace Shared.Extensions
         }
         public async Task CustomerMessageDelivered(long messageId, long contactId, string? guestToken)
         {
-            var cancellationToken =
-                Context.ConnectionAborted;
+            var cancellationToken = Context.ConnectionAborted;
 
             var message = await _dbContext.ChatMessages
                 .FirstOrDefaultAsync(
@@ -437,60 +435,19 @@ namespace Shared.Extensions
             if (message.Status >= ChatMessageStatus.Delivered)
                 return;
 
-            var conversation =
-                await _dbContext.ChatConversations
-                    .FirstOrDefaultAsync(
-                        x =>
-                            x.Id == message.ConversationId &&
-                            x.ContactId == contactId,
+           var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var allowed =
+                await _chatMessageService
+                    .CanCustomerAccessConversationAsync(
+                        message.ConversationId,
+                        contactId,
+                        userId,
+                        guestToken,
                         cancellationToken);
 
-            if (conversation == null)
+            if (!allowed)
                 throw new HubException("Forbidden.");
-
-            var contact =
-                await _dbContext.ChatContacts
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(
-                        x => x.Id == contactId,
-                        cancellationToken);
-
-            if (contact == null)
-                throw new HubException("Forbidden.");
-
-            /*
-             * Guest
-             */
-            if (!string.IsNullOrWhiteSpace(guestToken))
-            {
-                if (
-                    string.IsNullOrWhiteSpace(
-                        contact.GuestToken) ||
-                    contact.GuestToken != guestToken)
-                {
-                    throw new HubException("Forbidden.");
-                }
-            }
-            /*
-             * Logged-in Customer
-             */
-            else
-            {
-                var userId =
-                    Context.User?.FindFirstValue(
-                        ClaimTypes.NameIdentifier);
-
-                if (string.IsNullOrWhiteSpace(userId))
-                    throw new HubException("Unauthenticated.");
-
-                if (
-                    !string.IsNullOrWhiteSpace(
-                        contact.UserId) &&
-                    contact.UserId != userId)
-                {
-                    throw new HubException("Forbidden.");
-                }
-            }
 
             var now = DateTime.UtcNow;
 
@@ -568,6 +525,20 @@ namespace Shared.Extensions
                 return null;
 
             return ChatConversationStatus.Open;
+        }
+        [Authorize]
+        public async Task MarkAllConversationsAsRead()
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                throw new HubException(
+                    "Bạn chưa đăng nhập."
+                );
+            }
+
+            await _chatMessageService.MarkAllConversationsAsReadAsync();
         }
     }
 

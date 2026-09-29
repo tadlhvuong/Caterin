@@ -103,14 +103,10 @@ window.ChatScroll = {
    WORKSPACE
 ========================================================= */
 
-document.addEventListener(
-    'DOMContentLoaded',
-    function () {
+document.addEventListener('DOMContentLoaded', function () {
 
         const workspace =
-            document.getElementById(
-                'chatWorkspace'
-            );
+            document.getElementById('chatWorkspace');
 
         if (!workspace) {
             return;
@@ -189,7 +185,40 @@ document.addEventListener(
                 document.getElementById(
                     'closeContactDrawer'
                 ),
+            contactAvatar:
+                document.getElementById(
+                    'contactAvatar'
+                ),
 
+            contactName:
+                document.getElementById(
+                    'contactName'
+                ),
+
+            contactType:
+                document.getElementById(
+                    'contactType'
+                ),
+
+            contactEmail:
+                document.getElementById(
+                    'contactEmail'
+                ),
+
+            contactPhone:
+                document.getElementById(
+                    'contactPhone'
+                ),
+
+            contactCreatedAt:
+                document.getElementById(
+                    'contactCreatedAt'
+                ),
+
+            contactLoading:
+                document.getElementById(
+                    'contactLoading'
+                ),
             sendMessageForm:
                 document.getElementById(
                     'sendMessageForm'
@@ -233,7 +262,11 @@ document.addEventListener(
             typing:
                 document.getElementById(
                     'typing'
-                )
+                ),
+            markAllAsRead:
+                document.getElementById(
+                    'markAllAsRead'
+                ),
         };
 
 
@@ -316,7 +349,11 @@ document.addEventListener(
                 oldestMessageId: null,
 
                 newestMessageId: null
-            }
+            },
+
+            contactConversationId: null,
+            contactData: null,
+
         };
         const conversationState = {
             items: new Map(),
@@ -337,11 +374,17 @@ document.addEventListener(
         };
         const conversationCountState = {
             all: 0,
+            website: 0,
+            facebook: 0,
             open: 0,
             pending: 0,
             resolved: 0,
             loading: false
         };
+        const limitState = {
+            list: 10, //limit lazy loading conversation list
+            message: 30 //limit lazy loading conversation message
+        }
         let conversationSearchTimer = null;
         let conversationCountsRefreshQueued = false;
         /* =====================================================
@@ -604,20 +647,8 @@ document.addEventListener(
            CONVERSATION STATE
         ===================================================== */
 
-        function getCurrentConversationId() {
-
-            return state.currentConversationId;
-        }
-
-
-        function isCurrentConversation(
-            conversationId
-        ) {
-
-            return isSameId(
-                conversationId,
-                state.currentConversationId
-            );
+        function isCurrentConversation(conversationId) {
+            return isSameId(conversationId, state.currentConversationId);
         }
 
 
@@ -1090,10 +1121,7 @@ document.addEventListener(
                     <button
                         type="button"
                         class="chat-retry"
-                        data-conversation-id="${escapeHtml(
-                conversationId
-            )}">
-                        Thử lại
+                        data-conversation-id="${escapeHtml(conversationId)}"> Thử lại
                     </button>
                 </li>
             `;
@@ -1159,7 +1187,6 @@ document.addEventListener(
                     `Load messages failed: ${response.status}`
                 );
             }
-            console.log("LOAD MESSAGE");
             return await response.json();
         }
 
@@ -1168,57 +1195,87 @@ document.addEventListener(
             beforeLastMessageAt = null,
             beforeId = null
         } = {}) {
-            const params = new URLSearchParams();
+
+            const params =
+                new URLSearchParams();
+
 
             if (conversationState.filters.inboxId) {
+
                 params.set(
                     'inboxId',
                     conversationState.filters.inboxId
                 );
             }
-             if (conversationState.filters.status !== 'all') {
-            params.set(
-                'status',
+
+
+            if (
                 conversationState.filters.status
-            );
-        }
+            ) {
 
-        if (conversationState.filters.search) {
-            params.set(
-                'search',
+                params.set(
+                    'status',
+                    conversationState.filters.status
+                );
+            }
+
+
+            if (
                 conversationState.filters.search
-            );
-        }
-            
-        if (conversationState.filters.assignedUserId) {
-            params.set(
-                'assignedUserId',
-                conversationState.filters.assignedUserId
-            );
-        }
+            ) {
 
-        if (conversationState.filters.labelId) {
-            params.set(
-                'labelId',
+                params.set(
+                    'search',
+                    conversationState.filters.search
+                );
+            }
+
+
+            if (
+                conversationState.filters.assignedUserId
+            ) {
+
+                params.set(
+                    'assignedUserId',
+                    conversationState.filters.assignedUserId
+                );
+            }
+
+
+            if (
                 conversationState.filters.labelId
+            ) {
+
+                params.set(
+                    'labelId',
+                    conversationState.filters.labelId
+                );
+            }
+
+
+            params.set(
+                'limit',
+                String(limit)
             );
-        }
-            params.set('limit', String(limit));
 
 
             if (beforeLastMessageAt) {
+
                 params.set(
                     'beforeLastMessageAt',
                     beforeLastMessageAt
                 );
             }
 
+
             if (beforeId !== null) {
+
                 params.set(
                     'beforeId',
                     beforeId
                 );
             }
+
 
             return params;
         }
@@ -1232,17 +1289,14 @@ document.addEventListener(
 
             conversationState.loading = true;
             const params = buildConversationQueryParams({
-                limit: 10
+                limit: limitState.list
             });
-            console.log(
-                '[CONVERSATION FILTERS]',
-                conversationState.filters
-            );
+            const search = conversationState.filters.search?.trim();
 
-            console.log(
-                '[CONVERSATION URL]',
-                `/admin/chat/conversations?${params.toString()}`
-            );
+            if (search) {
+                params.set('search', search
+                );
+            }
             try {
                 const response = await fetch(
                     `/admin/chat/conversations?${params.toString()}`,
@@ -1253,14 +1307,12 @@ document.addEventListener(
                         }
                     }
                 );
-                console.log("LOAD CONVERSATION");
                 if (!response.ok) {
                     throw new Error('Không thể tải danh sách hội thoại.');
                 }
 
                 const result = await response.json();
 
-                console.log(result);
                 conversationState.items.clear();
 
                 for (const item of result.items) {
@@ -1274,9 +1326,7 @@ document.addEventListener(
                 conversationState.oldestLastMessageAt =
                     result.oldestLastMessageAt;
 
-                conversationState.oldestId =
-                    result.oldestId;
-
+                conversationState.oldestId = result.oldestId;
                 renderConversationList();
 
             } catch (error) {
@@ -1308,13 +1358,12 @@ document.addEventListener(
             try {
                 const params =
                     buildConversationQueryParams({
-                        limit: 30,
+                        limit: limitState.message,
                         beforeLastMessageAt:
                             conversationState.oldestLastMessageAt,
                         beforeId:
                             conversationState.oldestId
                     });
-                console.log(params);
                 const response = await fetch(
                     `/admin/chat/conversations?${params}`,
                     {
@@ -1332,8 +1381,6 @@ document.addEventListener(
                 }
 
                 const result = await response.json();
-                console.log("LOAD MORE CONVERSATION");
-                console.log(result);
                 for (const item of result.items) {
                     conversationState.items.set(
                         normalizeId(item.id),
@@ -1343,51 +1390,46 @@ document.addEventListener(
 
                 conversationState.hasMore = result.hasMore;
 
-                conversationState.oldestLastMessageAt =
-                    result.oldestLastMessageAt;
+                conversationState.oldestLastMessageAt = result.oldestLastMessageAt;
 
-                conversationState.oldestId =
-                    result.oldestId;
+                conversationState.oldestId = result.oldestId;
 
                 renderConversationList();
 
             } catch (error) {
-                console.error(
-                    'loadMoreConversations:',
-                    error
+                console.error('loadMoreConversations:', error
                 );
             } finally {
                 conversationState.loading = false;
             }
         }
         function renderConversationList() {
-
             if (!DOM.conversationList) {
                 return;
             }
-
-            const conversations =
-                getFilteredConversations();
+            const conversations = getFilteredConversations();
 
             DOM.conversationList.innerHTML = '';
 
             if (conversations.length === 0) {
-
                 renderConversationEmptyState();
-
             }
             else {
-
                 for (const conversation of conversations) {
-
-                    const element =
-                        createConversationElement(
-                            conversation
-                        );
+                    const element = createConversationElement(conversation);
+                    if (element) {
+                        if (conversation.unreadCount === 0) {
+                            element.classList.add('is-read');
+                        }
+                        else {
+                            element.classList.remove('is-read');
+                        }
+                    }
 
                     DOM.conversationList.appendChild(
                         element
                     );
+
                 }
             }
 
@@ -1419,9 +1461,10 @@ document.addEventListener(
         </div>
     `;
         }
-        function getFilteredConversations() {
 
-            let items = Array.from(
+        function getVisibleConversations() {
+
+            const items = Array.from(
                 conversationState.items.values()
             );
 
@@ -1438,16 +1481,28 @@ document.addEventListener(
                 return Number(b.id) - Number(a.id);
             });
 
-            return items.filter(
-                matchesConversation
-            );
+            return items;
+        }
+        function getFilteredConversations() {
+
+            let items = Array.from(conversationState.items.values());
+            items.sort((a, b) => {
+
+                const dateCompare = new Date(b.lastMessageAt) - new Date(a.lastMessageAt);
+
+                if (dateCompare !== 0) {
+                    return dateCompare;
+                }
+
+                return Number(b.id) - Number(a.id);
+            });
+
+            return items.filter(matchesConversation);
         }
         function matchesConversationFilters(
             conversation
         ) {
-            const name =
-                conversation.contactName
-                    ?.toLowerCase() || '';
+            const name = conversation.contactName?.toLowerCase() || '';
 
             const preview =
                 (
@@ -1456,41 +1511,25 @@ document.addEventListener(
                     ''
                 ).toLowerCase();
 
-            const search =
-                conversationState.filters.search
-                    ?.trim()
-                    .toLowerCase() || '';
-
+            const search = conversationState.filters.search?.trim().toLowerCase() || '';
             if (search) {
 
-                const matched =
-                    name.includes(search) ||
-                    preview.includes(search);
+                const matched = name.includes(search) || preview.includes(search);
 
                 if (!matched) {
                     return false;
                 }
             }
 
-            if (
-                conversationState.filters.assignedUserId
-            ) {
+            if (conversationState.filters.assignedUserId) {
 
-                if (
-                    normalizeId(
-                        conversation.assignedUserId
-                    ) !==
-                    normalizeId(
-                        conversationState.filters.assignedUserId
-                    )
+                if (normalizeId(conversation.assignedUserId) !== normalizeId(conversationState.filters.assignedUserId)
                 ) {
                     return false;
                 }
             }
 
-            if (
-                conversationState.filters.labelId
-            ) {
+            if (conversationState.filters.labelId) {
 
                 const hasLabel =
                     conversation.labels?.some(
@@ -1510,27 +1549,18 @@ document.addEventListener(
         }
         function matchesConversation(conversation) {
 
-            const inboxFilter =
-                conversationState.filters.inboxId;
-
-            if (
-                inboxFilter &&
-                Number(conversation.inboxId) !== Number(inboxFilter)
-            ) {
+            const inboxFilter = conversationState.filters.inboxId;
+            if (inboxFilter &&
+                inboxFilter !== 'all' &&
+                Number(conversation.inboxId) !==
+                Number(inboxFilter)) {
                 return false;
             }
 
-            const statusFilter =
-                conversationState.filters.status;
-
-            if (
-                statusFilter &&
-                statusFilter !== 'all' &&
-                getConversationStatusKey(conversation.status) !== statusFilter
-            ) {
+            const statusFilter = conversationState.filters.status;
+            if (statusFilter && statusFilter !== 'all' && getConversationStatusKey(conversation.status) !== statusFilter) {
                 return false;
             }
-
             return matchesConversationFilters(conversation);
         }
         function createConversationElement(conversation) {
@@ -1576,7 +1606,7 @@ document.addEventListener(
 
             article.innerHTML = `
         <div class="conversation-avatar">
-            <div class="avatar avatar-sm avatar-online">
+            <div class="avatar avatar-sm">
                 ${avatar}
             </div>
         </div>
@@ -1770,7 +1800,7 @@ document.addEventListener(
                     await fetchConversationMessages(
                         conversationId,
                         {
-                            limit: 30,
+                            limit: limitState.message,
                             signal:
                                 controller.signal
                         }
@@ -1896,9 +1926,8 @@ document.addEventListener(
                     await fetchConversationMessages(
                         conversationId,
                         {
-                            limit: 30,
-                            before:
-                                oldestMessageId
+                            limit: limitState.message,
+                            before: oldestMessageId
                         }
                     );
 
@@ -1974,7 +2003,7 @@ document.addEventListener(
         }
 
         async function loadConversationCounts() {
-
+            console.log("loadConversationCounts");
             /*
              * Nếu đang có request:
              * không bỏ qua request mới.
@@ -1993,8 +2022,7 @@ document.addEventListener(
 
             try {
 
-                const params =
-                    new URLSearchParams();
+                const params = new URLSearchParams();
 
                 if (conversationState.filters.inboxId) {
                     params.set(
@@ -2003,8 +2031,7 @@ document.addEventListener(
                     );
                 }
 
-                const search =
-                    conversationState.filters.search?.trim();
+                const search = conversationState.filters.search?.trim();
 
                 if (search) {
 
@@ -2057,13 +2084,14 @@ document.addEventListener(
                 const result =
                     await response.json();
 
-                console.log(
-                    '[COUNTS FROM DB]',
-                    result
-                );
-
                 conversationCountState.all =
                     Number(result.all) || 0;
+
+                conversationCountState.website =
+                    Number(result.website) || 0;
+
+                conversationCountState.facebook =
+                    Number(result.facebook) || 0;
 
                 conversationCountState.open =
                     Number(result.open) || 0;
@@ -2073,7 +2101,6 @@ document.addEventListener(
 
                 conversationCountState.resolved =
                     Number(result.resolved) || 0;
-
                 updateConversationFilterCounts();
 
             }
@@ -2107,10 +2134,15 @@ document.addEventListener(
         }
         function updateConversationFilterCounts() {
             const counts = conversationCountState;
-
             const countElements = {
                 all: document.querySelector(
                     '.chat-filter-list li[data-filter-value="all"] .chat-filter-count'
+                ),
+                website: document.querySelector(
+                    '.chat-filter-list li[data-filter-value="1"] .chat-filter-count'
+                ),
+                facebook: document.querySelector(
+                    '.chat-filter-list li[data-filter-value="2"] .chat-filter-count'
                 ),
 
                 open: document.querySelector(
@@ -2128,6 +2160,12 @@ document.addEventListener(
 
             if (countElements.all) {
                 countElements.all.textContent = counts.all;
+            }
+            if (countElements.website) {
+                countElements.website.textContent = counts.website;
+            }
+            if (countElements.facebook) {
+                countElements.facebook.textContent = counts.facebook;
             }
 
             if (countElements.open) {
@@ -2252,6 +2290,10 @@ document.addEventListener(
             ChatScroll.update(
                 DOM.conversationList
             );
+
+            state.contactConversationId = null;
+            state.contactData = null;
+            resetContact();
         }
 
 
@@ -2283,9 +2325,7 @@ document.addEventListener(
             /*
              * Cancel message request.
              */
-            if (
-                state.messageRequestController
-            ) {
+            if (state.messageRequestController) {
 
                 state.messageRequestController.abort();
 
@@ -2413,6 +2453,8 @@ document.addEventListener(
 
             registerMessageReceived();
 
+            registerConversationCreated();
+
             registerTypingReceived();
 
             registerPresenceUpdated();
@@ -2428,10 +2470,8 @@ document.addEventListener(
         ===================================================== */
 
         function registerMessageReceived() {
-
             state.connection.on(
-                'chat.message.received',
-                handleMessageReceived
+                'chat.message.received', handleMessageReceived
             );
         }
 
@@ -2439,7 +2479,6 @@ document.addEventListener(
         async function handleMessageReceived(
             message
         ) {
-
             if (!message?.id) {
                 return;
             }
@@ -2452,33 +2491,23 @@ document.addEventListener(
                 return;
             }
 
-            const conversationId =
-                message.conversationId;
+            const conversationId = message.conversationId;
 
             if (!conversationId) {
                 return;
             }
 
-            const current =
-                isCurrentConversation(
-                    conversationId
-                );
-
+            const current = isCurrentConversation(conversationId);
 
             /*
              * Current conversation.
              */
-            if (current) {
+            await acknowledgeMessageDelivered(message);
 
-                appendChatMessage(
-                    message
-                );
+            if (current) {
+                appendChatMessage(message);
 
                 scrollChatToBottom();
-
-                await acknowledgeMessageDelivered(
-                    message
-                );
 
                 scheduleMarkConversationAsRead(
                     conversationId
@@ -2493,12 +2522,70 @@ document.addEventListener(
                 message
             );
         }
+        function registerConversationCreated() {
 
+            state.connection.on(
+                'chat.conversation.created',
+                handleConversationCreated
+            );
+        }
+
+        async function handleConversationCreated(
+            conversation
+        ) {
+
+            if (!conversation?.id) {
+                return;
+            }
+
+            const conversationId =
+                normalizeId(conversation.id);
+
+            /*
+             * Đã tồn tại trong state
+             * thì không thêm lại.
+             */
+            if (
+                conversationState.items.has(
+                    conversationId
+                )
+            ) {
+                return;
+            }
+
+            /*
+             * Conversation mới.
+             */
+            conversationState.items.set(
+                conversationId,
+                conversation
+            );
+
+            /*
+             * Conversation mới được tạo
+             * với status Open.
+             */
+            updateRealtimeConversationCounts(
+                'open',
+                1
+            );
+
+            /*
+             * Render lại list.
+             *
+             * renderConversationList()
+             * sẽ tự:
+             * - lấy Map
+             * - sort theo lastMessageAt
+             * - apply filter
+             * - createConversationElement()
+             */
+            renderConversationList();
+        }
 
         async function acknowledgeMessageDelivered(
             message
         ) {
-
             if (
                 !state.connection ||
                 typeof signalR ===
@@ -2510,10 +2597,7 @@ document.addEventListener(
             }
 
             try {
-
-                await state.connection.invoke(
-                    'AdminMessageDelivered',
-                    Number(message.id)
+                await state.connection.invoke('AdminMessageDelivered', Number(message.id)
                 );
 
             }
@@ -2937,16 +3021,7 @@ document.addEventListener(
                 );
 
 
-                const conversation =
-                    conversationState.items.get(
-                        normalizeId(conversationId)
-                    );
-
-                if (conversation) {
-                    conversation.unreadCount = 0;
-                }
-
-                renderConversationList();
+                await reloadConversationsWithFilters();
 
                 return true;
 
@@ -2984,9 +3059,6 @@ document.addEventListener(
 
 
         function updateConversationList(message) {
-
-            console.log('[MESSAGE RECEIVED]', message);
-
             if (!message?.conversationId) {
                 return;
             }
@@ -3124,12 +3196,6 @@ document.addEventListener(
             if (oldStatus === newStatus) {
                 return;
             }
-
-            console.log('[UPDATE STATUS]', {
-                conversationId,
-                oldStatus,
-                newStatus
-            });
 
             /*
              * Backend là source of truth.
@@ -3313,57 +3379,113 @@ document.addEventListener(
                     '.chat-filter-list li[data-filter-type]'
                 );
 
-            filterItems.forEach(filterItem => {
-                filterItem.addEventListener('click', async function () {
+            filterItems.forEach(
+                filterItem => {
 
-                    const type =
-                        this.dataset.filterType;
+                    filterItem.addEventListener(
+                        'click',
+                        async function () {
 
-                    const value =
-                        this.dataset.filterValue;
+                            const type =
+                                this.dataset.filterType;
 
-                    const filterKey =
-                        filterMap[type];
+                            const value =
+                                this.dataset.filterValue;
 
-                    if (!filterKey) return;
+                            const filterKey =
+                                filterMap[type];
 
-                    // Chỉ một item active trong cùng filter type
-                    document
-                        .querySelectorAll(
-                            `.chat-filter-list li[data-filter-type="${CSS.escape(type)}"]`
-                        )
-                        .forEach(item => {
-                            item.classList.remove('active');
-                        });
+                            if (!filterKey) {
+                                return;
+                            }
 
-                    this.classList.add('active');
 
-                    if (type === 'inbox') {
+                            /*
+                             * =====================================================
+                             * TOGGLE
+                             * =====================================================
+                             *
+                             * Status / Label / Assigned:
+                             *
+                             *   click lần 1 -> active
+                             *   click lần 2 -> inactive
+                             *
+                             * Inbox:
+                             *
+                             *   luôn có 1 inbox active
+                             *   click inbox khác -> đổi inbox
+                             */
 
-                        conversationState.filters.inboxId =
-                            value === 'all'
-                                ? null
-                                : value;
+                            if (
+                                this.classList.contains('active') &&
+                                type !== 'inbox'
+                            ) {
 
-                    } else if (type === 'status') {
+                                /*
+                                 * Click lại filter đang active
+                                 * => bỏ filter.
+                                 */
+                                this.classList.remove('active');
 
-                        conversationState.filters.status =
-                            value || 'all';
+                                conversationState.filters[
+                                    filterKey
+                                ] = null;
 
-                    } else {
+                            }
+                            else {
 
-                        conversationState.filters[filterKey] =
-                            value || null;
-                    }
+                                /*
+                                 * Chỉ bỏ active của những item
+                                 * cùng loại filter.
+                                 */
+                                document
+                                    .querySelectorAll(
+                                        `.chat-filter-list li[data-filter-type="${CSS.escape(type)}"]`
+                                    )
+                                    .forEach(
+                                        item => {
 
-                    await reloadConversationsWithFilters();
+                                            item.classList.remove(
+                                                'active'
+                                            );
 
-                    if (isMobile()) {
-                        closeFilterSidebar();
-                    }
-                });
-            });
+                                        }
+                                    );
+
+
+                                /*
+                                 * Active item mới.
+                                 */
+                                this.classList.add('active');
+
+
+                                /*
+                                 * Lưu value.
+                                 */
+                                conversationState.filters[
+                                    filterKey
+                                ] = value;
+                            }
+
+
+                            /*
+                             * Reload theo toàn bộ filter
+                             * hiện tại.
+                             */
+                            await reloadConversationsWithFilters();
+
+
+                            if (isMobile()) {
+                                closeFilterSidebar();
+                            }
+
+                        }
+                    );
+
+                }
+            );
         }
+
         async function reloadConversationsWithFilters() {
             conversationState.items.clear();
             conversationState.oldestLastMessageAt = null;
@@ -3452,24 +3574,22 @@ document.addEventListener(
            CONTACT DRAWER
         ===================================================== */
 
-        function initContactEvents() {
+    async function initContactEvents() {
 
             DOM.chatContactButton?.addEventListener(
                 'click',
                 function () {
-
-                    if (
-                        !state.currentConversationId
-                    ) {
+                    const conversationId = state.currentConversationId;
+                    if (!conversationId) {
                         return;
                     }
 
-                    DOM.contactDrawer
-                        ?.classList.add(
-                            'show'
-                        );
+                    DOM.contactDrawer?.classList.add('show');
 
                     updateOverlay();
+                    loadContact(
+                        conversationId
+                    );
                 }
             );
 
@@ -3480,7 +3600,179 @@ document.addEventListener(
             );
         }
 
+    async function loadContact(conversationId) {
 
+        // Đã load contact của conversation này
+        if (
+            state.contactConversationId ===
+            conversationId &&
+            state.contactData
+        ) {
+            renderContact(
+                state.contactData
+            );
+
+            return;
+        }
+
+        setContactLoading(true);
+
+        try {
+
+            const response = await fetch(
+                `/admin/chat/${conversationId}/contact`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With':
+                            'XMLHttpRequest'
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    'Failed to load contact.'
+                );
+            }
+
+            const contact =
+                await response.json();
+            console.log(contact);
+            // Trong lúc request đang chạy,
+            // user có thể đã click conversation khác
+            if (
+                state.currentConversationId !==
+                conversationId
+            ) {
+                return;
+            }
+
+            state.contactConversationId =
+                conversationId;
+
+            state.contactData =
+                contact;
+
+            renderContact(contact);
+
+        } catch (error) {
+
+            console.error(
+                'Load contact failed:',
+                error
+            );
+
+            renderContactError();
+
+        } finally {
+
+            setContactLoading(false);
+        }
+    }
+    function renderContact(contact) {
+
+        if (!contact) {
+            return;
+        }
+
+        if (DOM.contactName) {
+            DOM.contactName.textContent =
+                contact.name || 'Unknown';
+        }
+
+        if (DOM.contactType) {
+            DOM.contactType.textContent =
+                contact.type || 'Customer';
+        }
+
+        if (DOM.contactEmail) {
+            DOM.contactEmail.textContent =
+                contact.email || '-';
+        }
+
+        if (DOM.contactPhone) {
+            DOM.contactPhone.textContent =
+                contact.phone || '-';
+        }
+
+        if (DOM.contactCreatedAt) {
+            DOM.contactCreatedAt.textContent = formatDate(contact.createdAt);
+        }
+
+        if (DOM.contactAvatar) {
+            DOM.contactAvatar.src =
+                contact.avatarUrl ||
+                '/admin/assets/img/avatars/4.png';
+        }
+    }
+    function resetContact() {
+
+        if (DOM.contactName) {
+            DOM.contactName.textContent = '-';
+        }
+
+        if (DOM.contactType) {
+            DOM.contactType.textContent = 'Customer';
+        }
+
+        if (DOM.contactEmail) {
+            DOM.contactEmail.textContent = '-';
+        }
+
+        if (DOM.contactPhone) {
+            DOM.contactPhone.textContent = '-';
+        }
+
+        if (DOM.contactCreatedAt) {
+            DOM.contactCreatedAt.textContent = '-';
+        }
+
+        if (DOM.contactAvatar) {
+            DOM.contactAvatar.src =
+                '/admin/assets/img/avatars/4.png';
+        }
+    }
+
+    function setContactLoading(isLoading) {
+
+        if (!DOM.contactLoading ||
+            !DOM.contactContent) {
+            return;
+        }
+
+        DOM.contactLoading.classList.toggle(
+            'd-none',
+            !isLoading
+        );
+
+        DOM.contactContent.classList.toggle(
+            'd-none',
+            isLoading
+        );
+    }
+
+
+    function formatDate(value) {
+        if (!value) {
+            return '-';
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return '-';
+        }
+
+        return new Intl.DateTimeFormat(
+            'vi-VN',
+            {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }
+        ).format(date);
+    }
         /* =====================================================
            MOBILE FILTER
         ===================================================== */
@@ -3653,34 +3945,153 @@ document.addEventListener(
            REFRESH
         ===================================================== */
 
-        function initRefresh() {
+        async function initRefresh() {
 
             DOM.refreshConversations?.addEventListener(
                 'click',
-                function () {
+                async function () {
 
                     this.classList.add(
                         'ti-spin'
                     );
 
-                    /*
-                     * Chưa reload API ở đây.
-                     *
-                     * Sau khi lazy loading conversation
-                     * hoàn chỉnh, refresh sẽ gọi:
-                     *
-                     * conversationStore.refresh()
-                     */
-                    setTimeout(
-                        () => {
+                    try {
 
-                            this.classList.remove(
-                                'ti-spin'
-                            );
+                        /*
+                         * Refresh luôn reset:
+                         *
+                         * - Inbox -> All
+                         * - Status -> All
+                         * - Label -> inactive
+                         */
+                        resetConversationFiltersForRefresh();
 
-                        },
-                        500
-                    );
+
+                        /*
+                         * Load lại:
+                         *
+                         * - conversation list
+                         * - conversation counts
+                         */
+                        await reloadConversationsWithFilters();
+
+                    }
+                    catch (error) {
+
+                        console.error(
+                            'REFRESH CONVERSATIONS ERROR:',
+                            error
+                        );
+
+                    }
+                    finally {
+
+                        this.classList.remove(
+                            'ti-spin'
+                        );
+                    }
+                }
+            );
+        }
+        function resetConversationFiltersForRefresh() {
+
+            /*
+             * Inbox
+             * => trở về All
+             */
+            conversationState.filters.inboxId = null;
+
+            document
+                .querySelectorAll(
+                    '.chat-filter-list li[data-filter-type="inbox"]'
+                )
+                .forEach(item => {
+                    item.classList.remove('active');
+
+                    if (
+                        item.dataset.filterValue === 'all'
+                    ) {
+                        item.classList.add('active');
+                    }
+                });
+
+
+            /*
+             * Status
+             * => bỏ filter
+             */
+            conversationState.filters.status = 'all';
+
+            document
+                .querySelectorAll(
+                    '.chat-filter-list li[data-filter-type="status"]'
+                )
+                .forEach(item => {
+                    item.classList.remove('active');
+                });
+
+
+            /*
+             * Label
+             * => bỏ filter
+             */
+            conversationState.filters.labelId = null;
+
+            document
+                .querySelectorAll(
+                    '.chat-filter-list li[data-filter-type="label"]'
+                )
+                .forEach(item => {
+                    item.classList.remove('active');
+                });
+        }
+
+        /* =====================================================
+           MARK ALL AS READ
+        ===================================================== */
+        function initMarkAllAsRead() {
+            DOM.markAllAsRead?.addEventListener(
+                'click',
+                async function () {
+
+                    if (
+                        !state.connection ||
+                        typeof signalR === 'undefined' ||
+                        state.connection.state !==
+                        signalR.HubConnectionState.Connected
+                    ) {
+                        return;
+                    }
+
+                    try {
+                        this.disabled = true;
+
+                        await state.connection.invoke(
+                            'MarkAllConversationsAsRead'
+                        );
+
+                        /*
+                         * Backend đã xử lý mark all read.
+                         *
+                         * Không tự sửa count ở client.
+                         * Không tự đổi status ở client.
+                         *
+                         * Reload lại DB:
+                         * - conversation list
+                         * - filter counts
+                         */
+                        await reloadConversationsWithFilters();
+
+                    }
+                    catch (error) {
+                        console.error(
+                            'MARK ALL AS READ ERROR:',
+                            error
+                        );
+                    }
+                    finally {
+                        this.disabled = false;
+                    }
                 }
             );
         }
@@ -3693,7 +4104,6 @@ document.addEventListener(
         DOM.chatHistory?.addEventListener(
             'click',
             function (event) {
-
                 const retryButton =
                     event.target.closest(
                         '.chat-retry'
@@ -3728,8 +4138,8 @@ document.addEventListener(
         ===================================================== */
 
         async function initialize() {
-            conversationState.filters.inboxId =
-                DOM.workspace?.dataset.inboxId || null;
+            //conversationState.filters.inboxId = DOM.workspace?.dataset.inboxId || null;
+            conversationState.filters.inboxId = null;
 
             initFilterEvents();
 
@@ -3744,6 +4154,8 @@ document.addEventListener(
             initSendMessage();
 
             initRefresh();
+
+            initMarkAllAsRead();
 
             setupConversationLazyLoading();
 

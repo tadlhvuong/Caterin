@@ -193,7 +193,9 @@ public class AuthService : IAuthService
             Email = email,
             UserName = username,
             PhoneNumber = request.PhoneNumber,
-            EmailConfirmed = false
+            EmailConfirmed = false,
+            CreatedAt = DateTime.UtcNow,
+            CreatedIP = CommonHelper.GET_IP(),
         };
         //Tạo tài khoản mới
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -217,12 +219,12 @@ public class AuthService : IAuthService
         //Check gửi thư thành công không
         if (!resultConfirmEmail.Succeeded)
         {
-            await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, false, $"Resend confirm email failed. UserId: {user.Id}");
+            await _securityLogger.LogAsync(SecurityActionType.ResendConfirmEmail, false, $"Send confirm email failed. UserId: {user.Id}");
 
             return new AuthResponse
             {
                 Success = false,
-                Message = $"Gửi xác thực email lỗi. UserId: {user.Id}"
+                Message = "Tài khoản đã được tạo nhưng không thể gửi email xác thực. Vui lòng thử gửi lại email xác thực."
             };
         }
 

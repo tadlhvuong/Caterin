@@ -139,14 +139,16 @@
                 <span>LABELS</span>
 
                 <button type="button"
-                        class="btn btn-icon btn-text-secondary btn-sm">
+                        class="btn btn-icon btn-text-secondary btn-sm"
+                        id="btn-create-chat-label"
+                        title="Thêm label">
                     <i class="ti ti-plus"></i>
                 </button>
             </div>
 
             <ul class="chat-filter-list">
 
-                <li data-filter-type="label"
+               @*  <li data-filter-type="label"
                     data-filter-value="new">
 
                     <a href="javascript:void(0);">
@@ -181,10 +183,120 @@
                         <span>Complaint</span>
                     </a>
                 </li>
-
+ *@
             </ul>
 
         </div>
+        <div class="offcanvas offcanvas-end"
+             tabindex="-1"
+             id="chatLabelOffcanvas"
+             aria-labelledby="chatLabelOffcanvasTitle">
 
+            <div class="offcanvas-header py-6">
+                <h5 id="chatLabelOffcanvasTitle" class="offcanvas-title">
+                    Thêm label
+                </h5>
+
+                <button type="button"
+                        class="btn-close text-reset"
+                        data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
+            </div>
+
+            <div class="offcanvas-body border-top">
+
+                <form class="pt-0"
+                      id="form-create-chat-label"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           id="ChatLabelId"
+                           name="Id"
+                           value="0" />
+
+                    <!-- Name -->
+                    <div class="mb-6">
+                        <label class="form-label" for="chat-label-name">
+                            Tên label
+                        </label>
+
+                        <input type="text"
+                               class="form-control"
+                               id="chat-label-name"
+                               name="Name"
+                               maxlength="100"
+                               placeholder="Nhập tên label"
+                               autocomplete="off"
+                               required />
+
+                        <span class="text-danger field-validation-error"
+                              data-valmsg-for="Name"></span>
+                    </div>
+
+                    <!-- Color -->
+                    <div class="mb-6">
+                        <label class="form-label" for="chat-label-color">
+                            Màu sắc
+                        </label>
+
+                        <div class="d-flex align-items-center gap-3">
+
+                            <input type="color"
+                                   class="form-control form-control-color"
+                                   id="chat-label-color"
+                                   name="Color"
+                                   value="#7367F0"
+                                   title="Chọn màu label" />
+
+                            <input type="text"
+                                   class="form-control"
+                                   id="chat-label-color-value"
+                                   value="#7367F0"
+                                   maxlength="50"
+                                   placeholder="#7367F0"
+                                   autocomplete="off" />
+
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="mb-6">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="chat-label-is-active"
+                                   name="IsActive"
+                                   value="true"
+                                   checked />
+
+                            <label class="form-check-label"
+                                   for="chat-label-is-active">
+                                Hoạt động
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="mb-6">
+                        <button type="submit"
+                                class="btn btn-primary me-sm-3 me-1"
+                                id="btn-submit-chat-label">
+                            Xác nhận
+                        </button>
+
+                        <button type="button"
+                                class="btn btn-label-danger"
+                                id="btn-reset-chat-label"
+                                data-bs-dismiss="offcanvas">
+                            Hủy
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
     </div>
 </aside>

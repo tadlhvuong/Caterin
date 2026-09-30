@@ -9,11 +9,11 @@ namespace Shared.Interfaces.Chat
 {
     public interface IChatMessageService
     {
-        Task<ChatConversationDto> StartConversationAsync(
-            StartChatRequest request,
-            string? userId,
-            CancellationToken cancellationToken = default);
-        Task<ChatConversationDto> StartClientConversationAsync(
+        //Task<ChatConversationDto> StartConversationAsync(
+        //    StartChatRequest request,
+        //    string? userId,
+        //    CancellationToken cancellationToken = default);
+        Task<StartChatResponse> StartClientConversationAsync(
     StartChatRequest request,
     string? userId,
     CancellationToken cancellationToken = default);
@@ -22,11 +22,11 @@ namespace Shared.Interfaces.Chat
       long contactId,
       CancellationToken cancellationToken = default);
         Task<ChatMessageDto> SendCustomerMessageAsync(
-            long conversationId,
-            long contactId,
-            string content,
-            string? guestToken,
-            CancellationToken cancellationToken = default);
+    long? conversationId,
+    long contactId,
+    string content,
+    string? guestToken,
+    CancellationToken cancellationToken = default);
 
         Task<ChatMessageDto> SendAdminMessageAsync(
             long conversationId,
@@ -39,6 +39,7 @@ namespace Shared.Interfaces.Chat
             CancellationToken cancellationToken = default);
         Task<object> GetConversationListAsync(
     long? inboxId,
+    ChatConversationStatus? status,
     string?  search,
     string? currentUserId,
     int limit = 30,
@@ -57,7 +58,7 @@ namespace Shared.Interfaces.Chat
             bool isAdmin,
             CancellationToken cancellationToken = default);
         Task<bool> CanCustomerAccessConversationAsync(
-    long conversationId,
+    long? conversationId,
     long contactId,
     string? userId,
     string? guestToken,
@@ -92,5 +93,20 @@ namespace Shared.Interfaces.Chat
         Task<ServiceResult> MarkConversationAsReadAsync(long conversationId, long? contactId,
             string? guestToken, CancellationToken cancellationToken = default);
         Task<ServiceResult> MarkAllConversationsAsReadAsync(CancellationToken cancellationToken = default);
+
+        Task<ServiceResult> ResolveConversationAsync(
+    long conversationId,
+    string userId,
+    CancellationToken cancellationToken = default);
+
+        Task<ChatConversationDto?> GetPreviousResolvedConversationAsync(
+    long conversationId,
+    long contactId,
+    string? userId,
+    string? guestToken,
+    CancellationToken cancellationToken = default);
+        Task<ChatConversationStatus?> GetCustomerConversationStatusAsync(
+    long conversationId,
+    CancellationToken cancellationToken = default);
     }
 }

@@ -219,6 +219,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById(
                     'contactLoading'
                 ),
+
+            resolveConversationButton: document.getElementById(
+                "resolveConversationButton"
+            ),
             sendMessageForm:
                 document.getElementById(
                     'sendMessageForm'
@@ -282,7 +286,7 @@ document.addEventListener('DOMContentLoaded', function () {
              * Đây là ID duy nhất chúng ta sử dụng.
              */
             currentConversationId: null,
-
+            currentConversationStatus: null,
             /*
              * Conversation SignalR room.
              */
@@ -363,6 +367,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             oldestLastMessageAt: null,
             oldestId: null,
+
+            requestVersion: 0,
+            requestController: null,
 
             filters: {
                 inboxId: null,
@@ -1209,16 +1216,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
 
-            if (
-                conversationState.filters.status
-            ) {
-
+            if (conversationState.filters.status) {
                 params.set(
                     'status',
                     conversationState.filters.status
                 );
             }
-
 
             if (
                 conversationState.filters.search
@@ -1282,62 +1285,117 @@ document.addEventListener('DOMContentLoaded', function () {
         /* =====================================================
            LOAD CONVERSATION LIST
         ===================================================== */
-        async function loadInitialConversations() {
-            if (conversationState.loading) {
+    async function loadInitialConversations() {
+        const requestVersion =
+            ++conversationState.requestVersion;
+
+        // Hủy request list trước đó
+        if (conversationState.requestController) {
+            conversationState.requestController.abort();
+        }
+
+        const controller = new AbortController();
+
+        conversationState.requestController = controller;
+        conversationState.loading = true;
+
+        const params = buildConversationQueryParams({
+            limit: limitState.list
+        });
+
+        const search =
+            conversationState.filters.search?.trim();
+
+        if (search) {
+            params.set('search', search);
+        }
+
+        try {
+            const response = await fetch(
+                `/admin/chat/conversations?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    signal: controller.signal
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    'Không thể tải danh sách hội thoại.'
+                );
+            }
+
+            const result = await response.json();
+
+            // Request này đã cũ.
+            // Không được phép cập nhật state.
+            if (
+                requestVersion !==
+                conversationState.requestVersion
+            ) {
                 return;
             }
 
-            conversationState.loading = true;
-            const params = buildConversationQueryParams({
-                limit: limitState.list
-            });
-            const search = conversationState.filters.search?.trim();
+            conversationState.items.clear();
 
-            if (search) {
-                params.set('search', search
+            for (const item of result.items) {
+                conversationState.items.set(
+                    normalizeId(item.id),
+                    item
                 );
             }
-            try {
-                const response = await fetch(
-                    `/admin/chat/conversations?${params.toString()}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    }
-                );
-                if (!response.ok) {
-                    throw new Error('Không thể tải danh sách hội thoại.');
-                }
 
-                const result = await response.json();
+            conversationState.hasMore =
+                result.hasMore;
 
-                conversationState.items.clear();
+            conversationState.oldestLastMessageAt =
+                result.oldestLastMessageAt;
 
-                for (const item of result.items) {
-                    conversationState.items.set(
-                        normalizeId(item.id),
-                        item
-                    );
-                }
+            conversationState.oldestId =
+                result.oldestId;
 
-                conversationState.hasMore = result.hasMore;
-                conversationState.oldestLastMessageAt =
-                    result.oldestLastMessageAt;
+            renderConversationList();
 
-                conversationState.oldestId = result.oldestId;
-                renderConversationList();
+        } catch (error) {
 
-            } catch (error) {
-                console.error(
-                    'loadInitialConversations:',
-                    error
-                );
-            } finally {
+            // Abort là hành vi bình thường khi filter thay đổi.
+            if (error.name === 'AbortError') {
+                return;
+            }
+
+            // Request cũ thì bỏ qua lỗi luôn.
+            if (
+                requestVersion !==
+                conversationState.requestVersion
+            ) {
+                return;
+            }
+
+            console.log(
+                'loadInitialConversations:',
+                error
+            );
+
+        } finally {
+
+            if (
+                requestVersion ===
+                conversationState.requestVersion
+            ) {
                 conversationState.loading = false;
+
+                if (
+                    conversationState.requestController ===
+                    controller
+                ) {
+                    conversationState.requestController = null;
+                }
             }
         }
+    }
         async function loadMoreConversations() {
             if (
                 conversationState.loading ||
@@ -1358,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', function () {
             try {
                 const params =
                     buildConversationQueryParams({
-                        limit: limitState.message,
+                        limit: limitState.list,
                         beforeLastMessageAt:
                             conversationState.oldestLastMessageAt,
                         beforeId:
@@ -1397,7 +1455,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderConversationList();
 
             } catch (error) {
-                console.error('loadMoreConversations:', error
+                console.log('loadMoreConversations:', error
                 );
             } finally {
                 conversationState.loading = false;
@@ -1570,9 +1628,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             article.dataset.conversationId =
                 conversation.id;
+            const statusKey =
+                getConversationStatusKey(
+                    conversation.status
+                );
 
-            article.dataset.status =
-                conversation.status;
+            article.dataset.status = statusKey;
 
             article.dataset.inbox =
                 conversation.inboxId;
@@ -1699,24 +1760,27 @@ document.addEventListener('DOMContentLoaded', function () {
                     return '';
             }
         }
-            function getConversationStatusText(status) {
-                switch (Number(status)) {
-                    case 1:
-                        return 'Đang mở';
+    function getConversationStatusText(status) {
 
-                    case 2:
-                        return 'Đang chờ';
+        switch (
+        getConversationStatusKey(status)
+        ) {
+            case 'open':
+                return 'Đang mở';
 
-                    case 3:
-                        return 'Đã xử lý';
+            case 'pending':
+                return 'Đang chờ';
 
-                    case 4:
-                        return 'Đã đóng';
+            case 'resolved':
+                return 'Đã xử lý';
 
-                    default:
-                        return '';
-                }
-            }
+            case 'closed':
+                return 'Đã đóng';
+
+            default:
+                return '';
+        }
+    }
         function setupConversationLazyLoading() {
             DOM.conversationList.addEventListener(
                 'scroll',
@@ -1858,7 +1922,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
-                console.error(
+                console.log(
                     'Load conversation failed:',
                     error
                 );
@@ -1990,7 +2054,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'Load older messages failed:',
                     error
                 );
@@ -2106,7 +2170,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'Load conversation counts failed:',
                     error
                 );
@@ -2207,9 +2271,11 @@ document.addEventListener('DOMContentLoaded', function () {
              * Set current conversation
              * BEFORE loading messages.
              */
-            state.currentConversationId =
-                conversationId;
-
+            state.currentConversationId = conversationId;
+            state.currentConversationStatus =
+                getConversationStatusKey(
+                    conversationItem.dataset.status
+                );
             /*
              * Reset message state.
              *
@@ -2263,12 +2329,24 @@ document.addEventListener('DOMContentLoaded', function () {
             updateChatHeader(
                 conversationItem
             );
+            /*
+            * Resolved.
+            */
+            const statusKey =
+                getConversationStatusKey(
+                    conversationItem.dataset.status
+                );
 
+            state.currentConversationStatus = statusKey;
+            updateConversationReadOnlyUI(
+                conversationItem.dataset.status
+            );
             /*
              * SignalR room.
              */
             await joinConversation(
-                conversationId
+                conversationId,
+                conversationItem.dataset.status
             );
 
             /*
@@ -2335,8 +2413,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             await leaveCurrentConversation();
 
-            state.currentConversationId =
-                null;
+            state.currentConversationId = null;
+            state.currentConversationStatus = null;
 
             resetMessageState();
 
@@ -2409,7 +2487,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 'undefined'
             ) {
 
-                console.error(
+                console.log(
                     'SignalR is not loaded.'
                 );
 
@@ -2441,7 +2519,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'Chat SignalR connection failed:',
                     error
                 );
@@ -2476,52 +2554,85 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        async function handleMessageReceived(
-            message
+    async function handleMessageReceived(message) {
+
+        if (!message?.id) {
+            return;
+        }
+
+        if (
+            isMessageProcessed(message.id)
         ) {
-            if (!message?.id) {
-                return;
-            }
+            return;
+        }
 
-            if (
-                isMessageProcessed(
-                    message.id
-                )
-            ) {
-                return;
-            }
+        const conversationId =
+            normalizeId(message.conversationId);
 
-            const conversationId = message.conversationId;
+        if (!conversationId) {
+            return;
+        }
 
-            if (!conversationId) {
-                return;
-            }
+        const current =
+            isCurrentConversation(
+                conversationId
+            );
 
-            const current = isCurrentConversation(conversationId);
+        /*
+         * Message từ customer/contact.
+         *
+         * Nếu đang mở conversation hiện tại,
+         * mark delivered + append detail.
+         */
+        await acknowledgeMessageDelivered(message);
 
-            /*
-             * Current conversation.
-             */
-            await acknowledgeMessageDelivered(message);
+        if (current) {
 
-            if (current) {
-                appendChatMessage(message);
+            appendChatMessage(message);
 
-                scrollChatToBottom();
+            scrollChatToBottom();
 
-                scheduleMarkConversationAsRead(
-                    conversationId
-                );
-            }
-
-
-            /*
-             * Conversation list.
-             */
-            updateConversationList(
-                message
+            scheduleMarkConversationAsRead(
+                conversationId
             );
         }
+
+        /*
+         * Conversation chưa có trong Map.
+         *
+         * Đây là trường hợp customer gửi message đầu tiên
+         * và server vừa tạo Conversation mới.
+         *
+         * MessageReceived đã được broadcast vào Inbox group,
+         * nhưng Admin chưa có conversation trong state.
+         *
+         * Không thể tự dựng đầy đủ conversation item từ MessageDto
+         * vì còn thiếu contactName / avatar / labels...
+         *
+         * Vì vậy chỉ trong trường hợp conversation mới,
+         * load lại batch đầu tiên + counts.
+         */
+        const conversation =
+            conversationState.items.get(
+                conversationId
+            );
+
+        if (!conversation) {
+
+            await reloadConversationsWithFilters();
+
+            return;
+        }
+
+        /*
+         * Conversation đã tồn tại:
+         * chỉ update item hiện tại,
+         * không reload toàn bộ list.
+         */
+        updateConversationList(
+            message
+        );
+    }
         function registerConversationCreated() {
 
             state.connection.on(
@@ -2542,18 +2653,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 normalizeId(conversation.id);
 
             /*
-             * Đã tồn tại trong state
-             * thì không thêm lại.
-             */
-            if (
-                conversationState.items.has(
-                    conversationId
-                )
-            ) {
-                return;
-            }
-
-            /*
              * Conversation mới.
              */
             conversationState.items.set(
@@ -2561,14 +2660,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 conversation
             );
 
-            /*
-             * Conversation mới được tạo
-             * với status Open.
-             */
-            updateRealtimeConversationCounts(
-                'open',
-                1
-            );
 
             /*
              * Render lại list.
@@ -2581,6 +2672,7 @@ document.addEventListener('DOMContentLoaded', function () {
              * - createConversationElement()
              */
             renderConversationList();
+            await loadConversationCounts();
         }
 
         async function acknowledgeMessageDelivered(
@@ -2603,7 +2695,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'Failed to acknowledge message delivered:',
                     error
                 );
@@ -2641,20 +2733,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     await joinInbox();
 
-                    if (
-                        state.currentConversationId
-                    ) {
+                    if (state.currentConversationId) {
 
-                        /*
-                         * Reset joined ID so
-                         * joinConversation will
-                         * execute again.
-                         */
-                        state.joinedConversationId =
-                            null;
+                        state.joinedConversationId = null;
 
                         await joinConversation(
-                            state.currentConversationId
+                            state.currentConversationId,
+                            state.currentConversationStatus
                         );
                     }
                 }
@@ -2715,7 +2800,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'JoinInbox failed:',
                     error
                 );
@@ -2727,84 +2812,97 @@ document.addEventListener('DOMContentLoaded', function () {
            SIGNALR - CONVERSATION
         ===================================================== */
 
-        async function joinConversation(
-            conversationId
+    async function joinConversation(
+        conversationId,
+        status = null
+    ) {
+        if (
+            !conversationId ||
+            !state.connection ||
+            typeof signalR === 'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
         ) {
-
-            if (
-                !conversationId ||
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-                return;
-            }
-
-
-            if (
-                isSameId(
-                    state.joinedConversationId,
-                    conversationId
-                )
-            ) {
-                return;
-            }
-
-
-            /*
-             * Leave previous conversation.
-             */
-            if (
-                state.joinedConversationId
-            ) {
-
-                try {
-
-                    await state.connection.invoke(
-                        'LeaveAdminConversation',
-                        Number(
-                            state.joinedConversationId
-                        )
-                    );
-
-                }
-                catch (error) {
-
-                    console.warn(
-                        'LeaveAdminConversation failed:',
-                        error
-                    );
-                }
-            }
-
-
-            try {
-
-                await state.connection.invoke('JoinAdminConversation',  Number(conversationId));
-
-                state.joinedConversationId = conversationId;
-
-                await state.connection.invoke('OpenConversation', Number(conversationId));
-
-                console.log(
-                    'Joined conversation:',
-                    conversationId
-                );
-            }
-            catch (error) {
-
-                console.error(
-                    'JoinAdminConversation failed:',
-                    error
-                );
-
-                state.joinedConversationId =
-                    null;
-            }
+            return;
         }
 
+        if (
+            isSameId(
+                state.joinedConversationId,
+                conversationId
+            )
+        ) {
+            return;
+        }
+
+        if (state.joinedConversationId) {
+
+            await state.connection.invoke(
+                'LeaveAdminConversation',
+                Number(state.joinedConversationId)
+            );
+
+            state.joinedConversationId = null;
+        }
+
+        try {
+
+            const normalizedConversationId =
+                normalizeId(conversationId);
+
+            const statusKey =
+                getConversationStatusKey(status);
+
+            console.log(
+                '[JOIN]',
+                {
+                    conversationId: normalizedConversationId,
+                    status,
+                    statusKey
+                }
+            );
+
+            await state.connection.invoke(
+                'JoinAdminConversation',
+                Number(normalizedConversationId)
+            );
+
+            state.joinedConversationId =
+                normalizedConversationId;
+
+            /*
+             * Resolved / Closed chỉ được xem.
+             * Không được gọi OpenConversation.
+             */
+            if (
+                statusKey === 'open' ||
+                statusKey === 'pending'
+            ) {
+                await state.connection.invoke(
+                    'OpenConversation',
+                    Number(normalizedConversationId)
+                );
+            }
+
+            console.log(
+                'Joined conversation:',
+                normalizedConversationId,
+                statusKey
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                'Join conversation failed:',
+                error
+            );
+
+            state.joinedConversationId = null;
+
+            throw error;
+        }
+    }
 
         /* =====================================================
            SIGNALR - TYPING
@@ -2901,7 +2999,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'SEND ADMIN TYPING ERROR:',
                     error
                 );
@@ -2923,7 +3021,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 return;
             }
-
+            if (isCurrentConversationReadOnly()) {
+                stopTyping();
+                hideTyping();
+                return;
+            }
             if (
                 !state.typing.isTyping
             ) {
@@ -2966,8 +3068,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
             sendTypingStatus(false);
         }
+    function isCurrentConversationReadOnly() {
 
+        return (
+            state.currentConversationStatus === 'resolved' ||
+            state.currentConversationStatus === 'closed'
+        );
+    }
+    function isCurrentConversationResolved() {
 
+        if (!state.currentConversationId) {
+            return false;
+        }
+
+        if (
+            state.currentConversationStatus === 'resolved'
+        ) {
+            return true;
+        }
+
+        const conversation =
+            conversationState.items.get(
+                normalizeId(
+                    state.currentConversationId
+                )
+            );
+
+        if (!conversation) {
+            return false;
+        }
+
+        return (
+            getConversationStatusKey(
+                conversation.status
+            ) === 'resolved'
+        );
+    }
         /* =====================================================
            CONVERSATION READ
         ===================================================== */
@@ -3028,7 +3164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'MARK CONVERSATION READ ERROR:',
                     error
                 );
@@ -3136,89 +3272,109 @@ document.addEventListener('DOMContentLoaded', function () {
            CONVERSATION STATUS
         ===================================================== */
 
-        function registerConversationStatusUpdated() {
+    function registerConversationStatusUpdated() {
 
-            state.connection.on(
-                'chat.conversation.status.updated',
-                async function (data) {
+        state.connection.on(
+            'chat.conversation.status.updated',
+            async function (data) {
 
-                    console.log(
-                        '[SIGNALR STATUS EVENT]',
-                        JSON.stringify(data)
-                    );
+                console.log(
+                    '[SIGNALR STATUS EVENT]',
+                    JSON.stringify(data)
+                );
 
-                    if (!data?.conversationId) {
-                        return;
-                    }
-
-                    updateConversationStatus(
-                        data.conversationId,
-                        data.status
-                    );
-
-                    /*
-                     * Count luôn lấy từ DB.
-                     */
-                    await loadConversationCounts();
+                if (!data?.conversationId) {
+                    return;
                 }
-            );
+
+                updateConversationStatus(
+                    data.conversationId,
+                    data.status
+                );
+
+                await reloadConversationsWithFilters();
+            }
+        );
+    }
+
+
+    function updateConversationStatus(
+        conversationId,
+        status
+    ) {
+        const normalizedId =
+            normalizeId(conversationId);
+
+        const newStatus =
+            getConversationStatusKey(status);
+
+        if (!newStatus) {
+            return;
         }
 
+        const conversation =
+            conversationState.items.get(
+                normalizedId
+            );
 
-        function updateConversationStatus(
-            conversationId,
-            status
+        /*
+         * Current conversation vẫn phải update UI
+         * kể cả khi item không còn nằm trong Map.
+         */
+        if (
+            isCurrentConversation(
+                normalizedId
+            )
         ) {
 
-            const conversation =
-                conversationState.items.get(
-                    normalizeId(conversationId)
-                );
+            state.currentConversationStatus = newStatus;
+            updateConversationReadOnlyUI(newStatus);
 
-            if (!conversation) {
-                return;
-            }
+            if (DOM.chatContactStatus) {
+                const statusText = {
+                    open: 'Open',
+                    pending: 'Pending',
+                    resolved: 'Resolved'
+                };
 
-            const oldStatus =
-                getConversationStatusKey(
-                    conversation.status
-                );
-
-            const newStatus =
-                getConversationStatusKey(
-                    status
-                );
-
-            if (!newStatus) {
-                return;
-            }
-
-            if (oldStatus === newStatus) {
-                return;
-            }
-
-            /*
-             * Backend là source of truth.
-             *
-             * Chỉ cập nhật state local để UI phản ánh
-             * status backend vừa broadcast.
-             */
-            conversation.status =
-                getConversationStatusValue(
-                    newStatus
-                );
-
-            renderConversationList();
-
-            if (isCurrentConversation(conversationId)) {
-
-                updateChatHeader(
-                    findConversationItem(
-                        conversationId
-                    )
-                );
+                DOM.chatContactStatus.textContent =
+                    statusText[newStatus] ||
+                    newStatus;
             }
         }
+
+        if (!conversation) {
+            return;
+        }
+
+        const oldStatus =
+            getConversationStatusKey(
+                conversation.status
+            );
+
+        if (oldStatus === newStatus) {
+            return;
+        }
+
+        conversation.status =
+            getConversationStatusValue(
+                newStatus
+            );
+
+        renderConversationList();
+
+        if (
+            isCurrentConversation(
+                normalizedId
+            )
+        ) {
+            updateChatHeader(
+                findConversationItem(
+                    normalizedId
+                )
+            );
+        }
+    }
         function getConversationStatusValue(status) {
 
             switch (status) {
@@ -3360,7 +3516,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 `${count} conversations`;
         }
 
+    function updateConversationReadOnlyUI(newStatus) {
+        const statusKey = getConversationStatusKey(newStatus);
+        const isReadOnly =
+            statusKey === 'resolved' ||
+            statusKey === 'closed';
 
+        if (DOM.sendMessageForm) {
+            DOM.sendMessageForm.classList.toggle(
+                'd-none',
+                isReadOnly
+            );
+        }
+
+        if (DOM.messageInput) {
+            DOM.messageInput.disabled = isReadOnly;
+
+            if (isReadOnly) {
+                DOM.messageInput.value = '';
+            }
+        }
+
+        if (DOM.typing) {
+            DOM.typing.hidden = true;
+        }
+
+        if (isReadOnly) {
+            stopTyping();
+            hideTyping();
+        }
+
+        if (DOM.resolveConversationButton) {
+            DOM.resolveConversationButton.disabled = isReadOnly;
+        }
+    }
         /* =====================================================
            FILTER EVENTS
         ===================================================== */
@@ -3486,19 +3675,20 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
 
-        async function reloadConversationsWithFilters() {
-            conversationState.items.clear();
-            conversationState.oldestLastMessageAt = null;
-            conversationState.oldestId = null;
-            conversationState.hasMore = true;
+    async function reloadConversationsWithFilters() {
+        conversationState.items.clear();
 
-            await Promise.all([
-                loadInitialConversations(),
-                loadConversationCounts()
-            ]);
+        conversationState.oldestLastMessageAt = null;
+        conversationState.oldestId = null;
+        conversationState.hasMore = true;
 
-            renderConversationList();
-        }
+        await Promise.all([
+            loadInitialConversations(),
+            loadConversationCounts()
+        ]);
+
+        renderConversationList();
+    }
         /* =====================================================
            SEARCH
         ===================================================== */
@@ -3658,7 +3848,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         } catch (error) {
 
-            console.error(
+            console.log(
                 'Load contact failed:',
                 error
             );
@@ -3752,6 +3942,87 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
+    //Fix A
+    function registerConversationActions() {
+
+        DOM.resolveConversationButton?.addEventListener(
+            "click",
+            async function () {
+
+                const conversationId =
+                    state.currentConversationId;
+
+                if (!conversationId) {
+                    return;
+                }
+
+                if (isCurrentConversationReadOnly()) {
+                    return;
+                }
+
+                if (
+                    !state.connection ||
+                    typeof signalR === 'undefined' ||
+                    state.connection.state !==
+                    signalR.HubConnectionState.Connected
+                ) {
+                    console.warn(
+                        "Chat SignalR is not connected."
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    this.disabled = true;
+
+                    console.log(
+                        "[RESOLVE]",
+                        state.currentConversationId,
+                        state.currentConversationStatus,
+                        state.connection?.state
+                    );
+
+                    await state.connection.invoke(
+                        "ResolveConversation",
+                        Number(conversationId)
+                    );
+
+                    /*
+                     * ==========================================
+                     * UI RESOLVED NGAY LẬP TỨC
+                     * ==========================================
+                     */
+
+                    state.currentConversationStatus =
+                        'resolved';
+
+                    updateConversationReadOnlyUI(
+                        'resolved'
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Failed to resolve conversation:",
+                        error
+                    );
+
+                }
+                finally {
+
+                    /*
+                     * Nếu conversation đã resolved,
+                     * button vẫn phải readonly.
+                     */
+                    this.disabled =
+                        isCurrentConversationReadOnly();
+                }
+            }
+        );
+    }
 
     function formatDate(value) {
         if (!value) {
@@ -3811,6 +4082,17 @@ document.addEventListener('DOMContentLoaded', function () {
             content
         ) {
 
+            //Chặn gửi message ở frontend
+            if (
+                !content ||
+                !state.currentConversationId
+            ) {
+                return false;
+            }
+
+            if (isCurrentConversationReadOnly()) {
+                return false;
+            }
             if (
                 !content ||
                 !state.currentConversationId
@@ -3848,7 +4130,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             catch (error) {
 
-                console.error(
+                console.log(
                     'Send admin message failed:',
                     error
                 );
@@ -3856,7 +4138,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
         }
-
 
         function initSendMessage() {
 
@@ -3978,7 +4259,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     catch (error) {
 
-                        console.error(
+                        console.log(
                             'REFRESH CONVERSATIONS ERROR:',
                             error
                         );
@@ -4084,7 +4365,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     }
                     catch (error) {
-                        console.error(
+                        console.log(
                             'MARK ALL AS READ ERROR:',
                             error
                         );
@@ -4145,6 +4426,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             initSearch();
 
+            registerConversationActions();
+
             initConversationEvents();
 
             initContactEvents();
@@ -4172,6 +4455,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
 
-        initialize();
+    initialize();
+
+    const createLabelButton = document.getElementById("btn-create-chat-label");
+    const chatLabelOffcanvasElement = document.getElementById("chatLabelOffcanvas");
+
+    createLabelButton?.addEventListener("click", () => {
+        const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(chatLabelOffcanvasElement);
+        offcanvas.show();
+    });
     }
 );

@@ -26,5 +26,7 @@ namespace Shared.DTOs.Chat
         public DateTime LastMessageAt { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public DateTime? ClosedAt { get; set; }  
     }
 }

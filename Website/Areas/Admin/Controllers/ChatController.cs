@@ -6,6 +6,7 @@ using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.DTOs.Chat;
 using Shared.Enums;
+using Shared.Enums.Chat;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Chat;
 using Shared.Interfaces.IdentityServices;
@@ -51,12 +52,36 @@ namespace Website.Areas.Admin.Controllers
             return View(model);
         }
 
+        //[HttpGet("conversations")]
+        //[PermissionAction(ActionType.View)]
+        //public async Task<IActionResult> Conversations(long? inboxId, ChatConversationStatus? status, string? search, int limit = 30, DateTime? beforeLastMessageAt = null, long? beforeId = null, CancellationToken cancellationToken = default)
+        //{
+        //    var result = await _chatService.GetConversationListAsync(
+        //        inboxId,
+        //        status,
+        //        search,
+        //        _currentUserService.UserId,
+        //        limit,
+        //        beforeLastMessageAt,
+        //        beforeId,
+        //        cancellationToken);
+
+        //    return Ok(result);
+        //}
         [HttpGet("conversations")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Conversations(long? inboxId, string? search, int limit = 30, DateTime? beforeLastMessageAt = null, long? beforeId = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Conversations(
+    long? inboxId,
+    ChatConversationStatus? status,
+    string? search,
+    int limit = 30,
+    DateTime? beforeLastMessageAt = null,
+    long? beforeId = null,
+    CancellationToken cancellationToken = default)
         {
             var result = await _chatService.GetConversationListAsync(
                 inboxId,
+                status,
                 search,
                 _currentUserService.UserId,
                 limit,
@@ -66,7 +91,6 @@ namespace Website.Areas.Admin.Controllers
 
             return Ok(result);
         }
-
         //    [HttpGet("conversation/{id:long}")]
         //    [PermissionAction(ActionType.View)]
         //    public async Task<IActionResult> Conversation(

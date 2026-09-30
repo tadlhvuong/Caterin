@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Constants.Core;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
+using Shared.DTOs.Chat;
 using Shared.Enums;
 using Shared.Enums.Chat;
 using Shared.Interfaces.Chat;
@@ -107,27 +108,48 @@ namespace Shared.Extensions
         {
             return Task.FromResult(_chatPresenceService.IsAnyOnline());
         }
-        public async Task JoinConversation(long conversationId, long contactId, string? guestToken)
+        public async Task<ChatConversationStatus> JoinConversation(
+    long conversationId,
+    long contactId,
+    string? guestToken)
         {
             var userId = Context.User?
                 .FindFirst(ClaimTypes.NameIdentifier)?
                 .Value;
 
             var allowed =
-                await _chatMessageService.CanCustomerAccessConversationAsync(
-                    conversationId,
-                    contactId,
-                    userId,
-                    guestToken);
+                await _chatMessageService
+                    .CanCustomerAccessConversationAsync(
+                        conversationId,
+                        contactId,
+                        userId,
+                        guestToken,
+                        Context.ConnectionAborted);
 
             if (!allowed)
             {
-                throw new HubException("Bạn không có quyền truy cập conversation này.");
+                throw new HubException(
+                    "Bạn không có quyền truy cập conversation này.");
+            }
+
+            var status =
+                await _chatMessageService
+                    .GetCustomerConversationStatusAsync(
+                        conversationId,
+                        Context.ConnectionAborted);
+
+            if (!status.HasValue)
+            {
+                throw new HubException(
+                    "Conversation không tồn tại.");
             }
 
             await Groups.AddToGroupAsync(
                 Context.ConnectionId,
-                ChatHubGroups.Conversation(conversationId));
+                ChatHubGroups.Conversation(conversationId),
+                Context.ConnectionAborted);
+
+            return status.Value;
         }
         [Authorize]
         public async Task JoinAdminConversation(
@@ -187,39 +209,49 @@ namespace Shared.Extensions
                 Context.ConnectionId,
                 ChatHubGroups.Inbox(inboxId));
         }
-        public async Task SendCustomerMessage(
-    long conversationId,
+        public async Task<ChatMessageDto> SendCustomerMessage(
+    long? conversationId,
     long contactId,
     string content,
     string? guestToken)
         {
-            var userId = Context.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?
-                .Value;
+            var userId =
+                Context.User?
+                    .FindFirst(
+                        ClaimTypes.NameIdentifier)?
+                    .Value;
 
             var allowed =
-                await _chatMessageService.CanCustomerAccessConversationAsync(
-                    conversationId,
-                    contactId,
-                    userId,
-                    guestToken);
+                await _chatMessageService
+                    .CanCustomerAccessConversationAsync(
+                        conversationId,
+                        contactId,
+                        userId,
+                        guestToken);
 
             if (!allowed)
+            {
                 throw new HubException(
                     "Bạn không có quyền gửi tin nhắn.");
+            }
 
-            await _chatMessageService.SendCustomerMessageAsync(
-                conversationId,
-                contactId,
-                content,
-                guestToken);
+            return await _chatMessageService
+                .SendCustomerMessageAsync(
+                    conversationId,
+                    contactId,
+                    content,
+                    guestToken);
         }
 
         [Authorize]
         [PermissionAction(ActionType.Reply)]
-        public async Task SendAdminMessage(long conversationId, string content)
+        public async Task SendAdminMessage(
+    long conversationId,
+    string content)
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId =
+                Context.User?.FindFirst(
+                    ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Bạn chưa đăng nhập.");
@@ -232,18 +264,21 @@ namespace Shared.Extensions
                     isAdmin: true);
 
             if (!allowed)
-                throw new HubException("Bạn không có quyền gửi tin nhắn.");
+                throw new HubException(
+                    "Bạn không có quyền gửi tin nhắn.");
 
-            var message = await _chatMessageService
-                .SendAdminMessageAsync(
+            var message =
+                await _chatMessageService.SendAdminMessageAsync(
                     conversationId,
                     userId,
-                    content, Context.ConnectionAborted);
+                    content,
+                    Context.ConnectionAborted);
+
             await Clients.Group(
-       ChatHubGroups.Conversation(conversationId))
-       .SendAsync(
-           ChatHubEvents.MessageReceived,
-           message);
+                ChatHubGroups.Conversation(conversationId))
+                .SendAsync(
+                    ChatHubEvents.MessageReceived,
+                    message);
         }
         public async Task LeaveAdminConversation(long conversationId)
         {
@@ -308,7 +343,9 @@ namespace Shared.Extensions
                         isTyping
                     });
         }
-        public async Task SendAdminTyping(long conversationId, bool isTyping)
+        public async Task SendAdminTyping(
+    long conversationId,
+    bool isTyping)
         {
             if (!Context.User?.Identity?.IsAuthenticated ?? true)
                 return;
@@ -319,16 +356,35 @@ namespace Shared.Extensions
                 .Select(x => new
                 {
                     x.Id,
-                    x.InboxId
+                    x.InboxId,
+                    x.Status
                 })
                 .FirstOrDefaultAsync();
 
             if (conversation == null)
                 return;
 
+            // Resolved / Closed không được typing
+            if (conversation.Status == ChatConversationStatus.Resolved ||
+                conversation.Status == ChatConversationStatus.Closed)
+            {
+                return;
+            }
+            var userId =
+        Context.User?.FindFirstValue(
+            ClaimTypes.NameIdentifier);
+            var allowed =
+    await _chatMessageService.CanAccessConversationAsync(
+        conversationId,
+        null,
+        userId,
+        isAdmin: true,
+        Context.ConnectionAborted);
+
+            if (!allowed)
+                return;
             // TODO:
-            // Validate admin có quyền truy cập conversation/inbox này
-            // nếu hệ thống của bạn có Team/Assignment/Permission riêng.
+            // Validate admin có quyền truy cập conversation/inbox này.
 
             await Clients
                 .Group(ChatHubGroups.Conversation(conversationId))
@@ -483,7 +539,16 @@ namespace Shared.Extensions
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
+            var allowed =
+      await _chatMessageService.CanAccessConversationAsync(
+          conversationId,
+          null,
+          userId,
+          isAdmin: true,
+          Context.ConnectionAborted);
 
+            if (!allowed)
+                throw new HubException("Forbidden.");
             var messages = await _dbContext.ChatMessages
                 .Where(x =>
                     x.ConversationId == conversationId &&
@@ -515,14 +580,36 @@ namespace Shared.Extensions
 
 
         [Authorize]
-        public async Task<ChatConversationStatus?> OpenConversation(long conversationId)
+        [PermissionAction(ActionType.View)]
+        public async Task<ChatConversationStatus?> OpenConversation(
+    long conversationId)
         {
+            var userId =
+                Context.User?.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new HubException("Bạn chưa đăng nhập.");
+
+            var allowed =
+                await _chatMessageService.CanAccessConversationAsync(
+                    conversationId,
+                    null,
+                    userId,
+                    isAdmin: true,
+                    Context.ConnectionAborted);
+
+            if (!allowed)
+                throw new HubException(
+                    "Bạn không có quyền truy cập conversation.");
+
             var result =
                 await _chatMessageService.UpdateStatusAsync(
-                    conversationId, ChatConversationStatus.Open);
+                    conversationId,
+                    ChatConversationStatus.Open);
 
             if (!result.Succeeded)
-                return null;
+                throw new HubException(result.Message);
 
             return ChatConversationStatus.Open;
         }
@@ -539,6 +626,53 @@ namespace Shared.Extensions
             }
 
             await _chatMessageService.MarkAllConversationsAsReadAsync();
+        }
+
+        [Authorize]
+        [PermissionAction(ActionType.Reply)]
+        public async Task<ChatConversationStatus?> ResolveConversation(
+    long conversationId)
+        {
+            Console.WriteLine(
+        $"[RESOLVE 1] conversationId={conversationId}");
+            var userId =
+                Context.User?
+                    .FindFirst(ClaimTypes.NameIdentifier)?
+                    .Value;
+
+            Console.WriteLine(
+                $"[RESOLVE 2] userId={userId}");
+
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new HubException(
+                    "Bạn chưa đăng nhập.");
+
+            var allowed =
+                await _chatMessageService.CanAccessConversationAsync(
+                    conversationId,
+                    null,
+                    userId,
+                    isAdmin: true);
+            Console.WriteLine(
+        $"[RESOLVE 3] allowed={allowed}");
+
+            if (!allowed)
+                throw new HubException(
+                    "Bạn không có quyền xử lý conversation.");
+
+            var result =
+                await _chatMessageService.ResolveConversationAsync(
+                    conversationId,
+                    userId,
+                    Context.ConnectionAborted);
+            Console.WriteLine(
+      $"[RESOLVE 4] succeeded={result.Succeeded}, message={result.Message}");
+            if (!result.Succeeded)
+                throw new HubException(result.Message);
+            Console.WriteLine(
+     "[RESOLVE 5] SUCCESS");
+
+            return ChatConversationStatus.Resolved;
         }
     }
 

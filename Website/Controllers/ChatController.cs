@@ -28,20 +28,30 @@ namespace Website.Controllers
         }
 
         [HttpPost("start")]
-        public async Task<IActionResult> Start([FromBody] StartChatRequest request, 
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> Start(
+    [FromBody] StartChatRequest request,
+    CancellationToken cancellationToken)
         {
-            var userId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-    //        var inbox = await _dbContext.ChatInboxes
-    //.FirstOrDefaultAsync(
-    //    x => x.ChannelType == Shared.Enums.Chat.ChatChannelType.Website &&
-    //         x.IsActive,
-    //    cancellationToken);
-            //request.InboxId = inbox.Id;
-            var conversation =
-                await _chatMessageService.StartClientConversationAsync(request, userId, cancellationToken);
+            if (request == null)
+            {
+                return BadRequest(
+                    "Request không hợp lệ.");
+            }
 
-            return Ok(conversation);
+            var userId =
+                User.Identity?.IsAuthenticated == true
+                    ? User.FindFirstValue(
+                        ClaimTypes.NameIdentifier)
+                    : null;
+
+            var result =
+                await _chatMessageService
+                    .StartClientConversationAsync(
+                        request,
+                        userId,
+                        cancellationToken);
+
+            return Ok(result);
         }
 
         [HttpGet("{conversationId:long}/messages")]
@@ -142,6 +152,40 @@ namespace Website.Controllers
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        [HttpGet("{conversationId:long}/previous")]
+        public async Task<IActionResult> GetPreviousConversation(
+    long conversationId,
+    CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var contactIdHeader = Request.Headers["X-Chat-Contact-Id"].FirstOrDefault();
+            var guestToken = Request.Headers["X-Chat-Guest-Token"].FirstOrDefault();
+
+            if (!long.TryParse(contactIdHeader, out var contactId))
+            {
+                return BadRequest(new
+                {
+                    message = "Chat contact không hợp lệ."
+                });
+            }
+
+            var conversation = await _chatMessageService
+                .GetPreviousResolvedConversationAsync(
+                    conversationId,
+                    contactId,
+                    userId,
+                    guestToken,
+                    cancellationToken);
+
+            if (conversation == null)
+            {
+                return NoContent();
+            }
+
+            return Ok(conversation);
         }
     }
 }

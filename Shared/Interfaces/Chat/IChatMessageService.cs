@@ -41,7 +41,7 @@ namespace Shared.Interfaces.Chat
     long? inboxId,
     ChatConversationStatus? status,
     string?  search,
-    string? currentUserId,
+    string? currentUserId, long? labelId = null,
     int limit = 30,
     DateTime? beforeLastMessageAt = null,
     long? beforeId = null,
@@ -107,6 +107,26 @@ namespace Shared.Interfaces.Chat
     CancellationToken cancellationToken = default);
         Task<ChatConversationStatus?> GetCustomerConversationStatusAsync(
     long conversationId,
+    CancellationToken cancellationToken = default);
+
+        Task<ChatLabelDto> CreateLabelAsync(
+    CreateChatLabelRequest request,
+    CancellationToken cancellationToken = default);
+
+        Task<List<ChatLabelDto>> GetLabelsAsync(
+    CancellationToken cancellationToken = default);
+
+        Task<bool> DeleteLabelAsync(
+    int labelId,
+    CancellationToken cancellationToken = default);
+
+        Task<ChatContactLabelDto?> AssignConversationLabelAsync(
+    long conversationId,
+    int labelId,
+    CancellationToken cancellationToken = default);
+        Task<bool> RemoveConversationLabelAsync(
+    long conversationId,
+    int labelId,
     CancellationToken cancellationToken = default);
     }
 }

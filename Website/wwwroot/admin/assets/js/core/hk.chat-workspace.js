@@ -271,6 +271,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById(
                     'markAllAsRead'
                 ),
+
+            conversationLabels: document.getElementById('conversationLabels'),
+            addConversationLabelButton: document.getElementById('addConversationLabelButton'),
         };
 
 
@@ -357,6 +360,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             contactConversationId: null,
             contactData: null,
+
+            labels: [],
 
         };
         const conversationState = {
@@ -1697,9 +1702,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     ? `
                         <div class="conversation-meta">
                             ${conversation.labels
-                        .map(label => `
-                                    <span class="chat-label badge bg-label-success">${escapeHtml(label.name)}</span>
-                                `)
+                        .map(label => `<span class="chat-label badge bg-label-success">${escapeHtml(label.name)}</span>`)
                         .join('')}
 
                             <span class="conversation-status">${getConversationStatusText(conversation.status)}
@@ -2329,6 +2332,8 @@ document.addEventListener('DOMContentLoaded', function () {
             updateChatHeader(
                 conversationItem
             );
+
+            renderConversationLabels(conversationItem.labels);
             /*
             * Resolved.
             */
@@ -3554,126 +3559,88 @@ document.addEventListener('DOMContentLoaded', function () {
            FILTER EVENTS
         ===================================================== */
 
-        function initFilterEvents() {
+    function initFilterEvents() {
 
-            const filterMap = {
-                inbox: 'inboxId',
-                status: 'status',
-                label: 'labelId',
-                assigned: 'assignedUserId'
-            };
+        const filterContainer =
+            document.querySelector(
+                '.chat-filter-sidebar'
+            );
 
-            const filterItems =
-                document.querySelectorAll(
-                    '.chat-filter-list li[data-filter-type]'
-                );
+        if (!filterContainer) {
+            return;
+        }
 
-            filterItems.forEach(
-                filterItem => {
+        filterContainer.addEventListener(
+            'click',
+            async function (event) {
 
-                    filterItem.addEventListener(
-                        'click',
-                        async function () {
-
-                            const type =
-                                this.dataset.filterType;
-
-                            const value =
-                                this.dataset.filterValue;
-
-                            const filterKey =
-                                filterMap[type];
-
-                            if (!filterKey) {
-                                return;
-                            }
-
-
-                            /*
-                             * =====================================================
-                             * TOGGLE
-                             * =====================================================
-                             *
-                             * Status / Label / Assigned:
-                             *
-                             *   click lần 1 -> active
-                             *   click lần 2 -> inactive
-                             *
-                             * Inbox:
-                             *
-                             *   luôn có 1 inbox active
-                             *   click inbox khác -> đổi inbox
-                             */
-
-                            if (
-                                this.classList.contains('active') &&
-                                type !== 'inbox'
-                            ) {
-
-                                /*
-                                 * Click lại filter đang active
-                                 * => bỏ filter.
-                                 */
-                                this.classList.remove('active');
-
-                                conversationState.filters[
-                                    filterKey
-                                ] = null;
-
-                            }
-                            else {
-
-                                /*
-                                 * Chỉ bỏ active của những item
-                                 * cùng loại filter.
-                                 */
-                                document
-                                    .querySelectorAll(
-                                        `.chat-filter-list li[data-filter-type="${CSS.escape(type)}"]`
-                                    )
-                                    .forEach(
-                                        item => {
-
-                                            item.classList.remove(
-                                                'active'
-                                            );
-
-                                        }
-                                    );
-
-
-                                /*
-                                 * Active item mới.
-                                 */
-                                this.classList.add('active');
-
-
-                                /*
-                                 * Lưu value.
-                                 */
-                                conversationState.filters[
-                                    filterKey
-                                ] = value;
-                            }
-
-
-                            /*
-                             * Reload theo toàn bộ filter
-                             * hiện tại.
-                             */
-                            await reloadConversationsWithFilters();
-
-
-                            if (isMobile()) {
-                                closeFilterSidebar();
-                            }
-
-                        }
+                const filterItem =
+                    event.target.closest(
+                        'li[data-filter-type]'
                     );
 
+                if (!filterItem ||
+                    !filterContainer.contains(filterItem)) {
+                    return;
                 }
-            );
-        }
+
+                const filterMap = {
+                    inbox: 'inboxId',
+                    status: 'status',
+                    label: 'labelId',
+                    assigned: 'assignedUserId'
+                };
+
+                const type =
+                    filterItem.dataset.filterType;
+
+                const value =
+                    filterItem.dataset.filterValue;
+
+                const filterKey =
+                    filterMap[type];
+
+                if (!filterKey) {
+                    return;
+                }
+
+                if (
+                    filterItem.classList.contains('active') &&
+                    type !== 'inbox'
+                ) {
+
+                    filterItem.classList.remove('active');
+
+                    conversationState.filters[
+                        filterKey
+                    ] = null;
+
+                }
+                else {
+
+                    filterContainer
+                        .querySelectorAll(
+                            `li[data-filter-type="${CSS.escape(type)}"]`
+                        )
+                        .forEach(item => {
+                            item.classList.remove('active');
+                        });
+
+                    filterItem.classList.add('active');
+
+                    conversationState.filters[
+                        filterKey
+                    ] = value;
+                }
+
+                await reloadConversationsWithFilters();
+
+                if (isMobile()) {
+                    closeFilterSidebar();
+                }
+            }
+        );
+    }
 
     async function reloadConversationsWithFilters() {
         conversationState.items.clear();
@@ -4377,7 +4344,128 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
 
+    async function loadChatLabels() {
 
+        try {
+
+            const response =
+                await fetch('/admin/chat/labels', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+            if (!response.ok) {
+                throw new Error(
+                    'Không thể tải danh sách label.'
+                );
+            }
+
+            const labels =
+                await response.json();
+
+            state.labels =
+                Array.isArray(labels)
+                    ? labels
+                    : [];
+
+            renderChatLabels();
+
+        }
+        catch (error) {
+
+            console.error(
+                'loadChatLabels:',
+                error
+            );
+
+            state.labels = [];
+        }
+    }
+    function renderChatLabels() {
+
+        const labelList =
+            document.querySelector(
+                '.chat-filter-section[data-filter="label"] .chat-filter-list'
+            );
+
+        if (!labelList) {
+            return;
+        }
+
+        labelList.innerHTML = '';
+
+        state.labels
+            .filter(label => label.isActive)
+            .forEach(label => {
+
+                const li =
+                    document.createElement('li');
+
+                li.classList.add('chat-label-item');
+
+                li.dataset.filterType = 'label';
+                li.dataset.filterValue = label.id;
+
+                const a =
+                    document.createElement('a');
+
+                a.href = 'javascript:void(0);';
+
+                const content =
+                    document.createElement('span');
+
+                content.className =
+                    'd-flex align-items-center flex-grow-1';
+
+                const dot =
+                    document.createElement('span');
+
+                dot.className =
+                    'chat-label-dot';
+
+                if (label.color) {
+                    dot.style.backgroundColor =
+                        label.color;
+                }
+
+                const name =
+                    document.createElement('span');
+
+                name.textContent =
+                    label.name;
+
+                content.appendChild(dot);
+                content.appendChild(name);
+
+                a.appendChild(content);
+
+
+                const deleteButton =
+                    document.createElement('button');
+
+                deleteButton.type = 'button';
+
+                deleteButton.className =
+                    'btn btn-sm btn-icon text-danger chat-label-delete';
+
+                deleteButton.dataset.labelId =
+                    label.id;
+
+                deleteButton.title =
+                    'Xóa label';
+
+                deleteButton.innerHTML =
+                    '<i class="ti ti-trash"></i>';
+
+
+                li.appendChild(a);
+                li.appendChild(deleteButton);
+
+                labelList.appendChild(li);
+            });
+    }
         /* =====================================================
            RETRY MESSAGE LOAD
         ===================================================== */
@@ -4413,7 +4501,731 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         );
 
+    //LABELS
 
+    const createLabelButton =
+        document.getElementById('btn-create-chat-label');
+
+    const chatLabelOffcanvasElement =
+        document.getElementById('chatLabelOffcanvas');
+
+    const createChatLabelForm =
+        document.getElementById('form-create-chat-label');
+
+    const chatLabelNameInput =
+        document.getElementById('chat-label-name');
+
+    const chatLabelColorInput =
+        document.getElementById('chat-label-color');
+
+    const chatLabelColorValueInput =
+        document.getElementById('chat-label-color-value');
+
+    const chatLabelIsActiveInput =
+        document.getElementById('chat-label-is-active');
+
+    const submitChatLabelButton =
+        document.getElementById('btn-submit-chat-label');
+
+
+    /* Open offcanvas */
+
+    createLabelButton?.addEventListener('click', () => {
+
+        const offcanvas =
+            bootstrap.Offcanvas.getOrCreateInstance(
+                chatLabelOffcanvasElement
+            );
+
+        offcanvas.show();
+    });
+
+
+    /* Color picker -> text */
+
+    chatLabelColorInput?.addEventListener(
+        'input',
+        () => {
+
+            chatLabelColorValueInput.value =
+                chatLabelColorInput.value;
+        }
+    );
+
+
+    /* Text -> color picker */
+
+    chatLabelColorValueInput?.addEventListener(
+        'input',
+        () => {
+
+            const value =
+                chatLabelColorValueInput.value.trim();
+
+            if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+
+                chatLabelColorInput.value =
+                    value;
+            }
+        }
+    );
+
+
+    /* Submit */
+
+    createChatLabelForm?.addEventListener(
+        'submit',
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const name =
+                chatLabelNameInput.value.trim();
+
+            const color =
+                chatLabelColorValueInput.value.trim();
+
+            const isActive =
+                chatLabelIsActiveInput.checked;
+
+
+            if (!name) {
+
+                chatLabelNameInput.focus();
+
+                return;
+            }
+
+
+            const token =
+                createChatLabelForm.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                )?.value;
+
+
+            try {
+
+                submitChatLabelButton.disabled = true;
+
+
+                const response =
+                    await fetch(
+                        '/admin/chat/labels',
+                        {
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json',
+
+                                'Accept':
+                                    'application/json',
+
+                                'RequestVerificationToken':
+                                    token || ''
+                            },
+
+                            body: JSON.stringify({
+                                name: name,
+                                color: color || null,
+                                isActive: isActive
+                            })
+                        }
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok || !result.success) {
+
+                    throw new Error(
+                        result.message ||
+                        'Không thể tạo label.'
+                    );
+                }
+
+
+                /*
+                 * API:
+                 *
+                 * {
+                 *     success: true,
+                 *     data: label
+                 * }
+                 */
+
+                const label =
+                    result.data;
+
+
+                if (label) {
+
+                    state.labels.push(label);
+
+                    renderChatLabels();
+                }
+
+
+                /*
+                 * Reset form
+                 */
+
+                createChatLabelForm.reset();
+
+                chatLabelColorInput.value =
+                    '#7367F0';
+
+                chatLabelColorValueInput.value =
+                    '#7367F0';
+
+                chatLabelIsActiveInput.checked =
+                    true;
+
+
+                /*
+                 * Close offcanvas
+                 */
+
+                const offcanvas =
+                    bootstrap.Offcanvas.getOrCreateInstance(
+                        chatLabelOffcanvasElement
+                    );
+
+                offcanvas.hide();
+
+
+                /*
+                 * Success toast
+                 */
+
+                if (typeof Toastify !== 'undefined') {
+
+                    Toastify({
+                        text: 'Đã thêm label.',
+                        duration: 2500,
+                        gravity: 'top',
+                        position: 'right'
+                    }).showToast();
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    'createChatLabel:',
+                    error
+                );
+
+
+                if (typeof Toastify !== 'undefined') {
+
+                    Toastify({
+                        text:
+                            error.message ||
+                            'Không thể tạo label.',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right'
+                    }).showToast();
+
+                } else {
+
+                    alert(
+                        error.message ||
+                        'Không thể tạo label.'
+                    );
+                }
+
+
+            } finally {
+
+                submitChatLabelButton.disabled = false;
+            }
+        }
+    );
+
+    document.addEventListener(
+        'click',
+        async function (event) {
+
+            const deleteButton =
+                event.target.closest(
+                    '.chat-label-delete'
+                );
+
+            if (!deleteButton) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const labelId =
+                deleteButton.dataset.labelId;
+
+            if (!labelId) {
+                return;
+            }
+
+            try {
+
+                deleteButton.disabled = true;
+
+                const response =
+                    await fetch(
+                        `/admin/chat/labels/${labelId}`,
+                        {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept':
+                                    'application/json',
+                                'X-Requested-With':
+                                    'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                const result =
+                    await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(
+                        result.message ||
+                        'Không thể xóa label.'
+                    );
+                }
+
+
+                // Soft delete khỏi state
+                state.labels =
+                    state.labels.filter(
+                        label =>
+                            String(label.id) !==
+                            String(labelId)
+                    );
+
+                renderChatLabels();
+
+
+                if (typeof Toastify !== 'undefined') {
+
+                    Toastify({
+                        text: 'Đã xóa label.',
+                        duration: 2500,
+                        gravity: 'top',
+                        position: 'right'
+                    }).showToast();
+                }
+
+            } catch (error) {
+
+                console.error(
+                    'deleteChatLabel:',
+                    error
+                );
+
+                if (typeof Toastify !== 'undefined') {
+
+                    Toastify({
+                        text:
+                            error.message ||
+                            'Không thể xóa label.',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right'
+                    }).showToast();
+                }
+
+            } finally {
+
+                deleteButton.disabled = false;
+            }
+        }
+    );
+
+    function getCurrentConversationItem() {
+        if (!state.currentConversationId) {
+            return null;
+        }
+
+        return conversationState.items.get(
+            normalizeId(state.currentConversationId)
+        ) || null;
+    }
+
+    function renderConversationLabels(labels = null) {
+        if (!DOM.conversationLabels) {
+            return;
+        }
+
+        DOM.conversationLabels.innerHTML = '';
+
+        const conversation =
+            getCurrentConversationItem();
+
+        const currentLabels = Array.isArray(labels)
+            ? labels
+            : conversation?.labels;
+
+        if (!Array.isArray(currentLabels) || currentLabels.length === 0) {
+            return;
+        }
+
+        currentLabels.forEach(label => {
+            const labelElement = document.createElement('span');
+
+            labelElement.className = 'chat-conversation-label';
+
+            if (label.color) {
+                labelElement.style.backgroundColor =
+                    `${label.color}18`;
+
+                labelElement.style.color =
+                    label.color;
+            }
+
+            labelElement.innerHTML = `
+            <span
+                class="chat-conversation-label-dot"
+                ${label.color
+                    ? `style="background-color:${escapeHtml(label.color)}"`
+                    : ''}
+            ></span>
+
+            <span>
+                ${escapeHtml(label.name)}
+            </span>
+
+            <button
+                type="button"
+                class="chat-conversation-label-remove"
+                data-label-id="${escapeHtml(label.id)}"
+                title="Xóa label">
+                <i class="ti ti-x"></i>
+            </button>
+        `;
+
+            DOM.conversationLabels.appendChild(labelElement);
+        });
+    }
+
+    function renderConversationLabels(labels = null) {
+        if (!DOM.conversationLabels) {
+            return;
+        }
+
+        DOM.conversationLabels.innerHTML = '';
+
+        const conversation = getCurrentConversationItem();
+
+        const currentLabels = Array.isArray(labels)
+            ? labels
+            : conversation?.labels;
+
+        if (!Array.isArray(currentLabels)) {
+            return;
+        }
+
+        currentLabels.forEach(label => {
+            const wrapper = document.createElement('span');
+            wrapper.className = 'chat-conversation-label';
+
+            const color = typeof label.color === 'string'
+                ? label.color.trim()
+                : '';
+
+            if (color) {
+                wrapper.style.backgroundColor = `${color}18`;
+                wrapper.style.color = color;
+            }
+
+            const dot = document.createElement('span');
+            dot.className = 'chat-conversation-label-dot';
+
+            if (color) {
+                dot.style.backgroundColor = color;
+            }
+
+            const name = document.createElement('span');
+            name.textContent = label.name || '';
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'chat-conversation-label-remove';
+            removeButton.dataset.labelId = label.id;
+            removeButton.title = 'Xóa label';
+            removeButton.innerHTML = '<i class="ti ti-x"></i>';
+
+            wrapper.appendChild(dot);
+            wrapper.appendChild(name);
+            wrapper.appendChild(removeButton);
+
+            DOM.conversationLabels.appendChild(wrapper);
+        });
+    }
+
+    function closeConversationLabelPicker() {
+        document
+            .querySelector('.chat-conversation-label-picker')
+            ?.remove();
+    }
+
+    function openConversationLabelPicker() {
+        closeConversationLabelPicker();
+
+        const conversation = getCurrentConversationItem();
+
+        if (!conversation || !DOM.addConversationLabelButton) {
+            return;
+        }
+
+        const assignedIds = new Set(
+            (conversation.labels || [])
+                .map(label => normalizeId(label.id))
+        );
+
+        const availableLabels = (state.labels || [])
+            .filter(label =>
+                label.isActive !== false &&
+                !assignedIds.has(normalizeId(label.id))
+            );
+
+        const picker = document.createElement('div');
+
+        picker.className =
+            'chat-conversation-label-picker dropdown-menu show';
+
+        if (availableLabels.length === 0) {
+            picker.innerHTML = `
+            <span class="dropdown-item-text text-muted">
+                Không còn label để gán
+            </span>
+        `;
+        } else {
+            availableLabels.forEach(label => {
+                const button = document.createElement('button');
+
+                button.type = 'button';
+                button.className = 'dropdown-item d-flex align-items-center gap-2';
+                button.dataset.labelId = label.id;
+
+                const dot = document.createElement('span');
+
+                dot.className = 'chat-conversation-label-dot';
+
+                if (label.color) {
+                    dot.style.backgroundColor = label.color;
+                }
+
+                const name = document.createElement('span');
+                name.textContent = label.name;
+
+                button.appendChild(dot);
+                button.appendChild(name);
+
+                picker.appendChild(button);
+            });
+        }
+
+        document.body.appendChild(picker);
+
+        const buttonRect =
+            DOM.addConversationLabelButton.getBoundingClientRect();
+
+        picker.style.position = 'fixed';
+        picker.style.left = `${buttonRect.left}px`;
+        picker.style.top = `${buttonRect.bottom + 4}px`;
+        picker.style.zIndex = '1080';
+    }
+
+    async function assignConversationLabel(labelId) {
+        const conversationId = state.currentConversationId;
+
+        if (!conversationId || !labelId) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/admin/chat/${conversationId}/labels/${labelId}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Không thể gán label.'
+                );
+            }
+
+            const conversation =
+                getCurrentConversationItem();
+
+            if (conversation) {
+                if (!Array.isArray(conversation.labels)) {
+                    conversation.labels = [];
+                }
+
+                const exists = conversation.labels.some(
+                    label =>
+                        isSameId(label.id, result.data.id)
+                );
+
+                if (!exists) {
+                    conversation.labels.push(result.data);
+                }
+
+                renderConversationLabels(conversation.labels);
+            }
+
+            closeConversationLabelPicker();
+
+            renderConversationList();
+            ChatScroll.update(DOM.conversationList);
+
+            Toastify({
+                text: 'Đã gán label.',
+                duration: 2000,
+                gravity: 'top',
+                position: 'right'
+            }).showToast();
+        }
+        catch (error) {
+            console.error(
+                'assignConversationLabel error:',
+                error
+            );
+
+            Toastify({
+                text: error.message || 'Không thể gán label.',
+                duration: 3000,
+                gravity: 'top',
+                position: 'right'
+            }).showToast();
+        }
+    }
+
+    async function removeConversationLabel(labelId) {
+        const conversationId = state.currentConversationId;
+
+        if (!conversationId || !labelId) {
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/admin/chat/${conversationId}/labels/${labelId}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                throw new Error(
+                    result.message || 'Không thể xóa label.'
+                );
+            }
+
+            const conversation =
+                getCurrentConversationItem();
+
+            if (conversation && Array.isArray(conversation.labels)) {
+                conversation.labels =
+                    conversation.labels.filter(
+                        label =>
+                            !isSameId(label.id, labelId)
+                    );
+            }
+
+            renderConversationLabels(
+                conversation?.labels || []
+            );
+
+            renderConversationList();
+            ChatScroll.update(DOM.conversationList);
+
+            Toastify({
+                text: 'Đã xóa label.',
+                duration: 2000,
+                gravity: 'top',
+                position: 'right'
+            }).showToast();
+        }
+        catch (error) {
+            console.error(
+                'removeConversationLabel error:',
+                error
+            );
+
+            Toastify({
+                text: error.message || 'Không thể xóa label.',
+                duration: 3000,
+                gravity: 'top',
+                position: 'right'
+            }).showToast();
+        }
+    }
+
+    DOM.addConversationLabelButton?.addEventListener(
+        'click',
+        function (event) {
+            event.stopPropagation();
+            openConversationLabelPicker();
+        }
+    );
+    document.addEventListener('click', function (event) {
+        const labelButton =
+            event.target.closest(
+                '.chat-conversation-label-picker [data-label-id]'
+            );
+
+        if (labelButton) {
+            event.preventDefault();
+
+            assignConversationLabel(
+                labelButton.dataset.labelId
+            );
+
+            return;
+        }
+
+        const removeButton =
+            event.target.closest(
+                '.chat-conversation-label-remove'
+            );
+
+        if (removeButton) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            removeConversationLabel(
+                removeButton.dataset.labelId
+            );
+
+            return;
+        }
+
+        if (
+            !event.target.closest('.chat-conversation-label-picker') &&
+            !event.target.closest('#addConversationLabelButton')
+        ) {
+            closeConversationLabelPicker();
+        }
+    });
         /* =====================================================
            INITIALIZATION
         ===================================================== */
@@ -4448,7 +5260,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             await Promise.all([
                 loadInitialConversations(),
-                loadConversationCounts()
+                loadConversationCounts(),
+                loadChatLabels()
             ]);
 
             initChatSignalR();
@@ -4457,12 +5270,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initialize();
 
-    const createLabelButton = document.getElementById("btn-create-chat-label");
-    const chatLabelOffcanvasElement = document.getElementById("chatLabelOffcanvas");
-
-    createLabelButton?.addEventListener("click", () => {
-        const offcanvas = bootstrap.Offcanvas.getOrCreateInstance(chatLabelOffcanvasElement);
-        offcanvas.show();
-    });
     }
 );

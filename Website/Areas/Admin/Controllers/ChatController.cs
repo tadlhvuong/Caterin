@@ -12,6 +12,7 @@ using Shared.Interfaces.Chat;
 using Shared.Interfaces.IdentityServices;
 using Shared.Requests.Chat;
 using Shared.Services.Chat;
+using System.Reflection.Emit;
 using System.Security.Claims;
 using Website.Areas.Admin.Models;
 
@@ -52,28 +53,12 @@ namespace Website.Areas.Admin.Controllers
             return View(model);
         }
 
-        //[HttpGet("conversations")]
-        //[PermissionAction(ActionType.View)]
-        //public async Task<IActionResult> Conversations(long? inboxId, ChatConversationStatus? status, string? search, int limit = 30, DateTime? beforeLastMessageAt = null, long? beforeId = null, CancellationToken cancellationToken = default)
-        //{
-        //    var result = await _chatService.GetConversationListAsync(
-        //        inboxId,
-        //        status,
-        //        search,
-        //        _currentUserService.UserId,
-        //        limit,
-        //        beforeLastMessageAt,
-        //        beforeId,
-        //        cancellationToken);
-
-        //    return Ok(result);
-        //}
         [HttpGet("conversations")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Conversations(
     long? inboxId,
     ChatConversationStatus? status,
-    string? search,
+    string? search, long? labelId,
     int limit = 30,
     DateTime? beforeLastMessageAt = null,
     long? beforeId = null,
@@ -83,7 +68,7 @@ namespace Website.Areas.Admin.Controllers
                 inboxId,
                 status,
                 search,
-                _currentUserService.UserId,
+                _currentUserService.UserId, labelId,
                 limit,
                 beforeLastMessageAt,
                 beforeId,
@@ -91,25 +76,6 @@ namespace Website.Areas.Admin.Controllers
 
             return Ok(result);
         }
-        //    [HttpGet("conversation/{id:long}")]
-        //    [PermissionAction(ActionType.View)]
-        //    public async Task<IActionResult> Conversation(
-        //long id,
-        //CancellationToken cancellationToken)
-        //    {
-        //        var result = await _chatService
-        //            .GetConversationDetailAsync(
-        //                id,
-        //                cancellationToken);
-
-        //        if (result == null)
-        //            return NotFound();
-
-        //        return PartialView(
-        //            "_ConversationDetail",
-        //            result);
-        //    }
-
 
         [HttpGet("{conversationId:long}/contact")]
         [PermissionAction(ActionType.View)]
@@ -124,6 +90,7 @@ namespace Website.Areas.Admin.Controllers
 
             return Ok(result);
         }
+
         [HttpGet("{conversationId:long}/messages")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Messages(long conversationId, int limit = 30, long? before = null, CancellationToken cancellationToken = default)
@@ -136,23 +103,175 @@ namespace Website.Areas.Admin.Controllers
 
             return Ok(result);
         }
+        
         [HttpGet("conversations/counts")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Counts(
-    long? inboxId,
-    string? search = null,
-    string? assignedUserId = null,
-    long? labelId = null,
-    CancellationToken cancellationToken = default)
+        long? inboxId,
+        string? search = null,
+        string? assignedUserId = null,
+        long? labelId = null,
+        CancellationToken cancellationToken = default)
+            {
+                var result = await _chatService.GetConversationCountsAsync(
+                    inboxId,
+                    search,
+                    assignedUserId,
+                    labelId,
+                    cancellationToken);
+
+                return Ok(result);
+            }
+
+        [HttpPost("labels")]
+        [PermissionAction(ActionType.Create)]
+        public async Task<IActionResult> CreateLabel(
+        [FromBody] CreateChatLabelRequest request,
+        CancellationToken cancellationToken)
         {
-            var result = await _chatService.GetConversationCountsAsync(
-                inboxId,
-                search,
-                assignedUserId,
-                labelId,
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Dữ liệu label không hợp lệ."
+                });
+            }
+
+            try
+            {
+                var result = await _chatService.CreateLabelAsync(
+                    request,
+                    cancellationToken);
+
+                return Ok(new
+                {
+                    success = true,
+                    data = result
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("labels")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> Labels(
+    CancellationToken cancellationToken)
+        {
+            var result = await _chatService.GetLabelsAsync(
                 cancellationToken);
 
             return Ok(result);
+        }
+
+        [HttpDelete("labels/{labelId:int}")]
+        [PermissionAction(ActionType.Delete)]
+        public async Task<IActionResult> DeleteLabel(
+        int labelId,
+        CancellationToken cancellationToken)
+            {
+                try
+                {
+                    var result =
+                        await _chatService.DeleteLabelAsync(
+                            labelId,
+                            cancellationToken);
+
+                    if (!result)
+                    {
+                        return NotFound(new
+                        {
+                            success = false,
+                            message = "Không tìm thấy label."
+                        });
+                    }
+
+                    return Ok(new
+                    {
+                        success = true
+                    });
+                }
+                catch (InvalidOperationException ex)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = ex.Message
+                    });
+                }
+            }
+
+        [HttpPost("{conversationId:long}/labels/{labelId:int}")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> AssignLabel(
+    long conversationId,
+    int labelId,
+    CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _chatService.AssignConversationLabelAsync(
+                    conversationId,
+                    labelId,
+                    cancellationToken);
+
+                if (result == null)
+                {
+                    return NotFound(new
+                    {
+                        success = false,
+                        message = "Không tìm thấy conversation."
+                    });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    data = result
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        [HttpDelete("{conversationId:long}/labels/{labelId:int}")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> RemoveLabel(
+    long conversationId,
+    int labelId,
+    CancellationToken cancellationToken)
+        {
+            var result = await _chatService.RemoveConversationLabelAsync(
+                conversationId,
+                labelId,
+                cancellationToken);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Label chưa được gán cho conversation."
+                });
+            }
+
+            return Ok(new
+            {
+                success = true
+            });
         }
     }
 }

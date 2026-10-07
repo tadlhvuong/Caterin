@@ -34,8 +34,10 @@ namespace Shared.Services.Chat
 
             _logger = logger;
         }
-        public async Task<StartChatResponse> StartClientConversationAsync(StartChatRequest request, string? userId,
-        CancellationToken cancellationToken = default)
+        public async Task<StartChatResponse> StartClientConversationAsync(
+     StartChatRequest request,
+     string? userId,
+     CancellationToken cancellationToken = default)
         {
             var inbox =
                 await _dbContext.ChatInboxes
@@ -53,54 +55,149 @@ namespace Shared.Services.Chat
             }
 
             // =========================================================
-            // 1. AUTHENTICATED CUSTOMER
-            //
-            // Có userId:
-            // → có thể lấy canonical Contact nếu đã tồn tại.
-            //
-            // Không tạo Contact mới ở đây.
-            // Contact sẽ được tạo khi customer gửi message đầu tiên.
+            // AUTHENTICATED
             // =========================================================
-
-            ChatContact? contact = null;
 
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                contact =
-                    await _dbContext.ChatContacts
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(
-                            x =>
-                                x.UserId == userId &&
-                                !x.IsMerged,
+                userId = userId.Trim();
+
+                ChatContact? contact = null;
+
+                // -----------------------------------------------------
+                // 1. Guest -> Login
+                //    Claim hoặc merge Guest Contact
+                // -----------------------------------------------------
+
+                if (request.ContactId.HasValue &&
+                    !string.IsNullOrWhiteSpace(request.GuestToken))
+                {
+                    contact =
+                        await ClaimOrMergeGuestContactAsync(
+                            request.ContactId.Value,
+                            request.GuestToken,
+                            userId,
                             cancellationToken);
+                }
+                else
+                {
+                    // -------------------------------------------------
+                    // 2. Auth-first
+                    //
+                    // Không có guest identity.
+                    // Không tạo Contact ở /start.
+                    // -------------------------------------------------
+
+                    contact =
+                        await _dbContext.ChatContacts
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(
+                                x =>
+                                    x.UserId == userId &&
+                                    !x.IsMerged,
+                                cancellationToken);
+                }
+
+                long? currentConversationId = null;
+
+                // =====================================================
+                // 3. Nếu có Contact + Conversation hiện tại
+                //    thì kiểm tra conversation
+                // =====================================================
+
+                if (contact != null)
+                {
+                    var isGuestConversationCurrent = false;
+                    // Có conversationId từ guest session
+                    if (request.ConversationId.HasValue)
+                    {
+                        var currentConversation =
+                            await _dbContext.ChatConversations
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(
+                                    x =>
+                                        x.Id == request.ConversationId.Value &&
+                                        x.ContactId == contact.Id &&
+                                        x.InboxId == inbox.Id,
+                                    cancellationToken);
+
+                        if (currentConversation == null)
+                            throw new HubException("CHAT_SESSION_INVALID");
+
+                        if (currentConversation.Status ==
+                                ChatConversationStatus.Open ||
+                            currentConversation.Status ==
+                                ChatConversationStatus.Pending)
+                        {
+                            currentConversationId =
+                                currentConversation.Id;
+
+                            isGuestConversationCurrent = true;
+                        }
+                    }
+
+                    // Không có current conversation
+                    // → tìm conversation active của user
+                    if (!currentConversationId.HasValue)
+                    {
+                        currentConversationId =
+                            await _dbContext.ChatConversations
+                                .Where(x =>
+                                    x.ContactId == contact.Id &&
+                                    x.InboxId == inbox.Id &&
+                                    (
+                                        x.Status == ChatConversationStatus.Open ||
+                                        x.Status == ChatConversationStatus.Pending
+                                    ))
+                                .OrderByDescending(x => x.LastMessageAt)
+                                .Select(x => (long?)x.Id)
+                                .FirstOrDefaultAsync(
+                                    cancellationToken);
+                    }
+
+                    var wasGuestContactMerged =
+    request.ContactId.HasValue &&
+    contact.Id != request.ContactId.Value;
+
+                    if (wasGuestContactMerged && isGuestConversationCurrent &&
+    currentConversationId.HasValue)
+                    {
+                        await ReconcileActiveConversationsAfterGuestLoginAsync(
+                            contact.Id,
+                            inbox.Id,
+                            currentConversationId.Value,
+                            userId,
+                            cancellationToken);
+                    }
+                }
+
+                return new StartChatResponse
+                {
+                    ContactId = contact?.Id,
+
+                    InboxId = inbox.Id,
+
+                    ConversationId = currentConversationId,
+
+                    ContactName = contact?.Name,
+
+                    ContactAvatar = contact?.AvatarUrl
+                };
             }
 
             // =========================================================
-            // 2. KHÔNG TẠO GUEST CONTACT
+            // GUEST
             //
-            // Guest mới:
-            //   ContactId = null
-            //   GuestToken = null
-            //   ConversationId = null
-            //
-            // Guest identity chỉ được tạo tại SendCustomerMessageAsync.
+            // /start không tạo Contact.
             // =========================================================
 
             return new StartChatResponse
             {
-                ContactId = contact?.Id,
-
-                InboxId =
-                    inbox.Id,
-
+                ContactId = null,
+                InboxId = inbox.Id,
                 ConversationId = null,
-
-                ContactName =
-                    contact?.Name,
-
-                ContactAvatar =
-                    contact?.AvatarUrl
+                ContactName = null,
+                ContactAvatar = null
             };
         }
 
@@ -1921,8 +2018,7 @@ namespace Shared.Services.Chat
             return contact;
         }
 
-        private async Task<GuestIdentityResult> ResolveGuestIdentityAsync(
-    long? contactId,
+        private async Task<GuestIdentityResult> ResolveGuestIdentityAsync(long? contactId,
     string? guestToken,
     CancellationToken ct)
         {
@@ -2100,107 +2196,52 @@ namespace Shared.Services.Chat
             };
         }
 
-        private async Task<(ChatConversation Conversation, bool IsNewConversation)>ResolveConversationForCustomerAsync(
-        ChatContact contact, ChatInbox inbox, long? conversationId, long inboxId, CancellationToken ct)
+        private async Task<(ChatConversation Conversation, bool IsNewConversation)>
+    ResolveConversationForCustomerAsync(
+        ChatContact contact,
+        ChatInbox inbox,
+        long? conversationId,
+        long inboxId,
+        CancellationToken ct)
         {
             // =========================================================
-            // 1. Không có conversation hiện tại
-            // => tạo conversation mới
+            // 1. Nếu client có conversationId
             // =========================================================
 
-            if (!conversationId.HasValue)
+            if (conversationId.HasValue)
             {
-                var now = DateTime.UtcNow;
+                var existing =
+                    await _dbContext.ChatConversations
+                        .FirstOrDefaultAsync(
+                            x =>
+                                x.Id == conversationId.Value &&
+                                x.ContactId == contact.Id &&
+                                x.InboxId == inboxId,
+                            ct);
 
-                var conversation = new ChatConversation
+                // Conversation không tồn tại hoặc không thuộc Contact/Inbox
+                if (existing == null)
                 {
-                    Contact = contact,
-                    Inbox = inbox,
+                    throw new HubException("CHAT_SESSION_INVALID");
+                }
 
-                    Status = ChatConversationStatus.Pending,
-                    Priority = ChatConversationPriority.Low,
+                // =====================================================
+                // 2. Conversation đang Active
+                // => tiếp tục conversation này
+                // =====================================================
 
-                    LastMessageAt = now,
-                    CreatedAt = now
-                };
+                if (existing.Status == ChatConversationStatus.Open ||
+                    existing.Status == ChatConversationStatus.Pending)
+                {
+                    return (existing, false);
+                }
 
-                _dbContext.ChatConversations.Add(conversation);
+                // =====================================================
+                // 3. Conversation đã Resolved / Closed
+                // => KHÔNG reopen
+                // => tìm conversation Active khác của Contact
+                // =====================================================
 
-                return (conversation, true);
-            }
-
-            // =========================================================
-            // 2. Load conversation hiện tại
-            // =========================================================
-
-            var existing =
-                await _dbContext.ChatConversations
-                    .FirstOrDefaultAsync(
-                        x => x.Id == conversationId.Value,
-                        ct);
-
-            if (existing == null)
-            {
-                throw new HubException(
-                    "CHAT_SESSION_INVALID");
-            }
-
-            // =========================================================
-            // 3. Conversation phải thuộc Contact hiện tại
-            // =========================================================
-
-            if (existing.ContactId != contact.Id)
-            {
-                throw new HubException("CHAT_SESSION_INVALID");
-            }
-
-            // =========================================================
-            // 4. Conversation phải thuộc Inbox hiện tại
-            // =========================================================
-
-            if (existing.InboxId != inboxId)
-            {
-                throw new HubException("CHAT_SESSION_INVALID");
-            }
-
-            // =========================================================
-            // 5. Closed = terminal
-            //
-            // Không reopen.
-            // Không tự tìm conversation khác.
-            // Client phải bắt đầu new-session flow.
-            // =========================================================
-
-            if (existing.Status == ChatConversationStatus.Closed)
-            {
-                throw new HubException("CHAT_SESSION_INVALID");
-            }
-
-            // =========================================================
-            // 6. Resolved
-            //
-            // Không reopen conversation cũ.
-            //
-            // Nhưng nếu Contact đã có một conversation Active
-            // trong cùng Inbox thì tiếp tục conversation đó.
-            //
-            // Ví dụ:
-            //
-            //   A = Resolved
-            //   B = Pending
-            //
-            // Client gửi conversationId = A
-            // => tìm thấy B
-            // => dùng B
-            //
-            // Nếu không có B:
-            //   A = Resolved
-            //   Không có Active
-            //   => tạo conversation mới C
-            // =========================================================
-
-            if (existing.Status == ChatConversationStatus.Resolved)
-            {
                 var activeConversation =
                     await _dbContext.ChatConversations
                         .Where(x =>
@@ -2218,32 +2259,342 @@ namespace Shared.Services.Chat
                     return (activeConversation, false);
                 }
 
-                var now = DateTime.UtcNow;
-
-                var newConversation = new ChatConversation
-                {
-                    Contact = contact,
-                    Inbox = inbox,
-
-                    Status = ChatConversationStatus.Pending,
-                    Priority = existing.Priority,
-
-                    CreatedAt = now,
-                    LastMessageAt = now
-                };
-
-                _dbContext.ChatConversations.Add(newConversation);
-
-                return (newConversation, true);
+                // Không còn conversation Active
+                // => tạo conversation mới
+                return CreateNewConversation(
+                    contact,
+                    inbox,
+                    existing.Priority);
             }
 
             // =========================================================
-            // 7. Open / Pending
+            // 4. Client KHÔNG gửi conversationId
             //
-            // Dùng conversation hiện tại.
+            // Đây chính là case:
+            //
+            // logout → login → gửi message
+            //
+            // => phải tìm conversation Active của Contact
             // =========================================================
 
-            return (existing, false);
+            var currentConversation =
+                await _dbContext.ChatConversations
+                    .Where(x =>
+                        x.ContactId == contact.Id &&
+                        x.InboxId == inboxId &&
+                        (
+                            x.Status == ChatConversationStatus.Open ||
+                            x.Status == ChatConversationStatus.Pending
+                        ))
+                    .OrderByDescending(x => x.LastMessageAt)
+                    .FirstOrDefaultAsync(ct);
+
+            if (currentConversation != null)
+            {
+                return (currentConversation, false);
+            }
+
+            // =========================================================
+            // 5. Không có conversation Active
+            // => tạo conversation mới
+            // =========================================================
+
+            return CreateNewConversation(
+                contact,
+                inbox,
+                ChatConversationPriority.Low);
+        }
+
+        private (ChatConversation Conversation, bool IsNewConversation)
+    CreateNewConversation(
+        ChatContact contact,
+        ChatInbox inbox,
+        ChatConversationPriority priority)
+        {
+            var now = DateTime.UtcNow;
+
+            var conversation = new ChatConversation
+            {
+                Contact = contact,
+                Inbox = inbox,
+
+                Status = ChatConversationStatus.Pending,
+                Priority = priority,
+
+                LastMessageAt = now,
+                CreatedAt = now
+            };
+
+            _dbContext.ChatConversations.Add(conversation);
+
+            return (conversation, true);
+        }
+
+        private async Task<ChatContact> ClaimOrMergeGuestContactAsync(
+    long guestContactId,
+    string guestToken,
+    string userId,
+    CancellationToken ct)
+        {
+            if (guestContactId <= 0)
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            if (string.IsNullOrWhiteSpace(guestToken))
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            userId = userId.Trim();
+
+            var now = DateTime.UtcNow;
+
+            // =========================================================
+            // 1. Lấy guest contact
+            // =========================================================
+
+            var guestContact =
+                await _dbContext.ChatContacts
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.Id == guestContactId &&
+                            !x.IsMerged,
+                        ct);
+
+            if (guestContact == null)
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            // =========================================================
+            // 2. Validate guest token
+            // =========================================================
+
+            var tokenHash = Common.CommonHelper.Hash(guestToken);
+
+            var guestSession =
+                await _dbContext.ChatGuestSessions
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.ContactId == guestContact.Id &&
+                            x.TokenHash == tokenHash &&
+                            !x.IsRevoked,
+                        ct);
+
+            if (guestSession == null)
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            // Login claim/merge KHÔNG rotate token.
+            // Token hết hạn => session không còn hợp lệ.
+            if (guestSession.ExpiresAt <= now)
+                throw new HubException("CHAT_SESSION_INVALID");
+
+            // =========================================================
+            // 3. Tìm canonical contact của user
+            // =========================================================
+
+            var canonicalContact =
+                await _dbContext.ChatContacts
+                    .FirstOrDefaultAsync(
+                        x =>
+                            x.UserId == userId &&
+                            !x.IsMerged,
+                        ct);
+
+            // =========================================================
+            // 4. User chưa có Contact
+            //    => claim guest contact
+            // =========================================================
+
+            if (canonicalContact == null)
+            {
+                guestContact.UserId = userId;
+                guestContact.UpdatedAt = now;
+
+                await _dbContext.SaveChangesAsync(ct);
+
+                return guestContact;
+            }
+
+            // =========================================================
+            // 5. Guest contact chính là canonical contact
+            // =========================================================
+
+            if (canonicalContact.Id == guestContact.Id)
+            {
+                return canonicalContact;
+            }
+
+            // =========================================================
+            // 6. User đã có canonical Contact
+            //    => merge guest -> canonical
+            // =========================================================
+
+            await MergeGuestContactIntoCanonicalAsync(
+                guestContact,
+                canonicalContact,
+                now,
+                ct);
+
+            return canonicalContact;
+        }
+
+        private async Task MergeGuestContactIntoCanonicalAsync(
+    ChatContact guestContact,
+    ChatContact canonicalContact,
+    DateTime now,
+    CancellationToken ct)
+        {
+            if (guestContact.Id == canonicalContact.Id)
+                return;
+
+            // =========================================================
+            // 1. Migrate Conversations
+            // =========================================================
+
+            var conversations =
+                await _dbContext.ChatConversations
+                    .Where(x =>
+                        x.ContactId == guestContact.Id)
+                    .ToListAsync(ct);
+
+            foreach (var conversation in conversations)
+            {
+                conversation.ContactId = canonicalContact.Id;
+                conversation.UpdatedAt = now;
+            }
+
+            // =========================================================
+            // 2. Migrate Messages
+            // =========================================================
+
+            var messages =
+                await _dbContext.ChatMessages
+                    .Where(x =>
+                        x.ContactId == guestContact.Id)
+                    .ToListAsync(ct);
+
+            foreach (var message in messages)
+            {
+                message.ContactId = canonicalContact.Id;
+                message.UpdatedAt = now;
+            }
+
+            // =========================================================
+            // 3. Migrate ChatContactInbox
+            //
+            // Không được update trực tiếp tất cả ContactId
+            // vì có thể tồn tại:
+            //
+            // Guest C1 + Inbox 1
+            // Canonical C0 + Inbox 1
+            //
+            // => duplicate unique key sau khi đổi C1 -> C0
+            // =========================================================
+
+            var guestContactInboxes =
+                await _dbContext.ChatContactInboxes
+                    .Where(x =>
+                        x.ContactId == guestContact.Id)
+                    .ToListAsync(ct);
+
+            var canonicalInboxIds =
+                await _dbContext.ChatContactInboxes
+                    .Where(x =>
+                        x.ContactId == canonicalContact.Id)
+                    .Select(x => x.InboxId)
+                    .ToListAsync(ct);
+
+            var canonicalInboxIdSet =
+                canonicalInboxIds.ToHashSet();
+
+            foreach (var guestContactInbox in guestContactInboxes)
+            {
+                if (canonicalInboxIdSet.Contains(
+                        guestContactInbox.InboxId))
+                {
+                    // Canonical đã có mapping này.
+                    // Không migrate record này để tránh duplicate.
+                    _dbContext.ChatContactInboxes.Remove(
+                        guestContactInbox);
+
+                    continue;
+                }
+
+                guestContactInbox.ContactId =
+                    canonicalContact.Id;
+            }
+
+            // =========================================================
+            // 4. Migrate Guest Sessions
+            // =========================================================
+
+            var guestSessions =
+                await _dbContext.ChatGuestSessions
+                    .Where(x =>
+                        x.ContactId == guestContact.Id)
+                    .ToListAsync(ct);
+
+            foreach (var session in guestSessions)
+            {
+                session.ContactId =
+                    canonicalContact.Id;
+            }
+
+            // =========================================================
+            // 5. Mark guest contact as merged
+            // =========================================================
+
+            guestContact.IsMerged = true;
+            guestContact.MergedIntoContactId =
+                canonicalContact.Id;
+            guestContact.MergedAt = now;
+            guestContact.UpdatedAt = now;
+
+            // Không xóa guestContact.
+            //
+            // Giữ lại record để:
+            // - bảo toàn lịch sử
+            // - có thể audit
+            // - tránh FK/history problem
+            //
+            // Sau này nếu muốn hard delete thì xử lý riêng.
+            // =========================================================
+
+            await _dbContext.SaveChangesAsync(ct);
+        }
+
+        private async Task ReconcileActiveConversationsAfterGuestLoginAsync(
+    long contactId,
+    long inboxId,
+    long currentConversationId,
+    string userId,
+    CancellationToken ct)
+        {
+            var activeConversationIds =
+                await _dbContext.ChatConversations
+                    .Where(x =>
+                        x.ContactId == contactId &&
+                        x.InboxId == inboxId &&
+                        (
+                            x.Status == ChatConversationStatus.Open ||
+                            x.Status == ChatConversationStatus.Pending
+                        ) &&
+                        x.Id != currentConversationId)
+                    .Select(x => x.Id)
+                    .ToListAsync(ct);
+
+            foreach (var conversationId in activeConversationIds)
+            {
+                var result =
+                    await ResolveConversationAsync(
+                        conversationId,
+                        userId,
+                        ct);
+
+                if (!result.Succeeded)
+                {
+                    throw new HubException(result.Message);
+                }
+            }
         }
     }
 }

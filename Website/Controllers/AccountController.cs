@@ -370,7 +370,7 @@ namespace Website.Controllers
             return Json(new
             {
                 success = true,
-                redirectUrl = Url.Action("", "Home")
+                redirectUrl = Url.Action("Login", "Account")
             });
         }
 

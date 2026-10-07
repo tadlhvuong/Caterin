@@ -1416,11 +1416,13 @@
         if (state.chatSession.isInvalid) {
             return;
         }
+
         /*
-         * User không còn authenticated.
+         * =========================================================
+         * USER KHÔNG AUTHENTICATED
          *
-         * Không restore authenticated ChatContact/
-         * Conversation từ localStorage.
+         * Giữ nguyên Guest flow hiện tại.
+         * =========================================================
          */
         if (!CHAT_CONFIG.isAuthenticated) {
 
@@ -1436,9 +1438,38 @@
         }
 
         /*
-         * User đang authenticated.
+         * =========================================================
+         * USER VỪA AUTHENTICATED
          *
-         * Chỉ restore nếu có conversation identity.
+         * Nếu localStorage vẫn còn:
+         *
+         *   contactId
+         *   guestToken
+         *   conversationId
+         *
+         * thì đây là Guest session vừa login.
+         *
+         * PHẢI claim / merge trước.
+         *
+         * Tuyệt đối không JoinConversation() ở bước này.
+         * =========================================================
+         */
+        if (
+            state.currentContactId &&
+            state.guestToken
+        ) {
+            await initializeAuthenticatedChat();
+
+            return;
+        }
+
+        /*
+         * =========================================================
+         * AUTHENTICATED SESSION BÌNH THƯỜNG
+         *
+         * Không còn guestToken.
+         * Chỉ restore authenticated conversation nếu có.
+         * =========================================================
          */
         if (!hasConversationIdentity()) {
             showQuickReplies();
@@ -1461,6 +1492,150 @@
         });
 
         updateCurrentConversationStatus(status);
+    }
+
+    async function initializeAuthenticatedChat() {
+        try {
+            const result = await fetch(
+                "/chat/start",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        inboxId: CHAT_CONFIG.inboxId,
+
+                        contactId:
+                            state.currentContactId || null,
+
+                        conversationId:
+                            state.currentConversationId || null,
+
+                        guestToken:
+                            state.guestToken || null
+                    })
+                }
+            );
+
+            if (!result.ok) {
+                throw new Error(
+                    `Chat start failed: ${result.status}`
+                );
+            }
+
+            const data = await result.json();
+
+            // =====================================================
+            // Canonical Contact
+            // =====================================================
+
+            if (data.contactId) {
+                state.currentContactId =
+                    normalizeNumber(data.contactId);
+
+                localStorage.setItem(
+                    CONFIG.storage.contactId,
+                    String(state.currentContactId)
+                );
+            }
+
+            // =====================================================
+            // Conversation
+            //
+            // Backend quyết định:
+            //
+            // Open/Pending -> giữ
+            // Resolved/Closed -> null
+            // =====================================================
+
+            const conversationId =
+                normalizeNumber(data.conversationId);
+
+            if (conversationId) {
+
+                state.currentConversationId =
+                    conversationId;
+
+                localStorage.setItem(
+                    CONFIG.storage.conversationId,
+                    String(conversationId)
+                );
+
+            } else {
+
+                state.currentConversationId = null;
+                state.currentConversationStatus = null;
+
+                localStorage.removeItem(
+                    CONFIG.storage.conversationId
+                );
+            }
+
+            // =====================================================
+            // Authenticated không còn dùng guest token
+            // =====================================================
+
+            state.guestToken = null;
+
+            localStorage.removeItem(
+                CONFIG.storage.guestToken
+            );
+
+            // =====================================================
+            // Reset UI
+            // =====================================================
+
+            clearMessages();
+
+            state.chatSession.hasActiveHistory = false;
+            state.chatSession.isInvalid = false;
+
+            // =====================================================
+            // Nếu conversation vẫn active
+            // => join + load lại conversation
+            // =====================================================
+
+            if (conversationId) {
+
+                const status =
+                    await joinConversation();
+
+                if (status === null) {
+                    return data;
+                }
+
+                state.currentConversationStatus =
+                    status;
+
+                await loadUnreadCount();
+
+                await loadConversationMessages({
+                    initial: true
+                });
+
+                updateCurrentConversationStatus(status);
+
+                return data;
+            }
+
+            // =====================================================
+            // Không còn conversation active
+            // => chat mới
+            // =====================================================
+
+            showQuickReplies();
+
+            return data;
+        }
+        catch (error) {
+            console.error(
+                "initializeAuthenticatedChat failed:",
+                error
+            );
+
+            throw error;
+        }
     }
     function resetToNewChatState() {
         clearMessages();
@@ -1500,12 +1675,16 @@ async function joinConversation() {
     }
 
     try {
+        const guestToken =
+            CHAT_CONFIG.isAuthenticated
+                ? null
+                : state.guestToken;
         const status =
             await connection.invoke(
                 "JoinConversation",
                 Number(state.currentConversationId),
                 Number(state.currentContactId),
-                state.guestToken || null
+                guestToken
             );
 
         state.currentConversationStatus =
@@ -4079,6 +4258,7 @@ async function joinConversation() {
     window.addEventListener(
         "caterin:customer-logout",
         function () {
+            console.log("caterin:customer-logout");
             clearCustomerIdentity();
 
             state.currentConversationStatus = null;

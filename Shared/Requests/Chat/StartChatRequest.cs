@@ -11,6 +11,7 @@ namespace Shared.Requests.Chat
     {
         public long InboxId { get; set; }
         public long? ContactId { get; set; }
+        public long? ConversationId { get; set; }
 
         [MaxLength(150)]
         public string? Name { get; set; }

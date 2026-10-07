@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Chat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations.Chat
 {
@@ -30,6 +25,8 @@ namespace Shared.Configurations.Chat
 
             builder.HasOne(x => x.Label).WithMany(x => x.Conversations)
                 .HasForeignKey(x => x.LabelId).OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
 
             builder.HasIndex(x => x.LabelId);
         }

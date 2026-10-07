@@ -754,7 +754,31 @@
 
                     </div>
                 </div>
-               
+            <!-- Invalid chat session -->
+            <div id="chatSessionReset"
+                 class="chat-session-reset"
+                 hidden>
+
+                <div class="chat-session-reset-content">
+                    <div class="chat-session-reset-icon">
+                        <i class="ph ph-warning-circle"></i>
+                    </div>
+
+                    <div class="chat-session-reset-text">
+                        <strong>Phiên trò chuyện không hợp lệ</strong>
+
+                        <span class="d-none d-sm-block">
+                            Phiên trò chuyện hiện tại không còn hợp lệ.
+                            Vui lòng bắt đầu lại để tiếp tục.
+                        </span>
+                    </div>
+
+                    <button type="button"
+                            id="resetChatBox">
+                        Bắt đầu lại
+                    </button>
+                </div>
+            </div>
                 <!-- Typing -->
                 <div class="typing" id="typing" hidden>
                     <div class="typing-avatar">C</div>

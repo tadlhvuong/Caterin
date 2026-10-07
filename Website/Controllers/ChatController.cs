@@ -118,6 +118,7 @@ namespace Website.Controllers
     [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
     CancellationToken cancellationToken)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _chatMessageService.GetUnreadCountAsync(
                 conversationId,
                 contactId,

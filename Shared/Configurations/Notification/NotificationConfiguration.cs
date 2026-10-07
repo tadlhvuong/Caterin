@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NotificationEntity = Shared.Data.Entities.Notification.Notification;
 
 namespace Shared.Configurations.Notification
@@ -49,13 +44,13 @@ namespace Shared.Configurations.Notification
             builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone")
                 .IsRequired();
 
-            // User → Notifications
             builder.HasOne<AppUser>()
                 .WithMany()
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Index
+            // Indexes
+
             builder.HasIndex(x => x.UserId);
 
             builder.HasIndex(x => new

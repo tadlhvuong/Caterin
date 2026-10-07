@@ -4,8 +4,7 @@ using Shared.Data.Entities.Chat;
 
 namespace Shared.Configurations.Chat
 {
-    public class ChatGuestSessionConfiguration
-    : IEntityTypeConfiguration<ChatGuestSession>
+    public class ChatGuestSessionConfiguration : IEntityTypeConfiguration<ChatGuestSession>
     {
         public void Configure(EntityTypeBuilder<ChatGuestSession> builder)
         {
@@ -25,17 +24,15 @@ namespace Shared.Configurations.Chat
 
             builder.Property(x => x.LastSeenAt).HasColumnType("timestamp with time zone").IsRequired();
 
-            builder.Property(x => x.IsRevoked)
-                .IsRequired()
-                .HasDefaultValue(false);
+            builder.Property(x => x.IsRevoked).IsRequired().HasDefaultValue(false);
 
-            builder.HasOne(x => x.Contact)
-                .WithMany()
-                .HasForeignKey(x => x.ContactId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(x => x.RevokedReason).HasMaxLength(50);
 
-            builder.HasIndex(x => x.TokenHash)
-                .IsUnique();
+            builder.HasOne(x => x.Contact).WithMany().HasForeignKey(x => x.ContactId).OnDelete(DeleteBehavior.Cascade);
+
+            // Indexes
+
+            builder.HasIndex(x => x.TokenHash).IsUnique();
 
             builder.HasIndex(x => new
             {

@@ -40,23 +40,20 @@ namespace Shared.Configurations.Chat
 
             builder.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
 
-            // Conversation
             builder.HasOne(x => x.Conversation).WithMany(x => x.Messages)
                 .HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
 
-            // Inbox
             builder.HasOne(x => x.Inbox).WithMany(x => x.Messages)
                 .HasForeignKey(x => x.InboxId).OnDelete(DeleteBehavior.Restrict);
 
-            // Contact
-            builder.HasOne(x => x.Contact).WithMany(x => x.Messages)
-                .HasForeignKey(x => x.ContactId).OnDelete(DeleteBehavior.SetNull);
+            builder.HasOne(x => x.Contact)
+    .WithMany(x => x.Messages)
+    .HasForeignKey(x => x.ContactId)
+    .OnDelete(DeleteBehavior.SetNull);
 
-            // User
             builder.HasOne(x => x.User).WithMany()
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
 
-            // Attachments
             builder.HasMany(x => x.Attachments).WithOne(x => x.Message)
                 .HasForeignKey(x => x.MessageId).OnDelete(DeleteBehavior.Cascade);
 

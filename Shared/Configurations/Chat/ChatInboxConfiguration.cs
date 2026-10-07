@@ -36,6 +36,7 @@ namespace Shared.Configurations.Chat
                 .HasForeignKey(x => x.InboxId).OnDelete(DeleteBehavior.Cascade);
 
             // Indexes
+
             builder.HasIndex(x => x.ChannelType);
 
             builder.HasIndex(x => x.IsActive);

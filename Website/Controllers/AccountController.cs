@@ -366,7 +366,12 @@ namespace Website.Controllers
             //delete refresh token
             Response.Cookies.Delete("refresh_token");
 
-            return RedirectToAction("Login");
+            //return RedirectToAction("Login");
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("", "Home")
+            });
         }
 
         [HttpGet("access-denied")]

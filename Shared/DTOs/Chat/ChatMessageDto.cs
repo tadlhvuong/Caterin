@@ -5,12 +5,13 @@ namespace Shared.DTOs.Chat
     public class ChatMessageDto
     {
         public long Id { get; set; }
-
-        public long ConversationId { get; set; }
-
         public long InboxId { get; set; }
 
         public long? ContactId { get; set; }
+
+        public long ConversationId { get; set; }
+
+        public string? GuestToken { get; set; }
 
         public string? SenderId { get; set; }
 

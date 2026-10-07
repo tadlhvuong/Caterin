@@ -1481,11 +1481,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 for (const conversation of conversations) {
                     const element = createConversationElement(conversation);
                     if (element) {
-                        if (conversation.unreadCount === 0) {
-                            element.classList.add('is-read');
-                        }
-                        else {
-                            element.classList.remove('is-read');
+                        if (conversation.status != 3) {
+                            element.classList.remove('is-resolved');
+                            if (conversation.unreadCount === 0) {
+                                element.classList.add('is-read');
+                            }
+                            else {
+                                element.classList.remove('is-read');
+                            }
+
+                        } else {
+                            element.classList.add('is-resolved');
                         }
                     }
 
@@ -1523,28 +1529,6 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
     `;
-        }
-
-        function getVisibleConversations() {
-
-            const items = Array.from(
-                conversationState.items.values()
-            );
-
-            items.sort((a, b) => {
-
-                const dateCompare =
-                    new Date(b.lastMessageAt) -
-                    new Date(a.lastMessageAt);
-
-                if (dateCompare !== 0) {
-                    return dateCompare;
-                }
-
-                return Number(b.id) - Number(a.id);
-            });
-
-            return items;
         }
         function getFilteredConversations() {
 

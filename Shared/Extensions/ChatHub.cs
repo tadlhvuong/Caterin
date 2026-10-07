@@ -209,38 +209,39 @@ namespace Shared.Extensions
                 Context.ConnectionId,
                 ChatHubGroups.Inbox(inboxId));
         }
-        public async Task<ChatMessageDto> SendCustomerMessage(
+        public async Task<CustomerSendMessageResult> SendCustomerMessage(
+    long inboxId,
     long? conversationId,
-    long contactId,
+    long? contactId,
     string content,
     string? guestToken)
         {
             var userId =
-                Context.User?
-                    .FindFirst(
-                        ClaimTypes.NameIdentifier)?
-                    .Value;
+                Context.User?.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
-            var allowed =
-                await _chatMessageService
-                    .CanCustomerAccessConversationAsync(
-                        conversationId,
-                        contactId,
-                        userId,
-                        guestToken);
-
-            if (!allowed)
+            if (string.IsNullOrWhiteSpace(content))
             {
                 throw new HubException(
-                    "Bạn không có quyền gửi tin nhắn.");
+                    "Nội dung tin nhắn không hợp lệ.");
             }
 
-            return await _chatMessageService
-                .SendCustomerMessageAsync(
-                    conversationId,
-                    contactId,
-                    content,
-                    guestToken);
+            try
+            {
+                return await _chatMessageService
+                    .SendCustomerMessageAsync(
+                        conversationId,
+                        contactId,
+                        inboxId,
+                        content,
+                        guestToken,
+                        userId,
+                        Context.ConnectionAborted);
+            }
+            catch (HubException ex)
+            {
+                throw new HubException(ex.Message);
+            }
         }
 
         [Authorize]
@@ -314,26 +315,43 @@ namespace Shared.Extensions
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatHubGroups.Conversation(conversationId));
         }
 
-        public async Task ConversationStatusUpdated(int conversationId, long inboxId, ChatConversationStatus status)
-        {
+        //public async Task ConversationStatusUpdated(int conversationId, long inboxId, ChatConversationStatus status)
+        //{
 
-            var dataSend = new
-            {
-                ConversationId = conversationId,
-                InboxId = inboxId,
-                Status = status.ToString(),
-                UpdatedAt = DateTime.UtcNow,
-            };
+        //    var dataSend = new
+        //    {
+        //        ConversationId = conversationId,
+        //        InboxId = inboxId,
+        //        Status = status.ToString(),
+        //        UpdatedAt = DateTime.UtcNow,
+        //    };
 
-            await Clients.Group(ChatHubGroups.Inbox(inboxId)).SendAsync(ChatHubEvents.ConversationStatusUpdated, dataSend);
-        }
+        //    await Clients.Group(ChatHubGroups.Inbox(inboxId)).SendAsync(ChatHubEvents.ConversationStatusUpdated, dataSend);
+        //}
 
         public async Task SendTyping(long conversationId, long contactId, string? guestToken, bool isTyping)
         {
-            // TODO:
-            // Validate contact + guestToken
-            // Validate conversation ownership
-            
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var allowed = await _chatMessageService.CanCustomerAccessConversationAsync(
+                conversationId,
+                contactId,
+                userId,
+                guestToken,
+                Context.ConnectionAborted);
+
+            if (!allowed)
+                throw new HubException("Forbidden.");
+
+            var status = await _chatMessageService.GetCustomerConversationStatusAsync(
+                conversationId,
+                Context.ConnectionAborted);
+
+            if (status is ChatConversationStatus.Resolved
+                or ChatConversationStatus.Closed)
+            {
+                return;
+            }
             await Clients.Group(ChatHubGroups.Conversation(conversationId))
                 .SendAsync(ChatHubEvents.Typing,
                     new
@@ -581,6 +599,8 @@ namespace Shared.Extensions
 
         [Authorize]
         [PermissionAction(ActionType.View)]
+
+        /// NÊN đổi thành SetConversationOpen(...) không dùng open conversation và service chỉ cho phép transition hợp lệ.
         public async Task<ChatConversationStatus?> OpenConversation(
     long conversationId)
         {
@@ -625,7 +645,9 @@ namespace Shared.Extensions
                 );
             }
 
-            await _chatMessageService.MarkAllConversationsAsReadAsync();
+            await _chatMessageService.MarkAllConversationsAsReadAsync(
+    userId,
+    Context.ConnectionAborted);
         }
 
         [Authorize]
@@ -673,6 +695,16 @@ namespace Shared.Extensions
      "[RESOLVE 5] SUCCESS");
 
             return ChatConversationStatus.Resolved;
+        }
+
+        public async Task<bool> ValidateCustomerChatSession(
+    long? conversationId,
+    long? contactId,
+    string? guestToken)
+        {
+            // authenticated thì validate theo userId
+            // guest thì validate contactId + guestToken + conversation
+            return false;
         }
     }
 

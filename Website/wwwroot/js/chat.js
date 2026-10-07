@@ -4,7 +4,6 @@
     // ============================================================
     // CONFIG
     // ============================================================
-
     const CONFIG = {
         storage: {
             hidePromo: "hidePromo",
@@ -77,6 +76,9 @@
         chatBadge: document.getElementById("chatBadge"),
         quickReplies: document.querySelector(".quick-replies"),
 
+        chatSessionReset: document.getElementById("chatSessionReset"),
+        resetChatBox: document.getElementById("resetChatBox"),
+
         attachmentButton: document.getElementById("attachmentBtn"),
         emojiButton: document.getElementById("emojiBtn"),
 
@@ -132,7 +134,8 @@
 
         reconnectTimer: null,
         chatSession: {
-            hasActiveHistory: false
+            hasActiveHistory: false,
+            isInvalid: false
         },
         quickReplies: {
             visible: false,
@@ -191,71 +194,147 @@
     // ============================================================
     // STORAGE
     // ============================================================
+    function loadStoredSession() {
+        state.currentContactId =
+            normalizeNumber(
+                localStorage.getItem(CONFIG.storage.contactId)
+            );
 
-    function getGuestToken() {
-        let token =
-            localStorage.getItem(CONFIG.storage.guestToken);
+        state.currentConversationId =
+            normalizeNumber(
+                localStorage.getItem(CONFIG.storage.conversationId)
+            );
 
-        if (!token) {
-            token = crypto.randomUUID();
+        state.guestToken =
+            localStorage.getItem(CONFIG.storage.guestToken) || null;
+    }
+    function persistContactIdentity(contactId, guestToken) {
+        const normalizedContactId =
+            normalizeNumber(contactId);
 
+        state.currentContactId =
+            normalizedContactId;
+
+        if (normalizedContactId) {
             localStorage.setItem(
-                CONFIG.storage.guestToken,
-                token
+                CONFIG.storage.contactId,
+                String(normalizedContactId)
             );
         }
 
-        return token;
+        /*
+         * Chỉ update token khi server thực sự
+         * cấp token mới.
+         *
+         * null / undefined:
+         * giữ token hiện tại.
+         */
+        if (guestToken) {
+            state.guestToken =
+                guestToken;
+
+            localStorage.setItem(
+                CONFIG.storage.guestToken,
+                guestToken
+            );
+        }
     }
-
-
-    function loadStoredSession() {
-        state.currentContactId =
-            Number(
-                localStorage.getItem(
-                    CONFIG.storage.contactId
-                )
-            ) || null;
+    function persistConversation(
+        conversationId,
+        status = null
+    ) {
+        const normalizedConversationId =
+            normalizeNumber(conversationId);
 
         state.currentConversationId =
-            Number(
-                localStorage.getItem(
-                    CONFIG.storage.conversationId
-                )
-            ) || null;
+            normalizedConversationId;
 
-        state.guestToken = getGuestToken();
+        if (normalizedConversationId) {
+            localStorage.setItem(
+                CONFIG.storage.conversationId,
+                String(normalizedConversationId)
+            );
+        }
+
+        if (status !== null && status !== undefined) {
+            state.currentConversationStatus =
+                Number(status);
+        }
     }
+    function clearConversationIdentity() {
+        state.currentConversationId = null;
+        state.currentConversationStatus = null;
 
-
-    function saveSession(conversation) {
-        state.currentContactId =
-            Number(conversation.contactId) || null;
-
-        state.currentConversationId =
-            Number(conversation.id) || null;
-
-        localStorage.setItem(
-            CONFIG.storage.contactId,
-            String(state.currentContactId)
-        );
-
-        localStorage.setItem(
-            CONFIG.storage.conversationId,
-            String(state.currentConversationId)
-        );
-
-        localStorage.setItem(
-            CONFIG.storage.guestToken,
-            state.guestToken
+        localStorage.removeItem(
+            CONFIG.storage.conversationId
         );
     }
 
+    //USER WHEN LOGOUT
+    function clearCustomerIdentity() {
+        state.currentContactId = null;
+        state.currentConversationId = null;
+        state.currentConversationStatus = null;
+        state.guestToken = null;
 
+        localStorage.removeItem(
+            CONFIG.storage.contactId
+        );
+
+        localStorage.removeItem(
+            CONFIG.storage.conversationId
+        );
+
+        localStorage.removeItem(
+            CONFIG.storage.guestToken
+        );
+    }
+
+
+    function hasConversationIdentity() {
+        return Boolean(
+            state.currentConversationId &&
+            state.currentContactId
+        );
+    }
+
+    function isValidChatSession() {
+        return Boolean(
+            state.currentConversationId &&
+            state.currentContactId
+        );
+    }
     // ============================================================
     // GENERIC HELPERS
     // ============================================================
+    function resetAfterAuthenticationLost() {
+        clearMessages();
 
+        state.currentContactId = null;
+        state.currentConversationId = null;
+        state.currentConversationStatus = null;
+        state.guestToken = null;
+
+        state.chatSession.hasActiveHistory = false;
+
+        localStorage.removeItem(
+            CONFIG.storage.contactId
+        );
+
+        localStorage.removeItem(
+            CONFIG.storage.conversationId
+        );
+
+        localStorage.removeItem(
+            CONFIG.storage.guestToken
+        );
+
+        resetConversationHistoryState();
+
+        setUnreadMessageCount(0);
+
+        showQuickReplies();
+    }
     function isConnectionReady() {
         return (
             connection.state ===
@@ -269,7 +348,7 @@
     }
 
 
-    function isValidChatSession() {
+    function hasCurrentConversation() {
         return Boolean(
             state.currentConversationId &&
             state.currentContactId
@@ -427,6 +506,10 @@
         let previousMessage = null;
 
         messages.forEach(message => {
+            if (!message?.id) {
+                return;
+            }
+
             appendMessageWithDate(
                 fragment,
                 message,
@@ -434,6 +517,8 @@
             );
 
             previousMessage = message;
+
+            markMessageProcessed(message.id);
         });
 
         DOM.chatBody.prepend(fragment);
@@ -672,88 +757,205 @@
         );
     }
 
-    //FIX NEW 2
     async function openChat() {
-        console.trace(
-            "[OPEN CHAT]",
-            {
-                conversationId:
-                    state.currentConversationId,
-
-                conversationStatus:
-                    state.currentConversationStatus,
-
-                isResolved:
-                    isConversationResolved(),
-
-                hasActiveHistory:
-                    state.chatSession.hasActiveHistory
-            }
-        );
-        if (!DOM.chatWindow) return;
+        if (!DOM.chatWindow) {
+            return;
+        }
 
         DOM.chatWindow.classList.add("open");
-
+        if (state.chatSession.isInvalid) {
+            return;
+        }
         try {
-            // Không có conversation
+            /*
+             * =====================================================
+             * 1. AUTHENTICATED CUSTOMER
+             * =====================================================
+             *
+             * Khi đã login:
+             * - Không phụ thuộc guestToken
+             * - Backend sẽ xác định ChatContact từ userId
+             */
+            if (CHAT_CONFIG.isAuthenticated) {
+
+                /*
+                 * Không có conversation
+                 * => New chat
+                 */
+                if (!state.currentConversationId) {
+                    clearMessages();
+
+                    state.chatSession.hasActiveHistory =
+                        false;
+
+                    showQuickReplies();
+
+                    return;
+                }
+
+                /*
+                 * Có conversation:
+                 * cho phép xem history kể cả Resolved/Closed.
+                 */
+                if (!DOM.chatBody?.children.length) {
+                    await loadConversationMessages({
+                        initial: true
+                    });
+                }
+
+                if (
+                    state.currentConversationId &&
+                    state.currentContactId
+                ) {
+                    const status =
+                        await joinConversation();
+
+                    if (status !== null) {
+                        updateCurrentConversationStatus(
+                            status
+                        );
+                    }
+
+                    const marked =
+                        await markConversationAsRead();
+
+                    if (marked) {
+                        setUnreadMessageCount(0);
+                    }
+                }
+
+                return;
+            }
+
+
+            /*
+             * =====================================================
+             * 2. GUEST
+             * =====================================================
+             */
+
+            /*
+             * Guest không có token thì KHÔNG được sử dụng
+             * contactId / conversationId cũ.
+             *
+             * contactId chỉ là identity reference.
+             * guestToken mới là credential để truy cập.
+             */
+            if (
+                state.currentContactId &&
+                state.currentConversationId &&
+                !state.guestToken
+            ) {
+                showChatSessionInvalid();
+                return;
+                //console.log(
+                //    "Guest identity không còn guestToken → reset session."
+                //);
+
+                //clearCustomerIdentity();
+
+                //state.currentConversationStatus =
+                //    null;
+
+                //state.chatSession.hasActiveHistory =
+                //    false;
+
+                //resetConversationHistoryState();
+                //clearMessages();
+
+                //showQuickReplies();
+
+                //return;
+            }
+
+
+            /*
+             * =====================================================
+             * 3. GUEST NEW CHAT
+             * =====================================================
+             */
             if (!state.currentConversationId) {
                 clearMessages();
-                state.chatSession.hasActiveHistory = false;
+
+                state.chatSession.hasActiveHistory =
+                    false;
+
                 showQuickReplies();
+
                 return;
             }
-            // Conversation đã resolved và UI session trước đó đã kết thúc
-            if (
-                isConversationResolved() &&
-                !state.chatSession.hasActiveHistory
-            ) {
-                console.log(
-                    "[OPEN CHAT RESET RESOLVED]",
-                    {
-                        conversationId:
-                            state.currentConversationId,
 
-                        conversationStatus:
-                            state.currentConversationStatus,
 
-                        hasActiveHistory:
-                            state.chatSession.hasActiveHistory
-                    }
-                );
-                clearMessages();
+            /*
+             * =====================================================
+             * 4. GUEST EXISTING CHAT
+             * =====================================================
+             *
+             * Đến đây guest phải có:
+             *
+             * contactId
+             * conversationId
+             * guestToken
+             */
+            if (!state.currentContactId ||
+                !state.guestToken) {
 
-                state.currentConversationId = null;
-                state.currentConversationStatus = null;
+                clearCustomerIdentity();
 
-                localStorage.removeItem(
-                    CONFIG.storage.conversationId
-                );
+                state.currentConversationStatus =
+                    null;
 
-                state.messages.oldestMessageId = null;
-                state.messages.hasMore = true;
-                state.messages.loading = false;
+                state.chatSession.hasActiveHistory =
+                    false;
 
                 resetConversationHistoryState();
+                clearMessages();
 
                 showQuickReplies();
 
                 return;
             }
 
+
+            /*
+             * =====================================================
+             * 5. LOAD HISTORY
+             * =====================================================
+             */
             if (!DOM.chatBody?.children.length) {
                 await loadConversationMessages({
                     initial: true
                 });
             }
 
-            await joinConversation();
-            const marked = await markConversationAsRead();
 
-            if (marked) {
-                setUnreadMessageCount(0);
+            /*
+             * =====================================================
+             * 6. JOIN CONVERSATION
+             * =====================================================
+             */
+            if (
+                state.currentConversationId &&
+                state.currentContactId
+            ) {
+                const status =
+                    await joinConversation();
+
+                if (status !== null) {
+                    updateCurrentConversationStatus(
+                        status
+                    );
+                }
+
+                const marked =
+                    await markConversationAsRead();
+
+                if (marked) {
+                    setUnreadMessageCount(0);
+                }
             }
-
-        } catch (error) {
+        }
+        catch (error) {
             console.error(
                 "Không thể mở chat:",
                 error
@@ -761,33 +963,32 @@
         }
     }
     function updateCurrentConversationStatus(status) {
-        const normalizedStatus =
-            String(status ?? "").toLowerCase();
+        const normalizedStatus = Number(status);
+
+        if (!DOM.chatInput || !DOM.sendButton) {
+            return;
+        }
+
+        const isResolved =
+            normalizedStatus ===
+            CONFIG.conversationStatus.resolved;
 
         const isClosed =
-            normalizedStatus === "closed";
+            normalizedStatus ===
+            CONFIG.conversationStatus.closed;
 
-        if (DOM.chatInput) {
-            DOM.chatInput.disabled = isClosed;
-        }
+        const isEnded =
+            isResolved || isClosed;
 
-        if (DOM.sendButton) {
-            DOM.sendButton.disabled = isClosed;
-        }
+        DOM.chatInput.disabled = false;
+        DOM.sendButton.disabled = false;
 
-        if (DOM.chatInput) {
-                if (normalizedStatus === "closed") {
-                    DOM.chatInput.placeholder =
-                    "Cuộc hội thoại đã đóng";
-            } else if (normalizedStatus === "resolved") {
-                DOM.chatInput.placeholder =
-                    "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới...";
-            } else {
-                DOM.chatInput.placeholder =
-                    "Nhập tin nhắn...";
-            }
-        }
+        DOM.chatInput.placeholder =
+            isEnded
+                ? "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới..."
+                : "Nhập tin nhắn...";
     }
+
     async function loadConversationMessages({
         initial = false
     } = {}) {
@@ -947,9 +1148,6 @@
         stopTyping();
         hideTyping();
 
-        if (isConversationResolved()) {
-            state.chatSession.hasActiveHistory = false;
-        }
         DOM.chatWindow?.classList.remove("open");
         DOM.chatToggle?.classList.remove("active");
     }
@@ -1130,10 +1328,9 @@
 
 
     async function sendTypingStatus(isTyping) {
-        if (
-            !isValidChatSession() ||
-            !isConnectionReady()
-        ) {
+        if (!state.currentConversationId ||
+            !state.currentContactId ||
+            !isConnectionReady()) {
             return;
         }
 
@@ -1215,23 +1412,47 @@
         );
     }
 
-
     async function initializeChatSession() {
+        if (state.chatSession.isInvalid) {
+            return;
+        }
+        /*
+         * User không còn authenticated.
+         *
+         * Không restore authenticated ChatContact/
+         * Conversation từ localStorage.
+         */
+        if (!CHAT_CONFIG.isAuthenticated) {
 
-        if (!isValidChatSession()) {
+            state.currentConversationStatus = null;
+            state.chatSession.hasActiveHistory = false;
+
+            resetConversationHistoryState();
+            clearMessages();
+
+            showQuickReplies();
+
             return;
         }
 
-        const status =
-            await joinConversation();
+        /*
+         * User đang authenticated.
+         *
+         * Chỉ restore nếu có conversation identity.
+         */
+        if (!hasConversationIdentity()) {
+            showQuickReplies();
 
-        if (
-            status ===
-            CONFIG.conversationStatus.resolved
-        ) {
-            resetToNewChatState();
             return;
         }
+
+        const status = await joinConversation();
+
+        if (status === null) {
+            return;
+        }
+
+        state.currentConversationStatus = status;
 
         await loadUnreadCount();
 
@@ -1242,114 +1463,69 @@
         updateCurrentConversationStatus(status);
     }
     function resetToNewChatState() {
-
         clearMessages();
 
+        /*
+         * Chỉ reset conversation.
+         *
+         * Không xóa Contact.
+         * Không xóa guestToken.
+         */
         state.currentConversationId = null;
         state.currentConversationStatus = null;
 
-        state.unreadMessageCount = 0;
-
-        state.chatSession.hasActiveHistory = false;
+        state.chatSession.hasActiveHistory =
+            false;
 
         state.messages.oldestMessageId = null;
         state.messages.hasMore = true;
         state.messages.loading = false;
 
-        state.history.previousConversationId = null;
-        state.history.hasPrevious = false;
-        state.history.loading = false;
-        state.history.oldestLoadedConversationId = null;
-        state.history.conversations.clear();
+        resetConversationHistoryState();
 
-        localStorage.removeItem(
-            CONFIG.storage.conversationId
-        );
-
-        hidePreviousConversationButton();
+        clearConversationIdentity();
 
         setUnreadMessageCount(0);
 
         showQuickReplies();
     }
 
-    async function joinConversation() {
+async function joinConversation() {
+    if (
+        !state.currentConversationId ||
+        !state.currentContactId ||
+        !isConnectionReady()
+    ) {
+        return null;
+    }
 
-        if (
-            !state.currentConversationId ||
-            !state.currentContactId ||
-            !isConnectionReady()
-        ) {
-            return null;
-        }
-
+    try {
         const status =
             await connection.invoke(
                 "JoinConversation",
-                state.currentConversationId,
-                state.currentContactId,
-                state.guestToken
+                Number(state.currentConversationId),
+                Number(state.currentContactId),
+                state.guestToken || null
             );
 
         state.currentConversationStatus =
             Number(status);
 
+        updateCurrentConversationStatus(
+            state.currentConversationStatus
+        );
+
         return state.currentConversationStatus;
     }
+    catch (error) {
+        console.error(
+            "JoinConversation failed:",
+            error
+        );
 
-
-    async function createConversation() {
-        if (!CHAT_CONFIG.inboxId) {
-            throw new Error(
-                "Chat inboxId không hợp lệ."
-            );
-        }
-        const response =
-            await fetch(
-                "/chat/start",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-                    credentials: "same-origin",
-                    body: JSON.stringify({
-                        inboxId:
-                            CHAT_CONFIG.inboxId,
-
-                        name:
-                            CHAT_CONFIG.name,
-
-                        email:
-                            CHAT_CONFIG.email,
-
-                        phone:
-                            CHAT_CONFIG.phone,
-
-                        guestToken:
-                            state.guestToken
-                    })
-                }
-            );
-
-        if (!response.ok) {
-            throw new Error(
-                "Không thể bắt đầu cuộc trò chuyện."
-            );
-        }
-
-        const conversation =
-            await response.json();
-
-        saveSession(conversation);
-
-        state.currentConversationStatus =
-            Number(conversation.status);
+        return null;
     }
-
-
+}
     function scheduleReconnect() {
         if (state.reconnectTimer) {
             return;
@@ -1467,24 +1643,51 @@
     }
 
     async function handleSignalRReconnected() {
-
         hideTyping();
 
-        if (!isValidChatSession()) {
+        /*
+         * Không có conversation/contact:
+         *
+         * - Không JoinConversation
+         * - Không restore history
+         * - Không tạo DB
+         *
+         * Đây là trạng thái bình thường của guest mới.
+         */
+        if (!hasConversationIdentity()) {
             return;
         }
 
         try {
-            await joinConversation();
+            /*
+             * Reconnect chỉ restore session hiện tại.
+             *
+             * Không được tạo identity mới tại đây.
+             */
+            const status = await joinConversation();
+
+            if (status === null) {
+                /*
+                 * Conversation hiện tại không còn access.
+                 *
+                 * Không tự refresh token.
+                 * Không tạo conversation mới.
+                 */
+                return;
+            }
+
+            state.currentConversationStatus = status;
 
             await loadConversationMessages({
                 initial: true
             });
 
             await loadUnreadCount();
+
+            updateCurrentConversationStatus(status);
         }
         catch (error) {
-            console.log(
+            console.error(
                 "Conversation synchronization failed:",
                 error
             );
@@ -1493,40 +1696,30 @@
 
 
     async function handleMessageReceived(message) {
-
         if (!message?.id) {
             return false;
         }
 
         const messageConversationId =
-            Number(message.conversationId);
-
-        const currentConversationId =
-            Number(state.currentConversationId);
-
-        console.log(
-            "[CLIENT MESSAGE RECEIVED]",
-            {
-                messageId: message.id,
-                messageConversationId,
-                currentConversationId,
-                senderType: message.senderType,
-                content: message.content
-            }
-        );
-
-        if (
-            messageConversationId &&
-            messageConversationId !== currentConversationId
-        ) {
-            console.log(
-                "[CLIENT MESSAGE IGNORED - DIFFERENT CONVERSATION]",
-                {
-                    messageConversationId,
-                    currentConversationId
-                }
+            normalizeNumber(
+                message.conversationId
             );
 
+        const currentConversationId =
+            normalizeNumber(
+                state.currentConversationId
+            );
+
+        /*
+         * Không thuộc conversation hiện tại
+         * thì không render vào chatbox.
+         */
+        if (
+            messageConversationId &&
+            currentConversationId &&
+            messageConversationId !==
+            currentConversationId
+        ) {
             return false;
         }
 
@@ -1538,14 +1731,6 @@
                 true
             );
 
-        console.log(
-            "[CLIENT MESSAGE ADDED]",
-            {
-                messageId: message.id,
-                added
-            }
-        );
-
         if (!added) {
             return false;
         }
@@ -1554,14 +1739,17 @@
             Number(message.senderType);
 
         if (
-            senderType === CONFIG.senderType.system
+            senderType ===
+            CONFIG.senderType.system
         ) {
             return true;
         }
 
         const isIncoming =
-            senderType === CONFIG.senderType.admin ||
-            senderType === CONFIG.senderType.bot;
+            senderType ===
+            CONFIG.senderType.admin ||
+            senderType ===
+            CONFIG.senderType.bot;
 
         if (!isIncoming) {
             return true;
@@ -1572,7 +1760,6 @@
         );
 
         if (isChatOpen()) {
-
             const marked =
                 await markConversationAsRead();
 
@@ -1581,12 +1768,12 @@
             }
         }
         else {
-
             incrementUnreadMessage();
         }
 
-        if (shouldShowNotificationPrompt()) {
-
+        if (
+            shouldShowNotificationPrompt()
+        ) {
             state.notification.pendingMessage =
                 message;
 
@@ -1627,54 +1814,131 @@
 
 
     function handleConversationStatusUpdated(data) {
-        const conversationId = Number(
-            data?.conversationId
-        );
+        const conversationId =
+            normalizeNumber(
+                data?.conversationId
+            );
 
         if (
             conversationId !==
-            Number(state.currentConversationId)
+            normalizeNumber(
+                state.currentConversationId
+            )
         ) {
             return;
         }
 
-        state.currentConversationStatus =
-            data.status;
-
         updateCurrentConversationStatus(
             data.status
         );
-    }
 
+        /*
+         * Resolve:
+         *
+         * - giữ conversationId
+         * - giữ history
+         * - không reopen
+         * - composer chuyển sang "new conversation"
+         *
+         * Khi user send tiếp:
+         * server tạo conversation mới.
+         */
+        if (
+            Number(data.status) ===
+            CONFIG.conversationStatus.resolved
+        ) {
+            state.chatSession.hasActiveHistory =
+                true;
+        }
+    }
     function updateCurrentConversationStatus(status) {
-        const normalizedStatus = Number(status);
+        const normalizedStatus =
+            Number(status);
+
+        state.currentConversationStatus =
+            normalizedStatus;
+
+        const isResolved =
+            normalizedStatus ===
+            CONFIG.conversationStatus.resolved;
 
         const isClosed =
-            normalizedStatus === CONFIG.conversationStatus.closed;
+            normalizedStatus ===
+            CONFIG.conversationStatus.closed;
 
-        if (DOM.chatInput) {
-            DOM.chatInput.disabled = isClosed;
+        const statusName =
+            getConversationStatusName(
+                normalizedStatus
+            );
+
+        if (DOM.chatWindow) {
+            DOM.chatWindow.dataset.status =
+                statusName;
         }
 
-        if (DOM.sendButton) {
-            DOM.sendButton.disabled = isClosed;
+        if (DOM.chatStatusBadge) {
+            DOM.chatStatusBadge.dataset.status =
+                statusName;
+
+            DOM.chatStatusBadge.classList.remove(
+                "open",
+                "pending",
+                "resolved",
+                "closed"
+            );
+
+            DOM.chatStatusBadge.classList.add(
+                statusName
+            );
         }
 
+        //if (DOM.chatStatusText) {
+        //    const labels = {
+        //        open: "Đang hỗ trợ",
+        //        pending: "Đang chờ",
+        //        resolved: "Đã giải quyết",
+        //        closed: "Đã đóng"
+        //    };
+
+        //    DOM.chatStatusText.textContent =
+        //        labels[statusName] ??
+        //        statusName;
+        //}
+
+        /*
+         * Không disable composer chỉ vì Resolved.
+         *
+         * Resolved/Closed đều không được reopen.
+         * Khi user gửi:
+         *
+         *     Server tạo conversation mới.
+         */
         if (DOM.chatInput) {
-            if (isClosed) {
-                DOM.chatInput.placeholder =
-                    "Cuộc hội thoại đã đóng";
-            } else if (
-                normalizedStatus ===
-                CONFIG.conversationStatus.resolved
-            ) {
+            DOM.chatInput.disabled = false;
+
+            if (isResolved || isClosed) {
                 DOM.chatInput.placeholder =
                     "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới...";
-            } else {
+            }
+            else {
                 DOM.chatInput.placeholder =
                     "Nhập tin nhắn...";
             }
         }
+
+        if (DOM.sendButton) {
+            DOM.sendButton.disabled = false;
+        }
+
+        /*
+         * Closed/Resolved vẫn chỉ là trạng thái của
+         * conversation hiện tại.
+         *
+         * Không xóa conversationId ở đây.
+         *
+         * Chỉ khi user bắt đầu session mới hoặc server
+         * trả về conversation mới thì client chuyển ID.
+         */
     }
     function handleTypingEvent(data) {
         if (
@@ -1859,9 +2123,16 @@
         }
     }
     function renderInitialMessages(messages) {
-        DOM.chatBody.innerHTML = '';
+        if (!DOM.chatBody) {
+            return;
+        }
 
-        if (!messages || messages.length === 0) {
+        DOM.chatBody.innerHTML = "";
+
+        if (
+            !Array.isArray(messages) ||
+            messages.length === 0
+        ) {
             initializeQuickRepliesFromMessages(
                 messages
             );
@@ -1869,11 +2140,15 @@
             return;
         }
 
-        const fragment = document.createDocumentFragment();
+        const fragment =
+            document.createDocumentFragment();
 
         let previousMessage = null;
 
         messages.forEach(message => {
+            if (!message?.id) {
+                return;
+            }
 
             appendMessageWithDate(
                 fragment,
@@ -1881,10 +2156,17 @@
                 previousMessage
             );
 
-            previousMessage = message;
+            previousMessage =
+                message;
+
+            markMessageProcessed(
+                message.id
+            );
         });
 
-        DOM.chatBody.appendChild(fragment);
+        DOM.chatBody.appendChild(
+            fragment
+        );
 
         initializeQuickRepliesFromMessages(
             messages
@@ -1952,43 +2234,74 @@
 
         DOM.chatBody.scrollTop = DOM.chatBody.scrollHeight;
     }
-    function prependMessages(messages) {
-        if (!DOM.chatBody) {
-            return;
-        }
+    function resetChatBox() {
+        /*
+         * 1. Clear identity
+         */
+        clearCustomerIdentity();
 
-        const previousHeight =
-            DOM.chatBody.scrollHeight;
+        /*
+         * 2. Clear conversation state
+         */
+        state.currentConversationStatus = null;
+        state.chatSession.hasActiveHistory = false;
+        state.chatSession.isInvalid = false;
 
-        const previousTop =
-            DOM.chatBody.scrollTop;
+        resetConversationHistoryState();
 
-        const fragment =
-            document.createDocumentFragment();
+        /*
+         * 3. Clear messages
+         */
+        clearMessages();
 
-        let previousMessage = null;
+        /*
+         * 4. Hide invalid-session UI
+         */
+        DOM.chatSessionReset?.setAttribute(
+            "hidden",
+            ""
+        );
 
-        messages.forEach(message => {
+        /*
+         * 5. Enable composer
+         */
+        DOM.chatInput?.removeAttribute("disabled");
+        DOM.sendBtn?.removeAttribute("disabled");
 
-            appendMessageWithDate(
-                fragment,
-                message,
-                previousMessage
-            );
+        DOM.attachmentBtn?.removeAttribute("disabled");
+        DOM.emojiBtn?.removeAttribute("disabled");
 
-            previousMessage = message;
-        });
+        /*
+         * 6. Hiện quick replies
+         */
+        showQuickReplies();
 
-        DOM.chatBody.prepend(fragment);
-
-        const newHeight =
-            DOM.chatBody.scrollHeight;
-
-        DOM.chatBody.scrollTop =
-            previousTop +
-            (newHeight - previousHeight);
+        /*
+         * 7. Focus input
+         */
+        DOM.chatInput?.focus();
     }
+    function showChatSessionInvalid() {
+        console.log("showChatSessionInvalid");
+        state.chatSession.isInvalid = true;
 
+        DOM.chatSessionReset?.removeAttribute("hidden");
+
+        /*
+         * Không cho user tiếp tục gửi message
+         */
+        DOM.chatInput?.setAttribute("disabled", "disabled");
+        DOM.sendBtn?.setAttribute("disabled", "disabled");
+
+        /*
+         * Không cho typing / attachment / emoji
+         */
+        DOM.attachmentBtn?.setAttribute("disabled", "disabled");
+        DOM.emojiBtn?.setAttribute("disabled", "disabled");
+
+        stopTyping();
+        hideQuickReplies();
+    }
     function clearMessages() {
         DOM.chatBody?.replaceChildren();
 
@@ -2048,8 +2361,6 @@
             const result =
                 await response.json();
             console.log("unread-count response:", result);
-
-            const unreadCount = result?.data ?? result;
 
             console.log("unread count:", unreadCount);
             setUnreadMessageCount(
@@ -2134,127 +2445,26 @@
     // SEND MESSAGE
     // ============================================================
 
-    async function sendMessage(text) {
-
-        const message =
-            String(text ?? "").trim();
-
-        if (!message) {
-            return;
-        }
-
-        stopTyping();
-
-        if (!isConnectionReady()) {
-            console.log("SignalR chưa kết nối.");
-            return;
-        }
-
-        if (DOM.chatInput) {
-            DOM.chatInput.value = "";
-        }
-
-        try {
-            console.log(CHAT_CONFIG.inboxId);
-            const result =
-                await connection.invoke(
-                    "SendCustomerMessage",
-                    state.currentConversationId,
-                    state.currentContactId,
-                    message,
-                    state.guestToken
-                );
-
-            if (!result) {
-                return;
-            }
-
-            const newConversationId =
-                Number(result.conversationId);
-
-            const currentConversationId =
-                Number(state.currentConversationId);
-
-            /*
-             * Conversation chuyển:
-             *
-             * Resolved A
-             *      ↓
-             * customer gửi message
-             *      ↓
-             * server tạo B
-             */
-            if (
-                newConversationId &&
-                newConversationId !== currentConversationId
-            ) {
-
-                state.currentConversationId =
-                    newConversationId;
-
-                state.currentConversationStatus =
-                    Number(result.status);
-
-                localStorage.setItem(
-                    CONFIG.storage.conversationId,
-                    String(newConversationId)
-                );
-
-                await joinConversation();
-
-                state.chatSession.hasActiveHistory =
-                    true;
-
-                updateCurrentConversationStatus(
-                    state.currentConversationStatus
-                );
-
-                addMessage(result, true);
-
-                return;
-            }
-
-            /*
-             * Message thuộc conversation hiện tại.
-             */
-            addMessage(result, true);
-
-        }
-        catch (error) {
-
-            console.log(
-                "Send message failed:",
-                error
-            );
-
-            if (DOM.chatInput) {
-                DOM.chatInput.value = message;
-                DOM.chatInput.focus();
-            }
-        }
-    }
-
-
-    // ============================================================
-    // MESSAGE RENDERING
-    // ============================================================
-
     function isMessageProcessed(messageId) {
+        return state.processedMessageIds.has(
+            String(messageId)
+        );
+    }
+    function markMessageProcessed(messageId) {
         if (!messageId) {
-            return true;
+            return;
         }
+
+        const id =
+            String(messageId);
 
         if (
-            state.processedMessageIds.has(
-                messageId
-            )
+            state.processedMessageIds.has(id)
         ) {
-            return true;
+            return;
         }
 
-        state.processedMessageIds.add(
-            messageId
-        );
+        state.processedMessageIds.add(id);
 
         if (
             state.processedMessageIds.size >
@@ -2272,9 +2482,255 @@
                 );
             }
         }
-
-        return false;
     }
+
+    async function sendMessage(text) {
+        const message =
+            String(text ?? "").trim();
+
+        if (!message) {
+            return;
+        }
+
+        if (!isConnectionReady()) {
+            console.log(
+                "SignalR chưa kết nối."
+            );
+
+            return;
+        }
+
+        stopTyping();
+
+        const originalValue = DOM.chatInput?.value ?? "";
+
+        if (DOM.chatInput) {
+            DOM.chatInput.value = "";
+        }
+
+        try {
+            /*
+             * =====================================================
+             * IMPORTANT
+             *
+             * Không yêu cầu contactId / conversationId ở first send.
+             *
+             * Server sẽ resolve:
+             *
+             * Authenticated:
+             *     AppUser -> ChatContact
+             *
+             * Guest:
+             *     guestToken -> ChatGuestSession -> Contact
+             *
+             * Nếu chưa có identity:
+             *     server tạo Contact + GuestSession
+             *
+             * Sau đó:
+             *     Conversation -> Message
+             * =====================================================
+             */
+            console.log("SendCustomerMessage");
+            console.log(CHAT_CONFIG.inboxId + "; " + state.currentConversationId + "; " + state.currentContactId +
+                "; " + message + "; " + state.guestToken);
+            const result =
+                await connection.invoke(
+                    "SendCustomerMessage",
+                    CHAT_CONFIG.inboxId,
+                    state.currentConversationId || null,
+                    state.currentContactId || null,
+                    message,
+                    state.guestToken || null
+                );
+
+            if (!result) {
+                throw new Error(
+                    "Server không trả về kết quả gửi message."
+                );
+            }
+
+            /*
+             * =====================================================
+             * 1. Sync Contact
+             * =====================================================
+             */
+
+            if (result.contactId) {
+                persistContactIdentity(
+                    result.contactId,
+                    result.guestToken
+                );
+            }
+
+            /*
+             * =====================================================
+             * 2. Sync Conversation
+             * =====================================================
+             */
+
+            const newConversationId =
+                normalizeNumber(
+                    result.conversationId
+                );
+
+            const previousConversationId =
+                normalizeNumber(
+                    state.currentConversationId
+                );
+
+            const conversationChanged =
+                Boolean(
+                    newConversationId &&
+                    newConversationId !== previousConversationId
+                );
+            if (newConversationId) {
+                state.currentConversationId =
+                    newConversationId;
+
+                state.currentConversationStatus =
+                    Number(result.status);
+
+                persistConversation(
+                    newConversationId,
+                    result.status
+                );
+            }
+
+            /*
+             * =====================================================
+             * 3. Nếu server tạo conversation mới
+             * =====================================================
+             *
+             * Trường hợp:
+             *
+             * - first send
+             * - conversation Resolved
+             * - conversation Closed
+             *
+             * Conversation cũ không được reopen.
+             */
+
+            if (conversationChanged) {
+                clearMessages();
+
+                await joinConversation();
+
+                await loadConversationMessages({
+                    initial: true
+                });
+            }
+            else if (
+                result.status !== undefined &&
+                result.status !== null
+            ) {
+                state.currentConversationStatus =
+                    Number(result.status);
+
+                updateCurrentConversationStatus(
+                    state.currentConversationStatus
+                );
+            }
+
+            /*
+             * =====================================================
+             * 4. Render message
+             * =====================================================
+             *
+             * Chỉ render result.message.
+             * Không render result một lần nữa.
+             */
+
+            const sentMessage =
+                result.message ?? null;
+
+            if (sentMessage?.id) {
+                addMessage(
+                    sentMessage,
+                    true
+                );
+            }
+
+            hideQuickReplies();
+
+            state.chatSession.hasActiveHistory = true;
+        }
+        catch (error) {
+            console.error(
+                "Send message failed:",
+                error
+            );
+            const errorMessage =
+                String(error?.message ?? error ?? "");
+            /*
+             * =====================================================
+             * INVALID CHAT SESSION
+             * =====================================================
+             */
+            if (errorMessage.includes("CHAT_SESSION_INVALID")) {
+                
+                showChatSessionInvalid();
+
+                return;
+            }
+
+            /*
+             * =====================================================
+             * NORMAL SEND ERROR
+             * =====================================================
+             */
+
+            if (DOM.chatInput) {
+                DOM.chatInput.value =
+                    originalValue || message;
+
+                DOM.chatInput.focus();
+            }
+        }
+    }
+    function addMessage(
+        message,
+        shouldScroll = true
+    ) {
+        if (
+            !message?.id ||
+            !DOM.chatBody
+        ) {
+            return false;
+        }
+
+        if (
+            isMessageProcessed(message.id)
+        ) {
+            return false;
+        }
+
+        const row =
+            createMessageElement(message);
+
+        if (!row) {
+            return false;
+        }
+
+        DOM.chatBody.appendChild(row);
+
+        /*
+         * Mark ngay sau khi render.
+         */
+        markMessageProcessed(
+            message.id
+        );
+
+        updateQuickRepliesActivity(
+            message
+        );
+
+        if (shouldScroll) {
+            scrollBottom(true);
+        }
+
+        return true;
+    }
+
     function createDateSeparator(date) {
         const separator =
             document.createElement("div");
@@ -2453,45 +2909,6 @@
 
         return row;
     }
-
-    function addMessage(
-        message,
-        shouldScroll = true
-    ) {
-        if (!message?.id) {
-            return false;
-        }
-
-        if (
-            isMessageProcessed(
-                message.id
-            )
-        ) {
-            return false;
-        }
-
-        const row =
-            createMessageElement(
-                message
-            );
-
-        if (!row) {
-            return false;
-        }
-
-        DOM.chatBody?.appendChild(row);
-        console.log("addMessage");
-        updateQuickRepliesActivity(
-            message
-        );
-
-        if (shouldScroll) {
-            scrollBottom(true);
-        }
-
-        return true;
-    }
-
 
     function getMessageRowClass(senderType) {
         switch (senderType) {
@@ -2834,6 +3251,11 @@
         DOM.chatInput?.addEventListener(
             "input",
             handleTyping
+        );
+
+        DOM.resetChatBox?.addEventListener(
+            "click",
+            resetChatBox
         );
     }
 
@@ -3654,4 +4076,18 @@
         init();
     }
 
+    window.addEventListener(
+        "caterin:customer-logout",
+        function () {
+            clearCustomerIdentity();
+
+            state.currentConversationStatus = null;
+            state.chatSession.hasActiveHistory = false;
+
+            resetConversationHistoryState();
+            clearMessages();
+
+            showQuickReplies();
+        }
+    );
 })();

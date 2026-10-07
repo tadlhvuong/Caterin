@@ -9,9 +9,6 @@ namespace Shared.Data.Entities.Chat
 
         public string? UserId { get; set; }
 
-        [MaxLength(100)]
-        public string? GuestToken { get; set; }
-
         [MaxLength(150)]
         public string? Name { get; set; }
 
@@ -32,9 +29,18 @@ namespace Shared.Data.Entities.Chat
 
         public AppUser? User { get; set; }
 
+        public bool IsMerged { get; set; }
+
+        public long? MergedIntoContactId { get; set; }
+
+        public DateTime? MergedAt { get; set; }
+
+        public ChatContact? MergedIntoContact { get; set; }
         public ICollection<ChatContactInbox> Inboxes { get; set; } = new List<ChatContactInbox>();
 
         public ICollection<ChatConversation> Conversations { get; set; } = new List<ChatConversation>();
         public ICollection<ChatMessage> Messages { get; set; } = new List<ChatMessage>();
+
+        public ICollection<ChatContact> MergedContacts { get; set; } = new List<ChatContact>();
     }
 }

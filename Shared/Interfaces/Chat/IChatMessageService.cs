@@ -21,11 +21,13 @@ namespace Shared.Interfaces.Chat
       long inboxId,
       long contactId,
       CancellationToken cancellationToken = default);
-        Task<ChatMessageDto> SendCustomerMessageAsync(
+        Task<CustomerSendMessageResult> SendCustomerMessageAsync(
     long? conversationId,
-    long contactId,
+    long? contactId,
+    long inboxId,
     string content,
     string? guestToken,
+    string? userId,
     CancellationToken cancellationToken = default);
 
         Task<ChatMessageDto> SendAdminMessageAsync(
@@ -58,8 +60,8 @@ namespace Shared.Interfaces.Chat
             bool isAdmin,
             CancellationToken cancellationToken = default);
         Task<bool> CanCustomerAccessConversationAsync(
-    long? conversationId,
-    long contactId,
+    long conversationId,
+    long? contactId,
     string? userId,
     string? guestToken,
     CancellationToken cancellationToken = default);
@@ -92,7 +94,9 @@ namespace Shared.Interfaces.Chat
            CancellationToken cancellationToken = default);
         Task<ServiceResult> MarkConversationAsReadAsync(long conversationId, long? contactId,
             string? guestToken, CancellationToken cancellationToken = default);
-        Task<ServiceResult> MarkAllConversationsAsReadAsync(CancellationToken cancellationToken = default);
+        Task<ServiceResult> MarkAllConversationsAsReadAsync(
+     string userId,
+     CancellationToken cancellationToken = default);
 
         Task<ServiceResult> ResolveConversationAsync(
     long conversationId,
@@ -128,5 +132,7 @@ namespace Shared.Interfaces.Chat
     long conversationId,
     int labelId,
     CancellationToken cancellationToken = default);
+
+
     }
 }

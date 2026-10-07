@@ -10,6 +10,7 @@ namespace Shared.Requests.Chat
     public class StartChatRequest
     {
         public long InboxId { get; set; }
+        public long? ContactId { get; set; }
 
         [MaxLength(150)]
         public string? Name { get; set; }
@@ -19,6 +20,9 @@ namespace Shared.Requests.Chat
 
         [MaxLength(30)]
         public string? Phone { get; set; }
+
+        [MaxLength(255)]
+        public string? AvatarUrl { get; set; }
 
         [MaxLength(100)]
         public string? GuestToken { get; set; }

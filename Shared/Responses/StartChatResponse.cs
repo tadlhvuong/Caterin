@@ -8,7 +8,7 @@ namespace Shared.Responses
 {
     public sealed class StartChatResponse
     {
-        public long ContactId { get; set; }
+        public long? ContactId { get; set; }
 
         public long InboxId { get; set; }
 

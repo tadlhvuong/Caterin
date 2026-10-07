@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Chat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations.Chat
 {
@@ -31,9 +26,13 @@ namespace Shared.Configurations.Chat
 
             builder.Property(x => x.CustomAttributesJson).HasColumnType("jsonb").IsRequired(false);
 
+            builder.Property(x => x.IsMerged).HasDefaultValue(false);
+
             builder.Property(x => x.CreatedAt).HasColumnType("timestamp with time zone").IsRequired();
 
             builder.Property(x => x.UpdatedAt).HasColumnType("timestamp with time zone");
+
+            builder.Property(x => x.MergedAt).HasColumnType("timestamp with time zone");
 
             builder.HasOne(x => x.User).WithMany()
                 .HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.SetNull);
@@ -44,18 +43,23 @@ namespace Shared.Configurations.Chat
             builder.HasMany(x => x.Conversations).WithOne(x => x.Contact)
                 .HasForeignKey(x => x.ContactId).OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(x => x.MergedIntoContact).WithMany(x => x.MergedContacts)
+    .HasForeignKey(x => x.MergedIntoContactId)
+    .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasMany(x => x.Messages).WithOne(x => x.Contact)
                 .HasForeignKey(x => x.ContactId).OnDelete(DeleteBehavior.SetNull);
 
-            // =========================
+            
             // Indexes
-            // =========================
 
             builder.HasIndex(x => x.UserId);
 
             builder.HasIndex(x => x.Email);
 
             builder.HasIndex(x => x.Phone);
+
+            builder.HasIndex(x => x.MergedIntoContactId);
         }
     }
 }

@@ -1,16 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Data.Entities.Chat;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Configurations.Chat
 {
-    public sealed class ChatTeamConfiguration
-    : IEntityTypeConfiguration<ChatTeam>
+    public sealed class ChatTeamConfiguration : IEntityTypeConfiguration<ChatTeam>
     {
         public void Configure(EntityTypeBuilder<ChatTeam> builder)
         {
@@ -38,9 +32,7 @@ namespace Shared.Configurations.Chat
             builder.HasMany(x => x.Conversations).WithOne(x => x.Team)
                 .HasForeignKey(x => x.TeamId).OnDelete(DeleteBehavior.SetNull);
 
-            // =========================
-            // Index
-            // =========================
+            // Indexes
 
             builder.HasIndex(x => x.Name);
         }

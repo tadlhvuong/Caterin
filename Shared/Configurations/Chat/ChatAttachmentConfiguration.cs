@@ -28,7 +28,7 @@ namespace Shared.Configurations.Chat
             builder.HasOne(x => x.Message).WithMany(x => x.Attachments)
                 .HasForeignKey(x => x.MessageId).OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(x => x.MediaFile).WithMany()
+            builder.HasOne(x => x.MediaFile).WithMany(x => x.ChatAttachments)
                 .HasForeignKey(x => x.MediaFileId).OnDelete(DeleteBehavior.SetNull);
             // =========================
             // Indexes

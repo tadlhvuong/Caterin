@@ -232,8 +232,7 @@ using (var scope = app.Services.CreateScope())
 }
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/admin")
-    && context.Request.Path.Value?.TrimEnd('/') == "/admin")
+    if (context.Request.Path.StartsWithSegments("/admin") && context.Request.Path.Value?.TrimEnd('/') == "/admin")
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {

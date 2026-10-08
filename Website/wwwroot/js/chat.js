@@ -87,6 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
         resetChatBox: document.getElementById("resetChatBox"),
 
         attachmentBtn: document.getElementById("attachmentBtn"),
+        chatFileInput: document.getElementById("chatFileInput"),
+        chatAttachmentPreview: document.getElementById("chatAttachmentPreview"),
+        chatAttachmentList: document.getElementById("chatAttachmentList"),
+
         emojiBtn: document.getElementById("emojiBtn"),
 
         adminStatusDot: document.getElementById("chatAdminStatusDot"),
@@ -128,7 +132,6 @@ document.addEventListener("DOMContentLoaded", () => {
         guestToken: null,
         pendingConversationId: null,
         unreadMessageCount: 0,
-
         isTyping: false,
         typingTimer: null,
 
@@ -189,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
         [CONFIG.senderType.system]: "system"
     };
 
+    let pendingAttachments = [];
     // ============================================================
     // SIGNALR
     // ============================================================
@@ -3443,17 +3447,123 @@ async function joinConversation() {
     // ============================================================
 
     function initAttachment() {
-        DOM.attachmentBtn?.addEventListener(
-            "click",
-            () => {
-                alert(
-                    "Chức năng gửi file sẽ được tích hợp sau."
-                );
+        DOM.attachmentBtn?.addEventListener("click", () => {
+            DOM.chatFileInput?.click();
+        });
+
+        DOM.chatFileInput?.addEventListener("change", (event) => {
+            const files = Array.from(event.target.files ?? []);
+
+            if (!files.length) {
+                return;
             }
-        );
+
+            addPendingAttachments(files);
+
+            // Cho phép chọn lại đúng file vừa chọn
+            event.target.value = "";
+        });
     }
+    function addPendingAttachments(files) {
+        pendingAttachments.push(...files);
 
+        renderAttachmentPreview();
+    }
+    function renderAttachmentPreview() {
+        const preview = DOM.chatAttachmentPreview;
+        const list = DOM.chatAttachmentList;
 
+        if (!preview || !list) {
+            return;
+        }
+
+        list.innerHTML = "";
+
+        if (!pendingAttachments.length) {
+            preview.hidden = true;
+            return;
+        }
+
+        preview.hidden = false;
+
+        pendingAttachments.forEach((file, index) => {
+            const item = createAttachmentPreviewItem(file, index);
+
+            list.appendChild(item);
+        });
+    }
+    function createAttachmentPreviewItem(file, index) {
+        const item = document.createElement("div");
+
+        item.className = "chat-attachment-item";
+
+        if (file.type.startsWith("image/")) {
+            const image = document.createElement("img");
+
+            image.src = URL.createObjectURL(file);
+            image.alt = file.name;
+
+            item.appendChild(image);
+
+            image.onload = () => {
+                URL.revokeObjectURL(image.src);
+            };
+        }
+        else {
+            const fileInfo = document.createElement("div");
+
+            fileInfo.className = "chat-attachment-file";
+
+            fileInfo.innerHTML = `
+            <svg class="chat-attachment-file-icon"
+                 viewBox="0 0 24 24"
+                 fill="none">
+                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linejoin="round" />
+                <path d="M14 2V8H20"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linejoin="round" />
+            </svg>
+
+            <span class="chat-attachment-file-name"
+                  title="${escapeHtml(file.name)}">
+                ${escapeHtml(file.name)}
+            </span>
+        `;
+
+            item.appendChild(fileInfo);
+        }
+
+        const removeButton = document.createElement("button");
+
+        removeButton.type = "button";
+        removeButton.className = "chat-attachment-remove";
+        removeButton.setAttribute("aria-label", `Xóa ${file.name}`);
+        removeButton.textContent = "×";
+
+        removeButton.addEventListener("click", () => {
+            removePendingAttachment(index);
+        });
+
+        item.appendChild(removeButton);
+
+        return item;
+    }
+    function removePendingAttachment(index) {
+        if (
+            index < 0 ||
+            index >= pendingAttachments.length
+        ) {
+            return;
+        }
+
+        pendingAttachments.splice(index, 1);
+
+        renderAttachmentPreview();
+    }
     function initEmoji() {
         DOM.emojiBtn?.addEventListener(
             "click",

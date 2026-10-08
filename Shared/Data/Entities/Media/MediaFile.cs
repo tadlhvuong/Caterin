@@ -1,4 +1,5 @@
-﻿using Shared.Data.Entities.Product;
+﻿using Shared.Data.Entities.Chat;
+using Shared.Data.Entities.Product;
 using System.ComponentModel.DataAnnotations;
 
 namespace Shared.Data.Entities.Media
@@ -30,5 +31,7 @@ namespace Shared.Data.Entities.Media
         public virtual ICollection<ProductMedia> ProductMedias { get; set; } = new List<ProductMedia>();
 
         public virtual ICollection<ProductVariantMedia> ProductVariantMedias { get; set; }  = new List<ProductVariantMedia>();
+        
+        public virtual ICollection<ChatAttachment> ChatAttachments { get; set; } = new List<ChatAttachment>();
     }
 }

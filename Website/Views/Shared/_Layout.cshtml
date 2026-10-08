@@ -793,9 +793,18 @@
 
                 <!-- Footer -->
                 <div class="chat-footer">
+                <div class="chat-footer-content">
+                <!-- Attachment preview -->
+                <div class="chat-attachment-preview"
+                     id="chatAttachmentPreview"
+                     hidden>
+                    <div class="chat-attachment-list"
+                         id="chatAttachmentList">
+                    </div>
+                </div>
 
+                <div class="chat-input-row">
                     <div class="chat-input-wrapper">
-
                         <button class="input-action" id="attachmentBtn">
                             <svg viewBox="0 0 24 24" fill="none">
                                 <path d="M21 11.5L12.5 20C10 22.5 6 22.5 3.5 20C1 17.5 1 13.5 3.5 11L12.5 2C14.5 0 17.5 0 19.5 2C21.5 4 21.5 7 19.5 9L11 17.5C9.5 19 7 19 5.5 17.5C4 16 4 13.5 5.5 12L13.5 4"
@@ -805,7 +814,10 @@
                                       stroke-linejoin="round" />
                             </svg>
                         </button>
-
+                    <input type="file"
+                           id="chatFileInput"
+                           hidden
+                           multiple />
                         <input type="text"
                                id="chatInput"
                                placeholder="Nhập tin nhắn..."
@@ -814,7 +826,8 @@
                         <button class="emoji-btn" id="emojiBtn"> 😊 </button>
 
                     </div>
-
+                  </div>
+                </div>
                     <button class="send-btn" id="sendBtn">
 
                         <svg viewBox="0 0 24 24" fill="green">

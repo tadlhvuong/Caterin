@@ -2,6 +2,11 @@
 {
     public static class ChatHubEvents
     {
+        public const string AdminOnline = "chat.admin.online";
+        public const string AdminOffline = "chat.admin.offline";
+
+        public const string AdminPresenceUpdated = "chat.admin.presence.updated";
+
         public const string MessageReceived = "chat.message.received";
         public const string MessageDelivered = "chat.message.delivered";
         public const string MessageRead = "chat.message.read";
@@ -15,10 +20,6 @@
         public const string ConversationClosed = "chat.conversation.closed";
 
         public const string Typing = "chat.typing";
-
-        public const string AdminOnline = "chat.admin.online";
-        public const string AdminOffline = "chat.admin.offline";
-        public const string AdminPresenceUpdated = "chat.admin.presence.updated";
 
         // Giữ nguyên để không phá contract hiện tại với client.
         public const string AdminConvensationPresenceUpdated = "chat.admin.presence.updated";

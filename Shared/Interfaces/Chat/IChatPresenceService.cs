@@ -10,28 +10,20 @@ namespace Shared.Interfaces.Chat
     {
         Task<bool> AddConnectionAsync(string userId, string connectionId);
 
-        Task<bool> RemoveConnectionAsync(
-            string userId,
-            string connectionId);
+        Task<bool> RemoveConnectionAsync(string userId, string connectionId);
 
         bool IsOnline(string userId);
 
         IReadOnlyCollection<string> GetOnlineAdminIds();
+
         bool IsAnyOnline();
 
-        Task<bool> JoinConversationAsync(
-        string userId,
-        string connectionId,
-        long conversationId);
+        Task<bool> JoinConversationAsync(string userId, string connectionId, long conversationId);
 
-        Task<bool> LeaveConversationAsync(
-            string userId,
-            string connectionId,
-            long conversationId);
+        Task<bool> LeaveConversationAsync(string userId, string connectionId, long conversationId);
 
-        bool IsConversationActive(
-            long conversationId);
-        //OnDisconnectedAsync() có thể xảy ra mà không đi qua LeaveAdminConversation
+        bool IsConversationActive(long conversationId);
+
         Task RemoveConnectionFromConversationsAsync(string connectionId);
     }
 }

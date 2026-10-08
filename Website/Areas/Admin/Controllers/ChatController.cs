@@ -24,21 +24,32 @@ namespace Website.Areas.Admin.Controllers
     [PermissionModule("Chat")]
     public class ChatController : Controller
     {
-        private readonly IChatMessageService _chatService;
+        private readonly IChatAuthorizationService _chatAuthorizationService;
+        private readonly IChatConversationService _chatConversationService;
+        private readonly IChatMessageService _chatMessageService;
+        private readonly IChatLabelService _chatLabelService;
         private readonly ICurrentUserService _currentUserService;
 
-        public ChatController(
-            IChatMessageService chatService, ICurrentUserService currentUserService)
+        private readonly ILogger<ChatController> _logger;
+
+        public ChatController(IChatAuthorizationService chatAuthorizationService, IChatConversationService chatConversationService, 
+            IChatMessageService chatMessageService, IChatLabelService chatLabelService, ICurrentUserService currentUserService,
+            ILogger<ChatController> logger)
         {
-            _chatService = chatService;
+            _chatAuthorizationService = chatAuthorizationService;
+            _chatConversationService = chatConversationService;
+            _chatLabelService = chatLabelService;
+            _chatMessageService = chatMessageService;
             _currentUserService = currentUserService;
+
+            _logger = logger;
         }
 
         [HttpGet]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var inbox = await _chatService.GetDefaultInboxAsync(cancellationToken);
+            var inbox = await _chatConversationService.GetDefaultInboxAsync(cancellationToken);
 
             if (inbox == null)
             {
@@ -55,24 +66,11 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("conversations")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Conversations(
-    long? inboxId,
-    ChatConversationStatus? status,
-    string? search, long? labelId,
-    int limit = 30,
-    DateTime? beforeLastMessageAt = null,
-    long? beforeId = null,
-    CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Conversations(long? inboxId, ChatConversationStatus? status, string? search, long? labelId,
+            int limit = 30, DateTime? beforeLastMessageAt = null, long? beforeId = null, CancellationToken cancellationToken = default)
         {
-            var result = await _chatService.GetConversationListAsync(
-                inboxId,
-                status,
-                search,
-                _currentUserService.UserId, labelId,
-                limit,
-                beforeLastMessageAt,
-                beforeId,
-                cancellationToken);
+            var result = await _chatConversationService.GetConversationListAsync(inboxId, status, search, _currentUserService.UserId, labelId,
+                limit, beforeLastMessageAt, beforeId, cancellationToken);
 
             return Ok(result);
         }
@@ -81,7 +79,7 @@ namespace Website.Areas.Admin.Controllers
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Contact(long conversationId, CancellationToken cancellationToken)
         {
-            var result = await _chatService.GetConversationContactAsync(conversationId, cancellationToken);
+            var result = await _chatConversationService.GetConversationContactAsync(conversationId, cancellationToken);
 
             if (result == null)
             {
@@ -95,54 +93,37 @@ namespace Website.Areas.Admin.Controllers
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Messages(long conversationId, int limit = 30, long? before = null, CancellationToken cancellationToken = default)
         {
-            var result = await _chatService.GetAdminMessagesAsync(
-                conversationId,
-                limit,
-                before,
-                cancellationToken);
+            var result = await _chatMessageService.GetAdminMessagesAsync(conversationId, limit, before, cancellationToken);
 
             return Ok(result);
         }
         
         [HttpGet("conversations/counts")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Counts(
-        long? inboxId,
-        string? search = null,
-        string? assignedUserId = null,
-        long? labelId = null,
-        CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Counts(long? inboxId, string? search = null, string? assignedUserId = null, long? labelId = null,
+            CancellationToken cancellationToken = default)
             {
-                var result = await _chatService.GetConversationCountsAsync(
-                    inboxId,
-                    search,
-                    assignedUserId,
-                    labelId,
-                    cancellationToken);
+                var result = await _chatConversationService.GetConversationCountsAsync(inboxId, search, assignedUserId, labelId, cancellationToken);
 
                 return Ok(result);
             }
 
         [HttpPost("labels")]
         [PermissionAction(ActionType.Create)]
-        public async Task<IActionResult> CreateLabel(
-        [FromBody] CreateChatLabelRequest request,
-        CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateLabel([FromBody] CreateChatLabelRequest request, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new
                 {
                     success = false,
-                    message = "Dữ liệu label không hợp lệ."
+                    message = "Invalid label data."
                 });
             }
 
             try
             {
-                var result = await _chatService.CreateLabelAsync(
-                    request,
-                    cancellationToken);
+                var result = await _chatLabelService.CreateLabelAsync(request, cancellationToken);
 
                 return Ok(new
                 {
@@ -162,34 +143,27 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("labels")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Labels(
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> Labels(CancellationToken cancellationToken)
         {
-            var result = await _chatService.GetLabelsAsync(
-                cancellationToken);
+            var result = await _chatLabelService.GetLabelsAsync(cancellationToken);
 
             return Ok(result);
         }
 
         [HttpDelete("labels/{labelId:int}")]
         [PermissionAction(ActionType.Delete)]
-        public async Task<IActionResult> DeleteLabel(
-        int labelId,
-        CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteLabel(int labelId, CancellationToken cancellationToken)
             {
                 try
                 {
-                    var result =
-                        await _chatService.DeleteLabelAsync(
-                            labelId,
-                            cancellationToken);
+                    var result = await _chatLabelService.DeleteLabelAsync(labelId, cancellationToken);
 
                     if (!result)
                     {
                         return NotFound(new
                         {
                             success = false,
-                            message = "Không tìm thấy label."
+                            message = "Label not found."
                         });
                     }
 
@@ -210,24 +184,18 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpPost("{conversationId:long}/labels/{labelId:int}")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> AssignLabel(
-    long conversationId,
-    int labelId,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> AssignLabel(long conversationId, int labelId, CancellationToken cancellationToken)
         {
             try
             {
-                var result = await _chatService.AssignConversationLabelAsync(
-                    conversationId,
-                    labelId,
-                    cancellationToken);
+                var result = await _chatLabelService.AssignConversationLabelAsync(conversationId, labelId, cancellationToken);
 
                 if (result == null)
                 {
                     return NotFound(new
                     {
                         success = false,
-                        message = "Không tìm thấy conversation."
+                        message = "Conversation not found."
                     });
                 }
 
@@ -249,22 +217,16 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpDelete("{conversationId:long}/labels/{labelId:int}")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> RemoveLabel(
-    long conversationId,
-    int labelId,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> RemoveLabel(long conversationId, int labelId, CancellationToken cancellationToken)
         {
-            var result = await _chatService.RemoveConversationLabelAsync(
-                conversationId,
-                labelId,
-                cancellationToken);
+            var result = await _chatLabelService.RemoveConversationLabelAsync(conversationId, labelId, cancellationToken);
 
             if (!result)
             {
                 return NotFound(new
                 {
                     success = false,
-                    message = "Label chưa được gán cho conversation."
+                    message = "Label is not assigned to the conversation."
                 });
             }
 

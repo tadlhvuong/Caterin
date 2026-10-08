@@ -16,60 +16,45 @@ namespace Shared.Extensions
     public class ChatHub : Hub
     {
         private readonly AppDbContext _dbContext;
+
+        private readonly IChatAuthorizationService _chatAuthorizationService;
+        private readonly IChatConversationService _chatConversationService;
         private readonly IChatMessageService _chatMessageService;
         private readonly IChatPresenceService _chatPresenceService;
 
-        public ChatHub(AppDbContext dbContext, IChatMessageService chatMessageService, IChatPresenceService chatPresenceService)
+        public ChatHub(AppDbContext dbContext, IChatAuthorizationService chatAuthorizationService, IChatConversationService chatConversationService,
+            IChatMessageService chatMessageService, IChatPresenceService chatPresenceService)
         {
             _dbContext = dbContext;
+
+            _chatAuthorizationService = chatAuthorizationService;
+            _chatConversationService = chatConversationService;
             _chatMessageService = chatMessageService;
             _chatPresenceService = chatPresenceService;
         }
         public override async Task OnConnectedAsync()
         {
-            var userId =
-                Context.User?.FindFirstValue(
-                    ClaimTypes.NameIdentifier);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var clientType =
-                Context.GetHttpContext()?
-                    .Request.Query["clientType"]
-                    .ToString();
+            var clientType = Context.GetHttpContext()?.Request.Query["clientType"].ToString();
 
-            if (
-                clientType == "admin" &&
-                !string.IsNullOrWhiteSpace(userId))
+            if (clientType == "admin" && !string.IsNullOrWhiteSpace(userId))
             {
-                var becameOnline =
-                    await _chatPresenceService.AddConnectionAsync(
-                        userId,
-                        Context.ConnectionId);
+                var becameOnline = await _chatPresenceService.AddConnectionAsync(userId, Context.ConnectionId);
 
                 if (becameOnline)
                 {
-                    await Clients.All.SendAsync(
-                        "chat.admin.online",
-                        new
-                        {
-                            userId
-                        });
+                    await Clients.All.SendAsync(ChatHubEvents.AdminOnline, new { userId });
                 }
             }
-
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(
-    Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var userId =
-                Context.User?.FindFirstValue(
-                    ClaimTypes.NameIdentifier);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var clientType =
-                Context.GetHttpContext()?
-                    .Request.Query["clientType"]
-                    .ToString();
+            var clientType = Context.GetHttpContext()?.Request.Query["clientType"].ToString();
 
             if (clientType == "admin" && !string.IsNullOrWhiteSpace(userId))
             {
@@ -77,12 +62,7 @@ namespace Shared.Extensions
 
                 if (becameOffline)
                 {
-                    await Clients.All.SendAsync(
-                        "chat.admin.offline",
-                        new
-                        {
-                            userId
-                        });
+                    await Clients.All.SendAsync(ChatHubEvents.AdminOffline, new { userId });
                 }
             }
 
@@ -92,112 +72,78 @@ namespace Shared.Extensions
         }
 
         [Authorize]
-        public async Task<List<string>> GetOnlineAdmins()
+        public IReadOnlyCollection<string> GetOnlineAdmins()
         {
-            var userId = Context.User?
-                .FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
 
-            return _chatPresenceService
-                .GetOnlineAdminIds()
-                .ToList();
+            return _chatPresenceService.GetOnlineAdminIds().ToList();
         }
+
         public Task<bool> IsAnyAdminOnline()
         {
             return Task.FromResult(_chatPresenceService.IsAnyOnline());
         }
-        public async Task<ChatConversationStatus> JoinConversation(
-    long conversationId,
-    long contactId,
-    string? guestToken)
-        {
-            var userId = Context.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?
-                .Value;
 
-            var allowed =
-                await _chatMessageService
-                    .CanCustomerAccessConversationAsync(
-                        conversationId,
-                        contactId,
-                        userId,
-                        guestToken,
-                        Context.ConnectionAborted);
+        public async Task<ChatConversationStatus> JoinConversation(long conversationId, long contactId, string? guestToken)
+        {
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var allowed = await _chatAuthorizationService.CanCustomerAccessConversationAsync(
+                        conversationId, contactId, userId, guestToken, Context.ConnectionAborted);
 
             if (!allowed)
             {
-                throw new HubException(
-                    "Bạn không có quyền truy cập conversation này.");
+                throw new HubException("You do not have permission to access this conversation.");
             }
 
             var status =
-                await _chatMessageService
-                    .GetCustomerConversationStatusAsync(
-                        conversationId,
-                        Context.ConnectionAborted);
+                await _chatConversationService.GetCustomerConversationStatusAsync(conversationId, Context.ConnectionAborted);
 
             if (!status.HasValue)
             {
-                throw new HubException(
-                    "Conversation không tồn tại.");
+                throw new HubException("Conversation not found.");
             }
 
-            await Groups.AddToGroupAsync(
-                Context.ConnectionId,
-                ChatHubGroups.Conversation(conversationId),
-                Context.ConnectionAborted);
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatHubGroups.Conversation(conversationId), Context.ConnectionAborted);
 
             return status.Value;
         }
+
         [Authorize]
-        public async Task JoinAdminConversation(
-    long conversationId)
+        public async Task JoinAdminConversation(long conversationId)
         {
-            var userId = Context.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?
-                .Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
 
-            var allowed =
-                await _chatMessageService.CanAccessConversationAsync(
-                    conversationId,
-                    null,
-                    userId,
-                    isAdmin: true);
+            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
+                    conversationId, null, userId, isAdmin: true);
 
             if (!allowed)
-                throw new HubException(
-                    "Bạn không có quyền truy cập conversation này.");
+                throw new HubException("You do not have permission to access this conversation.");
 
-            await Groups.AddToGroupAsync(
-                Context.ConnectionId,
-                ChatHubGroups.Conversation(conversationId));
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatHubGroups.Conversation(conversationId));
 
-            await _chatPresenceService.JoinConversationAsync(
-       userId,
-       Context.ConnectionId,
-       conversationId);
+            await _chatPresenceService.JoinConversationAsync(userId, Context.ConnectionId, conversationId);
 
-            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(
-            ChatHubEvents.AdminConvensationPresenceUpdated,
-            new
-            {
-                userId,
-                conversationId,
-                isOnline = true
-            });
+            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.AdminConvensationPresenceUpdated,
+                new
+                {
+                    userId,
+                    conversationId,
+                    isOnline = true
+                });
         }
+
         [Authorize]
         [PermissionAction(ActionType.View)]
         public async Task JoinInbox(long inboxId)
         {
-            var userId = Context.User?
-                .FindFirst(ClaimTypes.NameIdentifier)?
-                .Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
@@ -205,68 +151,23 @@ namespace Shared.Extensions
             // Phase 1:
             // kiểm tra quyền admin/inbox ở đây.
 
-            await Groups.AddToGroupAsync(
-                Context.ConnectionId,
-                ChatHubGroups.Inbox(inboxId));
-        }
-        public async Task<CustomerSendMessageResult> SendCustomerMessage(
-    long inboxId,
-    long? conversationId,
-    long? contactId,
-    string content,
-    string? guestToken)
-        {
-            var userId =
-                Context.User?.FindFirstValue(
-                    ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                throw new HubException(
-                    "Nội dung tin nhắn không hợp lệ.");
-            }
-
-            try
-            {
-                return await _chatMessageService
-                    .SendCustomerMessageAsync(
-                        conversationId,
-                        contactId,
-                        inboxId,
-                        content,
-                        guestToken,
-                        userId,
-                        Context.ConnectionAborted);
-            }
-            catch (HubException ex)
-            {
-                throw new HubException(ex.Message);
-            }
+            await Groups.AddToGroupAsync(Context.ConnectionId, ChatHubGroups.Inbox(inboxId));
         }
 
         [Authorize]
         [PermissionAction(ActionType.Reply)]
-        public async Task SendAdminMessage(
-    long conversationId,
-    string content)
+        public async Task SendAdminMessage(long conversationId, string content)
         {
-            var userId =
-                Context.User?.FindFirst(
-                    ClaimTypes.NameIdentifier)?.Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
-                throw new HubException("Bạn chưa đăng nhập.");
+                throw new HubException("Authentication is required.");
 
-            var allowed =
-                await _chatMessageService.CanAccessConversationAsync(
-                    conversationId,
-                    null,
-                    userId,
-                    isAdmin: true);
+            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
+                    conversationId, null, userId, isAdmin: true);
 
             if (!allowed)
-                throw new HubException(
-                    "Bạn không có quyền gửi tin nhắn.");
+                throw new HubException("You do not have permission to send messages.");
 
             var message =
                 await _chatMessageService.SendAdminMessageAsync(
@@ -275,139 +176,85 @@ namespace Shared.Extensions
                     content,
                     Context.ConnectionAborted);
 
-            await Clients.Group(
-                ChatHubGroups.Conversation(conversationId))
-                .SendAsync(
-                    ChatHubEvents.MessageReceived,
-                    message);
+            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.MessageReceived, message);
         }
+
+        public async Task<CustomerSendMessageResult> SendCustomerMessage(long inboxId, long? conversationId, long? contactId,
+            string content, string? guestToken)
+        {
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new HubException("Invalid message content.");
+            }
+
+            try
+            {
+                return await _chatMessageService.SendCustomerMessageAsync(conversationId, contactId, inboxId,
+                        content, guestToken, userId, Context.ConnectionAborted);
+            }
+            catch (HubException ex)
+            {
+                throw new HubException(ex.Message);
+            }
+        }
+
         public async Task LeaveAdminConversation(long conversationId)
         {
-            var userId =
-        Context.User?
-            .FindFirst(ClaimTypes.NameIdentifier)?
-            .Value;
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
                 return;
 
-            await Groups.RemoveFromGroupAsync(
-                Context.ConnectionId,
-                ChatHubGroups.Conversation(conversationId));
-            await _chatPresenceService.LeaveConversationAsync(
-       userId,
-       Context.ConnectionId,
-       conversationId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatHubGroups.Conversation(conversationId));
+            
+            await _chatPresenceService.LeaveConversationAsync(userId, Context.ConnectionId, conversationId);
 
-            await Clients.Group(
-        ChatHubGroups.Conversation(conversationId)
-    ).SendAsync(
-        ChatHubEvents.AdminConvensationPresenceUpdated,
-        new
-        {
-            userId,
-            conversationId,
-            isOnline = false
-        });
+            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.AdminConvensationPresenceUpdated,
+                new
+                {
+                    userId,
+                    conversationId,
+                    isOnline = false
+                });
         }
         public async Task LeaveConversation(long conversationId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, ChatHubGroups.Conversation(conversationId));
         }
 
-        //public async Task ConversationStatusUpdated(int conversationId, long inboxId, ChatConversationStatus status)
-        //{
-
-        //    var dataSend = new
-        //    {
-        //        ConversationId = conversationId,
-        //        InboxId = inboxId,
-        //        Status = status.ToString(),
-        //        UpdatedAt = DateTime.UtcNow,
-        //    };
-
-        //    await Clients.Group(ChatHubGroups.Inbox(inboxId)).SendAsync(ChatHubEvents.ConversationStatusUpdated, dataSend);
-        //}
-
-        public async Task SendTyping(long conversationId, long contactId, string? guestToken, bool isTyping)
-        {
-            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var allowed = await _chatMessageService.CanCustomerAccessConversationAsync(
-                conversationId,
-                contactId,
-                userId,
-                guestToken,
-                Context.ConnectionAborted);
-
-            if (!allowed)
-                throw new HubException("Forbidden.");
-
-            var status = await _chatMessageService.GetCustomerConversationStatusAsync(
-                conversationId,
-                Context.ConnectionAborted);
-
-            if (status is ChatConversationStatus.Resolved
-                or ChatConversationStatus.Closed)
-            {
-                return;
-            }
-            await Clients.Group(ChatHubGroups.Conversation(conversationId))
-                .SendAsync(ChatHubEvents.Typing,
-                    new
-                    {
-                        conversationId,
-                        senderType = ChatSenderType.Contact,
-                        isTyping
-                    });
-        }
-        public async Task SendAdminTyping(
-    long conversationId,
-    bool isTyping)
+        public async Task SendAdminTyping(long conversationId, bool isTyping)
         {
             if (!Context.User?.Identity?.IsAuthenticated ?? true)
                 return;
 
-            var conversation = await _dbContext.ChatConversations
-                .AsNoTracking()
-                .Where(x => x.Id == conversationId)
-                .Select(x => new
+            var conversation = await _dbContext.ChatConversations.AsNoTracking().Where(x => x.Id == conversationId).Select(x => new
                 {
                     x.Id,
                     x.InboxId,
                     x.Status
-                })
-                .FirstOrDefaultAsync();
+                }).FirstOrDefaultAsync();
 
             if (conversation == null)
                 return;
 
             // Resolved / Closed không được typing
-            if (conversation.Status == ChatConversationStatus.Resolved ||
-                conversation.Status == ChatConversationStatus.Closed)
+            if (conversation.Status == ChatConversationStatus.Resolved || conversation.Status == ChatConversationStatus.Closed)
             {
                 return;
             }
-            var userId =
-        Context.User?.FindFirstValue(
-            ClaimTypes.NameIdentifier);
-            var allowed =
-    await _chatMessageService.CanAccessConversationAsync(
-        conversationId,
-        null,
-        userId,
-        isAdmin: true,
-        Context.ConnectionAborted);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
+                    conversationId, null, userId, isAdmin: true, Context.ConnectionAborted);
 
             if (!allowed)
                 return;
             // TODO:
             // Validate admin có quyền truy cập conversation/inbox này.
 
-            await Clients
-                .Group(ChatHubGroups.Conversation(conversationId))
-                .SendAsync(
-                    ChatHubEvents.Typing,
+            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.Typing,
                     new
                     {
                         conversationId,
@@ -416,23 +263,41 @@ namespace Shared.Extensions
                     });
         }
 
+        public async Task SendTyping(long conversationId, long contactId, string? guestToken, bool isTyping)
+        {
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var allowed = await _chatAuthorizationService.CanCustomerAccessConversationAsync(
+                        conversationId, contactId, userId, guestToken, Context.ConnectionAborted);
+
+            if (!allowed)
+                return;
+
+            var status = await _chatConversationService.GetCustomerConversationStatusAsync(conversationId, Context.ConnectionAborted);
+
+            if (status is ChatConversationStatus.Resolved or ChatConversationStatus.Closed)
+                return;
+
+            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.Typing,
+                    new
+                    {
+                        conversationId,
+                        senderType = ChatSenderType.Contact,
+                        isTyping
+                    });
+        }
+
         [Authorize]
         public async Task AdminMessageDelivered(long messageId)
         {
-            var userId =
-                Context.User?.FindFirstValue(
-                    ClaimTypes.NameIdentifier);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
 
-            var cancellationToken =
-                Context.ConnectionAborted;
+            var cancellationToken = Context.ConnectionAborted;
 
-            var message = await _dbContext.ChatMessages
-                .FirstOrDefaultAsync(
-                    x => x.Id == messageId,
-                    cancellationToken);
+            var message = await _dbContext.ChatMessages.FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
 
             if (message == null)
                 return;
@@ -445,14 +310,8 @@ namespace Shared.Extensions
             if (message.Status >= ChatMessageStatus.Delivered)
                 return;
 
-            var canAccess =
-                await _chatMessageService
-                    .CanAccessConversationAsync(
-                        message.ConversationId,
-                        null,
-                        userId,
-                        true,
-                        cancellationToken);
+            var canAccess = await _chatAuthorizationService.CanAccessConversationAsync(message.ConversationId, null,
+                        userId, true, cancellationToken);
 
             if (!canAccess)
                 throw new HubException("Forbidden.");
@@ -463,47 +322,30 @@ namespace Shared.Extensions
             message.DeliveredAt = now;
             message.UpdatedAt = now;
 
-            await _dbContext.SaveChangesAsync(
-                cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await Clients.Group(
-                ChatHubGroups.Conversation(
-                    message.ConversationId))
-                .SendAsync(
-                    ChatHubEvents.MessageStatusUpdated,
+            await Clients.Group(ChatHubGroups.Conversation(message.ConversationId)).SendAsync(ChatHubEvents.MessageStatusUpdated,
                     new
                     {
-                        ConversationId =
-                            message.ConversationId,
-
-                        MessageId =
-                            message.Id,
-
-                        Status =
-                            ChatMessageStatus.Delivered
-                    },
-                    cancellationToken);
+                        ConversationId = message.ConversationId,
+                        MessageId = message.Id,
+                        Status = ChatMessageStatus.Delivered
+                    }, cancellationToken);
         }
+
         public async Task CustomerMessageDelivered(long messageId, long contactId, string? guestToken)
         {
             var cancellationToken = Context.ConnectionAborted;
 
-            var message = await _dbContext.ChatMessages
-                .FirstOrDefaultAsync(
-                    x => x.Id == messageId,
-                    cancellationToken);
+            var message = await _dbContext.ChatMessages.FirstOrDefaultAsync(x => x.Id == messageId, cancellationToken);
 
             if (message == null)
                 return;
 
             // Customer chỉ được Delivered
             // message do Admin/Bot gửi
-            if (
-                message.SenderType != ChatSenderType.Admin &&
-                message.SenderType != ChatSenderType.Bot)
-            {
+            if (message.SenderType != ChatSenderType.Admin && message.SenderType != ChatSenderType.Bot)
                 return;
-            }
 
             // Không cho status đi lùi
             if (message.Status >= ChatMessageStatus.Delivered)
@@ -512,13 +354,8 @@ namespace Shared.Extensions
            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var allowed =
-                await _chatMessageService
-                    .CanCustomerAccessConversationAsync(
-                        message.ConversationId,
-                        contactId,
-                        userId,
-                        guestToken,
-                        cancellationToken);
+                await _chatAuthorizationService.CanCustomerAccessConversationAsync(message.ConversationId,
+                        contactId, userId, guestToken, cancellationToken);
 
             if (!allowed)
                 throw new HubException("Forbidden.");
@@ -529,26 +366,15 @@ namespace Shared.Extensions
             message.DeliveredAt = now;
             message.UpdatedAt = now;
 
-            await _dbContext.SaveChangesAsync(
-                cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-            await Clients.Group(
-                ChatHubGroups.Conversation(
-                    message.ConversationId))
-                .SendAsync(
-                    ChatHubEvents.MessageStatusUpdated,
+            await Clients.Group(ChatHubGroups.Conversation(message.ConversationId)).SendAsync(ChatHubEvents.MessageStatusUpdated,
                     new
                     {
-                        ConversationId =
-                            message.ConversationId,
-
-                        MessageId =
-                            message.Id,
-
-                        Status =
-                            ChatMessageStatus.Delivered
-                    },
-                    cancellationToken);
+                        ConversationId = message.ConversationId,
+                        MessageId = message.Id,
+                        Status = ChatMessageStatus.Delivered
+                    }, cancellationToken);
         }
 
         public async Task MarkConversationAsRead(long conversationId)
@@ -557,22 +383,16 @@ namespace Shared.Extensions
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Unauthenticated.");
+
             var allowed =
-      await _chatMessageService.CanAccessConversationAsync(
-          conversationId,
-          null,
-          userId,
-          isAdmin: true,
-          Context.ConnectionAborted);
+            
+                await _chatAuthorizationService.CanAccessConversationAsync(conversationId, null, userId, isAdmin: true, Context.ConnectionAborted);
 
             if (!allowed)
                 throw new HubException("Forbidden.");
-            var messages = await _dbContext.ChatMessages
-                .Where(x =>
-                    x.ConversationId == conversationId &&
-                    x.SenderType == ChatSenderType.Contact &&
-                    x.Status < ChatMessageStatus.Read)
-                .ToListAsync();
+
+            var messages = await _dbContext.ChatMessages.Where(x => x.ConversationId == conversationId &&
+                    x.SenderType == ChatSenderType.Contact && x.Status < ChatMessageStatus.Read).ToListAsync();
 
             if (messages.Count == 0)
                 return;
@@ -601,38 +421,27 @@ namespace Shared.Extensions
         [PermissionAction(ActionType.View)]
 
         /// NÊN đổi thành SetConversationOpen(...) không dùng open conversation và service chỉ cho phép transition hợp lệ.
-        public async Task<ChatConversationStatus?> OpenConversation(
-    long conversationId)
+        public async Task<ChatConversationStatus?> OpenConversation(long conversationId)
         {
-            var userId =
-                Context.User?.FindFirstValue(
-                    ClaimTypes.NameIdentifier);
+            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
-                throw new HubException("Bạn chưa đăng nhập.");
+                throw new HubException("User is not authenticated.");
 
-            var allowed =
-                await _chatMessageService.CanAccessConversationAsync(
-                    conversationId,
-                    null,
-                    userId,
-                    isAdmin: true,
-                    Context.ConnectionAborted);
+            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(conversationId, null,
+                    userId, isAdmin: true, Context.ConnectionAborted);
 
             if (!allowed)
-                throw new HubException(
-                    "Bạn không có quyền truy cập conversation.");
+                throw new HubException("You do not have permission to access this conversation.");
 
-            var result =
-                await _chatMessageService.UpdateStatusAsync(
-                    conversationId,
-                    ChatConversationStatus.Open);
+            var result = await _chatConversationService.UpdateStatusAsync(conversationId, ChatConversationStatus.Open);
 
             if (!result.Succeeded)
                 throw new HubException(result.Message);
 
             return ChatConversationStatus.Open;
         }
+
         [Authorize]
         public async Task MarkAllConversationsAsRead()
         {
@@ -640,14 +449,10 @@ namespace Shared.Extensions
 
             if (string.IsNullOrWhiteSpace(userId))
             {
-                throw new HubException(
-                    "Bạn chưa đăng nhập."
-                );
+                throw new HubException("User is not authenticated.");
             }
 
-            await _chatMessageService.MarkAllConversationsAsReadAsync(
-    userId,
-    Context.ConnectionAborted);
+            await _chatConversationService.MarkAllConversationsAsReadAsync(userId, Context.ConnectionAborted);
         }
 
         [Authorize]
@@ -655,57 +460,29 @@ namespace Shared.Extensions
         public async Task<ChatConversationStatus?> ResolveConversation(
     long conversationId)
         {
-            Console.WriteLine(
-        $"[RESOLVE 1] conversationId={conversationId}");
-            var userId =
-                Context.User?
-                    .FindFirst(ClaimTypes.NameIdentifier)?
-                    .Value;
-
-            Console.WriteLine(
-                $"[RESOLVE 2] userId={userId}");
+            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
-                throw new HubException(
-                    "Bạn chưa đăng nhập.");
+                throw new HubException("Authentication is required.");
 
-            var allowed =
-                await _chatMessageService.CanAccessConversationAsync(
-                    conversationId,
-                    null,
-                    userId,
-                    isAdmin: true);
-            Console.WriteLine(
-        $"[RESOLVE 3] allowed={allowed}");
-
+            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(conversationId, null, userId, isAdmin: true);
+        
             if (!allowed)
-                throw new HubException(
-                    "Bạn không có quyền xử lý conversation.");
+                throw new HubException("You do not have permission to manage this conversation.");
 
-            var result =
-                await _chatMessageService.ResolveConversationAsync(
-                    conversationId,
-                    userId,
-                    Context.ConnectionAborted);
-            Console.WriteLine(
-      $"[RESOLVE 4] succeeded={result.Succeeded}, message={result.Message}");
+            var result = await _chatConversationService.ResolveConversationAsync(conversationId, userId, Context.ConnectionAborted);
+            
             if (!result.Succeeded)
                 throw new HubException(result.Message);
-            Console.WriteLine(
-     "[RESOLVE 5] SUCCESS");
 
             return ChatConversationStatus.Resolved;
         }
-
-        public async Task<bool> ValidateCustomerChatSession(
-    long? conversationId,
-    long? contactId,
-    string? guestToken)
-        {
-            // authenticated thì validate theo userId
-            // guest thì validate contactId + guestToken + conversation
-            return false;
-        }
+        //public async Task<bool> ValidateCustomerChatSession(long? conversationId, long? contactId, string? guestToken)
+        //{
+        //    // authenticated thì validate theo userId
+        //    // guest thì validate contactId + guestToken + conversation
+        //    return false;
+        //}
     }
 
 }

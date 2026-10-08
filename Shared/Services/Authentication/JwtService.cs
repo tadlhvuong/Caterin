@@ -46,9 +46,7 @@ public class JwtService : IJwtService
     }
     public string GenerateRefreshToken()
     {
-        var randomBytes = RandomNumberGenerator.GetBytes(64);
-
-        return Convert.ToBase64String(randomBytes);
+        return Common.CommonHelper.GenerateSecureToken(64);
     }
     private List<Claim> CreateClaims(AppUser user, IEnumerable<string> roles)
     {

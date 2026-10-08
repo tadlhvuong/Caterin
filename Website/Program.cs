@@ -152,7 +152,10 @@ services.AddScoped<IOrderService, OrderService>();
 services.AddScoped<ICustomerService, CustomerService>();
 
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IChatAuthorizationService, ChatAuthorizationService>();
+builder.Services.AddScoped<IChatConversationService, ChatConversationService>();
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
+builder.Services.AddScoped<IChatLabelService, ChatLabelService>();
 
 builder.Services.AddScoped<IChatRealtimeNotifier, ChatRealtimeNotifier>();
 builder.Services.AddSingleton<IChatPresenceService, ChatPresenceService>();

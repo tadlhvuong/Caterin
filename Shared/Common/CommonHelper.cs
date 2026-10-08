@@ -64,16 +64,12 @@ namespace Shared.Common
 
             return Encoding.ASCII.GetString(res);
         }
-        public static class OtpGenerator
+        public static string GenerateOTP(int length = 6)
         {
-            public static string Generate(int length = 6)
-            {
-                int max = (int)Math.Pow(10, length);
+            int max = (int)Math.Pow(10, length);
+            int number = RandomNumberGenerator.GetInt32(max);
 
-                int number = RandomNumberGenerator.GetInt32(max);
-
-                return number.ToString($"D{length}");
-            }
+            return number.ToString($"D{length}");
         }
         public static string GetUserId(this ClaimsPrincipal principal)
         {
@@ -90,24 +86,23 @@ namespace Shared.Common
             //add claim avatar in controller login
             return principal.FindFirst("Avatar")?.Value;
         }
-        public static string Hash(string key)
-        {
-            var bytes = SHA256.HashData(
-                Encoding.UTF8.GetBytes(key));
-
-            return Convert.ToHexString(bytes);
-        }
 
         public static string GenerateSecureToken(int byteLength = 32)
         {
             var bytes = RandomNumberGenerator.GetBytes(byteLength);
             return Convert.ToBase64String(bytes).Replace('+', '-').Replace('/', '_').TrimEnd('=');
         }
+
+        public static string Hash(string key)
+        {
+            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(key));
+
+            return Convert.ToHexString(bytes);
+        }
+
         public static string NormalizeRoute(string route)
         {
-            return route
-                .Trim('/')
-                .ToLowerInvariant();
+            return route.Trim('/').ToLowerInvariant();
         }
 
         public static string NormalizeVietnamese(string orgText)
@@ -160,31 +155,21 @@ namespace Shared.Common
                     return string.Empty;
 
                 text = text.Trim().ToLowerInvariant();
-
                 text = RemoveVietnameseCharacters(text);
 
                 text = Regex.Replace(text, @"[^a-z0-9\s-]", "");
-
                 text = Regex.Replace(text, @"[\s-]+", "-");
 
                 return text.Trim('-');
             }
 
-            private static string RemoveVietnameseCharacters(
-                string text)
+            private static string RemoveVietnameseCharacters(string text)
             {
-                var normalized = text.Normalize(
-                    NormalizationForm.FormD);
+                var normalized = text.Normalize(NormalizationForm.FormD);
 
-                var chars = normalized
-                    .Where(c =>
-                        CharUnicodeInfo.GetUnicodeCategory(c)
-                        != UnicodeCategory.NonSpacingMark)
-                    .ToArray();
+                var chars = normalized.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray();
 
-                return new string(chars)
-                    .Normalize(NormalizationForm.FormC)
-                    .Replace('đ', 'd');
+                return new string(chars).Normalize(NormalizationForm.FormC).Replace('đ', 'd');
             }
         }
     }

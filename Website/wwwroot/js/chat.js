@@ -1,6 +1,6 @@
-﻿(() => {
-    "use strict";
+﻿"use strict";
 
+document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // CONFIG
     // ============================================================
@@ -10,7 +10,7 @@
             contactId: "caterin_chat_contact_id",
             conversationId: "caterin_chat_conversation_id",
             guestToken: "caterin_chat_guest_token",
-            notificationPrompt: "caterin_notification"
+            notificationPromptSnoozeUntil: "caterin_notification_prompt_snooze_until"
         },
 
         notification: {
@@ -49,7 +49,14 @@
             open: 1,
             pending: 2,
             resolved: 3,
-            closed: 4
+            closed: 4,
+
+            names: {
+                1: "open",
+                2: "pending",
+                3: "resolved",
+                4: "closed"
+            }
         }
     };
 
@@ -62,14 +69,14 @@
         popup: document.getElementById("promoPopup"),
         hideToday: document.getElementById("hideToday"),
         closePopup: document.getElementById("closePopup"),
-        laterButton: document.getElementById("laterBtn"),
+        laterBtn: document.getElementById("laterBtn"),
 
         chatToggle: document.getElementById("chatToggle"),
         chatWindow: document.getElementById("chatWindow"),
         chatClose: document.getElementById("chatClose"),
 
         chatInput: document.getElementById("chatInput"),
-        sendButton: document.getElementById("sendBtn"),
+        sendBtn: document.getElementById("sendBtn"),
 
         chatBody: document.getElementById("chatBody"),
         typing: document.getElementById("typing"),
@@ -79,28 +86,22 @@
         chatSessionReset: document.getElementById("chatSessionReset"),
         resetChatBox: document.getElementById("resetChatBox"),
 
-        attachmentButton: document.getElementById("attachmentBtn"),
-        emojiButton: document.getElementById("emojiBtn"),
+        attachmentBtn: document.getElementById("attachmentBtn"),
+        emojiBtn: document.getElementById("emojiBtn"),
 
         adminStatusDot: document.getElementById("chatAdminStatusDot"),
         chatStatusText: document.getElementById("chatStatusText"),
         chatStatusBadge: document.getElementById("chatStatusBadge"),
          
-        notificationPrompt:
-            document.querySelector("#chatNotificationPrompt"),
+        notificationPrompt: document.querySelector("#chatNotificationPrompt"),
 
-        notificationAllow:
-            document.querySelector("#chatNotificationAllow"),
+        notificationAllow: document.querySelector("#chatNotificationAllow"),
 
-        notificationLater:
-            document.querySelector("#chatNotificationLater"),
+        notificationLater: document.querySelector("#chatNotificationLater"),
 
         chatHistoryLoader: document.getElementById("chatHistoryLoader"),
 
-        loadPreviousConversationBtn:
-            document.getElementById(
-                "loadPreviousConversationBtn"
-            ),
+        loadPreviousConversationBtn: document.getElementById("loadPreviousConversationBtn"),
     };
 
 
@@ -115,7 +116,6 @@
         phone: DOM.chatWindow?.dataset.phone || null,
         isAuthenticated: DOM.chatWindow?.dataset.authenticated === "true"
     };
-
 
     // ============================================================
     // STATE
@@ -145,9 +145,10 @@
         notification: {
             pendingMessage: null
         },
+
         processedMessageIds: new Set(),
 
-        messages: {
+        messagePaging: {
             limit: 30,
             oldestMessageId: null,
             hasMore: true,
@@ -158,10 +159,8 @@
             previousConversationId: null,
             hasPrevious: false,
             loading: false,
-
-            oldestLoadedConversationId: null,
+            loadedConversationId: null,
             conversations: new Map(),
-
             userHasScrolledUp: false
         },
         touch: {
@@ -181,45 +180,39 @@
     };
 
     // ============================================================
+    //MESSAGE_TYPES
+    // ============================================================
+    const MESSAGE_SENDER_CLASS = {
+        [CONFIG.senderType.contact]: "contact",
+        [CONFIG.senderType.admin]: "admin",
+        [CONFIG.senderType.bot]: "bot",
+        [CONFIG.senderType.system]: "system"
+    };
+
+    // ============================================================
     // SIGNALR
     // ============================================================
 
-    const connection =
-        new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/chat?clientType=customer")
-            .withAutomaticReconnect()
-            .build();
+    const connection = new signalR.HubConnectionBuilder().withUrl("/hubs/chat?clientType=customer").withAutomaticReconnect().build();
 
 
     // ============================================================
     // STORAGE
     // ============================================================
     function loadStoredSession() {
-        state.currentContactId =
-            normalizeNumber(
-                localStorage.getItem(CONFIG.storage.contactId)
-            );
+        state.currentContactId = normalizeNumber(localStorage.getItem(CONFIG.storage.contactId));
 
-        state.currentConversationId =
-            normalizeNumber(
-                localStorage.getItem(CONFIG.storage.conversationId)
-            );
+        state.currentConversationId = normalizeNumber(localStorage.getItem(CONFIG.storage.conversationId));
 
-        state.guestToken =
-            localStorage.getItem(CONFIG.storage.guestToken) || null;
+        state.guestToken = localStorage.getItem(CONFIG.storage.guestToken) || null;
     }
     function persistContactIdentity(contactId, guestToken) {
-        const normalizedContactId =
-            normalizeNumber(contactId);
+        const normalizedContactId = normalizeNumber(contactId);
 
-        state.currentContactId =
-            normalizedContactId;
+        state.currentContactId = normalizedContactId;
 
         if (normalizedContactId) {
-            localStorage.setItem(
-                CONFIG.storage.contactId,
-                String(normalizedContactId)
-            );
+            localStorage.setItem(CONFIG.storage.contactId, String(normalizedContactId));
         }
 
         /*
@@ -230,8 +223,7 @@
          * giữ token hiện tại.
          */
         if (guestToken) {
-            state.guestToken =
-                guestToken;
+            state.guestToken = guestToken;
 
             localStorage.setItem(
                 CONFIG.storage.guestToken,
@@ -239,35 +231,25 @@
             );
         }
     }
-    function persistConversation(
-        conversationId,
-        status = null
-    ) {
-        const normalizedConversationId =
-            normalizeNumber(conversationId);
+    function persistConversation(conversationId, status = null) {
+        const normalizedConversationId = normalizeNumber(conversationId);
 
-        state.currentConversationId =
-            normalizedConversationId;
+        state.currentConversationId = normalizedConversationId;
 
         if (normalizedConversationId) {
-            localStorage.setItem(
-                CONFIG.storage.conversationId,
-                String(normalizedConversationId)
-            );
+            localStorage.setItem(CONFIG.storage.conversationId, String(normalizedConversationId));
         }
 
         if (status !== null && status !== undefined) {
-            state.currentConversationStatus =
-                Number(status);
+            state.currentConversationStatus = Number(status);
         }
     }
+
     function clearConversationIdentity() {
         state.currentConversationId = null;
         state.currentConversationStatus = null;
 
-        localStorage.removeItem(
-            CONFIG.storage.conversationId
-        );
+        localStorage.removeItem(CONFIG.storage.conversationId);
     }
 
     //USER WHEN LOGOUT
@@ -277,33 +259,17 @@
         state.currentConversationStatus = null;
         state.guestToken = null;
 
-        localStorage.removeItem(
-            CONFIG.storage.contactId
-        );
+        localStorage.removeItem(CONFIG.storage.contactId);
 
-        localStorage.removeItem(
-            CONFIG.storage.conversationId
-        );
+        localStorage.removeItem(CONFIG.storage.conversationId);
 
-        localStorage.removeItem(
-            CONFIG.storage.guestToken
-        );
+        localStorage.removeItem(CONFIG.storage.guestToken);
     }
-
 
     function hasConversationIdentity() {
-        return Boolean(
-            state.currentConversationId &&
-            state.currentContactId
-        );
+        return Boolean(state.currentConversationId && state.currentContactId);
     }
 
-    function isValidChatSession() {
-        return Boolean(
-            state.currentConversationId &&
-            state.currentContactId
-        );
-    }
     // ============================================================
     // GENERIC HELPERS
     // ============================================================
@@ -317,17 +283,11 @@
 
         state.chatSession.hasActiveHistory = false;
 
-        localStorage.removeItem(
-            CONFIG.storage.contactId
-        );
+        localStorage.removeItem(CONFIG.storage.contactId);
 
-        localStorage.removeItem(
-            CONFIG.storage.conversationId
-        );
+        localStorage.removeItem(CONFIG.storage.conversationId);
 
-        localStorage.removeItem(
-            CONFIG.storage.guestToken
-        );
+        localStorage.removeItem(CONFIG.storage.guestToken);
 
         resetConversationHistoryState();
 
@@ -336,49 +296,34 @@
         showQuickReplies();
     }
     function isConnectionReady() {
-        return (
-            connection.state ===
-            signalR.HubConnectionState.Connected
-        );
+        return (connection.state === signalR.HubConnectionState.Connected);
     }
-
 
     function isChatOpen() {
         return DOM.chatWindow?.classList.contains("open") ?? false;
     }
 
-
     function hasCurrentConversation() {
-        return Boolean(
-            state.currentConversationId &&
-            state.currentContactId
-        );
+        return Boolean(state.currentConversationId && state.currentContactId);
     }
 
 
     function normalizeNumber(value) {
         const number = Number(value);
 
-        return Number.isFinite(number)
-            ? number
-            : null;
+        return Number.isFinite(number) ? number : null;
     }
 
 
     function isSameConversation(conversationId) {
-        return (
-            Number(state.currentConversationId) ===
-            Number(conversationId)
-        );
+        return (Number(state.currentConversationId) === Number(conversationId));
     }
 
 
     function escapeHtml(value) {
-        const element =
-            document.createElement("div");
+        const element = document.createElement("div");
 
-        element.textContent =
-            value ?? "";
+        element.textContent = value ?? "";
 
         return element.innerHTML;
     }
@@ -420,29 +365,18 @@
 
         cleanupPromoStorage();
 
-        const hiddenUntil =
-            localStorage.getItem(
-                CONFIG.storage.hidePromo
-            );
+        const hiddenUntil = localStorage.getItem(CONFIG.storage.hidePromo);
 
         if (hiddenUntil) {
             return;
         }
 
-        setTimeout(() => {
-            DOM.popup?.classList.add("show");
-        }, CONFIG.timing.promoDelay);
+        setTimeout(() => { DOM.popup?.classList.add("show"); }, CONFIG.timing.promoDelay);
 
 
-        DOM.closePopup?.addEventListener(
-            "click",
-            closePromoPopup
-        );
+        DOM.closePopup?.addEventListener("click", closePromoPopup);
 
-        DOM.laterButton?.addEventListener(
-            "click",
-            closePromoPopup
-        );
+        DOM.laterBtn?.addEventListener("click", closePromoPopup);
     }
 
 
@@ -624,10 +558,7 @@
             syncPreviousConversationButton();
 
         } catch (error) {
-            console.log(
-                "preparePreviousConversationFor:",
-                error
-            );
+            console.log("preparePreviousConversationFor:", error);
 
             state.history.previousConversationId = null;
             state.history.hasPrevious = false;
@@ -848,24 +779,6 @@
             ) {
                 showChatSessionInvalid();
                 return;
-                //console.log(
-                //    "Guest identity không còn guestToken → reset session."
-                //);
-
-                //clearCustomerIdentity();
-
-                //state.currentConversationStatus =
-                //    null;
-
-                //state.chatSession.hasActiveHistory =
-                //    false;
-
-                //resetConversationHistoryState();
-                //clearMessages();
-
-                //showQuickReplies();
-
-                //return;
             }
 
 
@@ -962,92 +875,36 @@
             );
         }
     }
-    function updateCurrentConversationStatus(status) {
-        const normalizedStatus = Number(status);
-
-        if (!DOM.chatInput || !DOM.sendButton) {
-            return;
-        }
-
-        const isResolved =
-            normalizedStatus ===
-            CONFIG.conversationStatus.resolved;
-
-        const isClosed =
-            normalizedStatus ===
-            CONFIG.conversationStatus.closed;
-
-        const isEnded =
-            isResolved || isClosed;
-
-        DOM.chatInput.disabled = false;
-        DOM.sendButton.disabled = false;
-
-        DOM.chatInput.placeholder =
-            isEnded
-                ? "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới..."
-                : "Nhập tin nhắn...";
-    }
 
     async function loadConversationMessages({
         initial = false
     } = {}) {
         if (
             !state.currentConversationId ||
-            state.messages.loading
+            state.messagePaging.loading
         ) {
             return;
         }
+
         if (initial) {
             state.chatSession.hasActiveHistory = false;
         }
 
-        state.messages.loading = true;
+        state.messagePaging.loading = true;
+
+        const conversationId =
+            state.currentConversationId;
 
         try {
-            const params = new URLSearchParams();
+            const paging = getConversationPaging(conversationId);
 
-            params.set(
-                "limit",
-                String(state.messages.limit)
-            );
-
-            if (
-                !initial &&
-                state.messages.oldestMessageId
-            ) {
-                params.set(
-                    "before",
-                    String(state.messages.oldestMessageId)
-                );
-            }
-
-            const response = await fetch(
-                `/chat/${state.currentConversationId}/messages?${params}`,
+            const { messages, hasMore } = await fetchConversationMessages(
+                conversationId,
                 {
-                    method: "GET",
-                    headers: getChatHeaders(),
-                    credentials: "same-origin"
+                    limit: state.messagePaging.limit,
+                    before: initial ? null : state.messagePaging.oldestMessageId
                 }
             );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Không thể tải messages. Status: ${response.status}`
-                );
-            }
-
-            const result = await response.json();
-
-            const messages =
-                Array.isArray(result)
-                    ? result
-                    : result.items ?? [];
-
-            const hasMore =
-                Array.isArray(result)
-                    ? messages.length >= state.messages.limit
-                    : Boolean(result.hasMore);
 
             /*
              * Initial load của conversation hiện tại
@@ -1055,31 +912,26 @@
             if (initial) {
                 clearMessages();
 
-                state.history.oldestLoadedConversationId =
-                    state.currentConversationId;
+                state.history.loadedConversationId =
+                    conversationId;
 
-                const currentPaging =
-                    getConversationPaging(
-                        state.currentConversationId
-                    );
-
-                currentPaging.oldestMessageId = null;
-                currentPaging.hasMore = true;
-                currentPaging.loading = false;
+                paging.oldestMessageId = null;
+                paging.hasMore = true;
+                paging.loading = false;
             }
 
             /*
              * Không có message
              */
             if (!messages.length) {
-                state.messages.hasMore = false;
+                state.messagePaging.hasMore = false;
 
                 if (initial) {
                     initializeQuickRepliesFromMessages([]);
                 }
 
                 await preparePreviousConversationFor(
-                    state.currentConversationId
+                    conversationId
                 );
 
                 return;
@@ -1096,39 +948,37 @@
                 );
             }
             /*
-             * Load thêm message cũ của conversation hiện tại
+             * Load thêm message cũ
              */
             else {
                 prependHistoricalMessages(messages);
             }
 
             /*
-             * Message cũ nhất của conversation hiện tại
+             * Message cũ nhất
              */
-            state.messages.oldestMessageId =
+            const oldestMessageId =
                 messages[0]?.id ??
-                state.messages.oldestMessageId;
+                state.messagePaging.oldestMessageId;
 
-            state.messages.hasMore = hasMore;
+            state.messagePaging.oldestMessageId =
+                oldestMessageId;
 
-            const currentPaging =
-                getConversationPaging(
-                    state.currentConversationId
-                );
+            state.messagePaging.hasMore =
+                hasMore;
 
-            currentPaging.oldestMessageId =
-                state.messages.oldestMessageId;
+            paging.oldestMessageId =
+                oldestMessageId;
 
-            currentPaging.hasMore =
+            paging.hasMore =
                 hasMore;
 
             /*
-             * Conversation hiện tại đã hết message.
-             * Lúc này mới tìm conversation trước.
+             * Đã hết message của conversation hiện tại
              */
             if (!hasMore) {
                 await preparePreviousConversationFor(
-                    state.currentConversationId
+                    conversationId
                 );
             }
 
@@ -1141,8 +991,142 @@
             );
         }
         finally {
-            state.messages.loading = false;
+            state.messagePaging.loading = false;
         }
+    }
+
+    async function loadOlderMessagesForConversation(
+        conversationId
+    ) {
+        const id = Number(conversationId);
+
+        if (!id) {
+            return;
+        }
+
+        const paging =
+            getConversationPaging(id);
+
+        if (
+            !paging ||
+            paging.loading ||
+            !paging.hasMore
+        ) {
+            return;
+        }
+
+        paging.loading = true;
+
+        try {
+            const {
+                messages,
+                hasMore
+            } = await fetchConversationMessages(
+                id,
+                {
+                    limit: state.messagePaging.limit,
+                    before: paging.oldestMessageId
+                }
+            );
+
+            /*
+             * Không còn message cũ hơn
+             */
+            if (!messages.length) {
+                paging.hasMore = false;
+
+                await preparePreviousConversationFor(id);
+
+                return;
+            }
+
+            /*
+             * Append message cũ vào đầu chat.
+             * Hàm này giữ nguyên viewport.
+             */
+            prependHistoricalMessages(messages);
+
+            /*
+             * API trả cũ -> mới,
+             * phần tử đầu tiên là oldest.
+             */
+            paging.oldestMessageId =
+                messages[0]?.id ??
+                paging.oldestMessageId;
+
+            paging.hasMore =
+                hasMore;
+
+            /*
+             * Đã hết message của conversation này
+             */
+            if (!paging.hasMore) {
+                await preparePreviousConversationFor(id);
+            }
+        }
+        catch (error) {
+            console.error(
+                "Load older conversation messages failed:",
+                error
+            );
+        }
+        finally {
+            paging.loading = false;
+        }
+    }
+
+    async function fetchConversationMessages(
+        conversationId,
+        {
+            limit,
+            before = null
+        } = {}
+    ) {
+        const params = new URLSearchParams();
+
+        params.set(
+            "limit",
+            String(limit)
+        );
+
+        if (before) {
+            params.set(
+                "before",
+                String(before)
+            );
+        }
+
+        const response = await fetch(
+            `/chat/${conversationId}/messages?${params}`,
+            {
+                method: "GET",
+                headers: getChatHeaders(),
+                credentials: "same-origin"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Không thể tải messages. Status: ${response.status}`
+            );
+        }
+
+        const result = await response.json();
+
+        const messages =
+            Array.isArray(result)
+                ? result
+                : result.items ?? [];
+
+        const hasMore =
+            Array.isArray(result)
+                ? messages.length >= limit
+                : Boolean(result.hasMore);
+
+        return {
+            messages,
+            hasMore
+        };
     }
     function closeChat() {
         stopTyping();
@@ -1175,7 +1159,7 @@
         DOM.notificationLater?.addEventListener(
             "click",
             () => {
-                markNotificationPrompted();
+                snoozeNotificationPrompt();
             }
         );
 
@@ -1187,13 +1171,11 @@
                     return;
                 }
 
-                const permission =
-                    await Notification.requestPermission();
+                const permission = await Notification.requestPermission();
 
                 if (permission === "granted") {
-                    localStorage.setItem(
-                        CONFIG.storage.notificationPrompt,
-                        "true"
+                    localStorage.removeItem(
+                        CONFIG.storage.notificationPromptSnoozeUntil
                     );
 
                     const message =
@@ -1201,7 +1183,11 @@
 
                     state.notification.pendingMessage = null;
 
-                    DOM.notificationPrompt.hidden = true;
+                    DOM.notificationPrompt.classList.remove("is-visible");
+
+                    setTimeout(() => {
+                        DOM.notificationPrompt.hidden = true;
+                    }, 250);
 
                     if (message) {
                         showMessageNotification(message);
@@ -1328,27 +1314,13 @@
 
 
     async function sendTypingStatus(isTyping) {
-        if (!state.currentConversationId ||
-            !state.currentContactId ||
-            !isConnectionReady()) {
+        if (!state.currentConversationId || !state.currentContactId || !isConnectionReady()) {
             return;
         }
 
-        try {
-            await connection.invoke(
-                "SendTyping",
-                state.currentConversationId,
-                state.currentContactId,
-                state.guestToken,
-                isTyping
-            );
-        }
-        catch (error) {
-            console.log(
-                "Send typing failed:",
-                error
-            );
-        }
+        await connection.invoke("SendTyping",
+            state.currentConversationId, state.currentContactId, state.guestToken, isTyping
+        );
     }
 
 
@@ -1652,9 +1624,9 @@
         state.chatSession.hasActiveHistory =
             false;
 
-        state.messages.oldestMessageId = null;
-        state.messages.hasMore = true;
-        state.messages.loading = false;
+        state.messagePaging.oldestMessageId = null;
+        state.messagePaging.hasMore = true;
+        state.messagePaging.loading = false;
 
         resetConversationHistoryState();
 
@@ -1950,20 +1922,18 @@ async function joinConversation() {
             incrementUnreadMessage();
         }
 
-        if (
-            shouldShowNotificationPrompt()
-        ) {
-            state.notification.pendingMessage =
-                message;
+        if (shouldShowNotificationPrompt()) {
+            state.notification.pendingMessage = message;
 
             showNotificationPrompt();
 
             return true;
         }
 
-        showMessageNotification(
-            message
-        );
+        if (Notification.permission === "granted") {
+            showMessageNotification(message);
+        }
+
 
         return true;
     }
@@ -1993,17 +1963,9 @@ async function joinConversation() {
 
 
     function handleConversationStatusUpdated(data) {
-        const conversationId =
-            normalizeNumber(
-                data?.conversationId
-            );
+        const conversationId = normalizeNumber(data?.conversationId);
 
-        if (
-            conversationId !==
-            normalizeNumber(
-                state.currentConversationId
-            )
-        ) {
+        if (conversationId !== normalizeNumber(state.currentConversationId)) {
             return;
         }
 
@@ -2022,10 +1984,7 @@ async function joinConversation() {
          * Khi user send tiếp:
          * server tạo conversation mới.
          */
-        if (
-            Number(data.status) ===
-            CONFIG.conversationStatus.resolved
-        ) {
+        if (Number(data.status) === CONFIG.conversationStatus.resolved) {
             state.chatSession.hasActiveHistory =
                 true;
         }
@@ -2071,19 +2030,6 @@ async function joinConversation() {
             );
         }
 
-        //if (DOM.chatStatusText) {
-        //    const labels = {
-        //        open: "Đang hỗ trợ",
-        //        pending: "Đang chờ",
-        //        resolved: "Đã giải quyết",
-        //        closed: "Đã đóng"
-        //    };
-
-        //    DOM.chatStatusText.textContent =
-        //        labels[statusName] ??
-        //        statusName;
-        //}
-
         /*
          * Không disable composer chỉ vì Resolved.
          *
@@ -2096,17 +2042,15 @@ async function joinConversation() {
             DOM.chatInput.disabled = false;
 
             if (isResolved || isClosed) {
-                DOM.chatInput.placeholder =
-                    "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới...";
+                DOM.chatInput.placeholder = "Nhập tin nhắn để bắt đầu cuộc trò chuyện mới...";
             }
             else {
-                DOM.chatInput.placeholder =
-                    "Nhập tin nhắn...";
+                DOM.chatInput.placeholder = "Nhập tin nhắn...";
             }
         }
 
-        if (DOM.sendButton) {
-            DOM.sendButton.disabled = false;
+        if (DOM.sendBtn) {
+            DOM.sendBtn.disabled = false;
         }
 
         /*
@@ -2201,7 +2145,7 @@ async function joinConversation() {
 
             params.set(
                 "limit",
-                String(state.messages.limit)
+                String(state.messagePaging.limit)
             );
 
             const response = await fetch(
@@ -2230,23 +2174,14 @@ async function joinConversation() {
 
             const hasMore =
                 Array.isArray(result)
-                    ? messages.length >= state.messages.limit
+                    ? messages.length >= state.messagePaging.limit
                     : Boolean(result.hasMore);
-
-            console.log(
-                "Previous conversation:",
-                conversationId,
-                "messages:",
-                messages.length,
-                "hasMore:",
-                hasMore
-            );
 
             if (!messages.length) {
                 paging.hasMore = false;
                 paging.oldestMessageId = null;
 
-                state.history.oldestLoadedConversationId =
+                state.history.loadedConversationId =
                     conversationId;
 
                 await preparePreviousConversationFor(
@@ -2264,7 +2199,7 @@ async function joinConversation() {
 
             paging.hasMore = hasMore;
 
-            state.history.oldestLoadedConversationId =
+            state.history.loadedConversationId =
                 conversationId;
 
             if (paging.hasMore) {
@@ -2461,7 +2396,6 @@ async function joinConversation() {
         DOM.chatInput?.focus();
     }
     function showChatSessionInvalid() {
-        console.log("showChatSessionInvalid");
         state.chatSession.isInvalid = true;
 
         DOM.chatSessionReset?.removeAttribute("hidden");
@@ -2498,7 +2432,7 @@ async function joinConversation() {
         state.history.hasPrevious = false;
         state.history.loading = false;
 
-        state.history.oldestLoadedConversationId =
+        state.history.loadedConversationId =
             null;
 
         state.history.userHasScrolledUp =
@@ -2539,9 +2473,7 @@ async function joinConversation() {
 
             const result =
                 await response.json();
-            console.log("unread-count response:", result);
-
-            console.log("unread count:", unreadCount);
+                
             setUnreadMessageCount(
                 result?.data ?? result
             );
@@ -2556,7 +2488,7 @@ async function joinConversation() {
 
 
     async function markConversationAsRead() {
-        if (!isValidChatSession()) {
+        if (!hasConversationIdentity()) {
             return false;
         }
 
@@ -2664,8 +2596,7 @@ async function joinConversation() {
     }
 
     async function sendMessage(text) {
-        const message =
-            String(text ?? "").trim();
+        const message = String(text ?? "").trim();
 
         if (!message) {
             return;
@@ -2673,7 +2604,7 @@ async function joinConversation() {
 
         if (!isConnectionReady()) {
             console.log(
-                "SignalR chưa kết nối."
+                "SignalR not connected."
             );
 
             return;
@@ -2709,23 +2640,14 @@ async function joinConversation() {
              *     Conversation -> Message
              * =====================================================
              */
-            console.log("SendCustomerMessage");
-            console.log(CHAT_CONFIG.inboxId + "; " + state.currentConversationId + "; " + state.currentContactId +
-                "; " + message + "; " + state.guestToken);
             const result =
-                await connection.invoke(
-                    "SendCustomerMessage",
-                    CHAT_CONFIG.inboxId,
-                    state.currentConversationId || null,
-                    state.currentContactId || null,
-                    message,
-                    state.guestToken || null
+                await connection.invoke("SendCustomerMessage", CHAT_CONFIG.inboxId,
+                    state.currentConversationId || null, state.currentContactId || null,
+                    message, state.guestToken || null
                 );
 
             if (!result) {
-                throw new Error(
-                    "Server không trả về kết quả gửi message."
-                );
+                throw new Error("Server không trả về kết quả gửi message.");
             }
 
             /*
@@ -2735,10 +2657,7 @@ async function joinConversation() {
              */
 
             if (result.contactId) {
-                persistContactIdentity(
-                    result.contactId,
-                    result.guestToken
-                );
+                persistContactIdentity(result.contactId, result.guestToken);
             }
 
             /*
@@ -2747,32 +2666,18 @@ async function joinConversation() {
              * =====================================================
              */
 
-            const newConversationId =
-                normalizeNumber(
-                    result.conversationId
-                );
+            const newConversationId = normalizeNumber(result.conversationId);
 
-            const previousConversationId =
-                normalizeNumber(
-                    state.currentConversationId
-                );
+            const previousConversationId = normalizeNumber(state.currentConversationId);
 
-            const conversationChanged =
-                Boolean(
-                    newConversationId &&
-                    newConversationId !== previousConversationId
-                );
+            const conversationChanged = Boolean(newConversationId && newConversationId !== previousConversationId);
+
             if (newConversationId) {
-                state.currentConversationId =
-                    newConversationId;
+                state.currentConversationId = newConversationId;
 
-                state.currentConversationStatus =
-                    Number(result.status);
+                state.currentConversationStatus = Number(result.status);
 
-                persistConversation(
-                    newConversationId,
-                    result.status
-                );
+                persistConversation(newConversationId, result.status);
             }
 
             /*
@@ -3028,54 +2933,33 @@ async function joinConversation() {
             return null;
         }
 
-        const senderType =
-            Number(message.senderType);
+        const senderType = Number(message.senderType);
 
-        const rowClass =
-            getMessageRowClass(
-                senderType
-            );
+        const classes = getMessageClasses(message.senderType);
+
+        const rowClass = classes.row;
 
         if (!rowClass) {
             return null;
         }
 
-        const messageClass =
-            getMessageClass(
-                senderType
-            );
+        const messageClass = classes.message;
 
-        const isCustomer =
-            senderType ===
-            CONFIG.senderType.contact;
+        const isCustomer = senderType === CONFIG.senderType.contact;
 
 
-        const statusHtml =
-            isCustomer
-                ? buildMessageStatusHtml(
-                    message.status
-                )
-                : "";
+        const statusHtml = isCustomer ? buildMessageStatusHtml(message.status) : "";
 
         const isSystemMessage = senderType === CONFIG.senderType.system;
-        const avatarHtml =
-            isCustomer || isSystemMessage
-                ? ""
-                : buildAdminAvatar();
 
-        const row =
-            document.createElement("div");
+        const avatarHtml = isCustomer || isSystemMessage ? "" : buildAdminAvatar();
 
-        row.className =
-            `message-row ${rowClass}`;
+        const row = document.createElement("div");
 
-        row.dataset.messageId =
-            String(message.id);
-        row.dataset.createdAt =
-            message.createdAt;
-        row.innerHTML = `
-        ${avatarHtml}
-
+        row.className = `message-row ${rowClass}`;
+        row.dataset.messageId = String(message.id);
+        row.dataset.createdAt = message.createdAt;
+        row.innerHTML = `${avatarHtml}
         <div class="message-content">
             <div class="message ${messageClass}">${escapeHtml(message.content)}</div>
 
@@ -3089,45 +2973,21 @@ async function joinConversation() {
         return row;
     }
 
-    function getMessageRowClass(senderType) {
-        switch (senderType) {
-            case CONFIG.senderType.contact:
-                return "contact";
+    function getMessageClasses(senderType) {
+        const name = MESSAGE_SENDER_CLASS[senderType];
 
-            case CONFIG.senderType.admin:
-                return "admin";
-
-            case CONFIG.senderType.bot:
-                return "bot";
-
-            case CONFIG.senderType.system:
-                return "system";
-
-            default:
-                return null;
+        if (!name) {
+            return {
+                row: null,
+                message: ""
+            };
         }
+
+        return {
+            row: name,
+            message: `${name}-message`
+        };
     }
-
-
-    function getMessageClass(senderType) {
-        switch (senderType) {
-            case CONFIG.senderType.contact:
-                return "contact-message";
-
-            case CONFIG.senderType.admin:
-                return "admin-message";
-
-            case CONFIG.senderType.bot:
-                return "bot-message";
-
-            case CONFIG.senderType.system:
-                return "system-message";
-
-            default:
-                return "";
-        }
-    }
-
 
     function buildAdminAvatar() {
         return `<img src="/favicon.ico" width="20" alt="Favicon" class="avatar-initial rounded-circle">`;
@@ -3138,13 +2998,8 @@ async function joinConversation() {
     // MESSAGE STATUS
     // ============================================================
 
-    function buildMessageStatusHtml(status, showStatus = true) {
-        if (!showStatus) {
-            return "";
-        }
-
-        const statusConfig =
-            getMessageStatusConfig(status);
+    function buildMessageStatusHtml(status) {
+        const statusConfig = getMessageStatusConfig(status);
 
         if (!statusConfig) {
             return "";
@@ -3370,27 +3225,9 @@ async function joinConversation() {
     //}
 
 
-    function getConversationStatusName(
-        status
-    ) {
-        const statusMap = {
-            [CONFIG.conversationStatus.open]:
-                "open",
-
-            [CONFIG.conversationStatus.pending]:
-                "pending",
-
-            [CONFIG.conversationStatus.resolved]:
-                "resolved",
-
-            [CONFIG.conversationStatus.closed]:
-                "closed"
-        };
-
+    function getConversationStatusName(status) {
         return (
-            statusMap[
-            Number(status)
-            ] ?? "open"
+            CONFIG.conversationStatus.names[Number(status)] ?? "open"
         );
     }
 
@@ -3400,7 +3237,7 @@ async function joinConversation() {
     // ============================================================
 
     function initInputEvents() {
-        DOM.sendButton?.addEventListener(
+        DOM.sendBtn?.addEventListener(
             "click",
             () => sendMessage(
                 DOM.chatInput?.value
@@ -3544,9 +3381,7 @@ async function joinConversation() {
             !Array.isArray(messages) ||
             messages.length === 0
         ) {
-            state.quickReplies.lastMessageAt =
-                null;
-            console.log('c');
+            state.quickReplies.lastMessageAt = null;
             showQuickReplies();
 
             return;
@@ -3608,7 +3443,7 @@ async function joinConversation() {
     // ============================================================
 
     function initAttachment() {
-        DOM.attachmentButton?.addEventListener(
+        DOM.attachmentBtn?.addEventListener(
             "click",
             () => {
                 alert(
@@ -3620,7 +3455,7 @@ async function joinConversation() {
 
 
     function initEmoji() {
-        DOM.emojiButton?.addEventListener(
+        DOM.emojiBtn?.addEventListener(
             "click",
             () => {
                 if (!DOM.chatInput) {
@@ -3718,7 +3553,7 @@ async function joinConversation() {
 
         if (
             Number(
-                state.history.oldestLoadedConversationId
+                state.history.loadedConversationId
             ) ===
             Number(
                 state.currentConversationId
@@ -3731,11 +3566,11 @@ async function joinConversation() {
              * Ưu tiên load message của conversation hiện tại
              * trước. Chưa được hiện previous conversation loader.
              */
-            if (state.messages.hasMore) {
+            if (state.messagePaging.hasMore) {
 
                 hidePreviousConversationButton();
 
-                if (!state.messages.loading) {
+                if (!state.messagePaging.loading) {
                     await loadConversationMessages();
                 }
 
@@ -3762,7 +3597,7 @@ async function joinConversation() {
 
         const conversationId =
             Number(
-                state.history.oldestLoadedConversationId
+                state.history.loadedConversationId
             );
 
         if (!conversationId) {
@@ -4001,142 +3836,42 @@ async function joinConversation() {
             "chat-boundary-bounce"
         );
     }
-    async function loadOlderMessagesForConversation(conversationId) {
-        const id = Number(conversationId);
-
-        if (!id) {
-            return;
-        }
-
-        console.log("loadOlderMessagesForConversation:", id);
-
-        const paging = getConversationPaging(id);
-
-        if (
-            !paging ||
-            paging.loading ||
-            !paging.hasMore
-        ) {
-            return;
-        }
-
-        paging.loading = true;
-
-        try {
-            const params = new URLSearchParams();
-
-            params.set(
-                "limit",
-                String(state.messages.limit)
-            );
-
-            if (paging.oldestMessageId) {
-                params.set(
-                    "before",
-                    String(paging.oldestMessageId)
-                );
-            }
-
-            const response = await fetch(
-                `/chat/${id}/messages?${params}`,
-                {
-                    method: "GET",
-                    headers: getChatHeaders(),
-                    credentials: "same-origin"
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Không thể tải thêm message. Status: ${response.status}`
-                );
-            }
-
-            const result = await response.json();
-
-            const messages =
-                Array.isArray(result)
-                    ? result
-                    : result.items ?? [];
-
-            const hasMore =
-                Array.isArray(result)
-                    ? messages.length >= state.messages.limit
-                    : Boolean(result.hasMore);
-
-            /*
-             * Không còn message cũ hơn.
-             */
-            if (!messages.length) {
-                paging.hasMore = false;
-
-                await preparePreviousConversationFor(id);
-
-                return;
-            }
-
-            /*
-             * Append message cũ vào đầu chat.
-             * Hàm này đã tự giữ nguyên viewport.
-             */
-            prependHistoricalMessages(messages);
-
-            /*
-             * API đang trả message theo thứ tự cũ -> mới,
-             * nên message đầu tiên là oldest.
-             */
-            paging.oldestMessageId =
-                messages[0]?.id ?? paging.oldestMessageId;
-
-            paging.hasMore = hasMore;
-
-            /*
-             * Conversation hiện tại đã hết message.
-             * Tìm conversation cũ hơn.
-             *
-             * Không cần gọi sync trực tiếp vì
-             * preparePreviousConversationFor() sẽ cập nhật
-             * previousConversationId + hasPrevious rồi sync button.
-             */
-            if (!paging.hasMore) {
-                await preparePreviousConversationFor(id);
-            }
-        }
-        catch (error) {
-            console.error(
-                "Load older conversation messages failed:",
-                error
-            );
-        }
-        finally {
-            paging.loading = false;
-        }
-    }
     // ============================================================
     // NOTIFICATION BROWSER
     // ============================================================
     function shouldShowNotificationPrompt() {
-        const value = localStorage.getItem(CONFIG.storage.notificationPrompt);
-        console.log(value);
+        if (!("Notification" in window)) {
+            return false;
+        }
 
+        if (Notification.permission !== "default") {
+            return false;
+        }
+
+        const value = localStorage.getItem(
+            CONFIG.storage.notificationPromptSnoozeUntil
+        );
+
+        // Chưa từng bấm Later
         if (!value) {
             return true;
         }
 
         const expiresAt = Number(value);
 
-        console.log(expiresAt);
+        // Dữ liệu localStorage không hợp lệ
         if (!Number.isFinite(expiresAt)) {
             localStorage.removeItem(
-                CONFIG.storage.notificationPrompt
+                CONFIG.storage.notificationPromptSnoozeUntil
             );
 
             return true;
         }
 
+        // Đã hết 7 ngày
         if (Date.now() >= expiresAt) {
             localStorage.removeItem(
-                CONFIG.storage.notificationPrompt
+                CONFIG.storage.notificationPromptSnoozeUntil
             );
 
             return true;
@@ -4145,7 +3880,6 @@ async function joinConversation() {
         return false;
     }
     function showNotificationPrompt() {
-        console.log(DOM.notificationPrompt);
         if (!DOM.notificationPrompt) {
             return;
         }
@@ -4153,27 +3887,34 @@ async function joinConversation() {
         if (!("Notification" in window)) {
             return;
         }
+
         if (Notification.permission !== "default") {
             return;
         }
 
-        if (!shouldShowNotificationPrompt()) {
-            return;
-        }
         DOM.notificationPrompt.hidden = false;
+
+        requestAnimationFrame(() => {
+            DOM.notificationPrompt.classList.add("is-visible");
+        });
     }
 
-    function markNotificationPrompted() {
+    function snoozeNotificationPrompt() {
         const expiresAt =
-            Date.now() + CONFIG.timing.notificationPromptDelay;
+            Date.now() +
+            CONFIG.timing.notificationPromptDelay;
 
         localStorage.setItem(
-            CONFIG.storage.notificationPrompt, String(expiresAt)
+            CONFIG.storage.notificationPromptSnoozeUntil,
+            String(expiresAt)
         );
 
-        DOM.notificationPrompt.hidden = true;
-    }
+        DOM.notificationPrompt.classList.remove("is-visible");
 
+        setTimeout(() => {
+            DOM.notificationPrompt.hidden = true;
+        }, 250);
+    }
     function showMessageNotification(message) {
         if (!("Notification" in window)) {
             return;
@@ -4258,7 +3999,6 @@ async function joinConversation() {
     window.addEventListener(
         "caterin:customer-logout",
         function () {
-            console.log("caterin:customer-logout");
             clearCustomerIdentity();
 
             state.currentConversationStatus = null;
@@ -4270,4 +4010,4 @@ async function joinConversation() {
             showQuickReplies();
         }
     );
-})();
+});

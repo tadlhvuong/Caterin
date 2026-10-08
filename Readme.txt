@@ -21,40 +21,64 @@ WantedBy=multi-user.target
 - data-asset-path: path resource
 - data-app-style-img (style: light/dark): change image follow style web
 
+getMessageRowClass
+getMessageClass
 
-check valid order-items-adrress-history
+function clearMessages() {
+    DOM.chatBody?.replaceChildren();
 
-SELECT
-    o."OrderCode",
-    o."SubTotal",
-    COALESCE(SUM(oi."Total"), 0) AS "CalculatedSubTotal",
-    o."DiscountAmount",
-    o."ShippingAmount",
-    o."TotalAmount",
-    COALESCE(SUM(oi."Total"), 0)
-        - o."DiscountAmount"
-        + o."ShippingAmount" AS "CalculatedTotal",
-    CASE
-        WHEN
-            o."SubTotal" = COALESCE(SUM(oi."Total"), 0)
-            AND
-            o."TotalAmount" =
-                o."SubTotal"
-                - o."DiscountAmount"
-                + o."ShippingAmount"
-        THEN true
-        ELSE false
-    END AS "IsValid"
-FROM "Orders" AS o
-LEFT JOIN "OrderItems" AS oi
-    ON oi."OrderId" = o."Id"
-WHERE o."OrderCode" LIKE 'ORD202608%'
-GROUP BY
-    o."Id",
-    o."OrderCode",
-    o."SubTotal",
-    o."DiscountAmount",
-    o."ShippingAmount",
-    o."TotalAmount"
-ORDER BY
-    o."OrderCode";
+    clearQuickReplyTimer();
+
+    state.processedMessageIds.clear();
+
+    state.quickReplies.lastMessageAt = null;
+
+    resetConversationHistoryState();
+}
+
+function clearMessages() {
+    DOM.chatBody?.replaceChildren();
+    state.processedMessageIds.clear();
+}
+
+function resetMessagePaging() {
+    state.messages.oldestMessageId = null;
+    state.messages.hasMore = true;
+    state.messages.loading = false;
+}
+function resetConversationHistoryState() {
+    state.history.previousConversationId = null;
+    state.history.hasPrevious = false;
+    state.history.loading = false;
+    state.history.oldestLoadedConversationId = null;
+    state.history.userHasScrolledUp = false;
+    state.history.conversations.clear();
+
+    hidePreviousConversationButton();
+}
+function clearConversationIdentity() {
+    state.currentConversationId = null;
+    state.currentConversationStatus = null;
+
+    localStorage.removeItem(CONFIG.storage.conversationId);
+}
+
+
+ function resetToNewChatState() {
+     clearMessages();
+     resetMessagePaging();
+     resetConversationHistoryState();
+     /*
+      * Chỉ reset conversation.
+      *
+      * Không xóa Contact.
+      * Không xóa guestToken.
+      */
+     state.currentConversationId = null;
+     state.currentConversationStatus = null;
+     state.chatSession.hasActiveHistory = false;
+
+     clearConversationIdentity();
+     setUnreadMessageCount(0);
+     showQuickReplies();
+ }

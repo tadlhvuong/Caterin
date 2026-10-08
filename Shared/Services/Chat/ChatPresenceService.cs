@@ -12,13 +12,9 @@ namespace Shared.Services.Chat
     public class ChatPresenceService : IChatPresenceService
     {
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _connections = new();
-        public Task<bool> AddConnectionAsync(
-    string userId,
-    string connectionId)
+        public Task<bool> AddConnectionAsync(string userId, string connectionId)
         {
-            var connections = _connections.GetOrAdd(
-                userId,
-                _ => new ConcurrentDictionary<string, byte>());
+            var connections = _connections.GetOrAdd(userId, _ => new ConcurrentDictionary<string, byte>());
 
             var wasOffline = connections.IsEmpty;
 
@@ -27,55 +23,38 @@ namespace Shared.Services.Chat
             return Task.FromResult(wasOffline);
         }
 
-        public Task<bool> RemoveConnectionAsync(
-            string userId,
-            string connectionId)
+        public Task<bool> RemoveConnectionAsync(string userId, string connectionId)
         {
-            if (!_connections.TryGetValue(
-                    userId,
-                    out var connections))
+            if (!_connections.TryGetValue(userId, out var connections))
             {
                 return Task.FromResult(true);
             }
 
-            connections.TryRemove(
-                connectionId,
-                out _);
+            connections.TryRemove(connectionId, out _);
 
             if (!connections.IsEmpty)
                 return Task.FromResult(false);
 
-            _connections.TryRemove(
-                userId,
-                out _);
+            _connections.TryRemove(userId, out _);
 
             return Task.FromResult(true);
         }
 
         public bool IsOnline(string userId)
         {
-            return _connections.TryGetValue(
-                       userId,
-                       out var connections)
-                   && !connections.IsEmpty;
+            return _connections.TryGetValue(userId, out var connections) && !connections.IsEmpty;
         }
 
         public IReadOnlyCollection<string> GetOnlineAdminIds()
         {
-            return _connections
-                .Where(x => !x.Value.IsEmpty)
-                .Select(x => x.Key)
-                .ToList();
+            return _connections.Where(x => !x.Value.IsEmpty).Select(x => x.Key).ToList();
         }
         public bool IsAnyOnline()
         {
             return _connections.Any(x => !x.Value.IsEmpty);
         }
 
-        public Task<bool> JoinConversationAsync(
-    string userId,
-    string connectionId,
-    long conversationId)
+        public Task<bool> JoinConversationAsync(string userId, string connectionId, long conversationId)
         {
             if (string.IsNullOrWhiteSpace(userId))
                 return Task.FromResult(false);
@@ -86,19 +65,13 @@ namespace Shared.Services.Chat
             if (conversationId <= 0)
                 return Task.FromResult(false);
 
-            var connections =
-                _connections.GetOrAdd(conversationId.ToString(),  _ => new ConcurrentDictionary<string, byte>());
+            var connections = _connections.GetOrAdd(conversationId.ToString(),  _ => new ConcurrentDictionary<string, byte>());
 
-            var added = connections.TryAdd(
-                connectionId,
-                0);
+            var added = connections.TryAdd(connectionId, 0);
 
             return Task.FromResult(added);
         }
-        public Task<bool> LeaveConversationAsync(
-    string userId,
-    string connectionId,
-    long conversationId)
+        public Task<bool> LeaveConversationAsync(string userId, string connectionId, long conversationId)
         {
             if (string.IsNullOrWhiteSpace(userId))
                 return Task.FromResult(false);
@@ -111,16 +84,12 @@ namespace Shared.Services.Chat
 
             var key = conversationId.ToString();
 
-            if (!_connections.TryGetValue(
-                key,
-                out var connections))
+            if (!_connections.TryGetValue(key, out var connections))
             {
                 return Task.FromResult(false);
             }
 
-            var removed = connections.TryRemove(
-                connectionId,
-                out _);
+            var removed = connections.TryRemove(connectionId, out _);
 
             /*
              * Không còn connection nào trong conversation
@@ -128,23 +97,16 @@ namespace Shared.Services.Chat
              */
             if (connections.IsEmpty)
             {
-                _connections.TryRemove(
-                    key,
-                    out _);
+                _connections.TryRemove(key, out _);
             }
 
             return Task.FromResult(removed);
         }
-        public bool IsConversationActive(
-    long conversationId)
+        public bool IsConversationActive(long conversationId)
         {
             var key = conversationId.ToString();
 
-            return
-                _connections.TryGetValue(
-                    key,
-                    out var connections)
-                && !connections.IsEmpty;
+            return _connections.TryGetValue(key, out var connections) && !connections.IsEmpty;
         }
 
         public Task RemoveConnectionFromConversationsAsync(
@@ -158,9 +120,7 @@ namespace Shared.Services.Chat
                 var conversationId = pair.Key;
                 var connections = pair.Value;
 
-                connections.TryRemove(
-                    connectionId,
-                    out _);
+                connections.TryRemove(connectionId, out _);
 
                 /*
                  * Không còn connection nào đang mở
@@ -168,9 +128,7 @@ namespace Shared.Services.Chat
                  */
                 if (connections.IsEmpty)
                 {
-                    _connections.TryRemove(
-                        conversationId,
-                        out _);
+                    _connections.TryRemove(conversationId, out _);
                 }
             }
 

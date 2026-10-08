@@ -2482,6 +2482,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 return;
             }
+            if (state.connection &&
+                state.connection.state !== signalR.HubConnectionState.Disconnected) {
+                return;
+            }
 
             state.connection =
                 new signalR.HubConnectionBuilder()

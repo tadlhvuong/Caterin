@@ -32,3 +32,4 @@ node_modules/
 appsettings.Development.json
 /Website/Logs
 /Website/wwwroot/uploads/products
+/Website/wwwroot/uploads/chat

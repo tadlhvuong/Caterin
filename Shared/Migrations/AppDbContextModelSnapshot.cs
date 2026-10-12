@@ -558,6 +558,57 @@ namespace Shared.Migrations
                     b.ToTable("chat_messages", (string)null);
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Chat.ChatPendingUpload", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("AttachedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long?>("GuestSessionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MediaFileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("MessageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UploadTokenHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuestSessionId");
+
+                    b.HasIndex("MediaFileId");
+
+                    b.HasIndex("MessageId");
+
+                    b.HasIndex("Status", "ExpiresAt");
+
+                    b.HasIndex("UploadTokenHash", "Status", "ExpiresAt");
+
+                    b.ToTable("chat_pending_upload", (string)null);
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Chat.ChatTeam", b =>
                 {
                     b.Property<int>("Id")
@@ -2560,7 +2611,7 @@ namespace Shared.Migrations
             modelBuilder.Entity("Shared.Data.Entities.Chat.ChatAttachment", b =>
                 {
                     b.HasOne("Shared.Data.Entities.Media.MediaFile", "MediaFile")
-                        .WithMany()
+                        .WithMany("ChatAttachments")
                         .HasForeignKey("MediaFileId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2705,6 +2756,31 @@ namespace Shared.Migrations
                     b.Navigation("Inbox");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Chat.ChatPendingUpload", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Chat.ChatGuestSession", "GuestSession")
+                        .WithMany()
+                        .HasForeignKey("GuestSessionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "MediaFile")
+                        .WithMany()
+                        .HasForeignKey("MediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Chat.ChatMessage", "Message")
+                        .WithMany()
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("GuestSession");
+
+                    b.Navigation("MediaFile");
+
+                    b.Navigation("Message");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Chat.ChatTeamMember", b =>
@@ -3218,6 +3294,8 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
+                    b.Navigation("ChatAttachments");
+
                     b.Navigation("ProductMedias");
 
                     b.Navigation("ProductVariantMedias");

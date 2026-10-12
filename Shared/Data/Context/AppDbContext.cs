@@ -63,6 +63,7 @@ namespace Shared.Data.Context
         public virtual DbSet<ChatContact> ChatContacts { get; set; }
         public virtual DbSet<ChatContactInbox> ChatContactInboxes { get; set; }
         public virtual DbSet<ChatAttachment> ChatAttachments { get; set; }
+        public virtual DbSet<ChatPendingUpload> ChatPendingUploads { get; set; }
         public virtual DbSet<ChatTeam> ChatTeams { get; set; }
         public virtual DbSet<ChatTeamMember> ChatTeamMembers { get; set; }
 

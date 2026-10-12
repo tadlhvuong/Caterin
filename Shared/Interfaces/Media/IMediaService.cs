@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Shared.Data.Entities.Media;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Interfaces.Media
 {
@@ -32,5 +27,7 @@ namespace Shared.Interfaces.Media
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task DeleteFolderAsync(string relativeFolder, CancellationToken cancellationToken = default);
+
+        Task<FileStream?> OpenReadAsync(MediaFile mediaFile, CancellationToken cancellationToken = default);
     }
 }

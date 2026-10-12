@@ -73,7 +73,8 @@ namespace Shared.Services.Chat
             return true;
         }
 
-        public async Task<bool> CanCustomerAccessConversationAsync(long conversationId, long? contactId, string? userId, string? guestToken, CancellationToken cancellationToken = default)
+        public async Task<bool> CanCustomerAccessConversationAsync(long conversationId, long? contactId, string? userId, 
+            string? guestToken, CancellationToken cancellationToken = default)
         {
             var conversation = await _dbContext.ChatConversations.AsNoTracking().Where(x => x.Id == conversationId)
                     .Select(x => new
@@ -94,25 +95,26 @@ namespace Shared.Services.Chat
 
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                // Authenticated customer không cần GuestToken.
-                //
-                // Contact phải là canonical Contact của UserId.
-                if (!contactId.HasValue)
-                {
-                    return false;
-                }
-
-                if (conversation.ContactId != contactId.Value)
-                {
-                    return false;
-                }
-
+                // Contact phải thuộc đúng user và không phải contact đã merge.
                 if (conversation.ContactIsMerged)
                 {
                     return false;
                 }
 
-                return conversation.ContactUserId == userId;
+                if (conversation.ContactUserId != userId)
+                {
+                    return false;
+                }
+
+                // Nếu client có gửi contactId, phải khớp với contact của conversation.
+                // Nếu không gửi, vẫn xác thực bằng userId.
+                if (contactId.HasValue &&
+                    conversation.ContactId != contactId.Value)
+                {
+                    return false;
+                }
+
+                return true;
             }
 
             // =========================================================

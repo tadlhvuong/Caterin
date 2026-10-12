@@ -1,16 +1,11 @@
-﻿using Shared.Data.Entities.Chat;
-using Shared.DTOs.Chat;
-using Shared.Enums.Chat;
-using Shared.Requests.Chat;
-using Shared.Responses;
-using System.Threading.Tasks;
+﻿using Shared.DTOs.Chat;
 
 namespace Shared.Interfaces.Chat
 {
     public interface IChatMessageService
     {
         Task<CustomerSendMessageResult> SendCustomerMessageAsync(long? conversationId, long? contactId, long inboxId,
-            string content, string? guestToken, string? userId, CancellationToken cancellationToken = default);
+            string content, string? guestToken, string? userId, string? uploadSessionToken, List<long>? uploadIds, CancellationToken cancellationToken = default);
 
         Task<ChatMessageDto> SendAdminMessageAsync(long conversationId, string userId, string content, CancellationToken cancellationToken = default);
 

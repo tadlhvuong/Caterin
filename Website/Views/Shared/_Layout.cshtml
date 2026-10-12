@@ -7,6 +7,9 @@
     <title>@ViewData["Title"] - CATERIN</title>
     <link rel="shortcut icon" href="~/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2/src/regular/style.css">
+
+    <link rel="stylesheet" href="~/admin/assets/vendor/js/sweetalert2.min.js" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link href="~/css/app.min.css" rel="stylesheet" asp-append-version="true">
 
     <link href="~/css/chat.css" rel="stylesheet" asp-append-version="true">
@@ -862,6 +865,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2"></script>
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11"></script>
+    <script src="~/admin/assets/js/customize/toast-setting.js"></script>
+
     <script src="~/js/chat.js"></script>
     <script defer="defer" src="~/js/app.bundle.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -35,10 +35,8 @@ namespace Shared.Services.Chat
             _logger = logger;
         }
        
-
-       
         public async Task<CustomerSendMessageResult> SendCustomerMessageAsync(long? conversationId, long? contactId, long inboxId,
-            string content, string? guestToken, string? userId, CancellationToken cancellationToken = default)
+            string content, string? guestToken, string? userId, string? uploadSessionToken, List<long>? uploadIds, CancellationToken cancellationToken = default)
         {
 
             var inbox = await _dbContext.ChatInboxes.FirstOrDefaultAsync(x => x.Id == inboxId, cancellationToken);
@@ -53,15 +51,37 @@ namespace Shared.Services.Chat
 
             content = content?.Trim() ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(content))
+            var requestedUploadIds = uploadIds ?? new List<long>();
+
+            if (requestedUploadIds.Count > 5)
+                throw new HubException("Mỗi tin nhắn chỉ được đính kèm tối đa 5 file.");
+
+            if (requestedUploadIds.Any(x => x <= 0))
+                throw new HubException("Upload ID không hợp lệ.");
+
+            if (requestedUploadIds.Count != requestedUploadIds.Distinct().Count())
+                throw new HubException("Danh sách upload ID bị trùng.");
+
+            if (string.IsNullOrWhiteSpace(content) && requestedUploadIds.Count == 0)
+                throw new HubException("Tin nhắn phải có nội dung hoặc file đính kèm.");
+
+            var isTemporaryGuestUpload = string.IsNullOrWhiteSpace(userId) && !contactId.HasValue &&
+                string.IsNullOrWhiteSpace(guestToken) && requestedUploadIds.Count > 0;
+
+            if (isTemporaryGuestUpload &&
+                string.IsNullOrWhiteSpace(uploadSessionToken))
             {
-                throw new HubException("Nội dung tin nhắn không hợp lệ.");
+                throw new HubException("CHAT_UPLOAD_SESSION_INVALID");
             }
 
+            // Không cho dùng token upload tạm lẫn với danh tính đã tồn tại.
+            if (!string.IsNullOrWhiteSpace(uploadSessionToken) &&
+                !isTemporaryGuestUpload)
+            {
+                throw new HubException("CHAT_UPLOAD_SESSION_INVALID");
+            }
             ChatContact contact;
-
             string? newGuestToken = null;
-
             bool isNewContact = false;
 
             // =========================================================
@@ -93,9 +113,7 @@ namespace Shared.Services.Chat
                 var guestIdentity = await ResolveGuestIdentityAsync(contactId, guestToken, cancellationToken);
 
                 contact = guestIdentity.Contact;
-
                 newGuestToken = guestIdentity.GuestToken;
-
                 isNewContact = guestIdentity.IsNewContact;
 
                 /*
@@ -110,8 +128,73 @@ namespace Shared.Services.Chat
                 }
             }
 
+            // 2. XÁC ĐỊNH GUEST SESSION SỞ HỮU UPLOAD.
+            // Không cho phép lấy upload của guest cũ khi đã đăng nhập,
+            // hoặc lấy upload của session khác.
+            long? guestSessionId = null;
+            string? temporaryUploadTokenHash = null;
+            var now = DateTime.UtcNow;
+
+            if (requestedUploadIds.Count > 0)
+            {
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    // Upload của khách đã đăng nhập sẽ được kiểm tra theo UserId.
+                    if (!string.IsNullOrWhiteSpace(uploadSessionToken))
+                    {
+                        throw new HubException("CHAT_UPLOAD_SESSION_INVALID");
+                    }
+                }
+                else if (isTemporaryGuestUpload)
+                {
+                    temporaryUploadTokenHash = Common.CommonHelper.Hash(uploadSessionToken!);
+
+                    var temporaryUploads = await _dbContext.ChatPendingUploads
+                        .AsNoTracking()
+                        .Where(x =>
+                            requestedUploadIds.Contains(x.Id) &&
+                            x.Status == ChatPendingUploadStatus.Pending &&
+                            x.ExpiresAt > now &&
+                            x.UserId == null &&
+                            x.GuestSessionId == null &&
+                            x.UploadTokenHash == temporaryUploadTokenHash)
+                        .Select(x => x.Id)
+                        .ToListAsync(cancellationToken);
+
+                    if (temporaryUploads.Count != requestedUploadIds.Count)
+                    {
+                        throw new HubException(
+                            "Một hoặc nhiều file đã hết hạn hoặc không thuộc phiên upload này.");
+                    }
+                }
+                else
+                {
+                    // Guest đã có danh tính: giữ nguyên cơ chế xác thực cũ.
+                    if (string.IsNullOrWhiteSpace(guestToken))
+                    {
+                        throw new HubException("CHAT_SESSION_INVALID");
+                    }
+
+                    var tokenHash = Common.CommonHelper.Hash(guestToken);
+
+                    guestSessionId = await _dbContext.ChatGuestSessions
+                        .AsNoTracking()
+                        .Where(x =>
+                            x.TokenHash == tokenHash &&
+                            x.ContactId == contact.Id &&
+                            !x.IsRevoked &&
+                            x.ExpiresAt > now)
+                        .Select(x => (long?)x.Id)
+                        .SingleOrDefaultAsync(cancellationToken);
+
+                    if (!guestSessionId.HasValue)
+                    {
+                        throw new HubException("CHAT_SESSION_INVALID");
+                    }
+                }
+            }
             // =========================================================
-            // 2. ENSURE CONTACT-INBOX
+            // 3. ENSURE CONTACT-INBOX
             // =========================================================
 
             var contactInbox =
@@ -131,7 +214,7 @@ namespace Shared.Services.Chat
             }
 
             // =========================================================
-            // 3. RESOLVE CONVERSATION
+            // 4. RESOLVE CONVERSATION
             // =========================================================
 
             var conversationResult = await ResolveConversationForCustomerAsync(
@@ -145,26 +228,19 @@ namespace Shared.Services.Chat
             // 4. CREATE MESSAGE
             // =========================================================
 
-            var now = DateTime.UtcNow;
-
             var message = new ChatMessage
             {
                 Conversation = conversation,
                 Contact = contact,
                 Inbox = inbox,
-
                 UserId = userId,
 
                 MessageType = ChatMessageType.Incoming,
-
                 ContentType = ChatMessageContentType.Text,
-
                 Status = ChatMessageStatus.Sent,
-
                 SenderType = ChatSenderType.Contact,
 
-                Content = content,
-
+                Content = string.IsNullOrWhiteSpace(content) ? null : content,
                 IsPrivate = false,
 
                 CreatedAt = now,
@@ -173,8 +249,114 @@ namespace Shared.Services.Chat
 
             _dbContext.ChatMessages.Add(message);
 
+            // 5. TRANSACTION + CLAIM UPLOADS.
+            // Chỉ upload Pending, chưa hết hạn và thuộc đúng chủ sở hữu
+            // mới được chuyển sang Attached.
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            var pendingUploads = new List<ChatPendingUpload>();
+
+            foreach (var uploadId in requestedUploadIds)
+            {
+                int affectedRows;
+
+                if (!string.IsNullOrWhiteSpace(userId))
+                {
+                    affectedRows = await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+                        $@"UPDATE ""chat_pending_upload""
+           SET ""Status"" = {(int)ChatPendingUploadStatus.Attached},
+               ""AttachedAt"" = {now},
+               ""UploadTokenHash"" = NULL
+           WHERE ""Id"" = {uploadId}
+             AND ""Status"" = {(int)ChatPendingUploadStatus.Pending}
+             AND ""ExpiresAt"" > {now}
+             AND ""UserId"" = {userId}
+             AND ""GuestSessionId"" IS NULL",
+                        cancellationToken);
+                }
+                else if (isTemporaryGuestUpload)
+                {
+                    affectedRows = await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+                        $@"UPDATE ""chat_pending_upload""
+           SET ""Status"" = {(int)ChatPendingUploadStatus.Attached},
+               ""AttachedAt"" = {now},
+               ""UploadTokenHash"" = NULL
+           WHERE ""Id"" = {uploadId}
+             AND ""Status"" = {(int)ChatPendingUploadStatus.Pending}
+             AND ""ExpiresAt"" > {now}
+             AND ""UserId"" IS NULL
+             AND ""GuestSessionId"" IS NULL
+             AND ""UploadTokenHash"" = {temporaryUploadTokenHash}",
+                        cancellationToken);
+                }
+                else
+                {
+                    affectedRows = await _dbContext.Database.ExecuteSqlInterpolatedAsync(
+                        $@"UPDATE ""chat_pending_upload""
+           SET ""Status"" = {(int)ChatPendingUploadStatus.Attached},
+               ""AttachedAt"" = {now},
+               ""UploadTokenHash"" = NULL
+           WHERE ""Id"" = {uploadId}
+             AND ""Status"" = {(int)ChatPendingUploadStatus.Pending}
+             AND ""ExpiresAt"" > {now}
+             AND ""UserId"" IS NULL
+             AND ""GuestSessionId"" = {guestSessionId}",
+                        cancellationToken);
+                }
+
+                if (affectedRows != 1)
+                {
+                    throw new HubException(
+                        "Một hoặc nhiều file đã hết hạn, không hợp lệ hoặc đã được sử dụng.");
+                }
+            }
+
+            if (requestedUploadIds.Count > 0)
+            {
+                // Đọc lại các upload sau khi claim thành công.
+                // Chúng được truy vấn trong cùng transaction.
+                pendingUploads = await _dbContext.ChatPendingUploads.Include(x => x.MediaFile).Where(x => requestedUploadIds.Contains(x.Id))
+                    .ToListAsync(cancellationToken);
+
+                if (pendingUploads.Count != requestedUploadIds.Count || pendingUploads.Any(x => x.MediaFile == null))
+                {
+                    throw new HubException("Không thể đọc thông tin file đính kèm.");
+                }
+
+                var totalSize = pendingUploads.Sum(x => x.MediaFile.Size);
+
+                if (totalSize > 25L * 1024 * 1024)
+                    throw new HubException("Tổng dung lượng file vượt quá 25 MB.");
+
+                foreach (var upload in pendingUploads)
+                {
+                    var media = upload.MediaFile;
+
+                    var attachment = new ChatAttachment
+                    {
+                        Message = message,
+                        MediaFile = media,
+                        FileName = media.OriginalFileName ?? media.FileName,
+                        ContentType = media.ContentType,
+                        FileSize = media.Size
+                    };
+
+                    message.Attachments.Add(attachment);
+
+                    // Navigation này giúp EF gán MessageId sau khi
+                    // message được tạo trong cùng SaveChanges.
+                    upload.Message = message;
+                }
+
+                // Enum hiện tại không có Mixed:
+                // tất cả là ảnh => Image; có tài liệu => File.
+                var allImages = pendingUploads.All(x => x.MediaFile.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase));
+
+                message.ContentType = allImages ? ChatMessageContentType.Image : ChatMessageContentType.File;
+            }
+
             // =========================================================
-            // 5. UPDATE CONVERSATION
+            // 6. UPDATE CONVERSATION
             // =========================================================
 
             conversation.LastMessageAt = now;
@@ -182,11 +364,14 @@ namespace Shared.Services.Chat
 
             if (string.IsNullOrWhiteSpace(conversation.Subject))
             {
-                conversation.Subject = content.Length > 200 ? content[..200] : content;
+                var subject = !string.IsNullOrWhiteSpace(content) ? content : pendingUploads.FirstOrDefault()?.MediaFile.OriginalFileName
+                ?? pendingUploads.FirstOrDefault()?.MediaFile.FileName ?? "File đính kèm";
+
+                conversation.Subject = subject.Length > 200 ? subject[..200] : subject;
             }
 
             // =========================================================
-            // 6. RESOLVE STATUS
+            // RESOLVE STATUS
             // =========================================================
 
             var isAdminViewing = _chatPresenceService.IsConversationActive(conversation.Id);
@@ -201,7 +386,8 @@ namespace Shared.Services.Chat
             }
 
             // =========================================================
-            // 7. SAVE
+            // 7. SAVE MESSAGE + ATTACHMENTS + PENDING UPLOAD LINKS.
+            //      Nếu SaveChanges thất bại, transaction rollback cả claim upload.
             // =========================================================
 
             /*
@@ -214,7 +400,6 @@ namespace Shared.Services.Chat
              * - Conversation status/update
              */
             await _dbContext.SaveChangesAsync(cancellationToken);
-
             // =========================================================
             // 8. DTO
             // =========================================================
@@ -222,32 +407,28 @@ namespace Shared.Services.Chat
             var dto = new ChatMessageDto
             {
                 Id = message.Id,
-
                 ConversationId = message.ConversationId,
-
                 InboxId = message.InboxId,
-
                 ContactId = message.ContactId,
-
                 SenderId = message.UserId,
 
                 SenderName = contact.Name,
-
                 SenderAvatar = contact.AvatarUrl,
-
                 MessageType =  message.MessageType,
-
                 ContentType = message.ContentType,
-
                 Status = message.Status,
-
                 SenderType = message.SenderType,
-
                 Content = message.Content,
-
                 IsPrivate = message.IsPrivate,
-
-                CreatedAt = message.CreatedAt
+                CreatedAt = message.CreatedAt,
+                Attachments = message.Attachments.Select(a => new ChatAttachmentDto
+                {
+                    Id = a.Id,
+                    FileName = a.FileName,
+                    ContentType = a.ContentType,
+                    FileSize = a.FileSize,
+                    Url = $"/chat/attachments/{a.Id}/download"
+                }).ToList()
             };
 
             // =========================================================
@@ -270,6 +451,7 @@ namespace Shared.Services.Chat
             await _hubContext.Clients.Group(ChatHubGroups.Inbox(conversation.InboxId))
                 .SendAsync(ChatHubEvents.MessageReceived, dto, cancellationToken);
 
+            await transaction.CommitAsync(cancellationToken);
             // =========================================================
             // 11. RESULT
             // =========================================================
@@ -477,9 +659,19 @@ namespace Shared.Services.Chat
                     SenderType = x.SenderType,
                     Content = x.Content,
                     IsPrivate = x.IsPrivate,
-                    CreatedAt = x.CreatedAt
-                })
-                .ToListAsync(cancellationToken);
+                    CreatedAt = x.CreatedAt,
+
+                    // Lấy file đính kèm của từng message.
+                    Attachments = x.Attachments
+                    .Select(a => new ChatAttachmentDto
+                    {
+                        Id = a.Id,
+                        FileName = a.FileName,
+                        ContentType = a.ContentType,
+                        FileSize = a.FileSize,
+                        Url = "/chat/attachments/" + a.Id + "/download"
+                    }).ToList()
+            }).ToListAsync(cancellationToken);
 
             var hasMore = messages.Count > limit;
 
@@ -626,15 +818,14 @@ namespace Shared.Services.Chat
             {
                 throw new HubException("CHAT_SESSION_INVALID");
             }
-
-            // =========================================================
-            // 4. TOKEN ĐÃ BỊ REVOKE
-            // =========================================================
-
+            // Kiểm tra contact trước cả khi xử lý token hết hạn.
+            if (hasContactId && guestSession.ContactId != contactId!.Value)
+            {
+                throw new HubException("CHAT_SESSION_INVALID");
+            }
             if (guestSession.IsRevoked)
             {
-                throw new HubException(
-                    "Phiên trò chuyện đã hết hiệu lực.");
+                throw new HubException("CHAT_SESSION_INVALID");
             }
 
             // =========================================================
@@ -694,11 +885,11 @@ namespace Shared.Services.Chat
             //   - dùng Conversation của C1
             //   - tự sửa ContactId
             // =========================================================
-
-            if (hasContactId && guestSession.ContactId != contactId!.Value)
-            {
-                throw new HubException("CHAT_SESSION_INVALID");
-            }
+///FIX ĐƯA LÊN TRÊN ĐỢI SAU NÀY TESTCASE NẾU ĐÚNG THÌ XÓA ĐI
+            //if (hasContactId && guestSession.ContactId != contactId!.Value)
+            //{
+            //    throw new HubException("CHAT_SESSION_INVALID");
+            //}
 
             // =========================================================
             // 7. TOKEN HỢP LỆ

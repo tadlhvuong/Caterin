@@ -14,12 +14,14 @@ namespace Shared.Middlewares
         {
             return app.Use(async (context, next) =>
             {
-                //X-Content-Type-Options: nosniff
-                //Referrer-Policy: strict-origin-when-cross-origin
+                ////ENABLE WHEN PRODUCTION
+
+                //X-Content-Type-Options: nosniff  //Ngăn trình duyệt tự suy đoán MIME type
+                //Referrer-Policy: strict-origin-when-cross-origin //Hạn chế thông tin URL bị gửi trong Referer khi chuyển sang origin khác.
                 //Permissions-Policy: geolocation=(), microphone=(), camera=()
-                //X-Frame-Options: DENY
-                //Cross-Origin-Opener-Policy: same-origin
-                //Cross-Origin-Resource-Policy: same-origin
+                //X-Frame-Options: DENY //Ngăn trang bị nhúng trong iframe, giảm nguy cơ clickjacking.
+                //Cross-Origin-Opener-Policy: same-origin //cân nhắc vì Có ảnh hưởng autho bên ngoài như login facebook
+                //Cross-Origin-Resource-Policy: same-origin //cân nhắc vì Ảnh hướng nếu có sử dụng tài nguyên từ bên ngoài như font
 
                 context.Response.Headers["Content-Security-Policy"] =
                    "default-src 'self'; " +

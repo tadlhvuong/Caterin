@@ -180,19 +180,14 @@ namespace Shared.Extensions
         }
 
         public async Task<CustomerSendMessageResult> SendCustomerMessage(long inboxId, long? conversationId, long? contactId,
-            string content, string? guestToken)
+            string? content, string? guestToken, string? uploadSessionToken, List<long>? uploadIds)
         {
             var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                throw new HubException("Invalid message content.");
-            }
 
             try
             {
                 return await _chatMessageService.SendCustomerMessageAsync(conversationId, contactId, inboxId,
-                        content, guestToken, userId, Context.ConnectionAborted);
+                        content ?? string.Empty, guestToken, userId, uploadSessionToken, uploadIds, Context.ConnectionAborted);
             }
             catch (HubException ex)
             {

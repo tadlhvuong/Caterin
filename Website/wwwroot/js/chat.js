@@ -27,7 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
         },
 
         limits: {
-            processedMessageIds: 500
+            processedMessageIds: 500,
+            attachmentsPerMessage: 5,
+            attachmentSizeBytes: 12 * 1024 * 1024,
+            attachmentTotalBytes: 25 * 1024 * 1024
         },
 
         senderType: {
@@ -193,6 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     let pendingAttachments = [];
+    let uploadSessionToken = null;
+    const pendingAttachmentUploads = new Map();
     // ============================================================
     // SIGNALR
     // ============================================================
@@ -2602,7 +2607,7 @@ async function joinConversation() {
     async function sendMessage(text) {
         const message = String(text ?? "").trim();
 
-        if (!message) {
+        if (!message && pendingAttachments.length === 0) {
             return;
         }
 
@@ -2617,58 +2622,44 @@ async function joinConversation() {
         stopTyping();
 
         const originalValue = DOM.chatInput?.value ?? "";
-
-        if (DOM.chatInput) {
-            DOM.chatInput.value = "";
-        }
-
+        let sendSucceeded = false;
         try {
-            /*
-             * =====================================================
-             * IMPORTANT
-             *
-             * Không yêu cầu contactId / conversationId ở first send.
-             *
-             * Server sẽ resolve:
-             *
-             * Authenticated:
-             *     AppUser -> ChatContact
-             *
-             * Guest:
-             *     guestToken -> ChatGuestSession -> Contact
-             *
-             * Nếu chưa có identity:
-             *     server tạo Contact + GuestSession
-             *
-             * Sau đó:
-             *     Conversation -> Message
-             * =====================================================
-             */
+            // =====================================================
+            // 1. UPLOAD ATTACHMENTS
+            // =====================================================
+            // Upload thành công chưa có nghĩa là message đã gửi.
+            // Chỉ xóa preview sau khi Hub xác nhận thành công.
+
+            const uploadIds = await uploadPendingAttachments();
+            // =====================================================
+            // 2. SEND MESSAGE
+            // =====================================================
+            console.log("SendCustomerMessage");
+            console.log(CHAT_CONFIG.inboxId + " : " + state.currentContactId + " : " + state.currentContactId + " : " +
+                message + " : " + state.guestToken + " : " + uploadSessionToken + " : " + uploadIds);
             const result =
                 await connection.invoke("SendCustomerMessage", CHAT_CONFIG.inboxId,
                     state.currentConversationId || null, state.currentContactId || null,
-                    message, state.guestToken || null
+                    message, state.guestToken || null, uploadSessionToken, uploadIds
                 );
 
             if (!result) {
                 throw new Error("Server không trả về kết quả gửi message.");
             }
-
-            /*
-             * =====================================================
-             * 1. Sync Contact
-             * =====================================================
-             */
+            sendSucceeded = true;
+            uploadSessionToken = null;
+            clearPendingAttachments();
+            // =====================================================
+            // 3. SYNC CONTACT
+            // =====================================================
 
             if (result.contactId) {
                 persistContactIdentity(result.contactId, result.guestToken);
             }
 
-            /*
-             * =====================================================
-             * 2. Sync Conversation
-             * =====================================================
-             */
+            // =====================================================
+            // 4. SYNC CONVERSATION
+            // =====================================================
 
             const newConversationId = normalizeNumber(result.conversationId);
 
@@ -2684,19 +2675,13 @@ async function joinConversation() {
                 persistConversation(newConversationId, result.status);
             }
 
-            /*
-             * =====================================================
-             * 3. Nếu server tạo conversation mới
-             * =====================================================
-             *
-             * Trường hợp:
-             *
-             * - first send
-             * - conversation Resolved
-             * - conversation Closed
-             *
-             * Conversation cũ không được reopen.
-             */
+            // =====================================================
+            // 5. HANDLE NEW CONVERSATION
+            // =====================================================
+            // Giữ nguyên rule:
+            // - First send có thể tạo conversation mới.
+            // - Resolved/Closed không bị reopen.
+            // - Nếu server trả conversation mới, tải history của nó.
 
             if (conversationChanged) {
                 clearMessages();
@@ -2719,14 +2704,11 @@ async function joinConversation() {
                 );
             }
 
-            /*
-             * =====================================================
-             * 4. Render message
-             * =====================================================
-             *
-             * Chỉ render result.message.
-             * Không render result một lần nữa.
-             */
+            // =====================================================
+            // 6. RENDER SENT MESSAGE
+            // =====================================================
+            // Không render result hai lần.
+            // createMessageElement() cần hỗ trợ message.attachments.
 
             const sentMessage =
                 result.message ?? null;
@@ -2736,6 +2718,14 @@ async function joinConversation() {
                     sentMessage,
                     true
                 );
+            }
+
+            // =====================================================
+            // 7. CLEAR COMPOSER AFTER SUCCESS
+            // =====================================================
+
+            if (DOM.chatInput) {
+                DOM.chatInput.value = "";
             }
 
             hideQuickReplies();
@@ -2749,6 +2739,7 @@ async function joinConversation() {
             );
             const errorMessage =
                 String(error?.message ?? error ?? "");
+
             /*
              * =====================================================
              * INVALID CHAT SESSION
@@ -2764,13 +2755,30 @@ async function joinConversation() {
             /*
              * =====================================================
              * NORMAL SEND ERROR
+                Server đã xác nhận lưu tin nhắn.
+                Lỗi xảy ra ở bước cập nhật giao diện sau đó.
              * =====================================================
              */
-
+            if (sendSucceeded) {
+                console.error(
+                    "Message was sent, but the UI could not be synchronized.",
+                    error
+                );
+                return;
+            }
             if (DOM.chatInput) {
                 DOM.chatInput.value =
                     originalValue || message;
 
+                DOM.chatInput.focus();
+            }
+            Toast.error(
+                error?.message ||
+                "Không thể gửi tin nhắn. Vui lòng thử lại."
+            );
+
+        } finally {
+            if (!sendSucceeded && DOM.chatInput) {
                 DOM.chatInput.focus();
             }
         }
@@ -2973,7 +2981,17 @@ async function joinConversation() {
             </div>
         </div>
     `;
+        const messageContent = row.querySelector(".message-content");
+        const attachmentsElement = renderMessageAttachments(message.attachments);
 
+        if (messageContent && attachmentsElement) {
+            const meta = messageContent.querySelector(".message-meta");
+            if (meta) {
+                messageContent.insertBefore(attachmentsElement, meta);
+            } else {
+                messageContent.appendChild(attachmentsElement);
+            }
+        }
         return row;
     }
 
@@ -3159,82 +3177,561 @@ async function joinConversation() {
     // CONVERSATION STATUS
     // ============================================================
 
-    //function updateCurrentConversationStatus(
-    //    status
-    //) {
-    //    const normalizedStatus =
-    //        getConversationStatusName(
-    //            status
-    //        );
-
-    //    const statusText =
-    //        DOM.chatStatusText;
-
-    //    const statusBadge =
-    //        DOM.chatStatusBadge;
-
-    //    const statusLabels = {
-    //        open: "Đang hỗ trợ",
-    //        pending: "Đang chờ",
-    //        resolved: "Đã giải quyết",
-    //        closed: "Đã đóng"
-    //    };
-
-    //    if (statusText) {
-    //        statusText.textContent =
-    //            statusLabels[
-    //            normalizedStatus
-    //            ] ?? normalizedStatus;
-    //    }
-
-    //    if (statusBadge) {
-    //        statusBadge.dataset.status =
-    //            normalizedStatus;
-
-    //        statusBadge.classList.remove(
-    //            "open",
-    //            "pending",
-    //            "resolved",
-    //            "closed"
-    //        );
-
-    //        statusBadge.classList.add(
-    //            normalizedStatus
-    //        );
-    //    }
-
-    //    if (DOM.chatWindow) {
-    //        DOM.chatWindow.dataset.status =
-    //            normalizedStatus;
-    //    }
-
-    //    const isEnded =
-    //        normalizedStatus === "resolved" ||
-    //        normalizedStatus === "closed";
-
-    //    if (DOM.chatInput) {
-    //        DOM.chatInput.disabled =
-    //            isEnded;
-
-    //        DOM.chatInput.placeholder =
-    //            isEnded
-    //                ? "Cuộc trò chuyện đã kết thúc"
-    //                : "Nhập tin nhắn...";
-    //    }
-
-    //    if (DOM.sendButton) {
-    //        DOM.sendButton.disabled =
-    //            isEnded;
-    //    }
-    //}
-
-
     function getConversationStatusName(status) {
         return (
             CONFIG.conversationStatus.names[Number(status)] ?? "open"
         );
     }
 
+    // ============================================================
+    // ATTACHMENT
+    // ============================================================
+    async function uploadPendingAttachments() {
+        if (pendingAttachments.length > CONFIG.limits.attachmentsPerMessage) {
+            throw new Error("Mỗi tin nhắn chỉ được đính kèm tối đa 5 file.");
+        }
+
+        const totalSize = pendingAttachments.reduce(
+            (sum, file) => sum + file.size,
+            0
+        );
+
+        if (totalSize > CONFIG.limits.attachmentTotalBytes) {
+            throw new Error("Tổng dung lượng file vượt quá 25 MB.");
+        }
+
+        const uploadIds = [];
+
+        for (const file of pendingAttachments) {
+            if (file.size <= 0) {
+                throw new Error(`File "${file.name}" không hợp lệ.`);
+            }
+
+            if (file.size > CONFIG.limits.attachmentSizeBytes) {
+                throw new Error(`File "${file.name}" vượt quá giới hạn 12 MB.`);
+            }
+
+            let upload = pendingAttachmentUploads.get(file);
+
+            // Upload ID đã hết hạn thì không tái sử dụng.
+            if (
+                upload?.expiresAt &&
+                new Date(upload.expiresAt).getTime() <= Date.now()
+            ) {
+                pendingAttachmentUploads.delete(file);
+                upload = null;
+            }
+
+            if (!upload) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                const headers = getChatHeaders();
+
+                if (uploadSessionToken) {
+                    headers["X-Chat-Upload-Token"] = uploadSessionToken;
+                }
+
+                const response = await fetch("/chat/attachments/upload", {
+                    method: "POST",
+                    headers,
+                    body: formData,
+                    credentials: "same-origin"
+                });
+
+                if (!response.ok) {
+                    let message = "Không thể tải file lên. Vui lòng thử lại.";
+
+                    try {
+                        const data = await response.json();
+
+                        if (data?.message) {
+                            message = data.message;
+                        }
+                    } catch {
+                        // Response không phải JSON.
+                    }
+
+                    throw new Error(message);
+                }
+
+                const data = await response.json();
+                const uploadId = Number(data?.uploadId);
+
+                if (!Number.isSafeInteger(uploadId) || uploadId <= 0) {
+                    throw new Error("Server trả về upload ID không hợp lệ.");
+                }
+
+                // Lưu token mới nếu server cấp.
+                if (
+                    typeof data.uploadSessionToken === "string" &&
+                    data.uploadSessionToken.length > 0
+                ) {
+                    uploadSessionToken = data.uploadSessionToken;
+                }
+
+                // Guest chưa có danh tính cần token cho các upload tạm.
+                //const headersForGuest = getChatHeaders();
+                //const hasGuestIdentity =
+                //    Boolean(headersForGuest["X-Chat-Contact-Id"]) &&
+                //    Boolean(headersForGuest["X-Chat-Guest-Token"]);
+
+                //if (!hasGuestIdentity && !uploadSessionToken) {
+                //    throw new Error(
+                //        "Phiên upload không hợp lệ. Vui lòng tải file lên lại."
+                //    );
+                //}
+
+                upload = {
+                    uploadId,
+                    expiresAt: data.expiresAt ?? null
+                };
+
+                pendingAttachmentUploads.set(file, upload);
+            }
+
+            uploadIds.push(upload.uploadId);
+        }
+
+        return uploadIds;
+    }
+
+    function clearPendingAttachments() {
+        pendingAttachments = [];
+        pendingAttachmentUploads.clear();
+        renderAttachmentPreview();
+    }
+
+
+    async function downloadChatAttachment(attachmentId, fileName = "") {
+        const headers = {};
+
+        const contactId = localStorage.getItem("caterin_chat_contact_id");
+        const guestToken = localStorage.getItem("caterin_chat_guest_token");
+
+        if (contactId) {
+            headers["X-Chat-Contact-Id"] = contactId;
+        }
+
+        if (guestToken) {
+            headers["X-Chat-Guest-Token"] = guestToken;
+        }
+
+        const response = await fetch(
+            `/chat/attachments/${encodeURIComponent(attachmentId)}/download`,
+            {
+                method: "GET",
+                headers,
+                credentials: "same-origin"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Không thể tải file đính kèm.");
+        }
+
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = objectUrl;
+
+        // Ưu tiên tên file đã có từ attachment DTO.
+        const safeFileName = String(fileName || `attachment-${attachmentId}`)
+            .replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_")
+            .trim();
+
+        link.download = safeFileName || `attachment-${attachmentId}`;
+        link.style.display = "none";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        // Tránh thu hồi Blob URL quá sớm trong quá trình bắt đầu tải.
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+    }
+
+    function getAttachmentType(contentType, fileName) {
+        const mime = String(contentType || "").toLowerCase();
+        const extension = String(fileName || "")
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+        if (mime.startsWith("image/")) return "image";
+        if (mime === "application/pdf" || extension === "pdf") return "pdf";
+
+        if (
+            mime.includes("word") ||
+            ["doc", "docx", "odt", "rtf"].includes(extension)
+        ) {
+            return "word";
+        }
+
+        if (
+            mime.includes("spreadsheet") ||
+            mime.includes("excel") ||
+            ["xls", "xlsx", "csv", "ods"].includes(extension)
+        ) {
+            return "excel";
+        }
+
+        if (
+            mime.includes("presentation") ||
+            mime.includes("powerpoint") ||
+            ["ppt", "pptx", "odp"].includes(extension)
+        ) {
+            return "powerpoint";
+        }
+
+        if (
+            ["zip", "rar", "7z", "tar", "gz"].includes(extension) ||
+            mime.includes("zip") ||
+            mime.includes("compressed")
+        ) {
+            return "archive";
+        }
+
+        if (["txt", "md", "log"].includes(extension) || mime.startsWith("text/")) {
+            return "text";
+        }
+
+        return "file";
+    }
+
+    function getAttachmentTypeLabel(type) {
+        const labels = {
+            pdf: "PDF",
+            word: "DOC",
+            excel: "XLS",
+            powerpoint: "PPT",
+            archive: "ZIP",
+            text: "TXT",
+            file: "FILE"
+        };
+
+        return labels[type] || "FILE";
+    }
+
+
+    async function loadAttachmentImage(img, attachmentId) {
+        if (!img) {
+            return;
+        }
+
+        // Vô hiệu hóa kết quả từ request trước đó.
+        const requestId = String(
+            Number(img.dataset.previewRequestId || 0) + 1
+        );
+
+        img.dataset.previewRequestId = requestId;
+
+        revokeImageObjectUrl(img);
+
+        img.classList.remove("is-loaded");
+        img.classList.remove("is-load-failed");
+
+        try {
+            const response = await fetch(
+                `/chat/attachments/${encodeURIComponent(attachmentId)}/preview`,
+                {
+                    method: "GET",
+                    headers: getChatHeaders(),
+                    credentials: "same-origin"
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Image request failed: ${response.status}`
+                );
+            }
+
+            const blob = await response.blob();
+
+            // Bỏ qua kết quả nếu ảnh đã được yêu cầu tải lại.
+            if (img.dataset.previewRequestId !== requestId) {
+                return;
+            }
+
+            const allowedTypes = new Set([
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "image/gif"
+            ]);
+
+            if (!allowedTypes.has(blob.type.toLowerCase())) {
+                throw new Error("Định dạng ảnh không được hỗ trợ.");
+            }
+
+            if (!img.isConnected) {
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(blob);
+            img.dataset.objectUrl = objectUrl;
+
+            img.onload = () => {
+                if (img.dataset.objectUrl !== objectUrl) {
+                    return;
+                }
+
+                img.classList.add("is-loaded");
+                img.classList.remove("is-load-failed");
+            };
+
+            img.onerror = () => {
+                if (img.dataset.objectUrl !== objectUrl) {
+                    return;
+                }
+
+                img.classList.remove("is-loaded");
+                img.classList.add("is-load-failed");
+
+                revokeImageObjectUrl(img);
+            };
+
+            img.src = objectUrl;
+        } catch (error) {
+            if (img.dataset.previewRequestId === requestId) {
+                revokeImageObjectUrl(img);
+
+                img.classList.remove("is-loaded");
+                img.classList.add("is-load-failed");
+            }
+
+            console.error("Load attachment preview failed:", error);
+        }
+    }
+
+    function renderMessageAttachments(attachments) {
+        if (!Array.isArray(attachments) || attachments.length === 0) {
+            return null;
+        }
+
+        const container = document.createElement("div");
+        container.className = "message-attachments";
+
+        attachments.forEach(attachment => {
+            const attachmentId = Number(attachment?.id);
+
+            if (!Number.isSafeInteger(attachmentId) || attachmentId <= 0) {
+                return;
+            }
+
+            const fileName = String(attachment.fileName || `File ${attachmentId}`);
+            const contentType = String(attachment.contentType || "");
+            const fileSize = Number(attachment.fileSize) || 0;
+            const type = getAttachmentType(contentType, fileName);
+
+            const item = document.createElement("div");
+            item.className = `message-attachment is-${type}`;
+
+            if (type === "image") {
+                item.classList.add("message-attachment-image");
+
+                const imageButton = document.createElement("button");
+                imageButton.type = "button";
+                imageButton.className = "message-attachment-image-button";
+                imageButton.setAttribute("aria-label", "Xem ảnh đính kèm");
+
+                const image = document.createElement("img");
+                image.className = "message-attachment-preview";
+                image.alt = "Ảnh đính kèm";
+                image.loading = "lazy";
+                image.decoding = "async";
+
+                const loading = document.createElement("span");
+                loading.className = "message-attachment-image-loading";
+                loading.textContent = "Đang tải ảnh...";
+
+                image.addEventListener("load", () => {
+                    loading.remove();
+                });
+
+                image.addEventListener("error", () => {
+                    loading.textContent = "Không thể tải ảnh";
+                });
+
+                imageButton.addEventListener("click", () => {
+                    //downloadChatAttachment(attachmentId, fileName).catch(error => {
+                    //    console.error("Download attachment failed:", error);
+                    //    alert("Không thể tải ảnh. Vui lòng thử lại.");
+                    //});
+                    if (!image.dataset.objectUrl || !image.classList.contains("is-loaded")) {
+                        return;
+                    }
+
+                    openImageLightbox(image.dataset.objectUrl, "Ảnh đính kèm");
+                });
+
+                imageButton.append(image, loading);
+                item.appendChild(imageButton);
+
+                const meta = document.createElement("div");
+                meta.className = "message-attachment-image-meta";
+
+                const size = document.createElement("span");
+                size.className = "message-attachment-size";
+                size.textContent = formatAttachmentSize(fileSize);
+
+                const downloadButton = createAttachmentDownloadButton(
+                    attachmentId,
+                    fileName
+                );
+
+                meta.append(size, downloadButton);
+                item.appendChild(meta);
+
+                loadAttachmentImage(image, attachmentId);
+            } else {
+                const icon = document.createElement("div");
+                icon.className = `message-attachment-icon is-${type}`;
+                icon.setAttribute("aria-hidden", "true");
+                icon.textContent = getAttachmentTypeLabel(type);
+
+                const info = document.createElement("div");
+                info.className = "message-attachment-info";
+
+                const name = document.createElement("span");
+                name.className = "message-attachment-name";
+                name.textContent = fileName;
+                name.title = fileName;
+
+                const size = document.createElement("span");
+                size.className = "message-attachment-size";
+                size.textContent = formatAttachmentSize(fileSize);
+
+                info.append(name, size);
+
+                const downloadButton = createAttachmentDownloadButton(
+                    attachmentId,
+                    fileName
+                );
+
+                item.append(icon, info, downloadButton);
+            }
+
+            container.appendChild(item);
+        });
+
+        return container.childElementCount > 0 ? container : null;
+    }
+
+    function createAttachmentDownloadButton(attachmentId, fileName) {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "message-attachment-download";
+        button.setAttribute("aria-label", `Tải xuống ${fileName}`);
+
+        const icon = document.createElement("span");
+        icon.className = "message-attachment-download-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.textContent = "↓";
+
+        const label = document.createElement("span");
+        label.textContent = "Tải xuống";
+
+        button.append(icon, label);
+
+        button.addEventListener("click", async () => {
+            if (button.disabled) return;
+
+            button.disabled = true;
+            label.textContent = "Đang tải...";
+
+            try {
+                await downloadChatAttachment(attachmentId, fileName);
+            } catch (error) {
+                console.error("Download attachment failed:", error);
+                Toast.error("Không thể tải file. Vui lòng thử lại.");
+            } finally {
+                button.disabled = false;
+                label.textContent = "Tải xuống";
+            }
+        });
+
+        return button;
+    }
+
+    function formatAttachmentSize(size) {
+        if (!Number.isFinite(size) || size <= 0) {
+            return "";
+        }
+
+        if (size < 1024) {
+            return `${size} B`;
+        }
+
+        if (size < 1024 * 1024) {
+            return `${(size / 1024).toFixed(1)} KB`;
+        }
+
+        return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function closeImageLightbox() {
+        const lightbox = document.querySelector(".chat-image-lightbox");
+
+        if (!lightbox) {
+            return;
+        }
+
+        lightbox.classList.remove("is-open");
+
+        const preview = lightbox.querySelector("img");
+
+        if (preview) {
+            preview.removeAttribute("src");
+            preview.alt = "";
+        }
+    }
+
+    function openImageLightbox(imageUrl, altText = "Ảnh đính kèm") {
+        let lightbox = document.querySelector(".chat-image-lightbox");
+
+        if (!lightbox) {
+            lightbox = document.createElement("div");
+            lightbox.className = "chat-image-lightbox";
+
+            lightbox.innerHTML = `
+            <button type="button"
+                    class="chat-image-lightbox-close"
+                    aria-label="Đóng ảnh">&times;</button>
+            <img class="chat-image-lightbox-img" alt="">
+        `;
+
+            lightbox.addEventListener("click", event => {
+                if (
+                    event.target === lightbox ||
+                    event.target.closest(".chat-image-lightbox-close")
+                ) {
+                    closeImageLightbox();
+                }
+            });
+
+            document.addEventListener("keydown", event => {
+                if (
+                    event.key === "Escape" &&
+                    lightbox.classList.contains("is-open")
+                ) {
+                    closeImageLightbox();
+                }
+            });
+
+            document.body.appendChild(lightbox);
+        }
+
+        const preview = lightbox.querySelector("img");
+
+        preview.src = imageUrl;
+        preview.alt = altText;
+
+        lightbox.classList.add("is-open");
+    }
 
     // ============================================================
     // INPUT EVENTS
@@ -3446,28 +3943,89 @@ async function joinConversation() {
     // ATTACHMENT / EMOJI
     // ============================================================
 
+
     function initAttachment() {
-        DOM.attachmentBtn?.addEventListener("click", () => {
-            DOM.chatFileInput?.click();
+        const attachmentBtn = DOM.attachmentBtn;
+        const fileInput = DOM.chatFileInput;
+
+        if (!attachmentBtn || !fileInput) {
+            return;
+        }
+
+        if (attachmentBtn.dataset.initialized === "true") {
+            return;
+        }
+
+        attachmentBtn.dataset.initialized = "true";
+
+        attachmentBtn.addEventListener("click", () => {
+            fileInput.click();
         });
 
-        DOM.chatFileInput?.addEventListener("change", (event) => {
-            const files = Array.from(event.target.files ?? []);
+        fileInput.addEventListener("change", event => {
+            const input = event.currentTarget;
+            const files = Array.from(input.files ?? []);
+
+            // Cho phép chọn lại đúng file vừa chọn.
+            input.value = "";
 
             if (!files.length) {
                 return;
             }
 
             addPendingAttachments(files);
-
-            // Cho phép chọn lại đúng file vừa chọn
-            event.target.value = "";
         });
     }
-    function addPendingAttachments(files) {
-        pendingAttachments.push(...files);
 
+    function addPendingAttachments(files) {
+        if (!files?.length) {
+            return;
+        }
+
+        const remainingSlots = 5 - pendingAttachments.length;
+
+        if (remainingSlots <= 0) {
+            Toast.warning("Bạn chỉ có thể đính kèm tối đa 5 file.");
+            return;
+        }
+
+        const selectedFiles = Array.from(files);
+        const acceptedFiles = selectedFiles.slice(0, remainingSlots);
+
+        pendingAttachments.push(...acceptedFiles);
         renderAttachmentPreview();
+
+        if (acceptedFiles.length < selectedFiles.length) {
+            Toast.warning("Chỉ có thể đính kèm tối đa 5 file mỗi tin nhắn.");
+        }
+    }
+    function cleanupImageObjectUrls(container) {
+        if (!container) {
+            return;
+        }
+
+        const images = container.querySelectorAll("img[data-object-url]");
+
+        for (const img of images) {
+            const objectUrl = img.dataset.objectUrl;
+
+            if (!objectUrl) {
+                continue;
+            }
+
+            // Nếu lightbox đang dùng chung URL này, đóng nó trước.
+            const lightbox = document.querySelector(".chat-image-lightbox");
+            const lightboxImage = lightbox?.querySelector("img");
+
+            if (
+                lightbox?.classList.contains("is-open") &&
+                lightboxImage?.src === objectUrl
+            ) {
+                closeImageLightbox();
+            }
+
+            revokeImageObjectUrl(img);
+        }
     }
     function renderAttachmentPreview() {
         const preview = DOM.chatAttachmentPreview;
@@ -3477,6 +4035,7 @@ async function joinConversation() {
             return;
         }
 
+        cleanupImageObjectUrls(list);
         list.innerHTML = "";
 
         if (!pendingAttachments.length) {
@@ -3487,53 +4046,73 @@ async function joinConversation() {
         preview.hidden = false;
 
         pendingAttachments.forEach((file, index) => {
-            const item = createAttachmentPreviewItem(file, index);
-
-            list.appendChild(item);
+            list.appendChild(createAttachmentPreviewItem(file, index));
         });
     }
+
     function createAttachmentPreviewItem(file, index) {
         const item = document.createElement("div");
-
         item.className = "chat-attachment-item";
 
         if (file.type.startsWith("image/")) {
             const image = document.createElement("img");
+            const objectUrl = URL.createObjectURL(file);
 
-            image.src = URL.createObjectURL(file);
+            image.dataset.objectUrl = objectUrl;
+            image.src = objectUrl;
             image.alt = file.name;
-
-            item.appendChild(image);
+            image.loading = "lazy";
 
             image.onload = () => {
-                URL.revokeObjectURL(image.src);
+                image.classList.add("is-loaded");
+                image.classList.remove("is-load-failed");
             };
-        }
-        else {
-            const fileInfo = document.createElement("div");
 
+            image.onerror = () => {
+                image.classList.add("is-load-failed");
+                revokeImageObjectUrl(image);
+            };
+
+            image.addEventListener("click", () => {
+                if (image.dataset.objectUrl) {
+                    openImageLightbox(
+                        image.dataset.objectUrl,
+                        image.alt
+                    );
+                }
+            });
+
+            item.appendChild(image);
+        } else {
+            const fileInfo = document.createElement("div");
             fileInfo.className = "chat-attachment-file";
 
-            fileInfo.innerHTML = `
-            <svg class="chat-attachment-file-icon"
-                 viewBox="0 0 24 24"
-                 fill="none">
-                <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                      stroke-linejoin="round" />
-                <path d="M14 2V8H20"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                      stroke-linejoin="round" />
-            </svg>
+            const icon = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "svg"
+            );
 
-            <span class="chat-attachment-file-name"
-                  title="${escapeHtml(file.name)}">
-                ${escapeHtml(file.name)}
-            </span>
+            icon.setAttribute("class", "chat-attachment-file-icon");
+            icon.setAttribute("viewBox", "0 0 24 24");
+            icon.setAttribute("fill", "none");
+
+            icon.innerHTML = `
+            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linejoin="round" />
+            <path d="M14 2V8H20"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linejoin="round" />
         `;
 
+            const fileName = document.createElement("span");
+            fileName.className = "chat-attachment-file-name";
+            fileName.title = file.name;
+            fileName.textContent = file.name;
+
+            fileInfo.append(icon, fileName);
             item.appendChild(fileInfo);
         }
 
@@ -3552,17 +4131,31 @@ async function joinConversation() {
 
         return item;
     }
+
     function removePendingAttachment(index) {
-        if (
+        if (!Number.isInteger(index) ||
             index < 0 ||
             index >= pendingAttachments.length
         ) {
             return;
         }
-
+        const removedFile = pendingAttachments[index];
         pendingAttachments.splice(index, 1);
-
+        pendingAttachmentUploads.delete(removedFile);
         renderAttachmentPreview();
+    }
+
+    function revokeImageObjectUrl(img) {
+        if (!img) {
+            return;
+        }
+
+        const objectUrl = img.dataset.objectUrl;
+
+        if (objectUrl) {
+            URL.revokeObjectURL(objectUrl);
+            delete img.dataset.objectUrl;
+        }
     }
     function initEmoji() {
         DOM.emojiBtn?.addEventListener(

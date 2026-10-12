@@ -4,8 +4,7 @@ using Shared.Data.Entities.Chat;
 
 namespace Shared.Configurations.Chat
 {
-    public sealed class ChatAttachmentConfiguration
-    : IEntityTypeConfiguration<ChatAttachment>
+    public sealed class ChatAttachmentConfiguration : IEntityTypeConfiguration<ChatAttachment>
     {
         public void Configure(EntityTypeBuilder<ChatAttachment> builder)
         {

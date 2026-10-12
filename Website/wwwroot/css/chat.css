@@ -1064,9 +1064,9 @@
 
 .chat-attachment-item {
     position: relative;
-    flex: 0 0 72px;
-    width: 72px;
-    height: 72px;
+    flex: 0 0 50px;
+    width: 50px;
+    height: 50px;
     border: 1px solid #dce5df;
     border-radius: 10px;
     background: #f7f9f7;
@@ -1148,6 +1148,281 @@
         background: #d64545;
     }
 
+/* =========================================================
+   MESSAGE ATTACHMENTS
+   ========================================================= */
+
+.message-attachments {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    max-width: 360px;
+    margin-top: 8px;
+}
+
+.message-attachment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    border-radius: 12px;
+    background: var(--bs-tertiary-bg, #f8fafc);
+    color: var(--bs-body-color, #1f2937);
+    box-sizing: border-box;
+}
+
+.message-attachment-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.message-attachment-name {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.message-attachment-size {
+    color: var(--bs-secondary-color, #6b7280);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* =========================================================
+   DOCUMENT ICONS
+   ========================================================= */
+
+.message-attachment-icon {
+    display: flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 48px;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    background: var(--bs-body-bg, #fff);
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+    .message-attachment-icon.is-pdf {
+        color: #dc3545;
+    }
+
+    .message-attachment-icon.is-word {
+        color: #2563eb;
+    }
+
+    .message-attachment-icon.is-excel {
+        color: #16834a;
+    }
+
+    .message-attachment-icon.is-powerpoint {
+        color: #d65b28;
+    }
+
+    .message-attachment-icon.is-archive {
+        color: #946200;
+    }
+
+    .message-attachment-icon.is-text {
+        color: #64748b;
+    }
+
+/* =========================================================
+   DOWNLOAD BUTTON
+   ========================================================= */
+
+.message-attachment-download {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 1px solid var(--bs-border-color, #d1d5db);
+    border-radius: 8px;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #374151);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
+}
+
+    .message-attachment-download:hover:not(:disabled) {
+        border-color: #268f42;
+        background: #268f42;
+        color: #fff;
+    }
+
+    .message-attachment-download:focus-visible {
+        outline: 2px solid #268f42;
+        outline-offset: 2px;
+    }
+
+    .message-attachment-download:disabled {
+        cursor: wait;
+        opacity: 0.65;
+    }
+
+.message-attachment-download-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+
+/* =========================================================
+   IMAGE PREVIEW
+   ========================================================= */
+
+.message-attachment-image {
+    display: block;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.message-attachment-image-button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 90px;
+    max-height: 320px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--bs-border-color, #e5e7eb);
+    border-radius: 12px;
+    background: var(--bs-tertiary-bg, #f3f4f6);
+    cursor: pointer;
+}
+
+.message-attachment-preview {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+    .message-attachment-preview.is-loaded,
+    .message-attachment-preview.is-loaded {
+        opacity: 1;
+    }
+
+.message-attachment-image-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    color: var(--bs-secondary-color, #6b7280);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.message-attachment-image-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 2px 0;
+}
+
+    .message-attachment-image-meta .message-attachment-size {
+        padding-left: 4px;
+    }
+
+@media (max-width: 480px) {
+    .message-attachments {
+        max-width: 100%;
+    }
+
+    .message-attachment-download {
+        padding: 7px 9px;
+    }
+
+    .message-attachment-image-button,
+    .message-attachment-preview {
+        max-height: 260px;
+    }
+}
+.chat-image-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+    .chat-image-lightbox.is-open {
+        display: flex;
+    }
+
+.chat-image-lightbox-img {
+    display: block;
+    max-width: 95vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.chat-image-lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 22px;
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+    .chat-image-lightbox-close:hover {
+        background: rgba(255, 255, 255, 0.28);
+    }
+
+@media (max-width: 576px) {
+    .chat-image-lightbox {
+        padding: 12px;
+    }
+
+    .chat-image-lightbox-img {
+        max-width: 100%;
+        max-height: 85vh;
+    }
+}
 
 /* =========================================
    INPUT ROW

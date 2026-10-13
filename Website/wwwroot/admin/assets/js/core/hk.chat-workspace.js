@@ -105,360 +105,431 @@ window.ChatScroll = {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-        const workspace =
-            document.getElementById('chatWorkspace');
+    const workspace =
+        document.getElementById('chatWorkspace');
 
-        if (!workspace) {
-            return;
-        }
+    if (!workspace) {
+        return;
+    }
 
-        ChatScroll.initAll(workspace);
+    ChatScroll.initAll(workspace);
 
 
-        /* =====================================================
-           DOM
-        ===================================================== */
+    /* =====================================================
+       DOM
+    ===================================================== */
 
-        const DOM = {
+    const DOM = {
 
-            workspace,
+        workspace,
 
-            inboxId:
-                workspace.dataset.inboxId,
+        inboxId:
+            workspace.dataset.inboxId,
 
-            filterSidebar:
-                document.getElementById(
-                    'chatFilterSidebar'
-                ),
-
-            filterClose:
-                document.getElementById(
-                    'chatFilterClose'
-                ),
-
-            openChatFiltersButton:
-                document.getElementById(
-                    'openChatFilters'
-                ),
-
-            overlay:
-                document.getElementById(
-                    'chatWorkspaceOverlay'
-                ),
-
-            conversationPanel:
-                document.getElementById(
-                    'conversationPanel'
-                ),
-
-            chatDetailPanel:
-                document.getElementById(
-                    'chatDetailPanel'
-                ),
-
-            conversationList:
-                document.getElementById(
-                    'conversationList'
-                ),
-
-            conversationSearch:
-                document.getElementById(
-                    'conversationSearch'
-                ),
-
-            backButton:
-                document.getElementById(
-                    'backToConversations'
-                ),
-
-            chatContactButton:
-                document.getElementById(
-                    'chatContactButton'
-                ),
-
-            contactDrawer:
-                document.getElementById(
-                    'chatContactDrawer'
-                ),
-
-            closeContactDrawerButton:
-                document.getElementById(
-                    'closeContactDrawer'
-                ),
-            contactAvatar:
-                document.getElementById(
-                    'contactAvatar'
-                ),
-
-            contactName:
-                document.getElementById(
-                    'contactName'
-                ),
-
-            contactType:
-                document.getElementById(
-                    'contactType'
-                ),
-
-            contactEmail:
-                document.getElementById(
-                    'contactEmail'
-                ),
-
-            contactPhone:
-                document.getElementById(
-                    'contactPhone'
-                ),
-
-            contactCreatedAt:
-                document.getElementById(
-                    'contactCreatedAt'
-                ),
-
-            contactLoading:
-                document.getElementById(
-                    'contactLoading'
-                ),
-
-            resolveConversationButton: document.getElementById(
-                "resolveConversationButton"
+        filterSidebar:
+            document.getElementById(
+                'chatFilterSidebar'
             ),
-            sendMessageForm:
-                document.getElementById(
-                    'sendMessageForm'
-                ),
 
-            messageInput:
-                document.getElementById(
-                    'messageInput'
-                ),
+        filterClose:
+            document.getElementById(
+                'chatFilterClose'
+            ),
 
-            chatHistoryBody:
-                document.getElementById(
-                    'chatHistoryBody'
-                ),
+        openChatFiltersButton:
+            document.getElementById(
+                'openChatFilters'
+            ),
 
-            chatHistory:
-                document.getElementById(
-                    'chatHistory'
-                ),
+        overlay:
+            document.getElementById(
+                'chatWorkspaceOverlay'
+            ),
 
-            refreshConversations:
-                document.getElementById(
-                    'refreshConversations'
-                ),
+        conversationPanel:
+            document.getElementById(
+                'conversationPanel'
+            ),
 
-            chatContactName:
-                document.getElementById(
-                    'chatContactName'
-                ),
+        chatDetailPanel:
+            document.getElementById(
+                'chatDetailPanel'
+            ),
 
-            chatContactStatus:
-                document.getElementById(
-                    'chatContactStatus'
-                ),
+        conversationList:
+            document.getElementById(
+                'conversationList'
+            ),
 
-            conversationTotal:
-                document.getElementById(
-                    'conversationTotal'
-                ),
+        conversationSearch:
+            document.getElementById(
+                'conversationSearch'
+            ),
 
-            typing:
-                document.getElementById(
-                    'typing'
-                ),
-            markAllAsRead:
-                document.getElementById(
-                    'markAllAsRead'
-                ),
+        backButton:
+            document.getElementById(
+                'backToConversations'
+            ),
 
-            conversationLabels: document.getElementById('conversationLabels'),
-            addConversationLabelButton: document.getElementById('addConversationLabelButton'),
-        };
+        chatContactButton:
+            document.getElementById(
+                'chatContactButton'
+            ),
+
+        contactDrawer:
+            document.getElementById(
+                'chatContactDrawer'
+            ),
+
+        closeContactDrawerButton:
+            document.getElementById(
+                'closeContactDrawer'
+            ),
+        contactAvatar:
+            document.getElementById(
+                'contactAvatar'
+            ),
+
+        contactName:
+            document.getElementById(
+                'contactName'
+            ),
+
+        contactType:
+            document.getElementById(
+                'contactType'
+            ),
+
+        contactEmail:
+            document.getElementById(
+                'contactEmail'
+            ),
+
+        contactPhone:
+            document.getElementById(
+                'contactPhone'
+            ),
+
+        contactCreatedAt:
+            document.getElementById(
+                'contactCreatedAt'
+            ),
+
+        contactLoading:
+            document.getElementById(
+                'contactLoading'
+            ),
+
+        resolveConversationButton: document.getElementById(
+            "resolveConversationButton"
+        ),
+        sendMessageForm:
+            document.getElementById(
+                'sendMessageForm'
+            ),
+
+        messageInput:
+            document.getElementById(
+                'messageInput'
+            ),
+
+        chatHistoryBody:
+            document.getElementById(
+                'chatHistoryBody'
+            ),
+
+        chatHistory:
+            document.getElementById(
+                'chatHistory'
+            ),
+
+        refreshConversations:
+            document.getElementById(
+                'refreshConversations'
+            ),
+
+        chatContactName:
+            document.getElementById(
+                'chatContactName'
+            ),
+
+        chatContactStatus:
+            document.getElementById(
+                'chatContactStatus'
+            ),
+
+        conversationTotal:
+            document.getElementById(
+                'conversationTotal'
+            ),
+
+        typing:
+            document.getElementById(
+                'typing'
+            ),
+        markAllAsRead:
+            document.getElementById(
+                'markAllAsRead'
+            ),
+
+        conversationLabels: document.getElementById('conversationLabels'),
+        addConversationLabelButton: document.getElementById('addConversationLabelButton'),
+    };
 
 
-        /* =====================================================
-           STATE
-        ===================================================== */
+    /* =====================================================
+       STATE
+    ===================================================== */
 
-        const state = {
+    const state = {
 
-            /*
-             * Current conversation being displayed.
-             *
-             * Đây là ID duy nhất chúng ta sử dụng.
-             */
-            currentConversationId: null,
-            currentConversationStatus: null,
-            /*
-             * Conversation SignalR room.
-             */
-            joinedConversationId: null,
+        /*
+         * Current conversation being displayed.
+         *
+         * Đây là ID duy nhất chúng ta sử dụng.
+         */
+        currentConversationId: null,
+        currentConversationStatus: null,
+        /*
+         * Conversation SignalR room.
+         */
+        joinedConversationId: null,
 
-            /*
-             * SignalR connection.
-             */
-            connection: null,
+        /*
+         * SignalR connection.
+         */
+        connection: null,
 
-            /*
-             * Prevent duplicate realtime messages.
-             *
-             * Sau này lazy loading vẫn có thể dùng.
-             */
-            processedMessageIds: new Set(),
+        /*
+         * Prevent duplicate realtime messages.
+         *
+         * Sau này lazy loading vẫn có thể dùng.
+         */
+        processedMessageIds: new Set(),
 
-            maxProcessedMessageIds: 500,
+        maxProcessedMessageIds: 500,
 
-            /*
-             * Current message request.
-             *
-             * Dùng AbortController để:
-             *
-             * A → B
-             *
-             * request A có thể bị cancel.
-             */
-            messageRequestController: null,
+        /*
+         * Current message request.
+         *
+         * Dùng AbortController để:
+         *
+         * A → B
+         *
+         * request A có thể bị cancel.
+         */
+        messageRequestController: null,
 
-            /*
-             * Typing.
-             */
-            typing: {
+        /*
+         * Typing.
+         */
+        typing: {
 
-                isTyping: false,
+            isTyping: false,
 
-                timeout: null,
+            timeout: null,
 
-                timeoutDuration: 1500
-            },
+            timeoutDuration: 1500
+        },
 
-            /*
-             * Mark conversation read debounce.
-             */
-            markRead: {
+        /*
+         * Mark conversation read debounce.
+         */
+        markRead: {
 
-                timer: null,
+            timer: null,
 
-                delay: 300
-            },
+            delay: 300
+        },
 
-            /*
-             * Message loading state.
-             *
-             * Chuẩn bị cho lazy loading.
-             */
-            messages: {
-
-                loading: false,
-
-                hasMore: true,
-
-                oldestMessageId: null,
-
-                newestMessageId: null
-            },
-
-            contactConversationId: null,
-            contactData: null,
-
-            labels: [],
-
-        };
-        const conversationState = {
-            items: new Map(),
+        /*
+         * Message loading state.
+         *
+         * Chuẩn bị cho lazy loading.
+         */
+        messages: {
 
             loading: false,
+
             hasMore: true,
 
-            oldestLastMessageAt: null,
-            oldestId: null,
+            oldestMessageId: null,
 
-            requestVersion: 0,
-            requestController: null,
+            newestMessageId: null
+        },
 
-            filters: {
-                inboxId: null,
-                status: 'all',
-                search: '',
-                assignedUserId: null,
-                labelId: null
+        contactConversationId: null,
+        contactData: null,
+
+        labels: [],
+
+    };
+    const conversationState = {
+        items: new Map(),
+
+        loading: false,
+        hasMore: true,
+
+        oldestLastMessageAt: null,
+        oldestId: null,
+
+        requestVersion: 0,
+        requestController: null,
+
+        filters: {
+            inboxId: null,
+            status: 'all',
+            search: '',
+            assignedUserId: null,
+            labelId: null
+        }
+    };
+    const conversationCountState = {
+        all: 0,
+        website: 0,
+        facebook: 0,
+        open: 0,
+        pending: 0,
+        resolved: 0,
+        loading: false
+    };
+    const limitState = {
+        list: 10, //limit lazy loading conversation list
+        message: 30 //limit lazy loading conversation message
+    }
+    let conversationSearchTimer = null;
+    let conversationCountsRefreshQueued = false;
+    /* =====================================================
+       HELPERS
+    ===================================================== */
+
+
+    const CHAT_ATTACHMENT_CONFIG = {
+        maxFiles: 5,
+        maxFileSize: 12 * 1024 * 1024,
+
+        allowedExtensions: new Set([
+            '.jpg', '.jpeg', '.png', '.webp',
+            '.pdf', '.doc', '.docx',
+            '.xls', '.xlsx', '.txt'
+        ]),
+
+        allowedMimeTypes: new Set([
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain'
+        ])
+    };
+
+    const pendingAdminAttachments = new Map();
+
+    let adminAttachmentSequence = 0;
+    let isUploadingAdminAttachments = false;
+    let isSendingAdminMessage = false;
+
+
+    function normalizeId(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return null;
+        }
+
+        return String(value);
+    }
+
+
+    function isSameId(a, b) {
+
+        return (
+            normalizeId(a) !== null &&
+            normalizeId(a) === normalizeId(b)
+        );
+    }
+
+
+    function isMobile() {
+
+        return window.innerWidth < 992;
+    }
+
+
+    function escapeHtml(value) {
+
+        const div =
+            document.createElement('div');
+
+        div.textContent =
+            value ?? '';
+
+        return div.innerHTML;
+    }
+
+
+    function formatMessageTime(value) {
+
+        if (!value) {
+            return '';
+        }
+
+        const date =
+            new Date(value);
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return '';
+        }
+
+        return date.toLocaleTimeString(
+            'vi-VN',
+            {
+                hour: '2-digit',
+                minute: '2-digit'
             }
-        };
-        const conversationCountState = {
-            all: 0,
-            website: 0,
-            facebook: 0,
-            open: 0,
-            pending: 0,
-            resolved: 0,
-            loading: false
-        };
-        const limitState = {
-            list: 10, //limit lazy loading conversation list
-            message: 30 //limit lazy loading conversation message
-        }
-        let conversationSearchTimer = null;
-        let conversationCountsRefreshQueued = false;
-        /* =====================================================
-           HELPERS
-        ===================================================== */
+        );
+    }
 
-        function normalizeId(value) {
 
-            if (
-                value === null ||
-                value === undefined
-            ) {
-                return null;
-            }
+    function formatConversationTime(value) {
 
-            return String(value);
+        if (!value) {
+            return '';
         }
 
+        const date =
+            new Date(value);
 
-        function isSameId(a, b) {
-
-            return (
-                normalizeId(a) !== null &&
-                normalizeId(a) === normalizeId(b)
-            );
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+            return '';
         }
 
+        const now =
+            new Date();
 
-        function isMobile() {
+        const sameDay =
+            date.getFullYear() ===
+            now.getFullYear() &&
+            date.getMonth() ===
+            now.getMonth() &&
+            date.getDate() ===
+            now.getDate();
 
-            return window.innerWidth < 992;
-        }
-
-
-        function escapeHtml(value) {
-
-            const div =
-                document.createElement('div');
-
-            div.textContent =
-                value ?? '';
-
-            return div.innerHTML;
-        }
-
-
-        function formatMessageTime(value) {
-
-            if (!value) {
-                return '';
-            }
-
-            const date =
-                new Date(value);
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return '';
-            }
+        if (sameDay) {
 
             return date.toLocaleTimeString(
                 'vi-VN',
@@ -469,620 +540,577 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
 
-
-        function formatConversationTime(value) {
-
-            if (!value) {
-                return '';
+        return date.toLocaleDateString(
+            'vi-VN',
+            {
+                day: '2-digit',
+                month: '2-digit'
             }
+        );
+    }
 
-            const date =
-                new Date(value);
 
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-                return '';
-            }
+    /* =====================================================
+       SCROLL
+    ===================================================== */
 
-            const now =
-                new Date();
+    function scrollChatToBottom() {
 
-            const sameDay =
-                date.getFullYear() ===
-                now.getFullYear() &&
-                date.getMonth() ===
-                now.getMonth() &&
-                date.getDate() ===
-                now.getDate();
+        if (!DOM.chatHistoryBody) {
+            return;
+        }
 
-            if (sameDay) {
+        requestAnimationFrame(() => {
 
-                return date.toLocaleTimeString(
-                    'vi-VN',
-                    {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }
-                );
-            }
+            DOM.chatHistoryBody.scrollTop =
+                DOM.chatHistoryBody.scrollHeight;
 
-            return date.toLocaleDateString(
-                'vi-VN',
-                {
-                    day: '2-digit',
-                    month: '2-digit'
-                }
+            ChatScroll.update(
+                DOM.chatHistoryBody
             );
+        });
+    }
+
+
+    /* =====================================================
+       MESSAGE DEDUPLICATION
+    ===================================================== */
+
+    function isMessageProcessed(messageId) {
+
+        if (!messageId) {
+            return true;
         }
 
+        const id =
+            String(messageId);
 
-        /* =====================================================
-           SCROLL
-        ===================================================== */
-
-        function scrollChatToBottom() {
-
-            if (!DOM.chatHistoryBody) {
-                return;
-            }
-
-            requestAnimationFrame(() => {
-
-                DOM.chatHistoryBody.scrollTop =
-                    DOM.chatHistoryBody.scrollHeight;
-
-                ChatScroll.update(
-                    DOM.chatHistoryBody
-                );
-            });
+        if (
+            state.processedMessageIds.has(id)
+        ) {
+            return true;
         }
 
+        state.processedMessageIds.add(id);
 
-        /* =====================================================
-           MESSAGE DEDUPLICATION
-        ===================================================== */
-
-        function isMessageProcessed(messageId) {
-
-            if (!messageId) {
-                return true;
-            }
-
-            const id =
-                String(messageId);
-
-            if (
-                state.processedMessageIds.has(id)
-            ) {
-                return true;
-            }
-
-            state.processedMessageIds.add(id);
-
-            if (
-                state.processedMessageIds.size >
-                state.maxProcessedMessageIds
-            ) {
-
-                const firstId =
-                    state.processedMessageIds
-                        .values()
-                        .next()
-                        .value;
-
-                if (firstId) {
-
-                    state.processedMessageIds.delete(
-                        firstId
-                    );
-                }
-            }
-
-            return false;
-        }
-
-
-        /* =====================================================
-           UI - FILTER SIDEBAR
-        ===================================================== */
-
-        function openFilterSidebar() {
-
-            if (!DOM.filterSidebar) {
-                return;
-            }
-
-            DOM.filterSidebar.classList.add(
-                'show'
-            );
-
-            DOM.overlay?.classList.add(
-                'show'
-            );
-        }
-
-
-        function closeFilterSidebar() {
-
-            if (!DOM.filterSidebar) {
-                return;
-            }
-
-            DOM.filterSidebar.classList.remove(
-                'show'
-            );
-
-            updateOverlay();
-        }
-
-
-        function closeContactDrawer() {
-
-            if (!DOM.contactDrawer) {
-                return;
-            }
-
-            DOM.contactDrawer.classList.remove(
-                'show'
-            );
-
-            updateOverlay();
-        }
-
-
-        function updateOverlay() {
-
-            const filterOpen =
-                DOM.filterSidebar?.classList.contains(
-                    'show'
-                );
-
-            const contactOpen =
-                DOM.contactDrawer?.classList.contains(
-                    'show'
-                );
-
-            DOM.overlay?.classList.toggle(
-                'show',
-                Boolean(
-                    filterOpen ||
-                    contactOpen
-                )
-            );
-        }
-
-
-        /* =====================================================
-           CONVERSATION STATE
-        ===================================================== */
-
-        function isCurrentConversation(conversationId) {
-            return isSameId(conversationId, state.currentConversationId);
-        }
-
-
-        /* =====================================================
-           CONVERSATION UNREAD
-        ===================================================== */
-
-        function getConversationUnreadCount(
-            item
+        if (
+            state.processedMessageIds.size >
+            state.maxProcessedMessageIds
         ) {
 
-            if (!item) {
-                return 0;
-            }
+            const firstId =
+                state.processedMessageIds
+                    .values()
+                    .next()
+                    .value;
 
-            const count =
-                parseInt(
-                    item.dataset.unreadCount ||
-                    '0',
-                    10
+            if (firstId) {
+
+                state.processedMessageIds.delete(
+                    firstId
                 );
-
-            return Number.isNaN(count)
-                ? 0
-                : count;
+            }
         }
 
+        return false;
+    }
 
-        function setConversationUnreadCount(
-            item,
-            count
-        ) {
 
-            if (!item) {
-                return;
-            }
+    /* =====================================================
+       UI - FILTER SIDEBAR
+    ===================================================== */
 
-            count = Math.max(
-                0,
-                Number(count) || 0
+    function openFilterSidebar() {
+
+        if (!DOM.filterSidebar) {
+            return;
+        }
+
+        DOM.filterSidebar.classList.add(
+            'show'
+        );
+
+        DOM.overlay?.classList.add(
+            'show'
+        );
+    }
+
+
+    function closeFilterSidebar() {
+
+        if (!DOM.filterSidebar) {
+            return;
+        }
+
+        DOM.filterSidebar.classList.remove(
+            'show'
+        );
+
+        updateOverlay();
+    }
+
+
+    function closeContactDrawer() {
+
+        if (!DOM.contactDrawer) {
+            return;
+        }
+
+        DOM.contactDrawer.classList.remove(
+            'show'
+        );
+
+        updateOverlay();
+    }
+
+
+    function updateOverlay() {
+
+        const filterOpen =
+            DOM.filterSidebar?.classList.contains(
+                'show'
             );
 
-            item.dataset.unreadCount =
-                String(count);
+        const contactOpen =
+            DOM.contactDrawer?.classList.contains(
+                'show'
+            );
 
-            const bottom =
-                item.querySelector(
-                    '.conversation-bottom'
-                );
+        DOM.overlay?.classList.toggle(
+            'show',
+            Boolean(
+                filterOpen ||
+                contactOpen
+            )
+        );
+    }
 
-            if (!bottom) {
-                return;
-            }
 
-            let badge =
-                bottom.querySelector(
-                    '.conversation-unread'
-                );
+    /* =====================================================
+       CONVERSATION STATE
+    ===================================================== */
 
-            if (count <= 0) {
+    function isCurrentConversation(conversationId) {
+        return isSameId(conversationId, state.currentConversationId);
+    }
 
-                badge?.remove();
 
-                item.classList.remove(
-                    'conversation-unread-item'
-                );
+    /* =====================================================
+       CONVERSATION UNREAD
+    ===================================================== */
 
-                return;
-            }
+    function getConversationUnreadCount(
+        item
+    ) {
 
-            if (!badge) {
+        if (!item) {
+            return 0;
+        }
 
-                badge =
-                    document.createElement(
-                        'span'
-                    );
+        const count =
+            parseInt(
+                item.dataset.unreadCount ||
+                '0',
+                10
+            );
 
-                badge.className =
-                    'conversation-unread badge rounded-pill bg-primary';
+        return Number.isNaN(count)
+            ? 0
+            : count;
+    }
 
-                bottom.appendChild(
-                    badge
-                );
-            }
 
-            badge.textContent =
-                count > 99
-                    ? '99+'
-                    : String(count);
+    function setConversationUnreadCount(
+        item,
+        count
+    ) {
 
-            item.classList.add(
+        if (!item) {
+            return;
+        }
+
+        count = Math.max(
+            0,
+            Number(count) || 0
+        );
+
+        item.dataset.unreadCount =
+            String(count);
+
+        const bottom =
+            item.querySelector(
+                '.conversation-bottom'
+            );
+
+        if (!bottom) {
+            return;
+        }
+
+        let badge =
+            bottom.querySelector(
+                '.conversation-unread'
+            );
+
+        if (count <= 0) {
+
+            badge?.remove();
+
+            item.classList.remove(
                 'conversation-unread-item'
             );
+
+            return;
         }
 
+        if (!badge) {
 
-        /* =====================================================
-           CONVERSATION HEADER
-        ===================================================== */
+            badge =
+                document.createElement(
+                    'span'
+                );
 
-        function updateChatHeader(
+            badge.className =
+                'conversation-unread badge rounded-pill bg-primary';
+
+            bottom.appendChild(
+                badge
+            );
+        }
+
+        badge.textContent =
+            count > 99
+                ? '99+'
+                : String(count);
+
+        item.classList.add(
+            'conversation-unread-item'
+        );
+    }
+
+
+    /* =====================================================
+       CONVERSATION HEADER
+    ===================================================== */
+
+    function updateChatHeader(
+        conversationItem
+    ) {
+
+        if (!conversationItem) {
+            return;
+        }
+
+        const name =
             conversationItem
+                .querySelector(
+                    '.conversation-name'
+                )
+                ?.textContent
+                ?.trim();
+
+        if (
+            DOM.chatContactName &&
+            name
         ) {
 
-            if (!conversationItem) {
-                return;
-            }
-
-            const name =
-                conversationItem
-                    .querySelector(
-                        '.conversation-name'
-                    )
-                    ?.textContent
-                    ?.trim();
-
-            if (
-                DOM.chatContactName &&
-                name
-            ) {
-
-                DOM.chatContactName.textContent =
-                    name;
-            }
-
-            const status =
-                getConversationStatusKey(
-                    conversationItem.dataset.status
-                );
-
-            if (DOM.chatContactStatus) {
-
-                const statusText = {
-
-                    open: 'Open',
-
-                    pending: 'Pending',
-
-                    resolved: 'Resolved'
-                };
-
-                DOM.chatContactStatus.textContent =
-                    statusText[status] ||
-                    status;
-            }
+            DOM.chatContactName.textContent =
+                name;
         }
 
+        const status =
+            getConversationStatusKey(
+                conversationItem.dataset.status
+            );
 
-        /* =====================================================
-           MESSAGE RENDER
-        ===================================================== */
+        if (DOM.chatContactStatus) {
 
-        function createMessageElement(
-            message
-        ) {
+            const statusText = {
 
-            if (!message) {
-                return null;
-            }
+                open: 'Open',
 
-            const li =
-                document.createElement('li');
+                pending: 'Pending',
 
-            const isContact =
-                Number(message.senderType) === 1;
+                resolved: 'Resolved'
+            };
 
-            const isAdmin =
-                Number(message.senderType) === 2;
-
-            const isSystem =
-                Number(message.senderType) === 3;
-
-            const isBot =
-                Number(message.senderType) === 4;
-
-            if (isSystem) {
-
-                li.className =
-                    'chat-message text-center';
-
-                li.innerHTML = `
-                    <div class="text-muted">
-                        <small>
-                            ${escapeHtml(
-                    message.content || ''
-                )}
-                        </small>
-                    </div>
-                `;
-
-                return li;
-            }
-
-            if (
-                !isAdmin &&
-                !isContact &&
-                !isBot
-            ) {
-
-                console.warn(
-                    'Unknown sender type:',
-                    message.senderType
-                );
-
-                return null;
-            }
-
-            li.className =
-                isAdmin
-                    ? 'chat-message chat-message-right'
-                    : 'chat-message';
+            DOM.chatContactStatus.textContent =
+                statusText[status] ||
+                status;
+        }
+    }
 
 
-            const senderName =
-                message.senderName?.trim() ||
-                'Guest';
+    /* =====================================================
+       MESSAGE RENDER
+    ===================================================== */
 
 
-            const guestAvatar = `
-                <div class="flex-shrink-0 avatar">
-                    <span class="avatar-initial rounded-circle bg-label-secondary">
-                        <i class="ti ti-user"></i>
-                    </span>
-                </div>
-            `;
+    function createMessageElement(message) {
+        if (!message) {
+            return null;
+        }
 
+        const li = document.createElement('li');
 
-            const contactAvatar =
-                guestAvatar;
+        const senderType = Number(message.senderType);
+        const isContact = senderType === 1;
+        const isAdmin = senderType === 2;
+        const isSystem = senderType === 3;
+        const isBot = senderType === 4;
 
+        if (isSystem) {
+            li.className = 'chat-message text-center';
 
-            li.innerHTML = `
-                <div class="chat-message-inner">
+            const text = document.createElement('div');
+            text.className = 'text-muted';
 
-                    ${isContact
-                    ? contactAvatar
-                    : ''
-                }
+            const small = document.createElement('small');
+            small.textContent = message.content || '';
 
-                    <div class="chat-message-wrapper">
-
-                        ${isContact
-                    ? `
-                                    <div class="text-muted mb-1">
-                                        <small>${escapeHtml(senderName)}</small>
-                                    </div>
-                                `
-                    : ''
-                }
-
-                        <div class="chat-message-text">
-                            <p class="mb-0">${escapeHtml(message.content || '')}</p>
-                        </div>
-
-                        <div class="${isAdmin ? 'text-end' : '' } text-muted mt-1">
-                            <small>${formatMessageTime(message.createdAt)}</small>
-                        </div>
-                    </div>
-
-                </div>
-            `;
+            text.appendChild(small);
+            li.appendChild(text);
 
             return li;
         }
 
+        if (!isAdmin && !isContact && !isBot) {
+            console.warn('Unknown sender type:', message.senderType);
+            return null;
+        }
 
-        function appendChatMessage(
-            message
+        li.className = isAdmin
+            ? 'chat-message chat-message-right'
+            : 'chat-message';
+
+        const senderName = message.senderName?.trim() || 'Guest';
+
+        const guestAvatar = `
+        <div class="flex-shrink-0 avatar">
+            <span class="avatar-initial rounded-circle bg-label-secondary">
+                <i class="ti ti-user"></i>
+            </span>
+        </div>
+    `;
+
+        li.innerHTML = `
+        <div class="chat-message-inner">
+            ${isContact ? guestAvatar : ''}
+
+            <div class="chat-message-wrapper">
+                ${isContact ? `
+                    <div class="text-muted mb-1">
+                        <small>${escapeHtml(senderName)}</small>
+                    </div>
+                ` : ''}
+
+                <div class="chat-message-text">
+                    <p class="mb-0">${escapeHtml(message.content || '')}</p>
+                </div>
+
+                <div class="${isAdmin ? 'text-end' : ''} text-muted mt-1">
+                    <small>${formatMessageTime(message.createdAt)}</small>
+                </div>
+            </div>
+        </div>
+    `;
+
+        const wrapper = li.querySelector('.chat-message-wrapper');
+        const textElement = wrapper?.querySelector('.chat-message-text');
+        const attachments = renderMessageAttachments(message.attachments);
+
+        if (attachments && wrapper) {
+            if (textElement) {
+                textElement.after(attachments);
+            } else {
+                wrapper.prepend(attachments);
+            }
+        }
+
+        // Ẩn khung nội dung rỗng khi tin nhắn chỉ có file đính kèm.
+        if (
+            textElement &&
+            !message.content &&
+            Array.isArray(message.attachments) &&
+            message.attachments.length > 0
+        ) {
+            textElement.remove();
+        }
+
+        return li;
+    }
+
+
+
+    function appendChatMessage(
+        message
+    ) {
+
+        if (
+            !message ||
+            !DOM.chatHistory
+        ) {
+            return false;
+        }
+
+        const element =
+            createMessageElement(
+                message
+            );
+
+        if (!element) {
+            return false;
+        }
+
+        DOM.chatHistory.appendChild(
+            element
+        );
+
+        ChatScroll.update(
+            DOM.chatHistoryBody
+        );
+
+        return true;
+    }
+
+
+    function renderMessages(
+        messages
+    ) {
+
+        if (!DOM.chatHistory) {
+            return;
+        }
+
+        DOM.chatHistory.innerHTML = '';
+
+        if (
+            !Array.isArray(messages) ||
+            messages.length === 0
         ) {
 
-            if (
-                !message ||
-                !DOM.chatHistory
-            ) {
-                return false;
-            }
+            renderEmptyMessages();
 
-            const element =
-                createMessageElement(
-                    message
+            return;
+        }
+
+        const fragment =
+            document.createDocumentFragment();
+
+        messages.forEach(
+            message => {
+
+                if (!message?.id) {
+                    return;
+                }
+
+                isMessageProcessed(
+                    message.id
                 );
 
-            if (!element) {
-                return false;
-            }
-
-            DOM.chatHistory.appendChild(
-                element
-            );
-
-            ChatScroll.update(
-                DOM.chatHistoryBody
-            );
-
-            return true;
-        }
-
-
-        function renderMessages(
-            messages
-        ) {
-
-            if (!DOM.chatHistory) {
-                return;
-            }
-
-            DOM.chatHistory.innerHTML = '';
-
-            if (
-                !Array.isArray(messages) ||
-                messages.length === 0
-            ) {
-
-                renderEmptyMessages();
-
-                return;
-            }
-
-            const fragment =
-                document.createDocumentFragment();
-
-            messages.forEach(
-                message => {
-
-                    if (!message?.id) {
-                        return;
-                    }
-
-                    isMessageProcessed(
-                        message.id
+                const element =
+                    createMessageElement(
+                        message
                     );
 
-                    const element =
-                        createMessageElement(
-                            message
-                        );
-
-                    if (element) {
-                        fragment.appendChild(
-                            element
-                        );
-                    }
+                if (element) {
+                    fragment.appendChild(
+                        element
+                    );
                 }
-            );
+            }
+        );
+        DOM.chatHistory.appendChild(
+            fragment
+        );
 
-            DOM.chatHistory.appendChild(
-                fragment
-            );
+        ChatScroll.update(
+            DOM.chatHistoryBody
+        );
+    }
+    async function waitForImages(container) {
+        const images = [...container.querySelectorAll("img")];
 
-            ChatScroll.update(
-                DOM.chatHistoryBody
-            );
+        await Promise.all(
+            images.map((img) => {
+                if (img.complete) {
+                    return Promise.resolve();
+                }
+
+                return new Promise((resolve) => {
+                    img.addEventListener("load", resolve, { once: true });
+                    img.addEventListener("error", resolve, { once: true });
+                });
+            })
+        );
+    }
+    function prependMessages(
+        messages
+    ) {
+
+        if (
+            !DOM.chatHistory ||
+            !Array.isArray(messages) ||
+            messages.length === 0
+        ) {
+            return;
         }
 
-        function prependMessages(
-            messages
-        ) {
+        const fragment =
+            document.createDocumentFragment();
 
-            if (
-                !DOM.chatHistory ||
-                !Array.isArray(messages) ||
-                messages.length === 0
-            ) {
-                return;
-            }
+        messages.forEach(
+            message => {
 
-            const fragment =
-                document.createDocumentFragment();
+                if (!message?.id) {
+                    return;
+                }
 
-            messages.forEach(
-                message => {
+                /*
+                 * Message đã tồn tại thì bỏ qua.
+                 */
+                if (
+                    state.processedMessageIds.has(
+                        String(message.id)
+                    )
+                ) {
+                    return;
+                }
 
-                    if (!message?.id) {
-                        return;
-                    }
+                isMessageProcessed(
+                    message.id
+                );
 
-                    /*
-                     * Message đã tồn tại thì bỏ qua.
-                     */
-                    if (
-                        state.processedMessageIds.has(
-                            String(message.id)
-                        )
-                    ) {
-                        return;
-                    }
-
-                    isMessageProcessed(
-                        message.id
+                const element =
+                    createMessageElement(
+                        message
                     );
 
-                    const element =
-                        createMessageElement(
-                            message
-                        );
-
-                    if (element) {
-                        fragment.appendChild(
-                            element
-                        );
-                    }
+                if (element) {
+                    fragment.appendChild(
+                        element
+                    );
                 }
-            );
-
-            if (!fragment.childNodes.length) {
-                return;
             }
+        );
 
-            /*
-             * Chèn toàn bộ batch vào đầu.
-             */
-            DOM.chatHistory.prepend(
-                fragment
-            );
+        if (!fragment.childNodes.length) {
+            return;
         }
-        function renderLoadingMessages() {
 
-            if (!DOM.chatHistory) {
-                return;
-            }
+        /*
+         * Chèn toàn bộ batch vào đầu.
+         */
+        DOM.chatHistory.prepend(
+            fragment
+        );
+    }
+    function renderLoadingMessages() {
 
-            DOM.chatHistory.innerHTML = `
+        if (!DOM.chatHistory) {
+            return;
+        }
+
+        DOM.chatHistory.innerHTML = `
                 <li class="chat-loading">
                     <span>
                         Đang tải tin nhắn...
@@ -1090,19 +1118,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 </li>
             `;
 
-            ChatScroll.update(
-                DOM.chatHistoryBody
-            );
+        ChatScroll.update(
+            DOM.chatHistoryBody
+        );
+    }
+
+
+    function renderEmptyMessages() {
+
+        if (!DOM.chatHistory) {
+            return;
         }
 
-
-        function renderEmptyMessages() {
-
-            if (!DOM.chatHistory) {
-                return;
-            }
-
-            DOM.chatHistory.innerHTML = `
+        DOM.chatHistory.innerHTML = `
                 <li class="chat-empty">
                     <span>
                         Chưa có tin nhắn.
@@ -1110,21 +1138,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 </li>
             `;
 
-            ChatScroll.update(
-                DOM.chatHistoryBody
-            );
+        ChatScroll.update(
+            DOM.chatHistoryBody
+        );
+    }
+
+
+    function renderMessageError(
+        conversationId
+    ) {
+
+        if (!DOM.chatHistory) {
+            return;
         }
 
-
-        function renderMessageError(
-            conversationId
-        ) {
-
-            if (!DOM.chatHistory) {
-                return;
-            }
-
-            DOM.chatHistory.innerHTML = `
+        DOM.chatHistory.innerHTML = `
                 <li class="chat-error">
                     <span>
                         Không thể tải tin nhắn.
@@ -1138,158 +1166,343 @@ document.addEventListener('DOMContentLoaded', function () {
                 </li>
             `;
 
-            ChatScroll.update(
-                DOM.chatHistoryBody
+        ChatScroll.update(
+            DOM.chatHistoryBody
+        );
+    }
+
+    function getMessageAttachmentValue(attachment, camelName, pascalName) {
+        return attachment?.[camelName] ?? attachment?.[pascalName] ?? null;
+    }
+
+    function renderMessageAttachments(attachments) {
+        if (!Array.isArray(attachments) || attachments.length === 0) {
+            return null;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'chat-message-attachments';
+
+        for (const attachment of attachments) {
+            const id = getMessageAttachmentValue(attachment, 'id', 'Id');
+            const fileName =
+                getMessageAttachmentValue(attachment, 'fileName', 'FileName') ||
+                'Tệp đính kèm';
+            const contentType =
+                getMessageAttachmentValue(attachment, 'contentType', 'ContentType') ||
+                'application/octet-stream';
+            const fileSize = Number(
+                getMessageAttachmentValue(attachment, 'fileSize', 'FileSize') || 0
+            );
+            const url = getMessageAttachmentValue(attachment, 'url', 'Url');
+
+            if (!url || !Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
+                console.warn('Attachment thiếu Id hoặc URL hợp lệ:', attachment);
+                continue;
+            }
+
+            const item = document.createElement('div');
+            item.className = 'chat-message-attachment';
+
+            if (contentType.toLowerCase().startsWith('image/')) {
+                const imageButton = document.createElement('button');
+                imageButton.type = 'button';
+                imageButton.className = 'chat-attachment-image-button';
+                imageButton.dataset.lightboxSrc = url;
+                imageButton.dataset.lightboxAlt = fileName;
+                imageButton.setAttribute('aria-label', `Xem ảnh ${fileName}`);
+
+                const image = document.createElement('img');
+                image.className = 'chat-attachment-image';
+                image.src = url;
+                image.alt = fileName;
+                image.loading = 'lazy';
+                image.decoding = 'async';
+
+                image.addEventListener('error', () => {
+                    imageButton.classList.add('is-unavailable');
+                    imageButton.setAttribute('title', 'Không thể tải ảnh');
+                }, { once: true });
+
+                imageButton.appendChild(image);
+                item.appendChild(imageButton);
+            } else {
+                const fileCard = document.createElement('div');
+                fileCard.className = 'chat-attachment-file';
+
+                const icon = document.createElement('span');
+                icon.className = 'chat-attachment-file-icon';
+                icon.innerHTML = '<i class="ti ti-file"></i>';
+
+                const info = document.createElement('div');
+                info.className = 'chat-attachment-file-info';
+
+                const name = document.createElement('span');
+                name.className = 'chat-attachment-file-name';
+                name.textContent = fileName;
+                name.title = fileName;
+
+                const size = document.createElement('span');
+                size.className = 'chat-attachment-file-size';
+                size.textContent = formatAdminAttachmentSize(fileSize);
+
+                info.append(name, size);
+                fileCard.append(icon, info);
+                item.appendChild(fileCard);
+            }
+
+            const download = document.createElement('a');
+            download.className = 'chat-attachment-download';
+            download.href = `/admin/chat/attachments/${encodeURIComponent(id)}/download`;
+            download.setAttribute('download', fileName);
+            download.innerHTML = '<i class="ti ti-download"></i><span>Tải xuống</span>';
+
+            item.appendChild(download);
+            container.appendChild(item);
+        }
+
+        return container.childElementCount > 0 ? container : null;
+    }
+
+    let chatAttachmentLightbox = null;
+
+    function ensureChatAttachmentLightbox() {
+        if (chatAttachmentLightbox) {
+            return chatAttachmentLightbox;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.className = 'chat-attachment-lightbox';
+        overlay.hidden = true;
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Xem ảnh đính kèm');
+
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'chat-attachment-lightbox-close';
+        closeButton.setAttribute('aria-label', 'Đóng ảnh');
+        closeButton.innerHTML = '<i class="ti ti-x"></i>';
+
+        const image = document.createElement('img');
+        image.className = 'chat-attachment-lightbox-image';
+        image.alt = '';
+
+        overlay.append(closeButton, image);
+        document.body.appendChild(overlay);
+
+        function closeLightbox() {
+            overlay.hidden = true;
+            image.removeAttribute('src');
+            image.alt = '';
+            document.body.classList.remove('chat-lightbox-open');
+        }
+
+        closeButton.addEventListener('click', closeLightbox);
+
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && !overlay.hidden) {
+                closeLightbox();
+            }
+        });
+
+        chatAttachmentLightbox = {
+            overlay,
+            image,
+            open(src, alt) {
+                image.src = src;
+                image.alt = alt || '';
+                overlay.hidden = false;
+                document.body.classList.add('chat-lightbox-open');
+                closeButton.focus();
+            }
+        };
+
+        return chatAttachmentLightbox;
+    }
+
+    function initMessageAttachmentEvents() {
+        if (!DOM.chatHistory) {
+            return;
+        }
+
+        // Gọi trong initialize() đúng một lần.
+        DOM.chatHistory.addEventListener('click', event => {
+            const button = event.target.closest(
+                '.chat-attachment-image-button'
+            );
+
+            if (!button || !DOM.chatHistory.contains(button)) {
+                return;
+            }
+
+            event.preventDefault();
+
+            const src = button.dataset.lightboxSrc;
+            if (!src) {
+                return;
+            }
+
+            ensureChatAttachmentLightbox().open(
+                src,
+                button.dataset.lightboxAlt || ''
+            );
+        });
+    }
+
+
+    /* =====================================================
+       MESSAGE API
+    ===================================================== */
+
+    async function fetchConversationMessages(
+        conversationId,
+        options = {}
+    ) {
+
+        const {
+            limit = 30,
+            before = null,
+            signal
+        } = options;
+
+        const params =
+            new URLSearchParams();
+
+        params.set(
+            'limit',
+            String(limit)
+        );
+
+        if (before !== null) {
+
+            params.set(
+                'before',
+                String(before)
+            );
+        }
+
+        const response =
+            await fetch(
+                `/admin/chat/${conversationId}/messages?${params.toString()}`,
+                {
+                    method: 'GET',
+
+                    headers: {
+                        'Accept':
+                            'application/json'
+                    },
+
+                    credentials:
+                        'same-origin',
+
+                    signal
+                }
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Load messages failed: ${response.status}`
+            );
+        }
+        return await response.json();
+    }
+
+    function buildConversationQueryParams({
+        limit = 10,
+        beforeLastMessageAt = null,
+        beforeId = null
+    } = {}) {
+
+        const params =
+            new URLSearchParams();
+
+
+        if (conversationState.filters.inboxId) {
+
+            params.set(
+                'inboxId',
+                conversationState.filters.inboxId
             );
         }
 
 
-        /* =====================================================
-           MESSAGE API
-        ===================================================== */
+        if (conversationState.filters.status) {
+            params.set(
+                'status',
+                conversationState.filters.status
+            );
+        }
 
-        async function fetchConversationMessages(
-            conversationId,
-            options = {}
+        if (
+            conversationState.filters.search
         ) {
 
-            const {
-                limit = 30,
-                before = null,
-                signal
-            } = options;
-
-            const params =
-                new URLSearchParams();
-
             params.set(
-                'limit',
-                String(limit)
-            );
-
-            if (before !== null) {
-
-                params.set(
-                    'before',
-                    String(before)
-                );
-            }
-
-            const response =
-                await fetch(
-                    `/admin/chat/${conversationId}/messages?${params.toString()}`,
-                    {
-                        method: 'GET',
-
-                        headers: {
-                            'Accept':
-                                'application/json'
-                        },
-
-                        credentials:
-                            'same-origin',
-
-                        signal
-                    }
-                );
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Load messages failed: ${response.status}`
-                );
-            }
-            return await response.json();
-        }
-
-        function buildConversationQueryParams({
-            limit = 10,
-            beforeLastMessageAt = null,
-            beforeId = null
-        } = {}) {
-
-            const params =
-                new URLSearchParams();
-
-
-            if (conversationState.filters.inboxId) {
-
-                params.set(
-                    'inboxId',
-                    conversationState.filters.inboxId
-                );
-            }
-
-
-            if (conversationState.filters.status) {
-                params.set(
-                    'status',
-                    conversationState.filters.status
-                );
-            }
-
-            if (
+                'search',
                 conversationState.filters.search
-            ) {
-
-                params.set(
-                    'search',
-                    conversationState.filters.search
-                );
-            }
+            );
+        }
 
 
-            if (
-                conversationState.filters.assignedUserId
-            ) {
-
-                params.set(
-                    'assignedUserId',
-                    conversationState.filters.assignedUserId
-                );
-            }
-
-
-            if (
-                conversationState.filters.labelId
-            ) {
-
-                params.set(
-                    'labelId',
-                    conversationState.filters.labelId
-                );
-            }
-
+        if (
+            conversationState.filters.assignedUserId
+        ) {
 
             params.set(
-                'limit',
-                String(limit)
+                'assignedUserId',
+                conversationState.filters.assignedUserId
             );
-
-
-            if (beforeLastMessageAt) {
-
-                params.set(
-                    'beforeLastMessageAt',
-                    beforeLastMessageAt
-                );
-            }
-
-
-            if (beforeId !== null) {
-
-                params.set(
-                    'beforeId',
-                    beforeId
-                );
-            }
-
-
-            return params;
         }
-        /* =====================================================
-           LOAD CONVERSATION LIST
-        ===================================================== */
+
+
+        if (
+            conversationState.filters.labelId
+        ) {
+
+            params.set(
+                'labelId',
+                conversationState.filters.labelId
+            );
+        }
+
+
+        params.set(
+            'limit',
+            String(limit)
+        );
+
+
+        if (beforeLastMessageAt) {
+
+            params.set(
+                'beforeLastMessageAt',
+                beforeLastMessageAt
+            );
+        }
+
+
+        if (beforeId !== null) {
+
+            params.set(
+                'beforeId',
+                beforeId
+            );
+        }
+
+
+        return params;
+    }
+    /* =====================================================
+       LOAD CONVERSATION LIST
+    ===================================================== */
     async function loadInitialConversations() {
         const requestVersion =
             ++conversationState.requestVersion;
@@ -1401,124 +1614,124 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     }
-        async function loadMoreConversations() {
-            if (
-                conversationState.loading ||
-                !conversationState.hasMore
-            ) {
-                return;
-            }
-
-            if (
-                !conversationState.oldestLastMessageAt ||
-                !conversationState.oldestId
-            ) {
-                return;
-            }
-
-            conversationState.loading = true;
-
-            try {
-                const params =
-                    buildConversationQueryParams({
-                        limit: limitState.list,
-                        beforeLastMessageAt:
-                            conversationState.oldestLastMessageAt,
-                        beforeId:
-                            conversationState.oldestId
-                    });
-                const response = await fetch(
-                    `/admin/chat/conversations?${params}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        'Không thể tải thêm hội thoại.'
-                    );
-                }
-
-                const result = await response.json();
-                for (const item of result.items) {
-                    conversationState.items.set(
-                        normalizeId(item.id),
-                        item
-                    );
-                }
-
-                conversationState.hasMore = result.hasMore;
-
-                conversationState.oldestLastMessageAt = result.oldestLastMessageAt;
-
-                conversationState.oldestId = result.oldestId;
-
-                renderConversationList();
-
-            } catch (error) {
-                console.log('loadMoreConversations:', error
-                );
-            } finally {
-                conversationState.loading = false;
-            }
+    async function loadMoreConversations() {
+        if (
+            conversationState.loading ||
+            !conversationState.hasMore
+        ) {
+            return;
         }
-        function renderConversationList() {
-            if (!DOM.conversationList) {
-                return;
-            }
-            const conversations = getFilteredConversations();
 
-            DOM.conversationList.innerHTML = '';
+        if (
+            !conversationState.oldestLastMessageAt ||
+            !conversationState.oldestId
+        ) {
+            return;
+        }
 
-            if (conversations.length === 0) {
-                renderConversationEmptyState();
-            }
-            else {
-                for (const conversation of conversations) {
-                    const element = createConversationElement(conversation);
-                    if (element) {
-                        if (conversation.status != 3) {
-                            element.classList.remove('is-resolved');
-                            if (conversation.unreadCount === 0) {
-                                element.classList.add('is-read');
-                            }
-                            else {
-                                element.classList.remove('is-read');
-                            }
+        conversationState.loading = true;
 
-                        } else {
-                            element.classList.add('is-resolved');
-                        }
+        try {
+            const params =
+                buildConversationQueryParams({
+                    limit: limitState.list,
+                    beforeLastMessageAt:
+                        conversationState.oldestLastMessageAt,
+                    beforeId:
+                        conversationState.oldestId
+                });
+            const response = await fetch(
+                `/admin/chat/conversations?${params}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
-
-                    DOM.conversationList.appendChild(
-                        element
-                    );
-
                 }
-            }
-
-            updateConversationTotal(
-                conversations.length
             );
 
-            ChatScroll.update(
-                DOM.conversationList
-            );
-        }
-        function renderConversationEmptyState() {
-            const container =
-                document.getElementById('conversationList');
-
-            if (!container) {
-                return;
+            if (!response.ok) {
+                throw new Error(
+                    'Không thể tải thêm hội thoại.'
+                );
             }
 
-            container.innerHTML = `
+            const result = await response.json();
+            for (const item of result.items) {
+                conversationState.items.set(
+                    normalizeId(item.id),
+                    item
+                );
+            }
+
+            conversationState.hasMore = result.hasMore;
+
+            conversationState.oldestLastMessageAt = result.oldestLastMessageAt;
+
+            conversationState.oldestId = result.oldestId;
+
+            renderConversationList();
+
+        } catch (error) {
+            console.log('loadMoreConversations:', error
+            );
+        } finally {
+            conversationState.loading = false;
+        }
+    }
+    function renderConversationList() {
+        if (!DOM.conversationList) {
+            return;
+        }
+        const conversations = getFilteredConversations();
+
+        DOM.conversationList.innerHTML = '';
+
+        if (conversations.length === 0) {
+            renderConversationEmptyState();
+        }
+        else {
+            for (const conversation of conversations) {
+                const element = createConversationElement(conversation);
+                if (element) {
+                    if (conversation.status != 3) {
+                        element.classList.remove('is-resolved');
+                        if (conversation.unreadCount === 0) {
+                            element.classList.add('is-read');
+                        }
+                        else {
+                            element.classList.remove('is-read');
+                        }
+
+                    } else {
+                        element.classList.add('is-resolved');
+                    }
+                }
+
+                DOM.conversationList.appendChild(
+                    element
+                );
+
+            }
+        }
+
+        updateConversationTotal(
+            conversations.length
+        );
+
+        ChatScroll.update(
+            DOM.conversationList
+        );
+    }
+    function renderConversationEmptyState() {
+        const container =
+            document.getElementById('conversationList');
+
+        if (!container) {
+            return;
+        }
+
+        container.innerHTML = `
         <div class="flex flex-col items-center justify-center py-12 text-center">
             <div class="text-sm font-medium text-gray-500">
                 Không có cuộc trò chuyện
@@ -1529,132 +1742,132 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
     `;
-        }
-        function getFilteredConversations() {
+    }
+    function getFilteredConversations() {
 
-            let items = Array.from(conversationState.items.values());
-            items.sort((a, b) => {
+        let items = Array.from(conversationState.items.values());
+        items.sort((a, b) => {
 
-                const dateCompare = new Date(b.lastMessageAt) - new Date(a.lastMessageAt);
+            const dateCompare = new Date(b.lastMessageAt) - new Date(a.lastMessageAt);
 
-                if (dateCompare !== 0) {
-                    return dateCompare;
-                }
-
-                return Number(b.id) - Number(a.id);
-            });
-
-            return items.filter(matchesConversation);
-        }
-        function matchesConversationFilters(
-            conversation
-        ) {
-            const name = conversation.contactName?.toLowerCase() || '';
-
-            const preview =
-                (
-                    conversation.lastMessage ||
-                    conversation.subject ||
-                    ''
-                ).toLowerCase();
-
-            const search = conversationState.filters.search?.trim().toLowerCase() || '';
-            if (search) {
-
-                const matched = name.includes(search) || preview.includes(search);
-
-                if (!matched) {
-                    return false;
-                }
+            if (dateCompare !== 0) {
+                return dateCompare;
             }
 
-            if (conversationState.filters.assignedUserId) {
+            return Number(b.id) - Number(a.id);
+        });
 
-                if (normalizeId(conversation.assignedUserId) !== normalizeId(conversationState.filters.assignedUserId)
-                ) {
-                    return false;
-                }
-            }
+        return items.filter(matchesConversation);
+    }
+    function matchesConversationFilters(
+        conversation
+    ) {
+        const name = conversation.contactName?.toLowerCase() || '';
 
-            if (conversationState.filters.labelId) {
+        const preview =
+            (
+                conversation.lastMessage ||
+                conversation.subject ||
+                ''
+            ).toLowerCase();
 
-                const hasLabel =
-                    conversation.labels?.some(
-                        label =>
-                            normalizeId(label.id) ===
-                            normalizeId(
-                                conversationState.filters.labelId
-                            )
-                    );
+        const search = conversationState.filters.search?.trim().toLowerCase() || '';
+        if (search) {
 
-                if (!hasLabel) {
-                    return false;
-                }
-            }
+            const matched = name.includes(search) || preview.includes(search);
 
-            return true;
-        }
-        function matchesConversation(conversation) {
-
-            const inboxFilter = conversationState.filters.inboxId;
-            if (inboxFilter &&
-                inboxFilter !== 'all' &&
-                Number(conversation.inboxId) !==
-                Number(inboxFilter)) {
+            if (!matched) {
                 return false;
             }
+        }
 
-            const statusFilter = conversationState.filters.status;
-            if (statusFilter && statusFilter !== 'all' && getConversationStatusKey(conversation.status) !== statusFilter) {
+        if (conversationState.filters.assignedUserId) {
+
+            if (normalizeId(conversation.assignedUserId) !== normalizeId(conversationState.filters.assignedUserId)
+            ) {
                 return false;
             }
-            return matchesConversationFilters(conversation);
         }
-        function createConversationElement(conversation) {
-            const article = document.createElement('article');
 
-            article.className = 'conversation-item';
+        if (conversationState.filters.labelId) {
 
-            article.dataset.conversationId =
-                conversation.id;
-            const statusKey =
-                getConversationStatusKey(
-                    conversation.status
+            const hasLabel =
+                conversation.labels?.some(
+                    label =>
+                        normalizeId(label.id) ===
+                        normalizeId(
+                            conversationState.filters.labelId
+                        )
                 );
 
-            article.dataset.status = statusKey;
+            if (!hasLabel) {
+                return false;
+            }
+        }
 
-            article.dataset.inbox =
-                conversation.inboxId;
+        return true;
+    }
+    function matchesConversation(conversation) {
 
-            article.dataset.assignedUserId =
-                conversation.assignedUserId ?? '';
+        const inboxFilter = conversationState.filters.inboxId;
+        if (inboxFilter &&
+            inboxFilter !== 'all' &&
+            Number(conversation.inboxId) !==
+            Number(inboxFilter)) {
+            return false;
+        }
 
-            article.dataset.unreadCount =
-                conversation.unreadCount ?? 0;
+        const statusFilter = conversationState.filters.status;
+        if (statusFilter && statusFilter !== 'all' && getConversationStatusKey(conversation.status) !== statusFilter) {
+            return false;
+        }
+        return matchesConversationFilters(conversation);
+    }
+    function createConversationElement(conversation) {
+        const article = document.createElement('article');
 
-            const firstLetter =
-                conversation.contactName
-                    ?.trim()
-                    ?.charAt(0)
-                    ?.toUpperCase() || '?';
+        article.className = 'conversation-item';
 
-            const avatar = conversation.contactAvatarUrl
-                ? `
+        article.dataset.conversationId =
+            conversation.id;
+        const statusKey =
+            getConversationStatusKey(
+                conversation.status
+            );
+
+        article.dataset.status = statusKey;
+
+        article.dataset.inbox =
+            conversation.inboxId;
+
+        article.dataset.assignedUserId =
+            conversation.assignedUserId ?? '';
+
+        article.dataset.unreadCount =
+            conversation.unreadCount ?? 0;
+
+        const firstLetter =
+            conversation.contactName
+                ?.trim()
+                ?.charAt(0)
+                ?.toUpperCase() || '?';
+
+        const avatar = conversation.contactAvatarUrl
+            ? `
             <img src="${escapeHtml(conversation.contactAvatarUrl)}"
                  alt="${escapeHtml(conversation.contactName ?? '')}"
                  class="rounded-circle" />
           `
-                : `
+            : `
             <span class="avatar-initial rounded-circle bg-label-primary">${escapeHtml(firstLetter)}</span>
           `;
 
-            const preview =
-                conversation.lastMessage?.trim()
-                    ? conversation.lastMessage
-                    : conversation.subject ?? '';
+        const preview =
+            conversation.lastMessage?.trim()
+                ? conversation.lastMessage
+                : conversation.subject ?? '';
 
-            article.innerHTML = `
+        article.innerHTML = `
         <div class="conversation-avatar">
             <div class="avatar avatar-sm">
                 ${avatar}
@@ -1674,79 +1887,79 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="conversation-message">${escapeHtml(preview)}</p>
 
                 ${conversation.unreadCount > 0
-                    ? `
+                ? `
                             <span class="badge rounded-pill bg-primary">${conversation.unreadCount}</span>
                           `
-                    : ''
-                }
+                : ''
+            }
 
             </div>
 
             ${conversation.labels?.length
-                    ? `
+                ? `
                         <div class="conversation-meta">
                             ${conversation.labels
-                        .map(label => `<span class="chat-label badge bg-label-success">${escapeHtml(label.name)}</span>`)
-                        .join('')}
+                    .map(label => `<span class="chat-label badge bg-label-success">${escapeHtml(label.name)}</span>`)
+                    .join('')}
 
                             <span class="conversation-status">${getConversationStatusText(conversation.status)}
                             </span>
                         </div>
                       `
-                    : ''
-                }
+                : ''
+            }
 
         </div>
     `;
 
-            return article;
+        return article;
+    }
+    function getConversationStatusKey(status) {
+        if (status === null || status === undefined) {
+            return '';
         }
-        function getConversationStatusKey(status) {
-            if (status === null || status === undefined) {
-                return '';
-            }
 
-            // Backend có thể trả enum dạng string:
-            // "Open", "Pending", "Resolved", "Closed"
-            if (typeof status === 'string') {
-                const value = status.trim().toLowerCase();
+        // Backend có thể trả enum dạng string:
+        // "Open", "Pending", "Resolved", "Closed"
+        if (typeof status === 'string') {
+            const value = status.trim().toLowerCase();
 
-                switch (value) {
-                    case 'open':
-                        return 'open';
-
-                    case 'pending':
-                        return 'pending';
-
-                    case 'resolved':
-                        return 'resolved';
-
-                    case 'closed':
-                        return 'closed';
-
-                    default:
-                        return '';
-                }
-            }
-
-            // Backend/client có thể vẫn dùng enum number
-            switch (Number(status)) {
-                case 1:
+            switch (value) {
+                case 'open':
                     return 'open';
 
-                case 2:
+                case 'pending':
                     return 'pending';
 
-                case 3:
+                case 'resolved':
                     return 'resolved';
 
-                case 4:
+                case 'closed':
                     return 'closed';
 
                 default:
                     return '';
             }
         }
+
+        // Backend/client có thể vẫn dùng enum number
+        switch (Number(status)) {
+            case 1:
+                return 'open';
+
+            case 2:
+                return 'pending';
+
+            case 3:
+                return 'resolved';
+
+            case 4:
+                return 'closed';
+
+            default:
+                return '';
+        }
+    }
     function getConversationStatusText(status) {
 
         switch (
@@ -1768,783 +1981,828 @@ document.addEventListener('DOMContentLoaded', function () {
                 return '';
         }
     }
-        function setupConversationLazyLoading() {
-            DOM.conversationList.addEventListener(
-                'scroll',
-                () => {
-                    const element =
-                        DOM.conversationList;
+    function setupConversationLazyLoading() {
+        DOM.conversationList.addEventListener(
+            'scroll',
+            () => {
+                const element =
+                    DOM.conversationList;
 
-                    const distanceFromBottom =
-                        element.scrollHeight -
-                        element.scrollTop -
-                        element.clientHeight;
+                const distanceFromBottom =
+                    element.scrollHeight -
+                    element.scrollTop -
+                    element.clientHeight;
 
-                    if (distanceFromBottom < 300) {
-                        loadMoreConversations();
-                    }
+                if (distanceFromBottom < 300) {
+                    loadMoreConversations();
                 }
-            );
-        }
-
-        function setupMessageLazyLoading() {
-
-            if (!DOM.chatHistoryBody) {
-                return;
             }
+        );
+    }
 
-            DOM.chatHistoryBody.addEventListener(
-                'scroll',
-                function () {
+    function setupMessageLazyLoading() {
 
-                    /*
-                     * Gần đầu conversation.
-                     */
-                    if (
-                        this.scrollTop <= 100
-                    ) {
-
-                        loadOlderMessages();
-                    }
-                }
-            );
+        if (!DOM.chatHistoryBody) {
+            return;
         }
-        /* =====================================================
-           LOAD CONVERSATION MESSAGES
-        ===================================================== */
 
-        async function loadConversationMessages(
-            conversationId
+        DOM.chatHistoryBody.addEventListener(
+            'scroll',
+            function () {
+
+                /*
+                 * Gần đầu conversation.
+                 */
+                if (
+                    this.scrollTop <= 100
+                ) {
+
+                    loadOlderMessages();
+                }
+            }
+        );
+    }
+    /* =====================================================
+       LOAD CONVERSATION MESSAGES
+    ===================================================== */
+
+    async function loadConversationMessages(
+        conversationId
+    ) {
+
+        if (
+            !conversationId ||
+            !DOM.chatHistory
+        ) {
+            return;
+        }
+
+        /*
+         * Cancel previous request.
+         */
+        if (
+            state.messageRequestController
         ) {
 
-            if (
-                !conversationId ||
-                !DOM.chatHistory
-            ) {
-                return;
-            }
+            state.messageRequestController.abort();
+        }
+
+        const controller =
+            new AbortController();
+
+        state.messageRequestController =
+            controller;
+
+        state.messages.loading =
+            true;
+
+        renderLoadingMessages();
+
+        try {
+
+            const result =
+                await fetchConversationMessages(
+                    conversationId,
+                    {
+                        limit: limitState.message,
+                        signal:
+                            controller.signal
+                    }
+                );
 
             /*
-             * Cancel previous request.
+             * User changed conversation
+             * while request was running.
              */
             if (
-                state.messageRequestController
-            ) {
-
-                state.messageRequestController.abort();
-            }
-
-            const controller =
-                new AbortController();
-
-            state.messageRequestController =
-                controller;
-
-            state.messages.loading =
-                true;
-
-            renderLoadingMessages();
-
-            try {
-
-                const result =
-                    await fetchConversationMessages(
-                        conversationId,
-                        {
-                            limit: limitState.message,
-                            signal:
-                                controller.signal
-                        }
-                    );
-
-                /*
-                 * User changed conversation
-                 * while request was running.
-                 */
-                if (
-                    !isCurrentConversation(
-                        conversationId
-                    )
-                ) {
-                    return;
-                }
-
-                const messages =
-                    Array.isArray(result?.items)
-                        ? result.items
-                        : [];
-
-                /*
-                 * Initial render.
-                 */
-                renderMessages(
-                    messages
-                );
-
-                /*
-                 * Save lazy-loading cursor.
-                 */
-                state.messages.hasMore =
-                    result?.hasMore === true;
-
-                state.messages.oldestMessageId =
-                    result?.oldestMessageId ?? null;
-
-                state.messages.newestMessageId =
-                    result?.newestMessageId ?? null;
-
-                /*
-                 * Initial load always scrolls
-                 * to the newest message.
-                 */
-                scrollChatToBottom();
-
-            }
-            catch (error) {
-
-                if (
-                    error.name ===
-                    'AbortError'
-                ) {
-                    return;
-                }
-
-                console.log(
-                    'Load conversation failed:',
-                    error
-                );
-
-                if (
-                    !isCurrentConversation(
-                        conversationId
-                    )
-                ) {
-                    return;
-                }
-
-                renderMessageError(
+                !isCurrentConversation(
                     conversationId
-                );
-            }
-            finally {
-
-                if (
-                    state.messageRequestController ===
-                    controller
-                ) {
-
-                    state.messageRequestController =
-                        null;
-                }
-
-                state.messages.loading =
-                    false;
-            }
-        }
-        async function loadOlderMessages() {
-
-            const conversationId =
-                state.currentConversationId;
-
-            if (
-                !conversationId ||
-                !DOM.chatHistory ||
-                state.messages.loading ||
-                !state.messages.hasMore ||
-                !state.messages.oldestMessageId
+                )
             ) {
                 return;
             }
 
-            state.messages.loading =
-                true;
-
-            const oldestMessageId =
-                state.messages.oldestMessageId;
-
-            /*
-             * Lưu vị trí scroll hiện tại.
-             */
-            const previousScrollHeight =
-                DOM.chatHistoryBody.scrollHeight;
-
-            const previousScrollTop =
-                DOM.chatHistoryBody.scrollTop;
-
-            try {
-
-                const result =
-                    await fetchConversationMessages(
-                        conversationId,
-                        {
-                            limit: limitState.message,
-                            before: oldestMessageId
-                        }
-                    );
-
-                /*
-                 * Conversation đã bị đổi
-                 * trong lúc request.
-                 */
-                if (
-                    !isCurrentConversation(
-                        conversationId
-                    )
-                ) {
-                    return;
-                }
-
-                const messages =
-                    Array.isArray(result?.items)
-                        ? result.items
-                        : [];
-
-                if (messages.length > 0) {
-
-                    prependMessages(
-                        messages
-                    );
-                }
-
-                /*
-                 * Update cursor.
-                 */
-                state.messages.hasMore =
-                    result?.hasMore === true;
-
-                state.messages.oldestMessageId =
-                    result?.oldestMessageId ??
-                    state.messages.oldestMessageId;
-
-                /*
-                 * Giữ nguyên vị trí user đang đọc.
-                 */
-                requestAnimationFrame(
-                    () => {
-
-                        const newScrollHeight =
-                            DOM.chatHistoryBody.scrollHeight;
-
-                        DOM.chatHistoryBody.scrollTop =
-                            previousScrollTop +
-                            (
-                                newScrollHeight -
-                                previousScrollHeight
-                            );
-
-                        ChatScroll.update(
-                            DOM.chatHistoryBody
-                        );
-                    }
-                );
-
-            }
-            catch (error) {
-
-                console.log(
-                    'Load older messages failed:',
-                    error
-                );
-            }
-            finally {
-
-                state.messages.loading =
-                    false;
-            }
-        }
-
-        async function loadConversationCounts() {
-            console.log("loadConversationCounts");
-            /*
-             * Nếu đang có request:
-             * không bỏ qua request mới.
-             *
-             * Đánh dấu cần refresh lại sau khi
-             * request hiện tại hoàn tất.
-             */
-            if (conversationCountState.loading) {
-
-                conversationCountsRefreshQueued = true;
-
-                return;
-            }
-
-            conversationCountState.loading = true;
-
-            try {
-
-                const params = new URLSearchParams();
-
-                if (conversationState.filters.inboxId) {
-                    params.set(
-                        'inboxId',
-                        conversationState.filters.inboxId
-                    );
-                }
-
-                const search = conversationState.filters.search?.trim();
-
-                if (search) {
-
-                    params.set(
-                        'search',
-                        search
-                    );
-                }
-
-                if (
-                    conversationState.filters.assignedUserId
-                ) {
-
-                    params.set(
-                        'assignedUserId',
-                        conversationState.filters.assignedUserId
-                    );
-                }
-
-                if (
-                    conversationState.filters.labelId
-                ) {
-
-                    params.set(
-                        'labelId',
-                        conversationState.filters.labelId
-                    );
-                }
-
-                const response =
-                    await fetch(
-                        `/admin/chat/conversations/counts?${params.toString()}`,
-                        {
-                            method: 'GET',
-
-                            headers: {
-                                'X-Requested-With':
-                                    'XMLHttpRequest'
-                            }
-                        }
-                    );
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `Failed to load conversation counts: ${response.status}`
-                    );
-                }
-
-                const result =
-                    await response.json();
-
-                conversationCountState.all =
-                    Number(result.all) || 0;
-
-                conversationCountState.website =
-                    Number(result.website) || 0;
-
-                conversationCountState.facebook =
-                    Number(result.facebook) || 0;
-
-                conversationCountState.open =
-                    Number(result.open) || 0;
-
-                conversationCountState.pending =
-                    Number(result.pending) || 0;
-
-                conversationCountState.resolved =
-                    Number(result.resolved) || 0;
-                updateConversationFilterCounts();
-
-            }
-            catch (error) {
-
-                console.log(
-                    'Load conversation counts failed:',
-                    error
-                );
-
-            }
-            finally {
-
-                conversationCountState.loading = false;
-
-                /*
-                 * Trong lúc request đang chạy có event
-                 * hoặc filter mới yêu cầu refresh.
-                 */
-                if (conversationCountsRefreshQueued) {
-
-                    conversationCountsRefreshQueued = false;
-
-                    /*
-                     * Không await ở đây để tránh
-                     * chain recursion không cần thiết.
-                     */
-                    loadConversationCounts();
-                }
-            }
-        }
-        function updateConversationFilterCounts() {
-            const counts = conversationCountState;
-            const countElements = {
-                all: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="all"] .chat-filter-count'
-                ),
-                website: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="1"] .chat-filter-count'
-                ),
-                facebook: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="2"] .chat-filter-count'
-                ),
-
-                open: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="open"] .chat-filter-count'
-                ),
-
-                pending: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="pending"] .chat-filter-count'
-                ),
-
-                resolved: document.querySelector(
-                    '.chat-filter-list li[data-filter-value="resolved"] .chat-filter-count'
-                )
-            };
-
-            if (countElements.all) {
-                countElements.all.textContent = counts.all;
-            }
-            if (countElements.website) {
-                countElements.website.textContent = counts.website;
-            }
-            if (countElements.facebook) {
-                countElements.facebook.textContent = counts.facebook;
-            }
-
-            if (countElements.open) {
-                countElements.open.textContent = counts.open;
-            }
-
-            if (countElements.pending) {
-                countElements.pending.textContent = counts.pending;
-            }
-
-            if (countElements.resolved) {
-                countElements.resolved.textContent = counts.resolved;
-            }
-        }
-        /* =====================================================
-           CONVERSATION OPEN
-        ===================================================== */
-
-        async function openConversation(
-            conversationItem
-        ) {
-
-            if (!conversationItem) {
-                return;
-            }
-
-            const conversationId =
-                conversationItem.dataset
-                    .conversationId;
-
-            if (!conversationId) {
-                return;
-            }
-
-            stopTyping();
-            hideTyping();
+            const messages =
+                Array.isArray(result?.items)
+                    ? result.items
+                    : [];
 
             /*
-             * Set current conversation
-             * BEFORE loading messages.
+             * Initial render.
              */
-            state.currentConversationId = conversationId;
-            state.currentConversationStatus =
-                getConversationStatusKey(
-                    conversationItem.dataset.status
-                );
-            /*
-             * Reset message state.
-             *
-             * Không reset processedMessageIds
-             * toàn bộ vì realtime deduplication
-             * vẫn cần hoạt động.
-             */
-            resetMessageState();
-
-            /*
-             * Active item.
-             */
-            document
-                .querySelectorAll(
-                    '.conversation-item'
-                )
-                .forEach(
-                    item => {
-                        item.classList.remove(
-                            'active'
-                        );
-                    }
-                );
-
-            conversationItem.classList.add(
-                'active'
+            renderMessages(
+                messages
             );
-
+            waitForImages(chatHistoryBody).then(() => {
+                scrollChatToBottom();
+            });
             /*
-             * Switch panels.
+             * Save lazy-loading cursor.
              */
-            DOM.conversationPanel
-                ?.classList.add(
-                    'd-none'
-                );
-
-            DOM.chatDetailPanel
-                ?.classList.remove(
-                    'd-none'
-                );
-
-            closeContactDrawer();
-
-            if (isMobile()) {
-                closeFilterSidebar();
-            }
-
-            /*
-             * Header.
-             */
-            updateChatHeader(
-                conversationItem
-            );
-
-            renderConversationLabels(conversationItem.labels);
-            /*
-            * Resolved.
-            */
-            const statusKey =
-                getConversationStatusKey(
-                    conversationItem.dataset.status
-                );
-
-            state.currentConversationStatus = statusKey;
-            updateConversationReadOnlyUI(
-                conversationItem.dataset.status
-            );
-            /*
-             * SignalR room.
-             */
-            await joinConversation(
-                conversationId,
-                conversationItem.dataset.status
-            );
-
-            /*
-             * Load messages.
-             */
-            await loadConversationMessages(
-                conversationId
-            );
-
-            /*
-             * Mark read.
-             */
-            scheduleMarkConversationAsRead(
-                conversationId
-            );
-
-            renderConversationList();
-
-            ChatScroll.update(
-                DOM.conversationList
-            );
-
-            state.contactConversationId = null;
-            state.contactData = null;
-            resetContact();
-        }
-
-
-        function resetMessageState() {
-
-            state.messages.loading =
-                false;
-
             state.messages.hasMore =
-                true;
+                result?.hasMore === true;
 
             state.messages.oldestMessageId =
-                null;
+                result?.oldestMessageId ?? null;
 
             state.messages.newestMessageId =
-                null;
-        }
-
-
-        /* =====================================================
-           CONVERSATION CLOSE
-        ===================================================== */
-
-        async function closeConversation() {
-
-            stopTyping();
-            hideTyping();
+                result?.newestMessageId ?? null;
 
             /*
-             * Cancel message request.
+             * Initial load always scrolls
+             * to the newest message.
              */
-            if (state.messageRequestController) {
+            scrollChatToBottom();
 
-                state.messageRequestController.abort();
+        }
+        catch (error) {
+
+            if (
+                error.name ===
+                'AbortError'
+            ) {
+                return;
+            }
+
+            console.log(
+                'Load conversation failed:',
+                error
+            );
+
+            if (
+                !isCurrentConversation(
+                    conversationId
+                )
+            ) {
+                return;
+            }
+
+            renderMessageError(
+                conversationId
+            );
+        }
+        finally {
+
+            if (
+                state.messageRequestController ===
+                controller
+            ) {
 
                 state.messageRequestController =
                     null;
             }
 
-            await leaveCurrentConversation();
+            state.messages.loading =
+                false;
+        }
+    }
+    async function loadOlderMessages() {
 
-            state.currentConversationId = null;
-            state.currentConversationStatus = null;
+        const conversationId =
+            state.currentConversationId;
 
-            resetMessageState();
-
-            closeContactDrawer();
-
-            DOM.chatDetailPanel
-                ?.classList.add(
-                    'd-none'
-                );
-
-            DOM.conversationPanel
-                ?.classList.remove(
-                    'd-none'
-                );
-
-            renderConversationList();
-
-            ChatScroll.update(
-                DOM.conversationList
-            );
+        if (
+            !conversationId ||
+            !DOM.chatHistory ||
+            state.messages.loading ||
+            !state.messages.hasMore ||
+            !state.messages.oldestMessageId
+        ) {
+            return;
         }
 
+        state.messages.loading =
+            true;
 
-        async function leaveCurrentConversation() {
+        const oldestMessageId =
+            state.messages.oldestMessageId;
 
+        /*
+         * Lưu vị trí scroll hiện tại.
+         */
+        const previousScrollHeight =
+            DOM.chatHistoryBody.scrollHeight;
+
+        const previousScrollTop =
+            DOM.chatHistoryBody.scrollTop;
+
+        try {
+
+            const result =
+                await fetchConversationMessages(
+                    conversationId,
+                    {
+                        limit: limitState.message,
+                        before: oldestMessageId
+                    }
+                );
+
+            /*
+             * Conversation đã bị đổi
+             * trong lúc request.
+             */
             if (
-                !state.joinedConversationId ||
-                !state.connection ||
-                typeof signalR === 'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
+                !isCurrentConversation(
+                    conversationId
+                )
             ) {
-                state.joinedConversationId =
-                    null;
-
                 return;
             }
 
-            try {
+            const messages =
+                Array.isArray(result?.items)
+                    ? result.items
+                    : [];
 
-                await state.connection.invoke(
-                    'LeaveAdminConversation',
-                    Number(
-                        state.joinedConversationId
-                    )
-                );
+            if (messages.length > 0) {
 
-            }
-            catch (error) {
-
-                console.warn(
-                    'LeaveAdminConversation failed:',
-                    error
+                prependMessages(
+                    messages
                 );
             }
 
-            state.joinedConversationId =
+            /*
+             * Update cursor.
+             */
+            state.messages.hasMore =
+                result?.hasMore === true;
+
+            state.messages.oldestMessageId =
+                result?.oldestMessageId ??
+                state.messages.oldestMessageId;
+
+            /*
+             * Giữ nguyên vị trí user đang đọc.
+             */
+            requestAnimationFrame(
+                () => {
+
+                    const newScrollHeight =
+                        DOM.chatHistoryBody.scrollHeight;
+
+                    DOM.chatHistoryBody.scrollTop =
+                        previousScrollTop +
+                        (
+                            newScrollHeight -
+                            previousScrollHeight
+                        );
+
+                    ChatScroll.update(
+                        DOM.chatHistoryBody
+                    );
+                }
+            );
+
+        }
+        catch (error) {
+
+            console.log(
+                'Load older messages failed:',
+                error
+            );
+        }
+        finally {
+
+            state.messages.loading =
+                false;
+        }
+    }
+
+    async function loadConversationCounts() {
+        console.log("loadConversationCounts");
+        /*
+         * Nếu đang có request:
+         * không bỏ qua request mới.
+         *
+         * Đánh dấu cần refresh lại sau khi
+         * request hiện tại hoàn tất.
+         */
+        if (conversationCountState.loading) {
+
+            conversationCountsRefreshQueued = true;
+
+            return;
+        }
+
+        conversationCountState.loading = true;
+
+        try {
+
+            const params = new URLSearchParams();
+
+            if (conversationState.filters.inboxId) {
+                params.set(
+                    'inboxId',
+                    conversationState.filters.inboxId
+                );
+            }
+
+            const search = conversationState.filters.search?.trim();
+
+            if (search) {
+
+                params.set(
+                    'search',
+                    search
+                );
+            }
+
+            if (
+                conversationState.filters.assignedUserId
+            ) {
+
+                params.set(
+                    'assignedUserId',
+                    conversationState.filters.assignedUserId
+                );
+            }
+
+            if (
+                conversationState.filters.labelId
+            ) {
+
+                params.set(
+                    'labelId',
+                    conversationState.filters.labelId
+                );
+            }
+
+            const response =
+                await fetch(
+                    `/admin/chat/conversations/counts?${params.toString()}`,
+                    {
+                        method: 'GET',
+
+                        headers: {
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        }
+                    }
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Failed to load conversation counts: ${response.status}`
+                );
+            }
+
+            const result =
+                await response.json();
+
+            conversationCountState.all =
+                Number(result.all) || 0;
+
+            conversationCountState.website =
+                Number(result.website) || 0;
+
+            conversationCountState.facebook =
+                Number(result.facebook) || 0;
+
+            conversationCountState.open =
+                Number(result.open) || 0;
+
+            conversationCountState.pending =
+                Number(result.pending) || 0;
+
+            conversationCountState.resolved =
+                Number(result.resolved) || 0;
+            updateConversationFilterCounts();
+
+        }
+        catch (error) {
+
+            console.log(
+                'Load conversation counts failed:',
+                error
+            );
+
+        }
+        finally {
+
+            conversationCountState.loading = false;
+
+            /*
+             * Trong lúc request đang chạy có event
+             * hoặc filter mới yêu cầu refresh.
+             */
+            if (conversationCountsRefreshQueued) {
+
+                conversationCountsRefreshQueued = false;
+
+                /*
+                 * Không await ở đây để tránh
+                 * chain recursion không cần thiết.
+                 */
+                loadConversationCounts();
+            }
+        }
+    }
+    function updateConversationFilterCounts() {
+        const counts = conversationCountState;
+        const countElements = {
+            all: document.querySelector(
+                '.chat-filter-list li[data-filter-value="all"] .chat-filter-count'
+            ),
+            website: document.querySelector(
+                '.chat-filter-list li[data-filter-value="1"] .chat-filter-count'
+            ),
+            facebook: document.querySelector(
+                '.chat-filter-list li[data-filter-value="2"] .chat-filter-count'
+            ),
+
+            open: document.querySelector(
+                '.chat-filter-list li[data-filter-value="open"] .chat-filter-count'
+            ),
+
+            pending: document.querySelector(
+                '.chat-filter-list li[data-filter-value="pending"] .chat-filter-count'
+            ),
+
+            resolved: document.querySelector(
+                '.chat-filter-list li[data-filter-value="resolved"] .chat-filter-count'
+            )
+        };
+
+        if (countElements.all) {
+            countElements.all.textContent = counts.all;
+        }
+        if (countElements.website) {
+            countElements.website.textContent = counts.website;
+        }
+        if (countElements.facebook) {
+            countElements.facebook.textContent = counts.facebook;
+        }
+
+        if (countElements.open) {
+            countElements.open.textContent = counts.open;
+        }
+
+        if (countElements.pending) {
+            countElements.pending.textContent = counts.pending;
+        }
+
+        if (countElements.resolved) {
+            countElements.resolved.textContent = counts.resolved;
+        }
+    }
+    /* =====================================================
+       CONVERSATION OPEN
+    ===================================================== */
+
+    async function openConversation(
+        conversationItem
+    ) {
+
+        if (!conversationItem) {
+            return;
+        }
+
+        const conversationId =
+            conversationItem.dataset
+                .conversationId;
+
+        if (!conversationId) {
+            return;
+        }
+
+        stopTyping();
+        hideTyping();
+
+        /*
+         * Set current conversation
+         * BEFORE loading messages.
+         */
+        state.currentConversationId = conversationId;
+        state.currentConversationStatus =
+            getConversationStatusKey(
+                conversationItem.dataset.status
+            );
+        /*
+         * Reset message state.
+         *
+         * Không reset processedMessageIds
+         * toàn bộ vì realtime deduplication
+         * vẫn cần hoạt động.
+         */
+        resetMessageState();
+
+        /*
+         * Active item.
+         */
+        document
+            .querySelectorAll(
+                '.conversation-item'
+            )
+            .forEach(
+                item => {
+                    item.classList.remove(
+                        'active'
+                    );
+                }
+            );
+
+        conversationItem.classList.add(
+            'active'
+        );
+
+        /*
+         * Switch panels.
+         */
+        DOM.conversationPanel
+            ?.classList.add(
+                'd-none'
+            );
+
+        DOM.chatDetailPanel
+            ?.classList.remove(
+                'd-none'
+            );
+
+        closeContactDrawer();
+
+        if (isMobile()) {
+            closeFilterSidebar();
+        }
+
+        /*
+         * Header.
+         */
+        updateChatHeader(
+            conversationItem
+        );
+
+        const header = await getConversationHeader(conversationId);
+        updateChatContactHeader(header);
+
+        renderConversationLabels(conversationItem.labels);
+        /*
+        * Resolved.
+        */
+        const statusKey =
+            getConversationStatusKey(
+                conversationItem.dataset.status
+            );
+
+        state.currentConversationStatus = statusKey;
+        updateConversationReadOnlyUI(
+            conversationItem.dataset.status
+        );
+        /*
+         * SignalR room.
+         */
+        await joinConversation(
+            conversationId,
+            conversationItem.dataset.status
+        );
+
+        /*
+         * Load messages.
+         */
+        await loadConversationMessages(
+            conversationId
+        );
+
+        /*
+         * Mark read.
+         */
+        scheduleMarkConversationAsRead(
+            conversationId
+        );
+
+        renderConversationList();
+
+        ChatScroll.update(
+            DOM.conversationList
+        );
+
+        state.contactConversationId = null;
+        state.contactData = null;
+        resetContact();
+    }
+    function updateChatContactHeader(contact) {
+        const avatarElement = document.getElementById("chatContactAvatarImage");
+
+        console.log('AAAA');
+        console.log(contact);
+        if (!chatContactName || !avatarElement) {
+            return;
+        }
+        const defaultAvatar = "/images/Default/default-user.png";
+        const name = contact?.name?.trim() || "GUEST";
+        const avatarUrl = contact?.avatarUrl?.trim() || defaultAvatar;
+
+        chatContactName.textContent = name;
+        avatarElement.alt = name;
+
+        avatarElement.onerror = () => {
+            avatarElement.onerror = null;
+            avatarElement.src = defaultAvatar;
+        };
+
+        avatarElement.src = avatarUrl;
+    }
+    async function getConversationHeader(conversationId) {
+        const response = await fetch(
+            `/admin/chat/${encodeURIComponent(conversationId)}/header`,
+            {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Không thể tải thông tin Contact (${response.status}).`
+            );
+        }
+
+        return await response.json();
+    }
+    function resetMessageState() {
+
+        state.messages.loading =
+            false;
+
+        state.messages.hasMore =
+            true;
+
+        state.messages.oldestMessageId =
+            null;
+
+        state.messages.newestMessageId =
+            null;
+    }
+
+
+    /* =====================================================
+       CONVERSATION CLOSE
+    ===================================================== */
+
+    async function closeConversation() {
+
+        stopTyping();
+        hideTyping();
+
+        /*
+         * Cancel message request.
+         */
+        if (state.messageRequestController) {
+
+            state.messageRequestController.abort();
+
+            state.messageRequestController =
                 null;
         }
 
+        await leaveCurrentConversation();
 
-        /* =====================================================
-           SIGNALR
-        ===================================================== */
+        state.currentConversationId = null;
+        state.currentConversationStatus = null;
 
-        async function initChatSignalR() {
+        resetMessageState();
 
-            if (
-                typeof signalR ===
-                'undefined'
-            ) {
+        closeContactDrawer();
 
-                console.log(
-                    'SignalR is not loaded.'
-                );
+        DOM.chatDetailPanel
+            ?.classList.add(
+                'd-none'
+            );
 
-                return;
-            }
-            if (state.connection &&
-                state.connection.state !== signalR.HubConnectionState.Disconnected) {
-                return;
-            }
+        DOM.conversationPanel
+            ?.classList.remove(
+                'd-none'
+            );
 
-            state.connection =
-                new signalR.HubConnectionBuilder()
-                    .withUrl(
-                        '/hubs/chat?clientType=admin'
-                    )
-                    .withAutomaticReconnect()
-                    .build();
+        renderConversationList();
+
+        ChatScroll.update(
+            DOM.conversationList
+        );
+    }
 
 
-            registerSignalREvents();
+    async function leaveCurrentConversation() {
 
+        if (
+            !state.joinedConversationId ||
+            !state.connection ||
+            typeof signalR === 'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            state.joinedConversationId =
+                null;
 
-            try {
-
-                await state.connection.start();
-
-                console.log(
-                    'Chat SignalR connected.'
-                );
-
-                await joinInbox();
-
-            }
-            catch (error) {
-
-                console.log(
-                    'Chat SignalR connection failed:',
-                    error
-                );
-            }
+            return;
         }
 
+        try {
 
-        function registerSignalREvents() {
+            await state.connection.invoke(
+                'LeaveAdminConversation',
+                Number(
+                    state.joinedConversationId
+                )
+            );
 
-            registerMessageReceived();
-
-            registerConversationCreated();
-
-            registerTypingReceived();
-
-            registerPresenceUpdated();
-
-            registerConversationStatusUpdated();
-
-            registerConnectionEvents();
         }
+        catch (error) {
 
-
-        /* =====================================================
-           SIGNALR - MESSAGE RECEIVED
-        ===================================================== */
-
-        function registerMessageReceived() {
-            state.connection.on(
-                'chat.message.received', handleMessageReceived
+            console.warn(
+                'LeaveAdminConversation failed:',
+                error
             );
         }
+
+        state.joinedConversationId =
+            null;
+    }
+
+
+    /* =====================================================
+       SIGNALR
+    ===================================================== */
+
+    async function initChatSignalR() {
+
+        if (
+            typeof signalR ===
+            'undefined'
+        ) {
+
+            console.log(
+                'SignalR is not loaded.'
+            );
+
+            return;
+        }
+        if (state.connection &&
+            state.connection.state !== signalR.HubConnectionState.Disconnected) {
+            return;
+        }
+
+        state.connection =
+            new signalR.HubConnectionBuilder()
+                .withUrl(
+                    '/hubs/chat?clientType=admin'
+                )
+                .withAutomaticReconnect()
+                .build();
+
+
+        registerSignalREvents();
+
+
+        try {
+
+            await state.connection.start();
+
+            console.log(
+                'Chat SignalR connected.'
+            );
+
+            await joinInbox();
+
+        }
+        catch (error) {
+
+            console.log(
+                'Chat SignalR connection failed:',
+                error
+            );
+        }
+    }
+
+
+    function registerSignalREvents() {
+
+        registerMessageReceived();
+
+        registerConversationCreated();
+
+        registerTypingReceived();
+
+        registerPresenceUpdated();
+
+        registerConversationStatusUpdated();
+
+        registerConnectionEvents();
+    }
+
+
+    /* =====================================================
+       SIGNALR - MESSAGE RECEIVED
+    ===================================================== */
+
+    function registerMessageReceived() {
+        state.connection.on(
+            'chat.message.received', handleMessageReceived
+        );
+    }
 
 
     async function handleMessageReceived(message) {
@@ -2626,184 +2884,184 @@ document.addEventListener('DOMContentLoaded', function () {
             message
         );
     }
-        function registerConversationCreated() {
+    function registerConversationCreated() {
 
-            state.connection.on(
-                'chat.conversation.created',
-                handleConversationCreated
-            );
+        state.connection.on(
+            'chat.conversation.created',
+            handleConversationCreated
+        );
+    }
+
+    async function handleConversationCreated(
+        conversation
+    ) {
+
+        if (!conversation?.id) {
+            return;
         }
 
-        async function handleConversationCreated(
+        const conversationId =
+            normalizeId(conversation.id);
+
+        /*
+         * Conversation mới.
+         */
+        conversationState.items.set(
+            conversationId,
             conversation
+        );
+
+
+        /*
+         * Render lại list.
+         *
+         * renderConversationList()
+         * sẽ tự:
+         * - lấy Map
+         * - sort theo lastMessageAt
+         * - apply filter
+         * - createConversationElement()
+         */
+        renderConversationList();
+        await loadConversationCounts();
+    }
+
+    async function acknowledgeMessageDelivered(
+        message
+    ) {
+        if (
+            !state.connection ||
+            typeof signalR ===
+            'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
         ) {
-
-            if (!conversation?.id) {
-                return;
-            }
-
-            const conversationId =
-                normalizeId(conversation.id);
-
-            /*
-             * Conversation mới.
-             */
-            conversationState.items.set(
-                conversationId,
-                conversation
-            );
-
-
-            /*
-             * Render lại list.
-             *
-             * renderConversationList()
-             * sẽ tự:
-             * - lấy Map
-             * - sort theo lastMessageAt
-             * - apply filter
-             * - createConversationElement()
-             */
-            renderConversationList();
-            await loadConversationCounts();
+            return;
         }
 
-        async function acknowledgeMessageDelivered(
-            message
-        ) {
-            if (
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-                return;
-            }
+        try {
+            await state.connection.invoke('AdminMessageDelivered', Number(message.id)
+            );
 
-            try {
-                await state.connection.invoke('AdminMessageDelivered', Number(message.id)
-                );
-
-            }
-            catch (error) {
-
-                console.log(
-                    'Failed to acknowledge message delivered:',
-                    error
-                );
-            }
         }
+        catch (error) {
 
-
-        /* =====================================================
-           SIGNALR - CONNECTION
-        ===================================================== */
-
-        function registerConnectionEvents() {
-
-            state.connection.onreconnecting(
-                function (error) {
-
-                    console.warn(
-                        'Chat SignalR reconnecting...',
-                        error
-                    );
-
-                    stopTyping();
-                    hideTyping();
-                }
-            );
-
-
-            state.connection.onreconnected(
-                async function (connectionId) {
-
-                    console.log(
-                        'Chat SignalR reconnected:',
-                        connectionId
-                    );
-
-                    await joinInbox();
-
-                    if (state.currentConversationId) {
-
-                        state.joinedConversationId = null;
-
-                        await joinConversation(
-                            state.currentConversationId,
-                            state.currentConversationStatus
-                        );
-                    }
-                }
-            );
-
-
-            state.connection.onclose(
-                function (error) {
-
-                    console.warn(
-                        'Chat SignalR connection closed.',
-                        error
-                    );
-                }
+            console.log(
+                'Failed to acknowledge message delivered:',
+                error
             );
         }
+    }
 
 
-        /* =====================================================
-           SIGNALR - INBOX
-        ===================================================== */
+    /* =====================================================
+       SIGNALR - CONNECTION
+    ===================================================== */
 
-        async function joinInbox() {
+    function registerConnectionEvents() {
 
-            if (
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-                return;
-            }
-
-            const inboxId =
-                DOM.workspace.dataset.inboxId;
-
-            if (!inboxId) {
+        state.connection.onreconnecting(
+            function (error) {
 
                 console.warn(
-                    'InboxId is missing.'
+                    'Chat SignalR reconnecting...',
+                    error
                 );
 
-                return;
+                stopTyping();
+                hideTyping();
             }
+        );
 
-            try {
 
-                await state.connection.invoke(
-                    'JoinInbox',
-                    Number(inboxId)
-                );
+        state.connection.onreconnected(
+            async function (connectionId) {
 
                 console.log(
-                    'Joined inbox:',
-                    inboxId
+                    'Chat SignalR reconnected:',
+                    connectionId
                 );
-            }
-            catch (error) {
 
-                console.log(
-                    'JoinInbox failed:',
+                await joinInbox();
+
+                if (state.currentConversationId) {
+
+                    state.joinedConversationId = null;
+
+                    await joinConversation(
+                        state.currentConversationId,
+                        state.currentConversationStatus
+                    );
+                }
+            }
+        );
+
+
+        state.connection.onclose(
+            function (error) {
+
+                console.warn(
+                    'Chat SignalR connection closed.',
                     error
                 );
             }
+        );
+    }
+
+
+    /* =====================================================
+       SIGNALR - INBOX
+    ===================================================== */
+
+    async function joinInbox() {
+
+        if (
+            !state.connection ||
+            typeof signalR ===
+            'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            return;
         }
 
+        const inboxId =
+            DOM.workspace.dataset.inboxId;
 
-        /* =====================================================
-           SIGNALR - CONVERSATION
-        ===================================================== */
+        if (!inboxId) {
+
+            console.warn(
+                'InboxId is missing.'
+            );
+
+            return;
+        }
+
+        try {
+
+            await state.connection.invoke(
+                'JoinInbox',
+                Number(inboxId)
+            );
+
+            console.log(
+                'Joined inbox:',
+                inboxId
+            );
+        }
+        catch (error) {
+
+            console.log(
+                'JoinInbox failed:',
+                error
+            );
+        }
+    }
+
+
+    /* =====================================================
+       SIGNALR - CONVERSATION
+    ===================================================== */
 
     async function joinConversation(
         conversationId,
@@ -2897,170 +3155,170 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-        /* =====================================================
-           SIGNALR - TYPING
-        ===================================================== */
+    /* =====================================================
+       SIGNALR - TYPING
+    ===================================================== */
 
-        function registerTypingReceived() {
+    function registerTypingReceived() {
 
-            state.connection.on(
-                'chat.typing',
-                function (data) {
+        state.connection.on(
+            'chat.typing',
+            function (data) {
 
-                    if (
-                        !data ||
-                        !isCurrentConversation(
-                            data.conversationId
-                        )
-                    ) {
-                        return;
-                    }
-
-                    /*
-                     * Contact = 1
-                     * Bot = 4
-                     */
-                    if (
-                        Number(
-                            data.senderType
-                        ) !== 1 &&
-                        Number(
-                            data.senderType
-                        ) !== 4
-                    ) {
-                        return;
-                    }
-
-                    if (data.isTyping) {
-                        showTyping();
-                    }
-                    else {
-                        hideTyping();
-                    }
+                if (
+                    !data ||
+                    !isCurrentConversation(
+                        data.conversationId
+                    )
+                ) {
+                    return;
                 }
+
+                /*
+                 * Contact = 1
+                 * Bot = 4
+                 */
+                if (
+                    Number(
+                        data.senderType
+                    ) !== 1 &&
+                    Number(
+                        data.senderType
+                    ) !== 4
+                ) {
+                    return;
+                }
+
+                if (data.isTyping) {
+                    showTyping();
+                }
+                else {
+                    hideTyping();
+                }
+            }
+        );
+    }
+
+
+    function showTyping() {
+
+        if (!DOM.typing) {
+            return;
+        }
+
+        DOM.typing.hidden =
+            false;
+    }
+
+
+    function hideTyping() {
+
+        if (!DOM.typing) {
+            return;
+        }
+
+        DOM.typing.hidden =
+            true;
+    }
+
+
+    async function sendTypingStatus(
+        isTypingNow
+    ) {
+
+        if (
+            !state.currentConversationId ||
+            !state.connection ||
+            typeof signalR ===
+            'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
+
+        try {
+
+            await state.connection.invoke(
+                'SendAdminTyping',
+                Number(
+                    state.currentConversationId
+                ),
+                isTypingNow
+            );
+
+        }
+        catch (error) {
+
+            console.log(
+                'SEND ADMIN TYPING ERROR:',
+                error
             );
         }
+    }
 
 
-        function showTyping() {
+    function handleAdminTyping() {
 
-            if (!DOM.typing) {
-                return;
-            }
-
-            DOM.typing.hidden =
-                false;
+        if (!DOM.messageInput) {
+            return;
         }
 
-
-        function hideTyping() {
-
-            if (!DOM.typing) {
-                return;
-            }
-
-            DOM.typing.hidden =
-                true;
-        }
-
-
-        async function sendTypingStatus(
-            isTypingNow
+        if (
+            !DOM.messageInput.value.trim()
         ) {
 
-            if (
-                !state.currentConversationId ||
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-                return;
-            }
+            stopTyping();
 
-            try {
-
-                await state.connection.invoke(
-                    'SendAdminTyping',
-                    Number(
-                        state.currentConversationId
-                    ),
-                    isTypingNow
-                );
-
-            }
-            catch (error) {
-
-                console.log(
-                    'SEND ADMIN TYPING ERROR:',
-                    error
-                );
-            }
+            return;
         }
-
-
-        function handleAdminTyping() {
-
-            if (!DOM.messageInput) {
-                return;
-            }
-
-            if (
-                !DOM.messageInput.value.trim()
-            ) {
-
-                stopTyping();
-
-                return;
-            }
-            if (isCurrentConversationReadOnly()) {
-                stopTyping();
-                hideTyping();
-                return;
-            }
-            if (
-                !state.typing.isTyping
-            ) {
-
-                state.typing.isTyping =
-                    true;
-
-                sendTypingStatus(true);
-            }
-
-            clearTimeout(
-                state.typing.timeout
-            );
-
-            state.typing.timeout =
-                setTimeout(
-                    stopTyping,
-                    state.typing.timeoutDuration
-                );
+        if (isCurrentConversationReadOnly()) {
+            stopTyping();
+            hideTyping();
+            return;
         }
-
-
-        function stopTyping() {
-
-            clearTimeout(
-                state.typing.timeout
-            );
-
-            state.typing.timeout =
-                null;
-
-            if (
-                !state.typing.isTyping
-            ) {
-                return;
-            }
+        if (
+            !state.typing.isTyping
+        ) {
 
             state.typing.isTyping =
-                false;
+                true;
 
-            sendTypingStatus(false);
+            sendTypingStatus(true);
         }
+
+        clearTimeout(
+            state.typing.timeout
+        );
+
+        state.typing.timeout =
+            setTimeout(
+                stopTyping,
+                state.typing.timeoutDuration
+            );
+    }
+
+
+    function stopTyping() {
+
+        clearTimeout(
+            state.typing.timeout
+        );
+
+        state.typing.timeout =
+            null;
+
+        if (
+            !state.typing.isTyping
+        ) {
+            return;
+        }
+
+        state.typing.isTyping =
+            false;
+
+        sendTypingStatus(false);
+    }
     function isCurrentConversationReadOnly() {
 
         return (
@@ -3097,173 +3355,173 @@ document.addEventListener('DOMContentLoaded', function () {
             ) === 'resolved'
         );
     }
-        /* =====================================================
-           CONVERSATION READ
-        ===================================================== */
+    /* =====================================================
+       CONVERSATION READ
+    ===================================================== */
 
-        function scheduleMarkConversationAsRead(
-            conversationId
+    function scheduleMarkConversationAsRead(
+        conversationId
+    ) {
+
+        if (!conversationId) {
+            return;
+        }
+
+        clearTimeout(
+            state.markRead.timer
+        );
+
+        state.markRead.timer =
+            setTimeout(
+                async function () {
+
+                    await markConversationAsRead(
+                        conversationId
+                    );
+
+                },
+                state.markRead.delay
+            );
+    }
+
+
+    async function markConversationAsRead(
+        conversationId
+    ) {
+
+        if (
+            !conversationId ||
+            !state.connection ||
+            typeof signalR ===
+            'undefined' ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
         ) {
+            return false;
+        }
 
-            if (!conversationId) {
-                return;
-            }
+        try {
 
-            clearTimeout(
-                state.markRead.timer
+            await state.connection.invoke(
+                'MarkConversationAsRead',
+                Number(conversationId)
             );
 
-            state.markRead.timer =
-                setTimeout(
-                    async function () {
 
-                        await markConversationAsRead(
-                            conversationId
-                        );
+            await reloadConversationsWithFilters();
 
-                    },
-                    state.markRead.delay
-                );
+            return true;
+
         }
+        catch (error) {
 
-
-        async function markConversationAsRead(
-            conversationId
-        ) {
-
-            if (
-                !conversationId ||
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-                return false;
-            }
-
-            try {
-
-                await state.connection.invoke(
-                    'MarkConversationAsRead',
-                    Number(conversationId)
-                );
-
-
-                await reloadConversationsWithFilters();
-
-                return true;
-
-            }
-            catch (error) {
-
-                console.log(
-                    'MARK CONVERSATION READ ERROR:',
-                    error
-                );
-
-                return false;
-            }
-        }
-
-
-        /* =====================================================
-           CONVERSATION DOM
-        ===================================================== */
-
-        function findConversationItem(
-            conversationId
-        ) {
-
-            if (!DOM.conversationList) {
-                return null;
-            }
-
-            return DOM.conversationList.querySelector(
-                `.conversation-item[data-conversation-id="${CSS.escape(
-                    String(conversationId)
-                )}"]`
+            console.log(
+                'MARK CONVERSATION READ ERROR:',
+                error
             );
+
+            return false;
+        }
+    }
+
+
+    /* =====================================================
+       CONVERSATION DOM
+    ===================================================== */
+
+    function findConversationItem(
+        conversationId
+    ) {
+
+        if (!DOM.conversationList) {
+            return null;
         }
 
+        return DOM.conversationList.querySelector(
+            `.conversation-item[data-conversation-id="${CSS.escape(
+                String(conversationId)
+            )}"]`
+        );
+    }
 
-        function updateConversationList(message) {
-            if (!message?.conversationId) {
-                return;
-            }
 
-            const conversationId =
-                normalizeId(message.conversationId);
-
-            const conversation =
-                conversationState.items.get(
-                    conversationId
-                );
-
-            if (!conversation) {
-                return;
-            }
-
-            const isContact =
-                Number(message.senderType) === 1;
-
-            const isCurrent =
-                isCurrentConversation(
-                    conversationId
-                );
-
-            /*
-             * Message content
-             */
-            conversation.lastMessage =
-                message.content || '';
-
-            /*
-             * Message time
-             */
-            if (message.createdAt) {
-                conversation.lastMessageAt =
-                    message.createdAt;
-            }
-
-            /*
-             * Unread
-             */
-            if (isContact) {
-
-                if (isCurrent) {
-
-                    conversation.unreadCount = 0;
-
-                }
-                else {
-
-                    conversation.unreadCount =
-                        (
-                            Number(
-                                conversation.unreadCount
-                            ) || 0
-                        ) + 1;
-                }
-            }
-
-            /*
-             * IMPORTANT:
-             *
-             * Không đổi conversation.status ở đây.
-             *
-             * Không update Open/Pending count ở đây.
-             *
-             * Backend sẽ quyết định status và
-             * broadcast chat.conversation.status.updated.
-             */
-
-            renderConversationList();
+    function updateConversationList(message) {
+        if (!message?.conversationId) {
+            return;
         }
 
-        /* =====================================================
-           CONVERSATION STATUS
-        ===================================================== */
+        const conversationId =
+            normalizeId(message.conversationId);
+
+        const conversation =
+            conversationState.items.get(
+                conversationId
+            );
+
+        if (!conversation) {
+            return;
+        }
+
+        const isContact =
+            Number(message.senderType) === 1;
+
+        const isCurrent =
+            isCurrentConversation(
+                conversationId
+            );
+
+        /*
+         * Message content
+         */
+        conversation.lastMessage =
+            message.content || '';
+
+        /*
+         * Message time
+         */
+        if (message.createdAt) {
+            conversation.lastMessageAt =
+                message.createdAt;
+        }
+
+        /*
+         * Unread
+         */
+        if (isContact) {
+
+            if (isCurrent) {
+
+                conversation.unreadCount = 0;
+
+            }
+            else {
+
+                conversation.unreadCount =
+                    (
+                        Number(
+                            conversation.unreadCount
+                        ) || 0
+                    ) + 1;
+            }
+        }
+
+        /*
+         * IMPORTANT:
+         *
+         * Không đổi conversation.status ở đây.
+         *
+         * Không update Open/Pending count ở đây.
+         *
+         * Backend sẽ quyết định status và
+         * broadcast chat.conversation.status.updated.
+         */
+
+        renderConversationList();
+    }
+
+    /* =====================================================
+       CONVERSATION STATUS
+    ===================================================== */
 
     function registerConversationStatusUpdated() {
 
@@ -3368,146 +3626,146 @@ document.addEventListener('DOMContentLoaded', function () {
             );
         }
     }
-        function getConversationStatusValue(status) {
+    function getConversationStatusValue(status) {
 
-            switch (status) {
+        switch (status) {
 
-                case 'open':
-                    return 1;
+            case 'open':
+                return 1;
 
-                case 'pending':
-                    return 2;
+            case 'pending':
+                return 2;
 
-                case 'resolved':
-                    return 3;
+            case 'resolved':
+                return 3;
 
-                case 'closed':
-                    return 4;
+            case 'closed':
+                return 4;
 
-                default:
-                    return null;
-            }
+            default:
+                return null;
         }
+    }
 
-        /* =====================================================
-           ADMIN PRESENCE
-        ===================================================== */
+    /* =====================================================
+       ADMIN PRESENCE
+    ===================================================== */
 
-        function registerPresenceUpdated() {
+    function registerPresenceUpdated() {
 
-            state.connection.on(
-                'chat.admin.presence.updated',
-                function (data) {
+        state.connection.on(
+            'chat.admin.presence.updated',
+            function (data) {
 
-                    if (!data?.userId) {
-                        return;
-                    }
-
-                    updateAdminPresence(
-                        String(data.userId),
-                        data.isOnline === true
-                    );
+                if (!data?.userId) {
+                    return;
                 }
+
+                updateAdminPresence(
+                    String(data.userId),
+                    data.isOnline === true
+                );
+            }
+        );
+    }
+
+    function updateAdminPresence(
+        userId,
+        isOnline
+    ) {
+
+        const items =
+            document.querySelectorAll(
+                `.conversation-item[data-assigned-user-id="${CSS.escape(
+                    userId
+                )}"]`
             );
-        }
 
-        function updateAdminPresence(
-            userId,
-            isOnline
-        ) {
+        items.forEach(
+            item => {
 
-            const items =
-                document.querySelectorAll(
-                    `.conversation-item[data-assigned-user-id="${CSS.escape(
-                        userId
-                    )}"]`
+                const status =
+                    item.querySelector(
+                        '.admin-status'
+                    );
+
+                if (!status) {
+                    return;
+                }
+
+                status.textContent =
+                    isOnline
+                        ? 'Đang trực tuyến'
+                        : 'Ngoại tuyến';
+
+                status.classList.toggle(
+                    'online',
+                    isOnline
                 );
 
-            items.forEach(
-                item => {
-
-                    const status =
-                        item.querySelector(
-                            '.admin-status'
-                        );
-
-                    if (!status) {
-                        return;
-                    }
-
-                    status.textContent =
-                        isOnline
-                            ? 'Đang trực tuyến'
-                            : 'Ngoại tuyến';
-
-                    status.classList.toggle(
-                        'online',
-                        isOnline
-                    );
-
-                    status.classList.toggle(
-                        'offline',
-                        !isOnline
-                    );
-                }
-            );
-        }
+                status.classList.toggle(
+                    'offline',
+                    !isOnline
+                );
+            }
+        );
+    }
 
 
-        /* =====================================================
-           FILTER
-        ===================================================== */
+    /* =====================================================
+       FILTER
+    ===================================================== */
 
-        function updateStatusFilterCounts(
+    function updateStatusFilterCounts(
+        counts
+    ) {
+
+        Object.entries(
             counts
-        ) {
+        ).forEach(
+            ([status, count]) => {
 
-            Object.entries(
-                counts
-            ).forEach(
-                ([status, count]) => {
+                const badge =
+                    document.querySelector(
+                        `[data-status-count="${status}"]`
+                    );
 
-                    const badge =
-                        document.querySelector(
-                            `[data-status-count="${status}"]`
-                        );
-
-                    if (badge) {
-                        badge.textContent =
-                            count;
-                    }
+                if (badge) {
+                    badge.textContent =
+                        count;
                 }
+            }
+        );
+    }
+
+
+    function updateUnreadFilterCount(
+        count
+    ) {
+
+        const badge =
+            document.querySelector(
+                '[data-filter-count="unread"]'
             );
+
+        if (badge) {
+            badge.textContent =
+                count;
+        }
+    }
+
+
+    function updateConversationTotal(
+        count
+    ) {
+
+        if (!DOM.conversationTotal) {
+            return;
         }
 
-
-        function updateUnreadFilterCount(
-            count
-        ) {
-
-            const badge =
-                document.querySelector(
-                    '[data-filter-count="unread"]'
-                );
-
-            if (badge) {
-                badge.textContent =
-                    count;
-            }
-        }
-
-
-        function updateConversationTotal(
-            count
-        ) {
-
-            if (!DOM.conversationTotal) {
-                return;
-            }
-
-            DOM.conversationTotal.textContent =
-                `${count} conversations`;
-        }
+        DOM.conversationTotal.textContent =
+            `${count} conversations`;
+    }
 
     function updateConversationReadOnlyUI(newStatus) {
         const statusKey = getConversationStatusKey(newStatus);
@@ -3542,10 +3800,37 @@ document.addEventListener('DOMContentLoaded', function () {
         if (DOM.resolveConversationButton) {
             DOM.resolveConversationButton.disabled = isReadOnly;
         }
+
+
+        const attachmentButton = document.getElementById('attachmentBtn');
+        const fileInput = document.getElementById('chatFileInput');
+        const sendButton = document.getElementById('sendMessageBtn');
+
+        if (attachmentButton) {
+            attachmentButton.disabled =
+                isReadOnly ||
+                isUploadingAdminAttachments ||
+                isSendingAdminMessage;
+        }
+
+        if (fileInput) {
+            fileInput.disabled =
+                isReadOnly ||
+                isUploadingAdminAttachments ||
+                isSendingAdminMessage;
+        }
+
+        if (sendButton) {
+            sendButton.disabled =
+                isReadOnly ||
+                isSendingAdminMessage;
+        }
+
+
     }
-        /* =====================================================
-           FILTER EVENTS
-        ===================================================== */
+    /* =====================================================
+       FILTER EVENTS
+    ===================================================== */
 
     function initFilterEvents() {
 
@@ -3644,106 +3929,106 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderConversationList();
     }
-        /* =====================================================
-           SEARCH
-        ===================================================== */
+    /* =====================================================
+       SEARCH
+    ===================================================== */
 
-        function initSearch() {
+    function initSearch() {
 
-            if (!DOM.conversationSearch) {
-                return;
+        if (!DOM.conversationSearch) {
+            return;
+        }
+
+        DOM.conversationSearch.addEventListener(
+            'input',
+            () => {
+                conversationState.filters.search =
+                    DOM.conversationSearch.value
+                        .trim()
+                        .toLowerCase();
+
+                renderConversationList();
+
+                clearTimeout(
+                    conversationSearchTimer
+                );
+
+                conversationSearchTimer = setTimeout(
+                    () => {
+                        loadConversationCounts();
+                    },
+                    300
+                );
             }
+        );
+    }
 
-            DOM.conversationSearch.addEventListener(
-                'input',
-                () => {
-                    conversationState.filters.search =
-                        DOM.conversationSearch.value
-                            .trim()
-                            .toLowerCase();
 
-                    renderConversationList();
+    /* =====================================================
+       CONVERSATION EVENTS
+    ===================================================== */
 
-                    clearTimeout(
-                        conversationSearchTimer
+    function initConversationEvents() {
+
+        DOM.conversationList?.addEventListener(
+            'click',
+            function (event) {
+
+                const item =
+                    event.target.closest(
+                        '.conversation-item'
                     );
 
-                    conversationSearchTimer = setTimeout(
-                        () => {
-                            loadConversationCounts();
-                        },
-                        300
-                    );
+                if (!item) {
+                    return;
                 }
-            );
-        }
+
+                openConversation(
+                    item
+                );
+            }
+        );
 
 
-        /* =====================================================
-           CONVERSATION EVENTS
-        ===================================================== */
+        DOM.backButton?.addEventListener(
+            'click',
+            function () {
 
-        function initConversationEvents() {
-
-            DOM.conversationList?.addEventListener(
-                'click',
-                function (event) {
-
-                    const item =
-                        event.target.closest(
-                            '.conversation-item'
-                        );
-
-                    if (!item) {
-                        return;
-                    }
-
-                    openConversation(
-                        item
-                    );
-                }
-            );
+                closeConversation();
+            }
+        );
+    }
 
 
-            DOM.backButton?.addEventListener(
-                'click',
-                function () {
-
-                    closeConversation();
-                }
-            );
-        }
-
-
-        /* =====================================================
-           CONTACT DRAWER
-        ===================================================== */
+    /* =====================================================
+       CONTACT DRAWER
+    ===================================================== */
 
     async function initContactEvents() {
 
-            DOM.chatContactButton?.addEventListener(
-                'click',
-                function () {
-                    const conversationId = state.currentConversationId;
-                    if (!conversationId) {
-                        return;
-                    }
-
-                    DOM.contactDrawer?.classList.add('show');
-
-                    updateOverlay();
-                    loadContact(
-                        conversationId
-                    );
+        DOM.chatContactButton?.addEventListener(
+            'click',
+            function () {
+                const conversationId = state.currentConversationId;
+                if (!conversationId) {
+                    return;
                 }
-            );
+
+                DOM.contactDrawer?.classList.add('show');
+
+                updateOverlay();
+                loadContact(
+                    conversationId
+                );
+            }
+        );
 
 
-            DOM.closeContactDrawerButton?.addEventListener(
-                'click',
-                closeContactDrawer
-            );
-        }
+        DOM.closeContactDrawerButton?.addEventListener(
+            'click',
+            closeContactDrawer
+        );
+    }
 
     async function loadContact(conversationId) {
 
@@ -3781,8 +4066,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 );
             }
 
-            const contact =
-                await response.json();
+            const contact = await response.json();
             console.log(contact);
             // Trong lúc request đang chạy,
             // user có thể đã click conversation khác
@@ -3999,338 +4283,318 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         ).format(date);
     }
-        /* =====================================================
-           MOBILE FILTER
-        ===================================================== */
+    /* =====================================================
+       MOBILE FILTER
+    ===================================================== */
 
-        function initMobileEvents() {
+    function initMobileEvents() {
 
-            DOM.openChatFiltersButton?.addEventListener(
-                'click',
-                openFilterSidebar
-            );
-
-
-            DOM.filterClose?.addEventListener(
-                'click',
-                closeFilterSidebar
-            );
+        DOM.openChatFiltersButton?.addEventListener(
+            'click',
+            openFilterSidebar
+        );
 
 
-            DOM.overlay?.addEventListener(
-                'click',
-                function () {
-
-                    closeFilterSidebar();
-
-                    closeContactDrawer();
-                }
-            );
-        }
+        DOM.filterClose?.addEventListener(
+            'click',
+            closeFilterSidebar
+        );
 
 
-        /* =====================================================
-           SEND MESSAGE
-        ===================================================== */
+        DOM.overlay?.addEventListener(
+            'click',
+            function () {
 
-        async function sendAdminMessage(
-            content
+                closeFilterSidebar();
+
+                closeContactDrawer();
+            }
+        );
+    }
+
+
+    /* =====================================================
+       SEND MESSAGE
+    ===================================================== */
+
+
+    async function sendAdminMessage(content, uploadIds = []) {
+        content = (content ?? '').trim();
+
+        if (!state.currentConversationId) return false;
+        if (isCurrentConversationReadOnly()) return false;
+
+        if (isUploadingAdminAttachments) return false;
+
+        const ids = [...new Set(uploadIds.map(Number))];
+
+        if (!content && ids.length === 0) return false;
+        if (ids.length > CHAT_ATTACHMENT_CONFIG.maxFiles) return false;
+
+        if (
+            !state.connection ||
+            typeof signalR === 'undefined' ||
+            state.connection.state !== signalR.HubConnectionState.Connected
         ) {
-
-            //Chặn gửi message ở frontend
-            if (
-                !content ||
-                !state.currentConversationId
-            ) {
-                return false;
-            }
-
-            if (isCurrentConversationReadOnly()) {
-                return false;
-            }
-            if (
-                !content ||
-                !state.currentConversationId
-            ) {
-                return false;
-            }
-
-            if (
-                !state.connection ||
-                typeof signalR ===
-                'undefined' ||
-                state.connection.state !==
-                signalR.HubConnectionState.Connected
-            ) {
-
-                console.warn(
-                    'Chat SignalR is not connected.'
-                );
-
-                return false;
-            }
-
-            try {
-
-                await state.connection.invoke(
-                    'SendAdminMessage',
-                    Number(
-                        state.currentConversationId
-                    ),
-                    content
-                );
-
-                return true;
-
-            }
-            catch (error) {
-
-                console.log(
-                    'Send admin message failed:',
-                    error
-                );
-
-                return false;
-            }
+            console.warn('Chat SignalR is not connected.');
+            return false;
         }
 
-        function initSendMessage() {
+        try {
+            await state.connection.invoke(
+                'SendAdminMessage',
+                Number(state.currentConversationId),
+                content,
+                ids
+            );
 
+            return true;
+        } catch (error) {
+            console.error('Send admin message failed:', error);
+            return false;
+        }
+    }
+
+    function initSendMessage() {
+        const form = document.getElementById('sendMessageForm');
+        const input = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendMessageBtn');
+        const attachmentButton = document.getElementById('attachmentBtn');
+        const fileInput = document.getElementById('chatFileInput');
+
+        if (!form || !input || !sendButton || !attachmentButton || !fileInput) {
+            console.warn('Không tìm thấy đầy đủ các phần tử chat composer.');
+            return;
+        }
+
+        attachmentButton.onclick = () => {
             if (
-                !DOM.sendMessageForm ||
-                !DOM.messageInput
+                isCurrentConversationReadOnly() ||
+                isUploadingAdminAttachments ||
+                isSendingAdminMessage
             ) {
                 return;
             }
 
+            fileInput.click();
+        };
 
-            DOM.messageInput.addEventListener(
-                'input',
-                handleAdminTyping
+        fileInput.onchange = handleAdminAttachmentSelection;
+
+        form.onsubmit = async event => {
+            event.preventDefault();
+
+            if (isSendingAdminMessage) return;
+            if (isCurrentConversationReadOnly()) return;
+            if (isUploadingAdminAttachments) return;
+
+            const content = input.value.trim();
+
+            const attachments = [...pendingAdminAttachments.values()];
+            const failedAttachment = attachments.some(
+                item => item.status !== 'uploaded' || !item.uploadId
             );
 
+            if (failedAttachment) {
+                Toast.warning(
+                    'Hãy xử lý các file upload thất bại trước khi gửi tin nhắn.'
+                );
+                return;
+            }
 
-            DOM.sendMessageForm.addEventListener(
-                'submit',
-                async function (event) {
+            const uploadIds = attachments.map(item => item.uploadId);
 
-                    event.preventDefault();
+            if (!content && uploadIds.length === 0) return;
 
-                    const content =
-                        DOM.messageInput.value.trim();
+            isSendingAdminMessage = true;
+            sendButton.disabled = true;
+            attachmentButton.disabled = true;
+            input.disabled = true;
 
-                    if (!content) {
-                        return;
-                    }
+            renderAdminAttachmentList();
 
-                    stopTyping();
+            try {
+                const success = await sendAdminMessage(content, uploadIds);
 
-                    if (
-                        !state.currentConversationId
-                    ) {
-                        return;
-                    }
-
-
-                    const sendButton =
-                        DOM.sendMessageForm
-                            .querySelector(
-                                '.send-msg-btn'
-                            );
-
-                    if (sendButton) {
-                        sendButton.disabled =
-                            true;
-                    }
-
-
-                    try {
-
-                        const success =
-                            await sendAdminMessage(
-                                content
-                            );
-
-                        if (success) {
-
-                            DOM.messageInput.value =
-                                '';
-
-                            /*
-                             * Message will be appended
-                             * through SignalR.
-                             */
-                        }
-
-                    }
-                    finally {
-
-                        if (sendButton) {
-                            sendButton.disabled =
-                                false;
-                        }
-
-                        DOM.messageInput.focus();
-                    }
+                if (!success) {
+                    Toast.warning(
+                        'Gửi tin nhắn thất bại. Nội dung và file vẫn được giữ lại.'
+                    );
+                    return;
                 }
-            );
-        }
+
+                input.value = '';
+                clearAdminAttachments();
+            } finally {
+                isSendingAdminMessage = false;
+
+                const readOnly = isCurrentConversationReadOnly();
+
+                sendButton.disabled = readOnly;
+                attachmentButton.disabled = readOnly;
+                input.disabled = readOnly;
+
+                renderAdminAttachmentList();
+            }
+        };
+    }
 
 
-        /* =====================================================
-           REFRESH
-        ===================================================== */
 
-        async function initRefresh() {
+    /* =====================================================
+       REFRESH
+    ===================================================== */
 
-            DOM.refreshConversations?.addEventListener(
-                'click',
-                async function () {
+    async function initRefresh() {
 
-                    this.classList.add(
-                        'ti-spin'
+        DOM.refreshConversations?.addEventListener(
+            'click',
+            async function () {
+
+                this.classList.add(
+                    'ti-spin'
+                );
+
+                try {
+
+                    /*
+                     * Refresh luôn reset:
+                     *
+                     * - Inbox -> All
+                     * - Status -> All
+                     * - Label -> inactive
+                     */
+                    resetConversationFiltersForRefresh();
+
+
+                    /*
+                     * Load lại:
+                     *
+                     * - conversation list
+                     * - conversation counts
+                     */
+                    await reloadConversationsWithFilters();
+
+                }
+                catch (error) {
+
+                    console.log(
+                        'REFRESH CONVERSATIONS ERROR:',
+                        error
                     );
 
-                    try {
-
-                        /*
-                         * Refresh luôn reset:
-                         *
-                         * - Inbox -> All
-                         * - Status -> All
-                         * - Label -> inactive
-                         */
-                        resetConversationFiltersForRefresh();
-
-
-                        /*
-                         * Load lại:
-                         *
-                         * - conversation list
-                         * - conversation counts
-                         */
-                        await reloadConversationsWithFilters();
-
-                    }
-                    catch (error) {
-
-                        console.log(
-                            'REFRESH CONVERSATIONS ERROR:',
-                            error
-                        );
-
-                    }
-                    finally {
-
-                        this.classList.remove(
-                            'ti-spin'
-                        );
-                    }
                 }
-            );
-        }
-        function resetConversationFiltersForRefresh() {
+                finally {
 
-            /*
-             * Inbox
-             * => trở về All
-             */
-            conversationState.filters.inboxId = null;
-
-            document
-                .querySelectorAll(
-                    '.chat-filter-list li[data-filter-type="inbox"]'
-                )
-                .forEach(item => {
-                    item.classList.remove('active');
-
-                    if (
-                        item.dataset.filterValue === 'all'
-                    ) {
-                        item.classList.add('active');
-                    }
-                });
-
-
-            /*
-             * Status
-             * => bỏ filter
-             */
-            conversationState.filters.status = 'all';
-
-            document
-                .querySelectorAll(
-                    '.chat-filter-list li[data-filter-type="status"]'
-                )
-                .forEach(item => {
-                    item.classList.remove('active');
-                });
-
-
-            /*
-             * Label
-             * => bỏ filter
-             */
-            conversationState.filters.labelId = null;
-
-            document
-                .querySelectorAll(
-                    '.chat-filter-list li[data-filter-type="label"]'
-                )
-                .forEach(item => {
-                    item.classList.remove('active');
-                });
-        }
-
-        /* =====================================================
-           MARK ALL AS READ
-        ===================================================== */
-        function initMarkAllAsRead() {
-            DOM.markAllAsRead?.addEventListener(
-                'click',
-                async function () {
-
-                    if (
-                        !state.connection ||
-                        typeof signalR === 'undefined' ||
-                        state.connection.state !==
-                        signalR.HubConnectionState.Connected
-                    ) {
-                        return;
-                    }
-
-                    try {
-                        this.disabled = true;
-
-                        await state.connection.invoke(
-                            'MarkAllConversationsAsRead'
-                        );
-
-                        /*
-                         * Backend đã xử lý mark all read.
-                         *
-                         * Không tự sửa count ở client.
-                         * Không tự đổi status ở client.
-                         *
-                         * Reload lại DB:
-                         * - conversation list
-                         * - filter counts
-                         */
-                        await reloadConversationsWithFilters();
-
-                    }
-                    catch (error) {
-                        console.log(
-                            'MARK ALL AS READ ERROR:',
-                            error
-                        );
-                    }
-                    finally {
-                        this.disabled = false;
-                    }
+                    this.classList.remove(
+                        'ti-spin'
+                    );
                 }
-            );
-        }
+            }
+        );
+    }
+    function resetConversationFiltersForRefresh() {
+
+        /*
+         * Inbox
+         * => trở về All
+         */
+        conversationState.filters.inboxId = null;
+
+        document
+            .querySelectorAll(
+                '.chat-filter-list li[data-filter-type="inbox"]'
+            )
+            .forEach(item => {
+                item.classList.remove('active');
+
+                if (
+                    item.dataset.filterValue === 'all'
+                ) {
+                    item.classList.add('active');
+                }
+            });
+
+
+        /*
+         * Status
+         * => bỏ filter
+         */
+        conversationState.filters.status = 'all';
+
+        document
+            .querySelectorAll(
+                '.chat-filter-list li[data-filter-type="status"]'
+            )
+            .forEach(item => {
+                item.classList.remove('active');
+            });
+
+
+        /*
+         * Label
+         * => bỏ filter
+         */
+        conversationState.filters.labelId = null;
+
+        document
+            .querySelectorAll(
+                '.chat-filter-list li[data-filter-type="label"]'
+            )
+            .forEach(item => {
+                item.classList.remove('active');
+            });
+    }
+
+    /* =====================================================
+       MARK ALL AS READ
+    ===================================================== */
+    function initMarkAllAsRead() {
+        DOM.markAllAsRead?.addEventListener(
+            'click',
+            async function () {
+
+                if (
+                    !state.connection ||
+                    typeof signalR === 'undefined' ||
+                    state.connection.state !==
+                    signalR.HubConnectionState.Connected
+                ) {
+                    return;
+                }
+
+                try {
+                    this.disabled = true;
+
+                    await state.connection.invoke(
+                        'MarkAllConversationsAsRead'
+                    );
+
+                    /*
+                     * Backend đã xử lý mark all read.
+                     *
+                     * Không tự sửa count ở client.
+                     * Không tự đổi status ở client.
+                     *
+                     * Reload lại DB:
+                     * - conversation list
+                     * - filter counts
+                     */
+                    await reloadConversationsWithFilters();
+
+                }
+                catch (error) {
+                    console.log(
+                        'MARK ALL AS READ ERROR:',
+                        error
+                    );
+                }
+                finally {
+                    this.disabled = false;
+                }
+            }
+        );
+    }
 
     async function loadChatLabels() {
 
@@ -4454,40 +4718,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 labelList.appendChild(li);
             });
     }
-        /* =====================================================
-           RETRY MESSAGE LOAD
-        ===================================================== */
+    /* =====================================================
+       RETRY MESSAGE LOAD
+    ===================================================== */
 
-        DOM.chatHistory?.addEventListener(
-            'click',
-            function (event) {
-                const retryButton =
-                    event.target.closest(
-                        '.chat-retry'
-                    );
-
-                if (!retryButton) {
-                    return;
-                }
-
-                const conversationId =
-                    retryButton.dataset
-                        .conversationId;
-
-                if (
-                    !conversationId ||
-                    !isCurrentConversation(
-                        conversationId
-                    )
-                ) {
-                    return;
-                }
-
-                loadConversationMessages(
-                    conversationId
+    DOM.chatHistory?.addEventListener(
+        'click',
+        function (event) {
+            const retryButton =
+                event.target.closest(
+                    '.chat-retry'
                 );
+
+            if (!retryButton) {
+                return;
             }
-        );
+
+            const conversationId =
+                retryButton.dataset
+                    .conversationId;
+
+            if (
+                !conversationId ||
+                !isCurrentConversation(
+                    conversationId
+                )
+            ) {
+                return;
+            }
+
+            loadConversationMessages(
+                conversationId
+            );
+        }
+    );
 
     //LABELS
 
@@ -5214,49 +5478,397 @@ document.addEventListener('DOMContentLoaded', function () {
             closeConversationLabelPicker();
         }
     });
-        /* =====================================================
-           INITIALIZATION
-        ===================================================== */
 
-        async function initialize() {
-            //conversationState.filters.inboxId = DOM.workspace?.dataset.inboxId || null;
-            conversationState.filters.inboxId = null;
+    //ATTACHMENT
 
-            initFilterEvents();
 
-            initSearch();
+    function validateAdminAttachment(file) {
+        const dotIndex = file.name.lastIndexOf('.');
+        const extension = dotIndex >= 0
+            ? file.name.slice(dotIndex).toLowerCase()
+            : '';
 
-            registerConversationActions();
-
-            initConversationEvents();
-
-            initContactEvents();
-
-            initMobileEvents();
-
-            initSendMessage();
-
-            initRefresh();
-
-            initMarkAllAsRead();
-
-            setupConversationLazyLoading();
-
-            setupMessageLazyLoading();
-
-            scrollChatToBottom();
-
-            await Promise.all([
-                loadInitialConversations(),
-                loadConversationCounts(),
-                loadChatLabels()
-            ]);
-
-            initChatSignalR();
+        if (!CHAT_ATTACHMENT_CONFIG.allowedExtensions.has(extension)) {
+            return 'Định dạng file không được hỗ trợ.';
         }
+
+        if (
+            file.type &&
+            !CHAT_ATTACHMENT_CONFIG.allowedMimeTypes.has(file.type)
+        ) {
+            return 'Loại file không được hỗ trợ.';
+        }
+
+        if (file.size <= 0) {
+            return 'File rỗng hoặc không hợp lệ.';
+        }
+
+        if (file.size > CHAT_ATTACHMENT_CONFIG.maxFileSize) {
+            return 'File vượt quá giới hạn dung lượng cho phép.';
+        }
+
+        return null;
+    }
+
+    function formatAdminAttachmentSize(bytes) {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) {
+            return `${(bytes / 1024).toFixed(1)} KB`;
+        }
+
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function getAdminAttachmentIcon(file) {
+        const name = (file?.name || '').toLowerCase();
+        const type = (file?.type || '').toLowerCase();
+        const extension = name.includes('.') ? name.slice(name.lastIndexOf('.') + 1) : '';
+
+        if (type.startsWith('image/')) return 'ti-photo';
+        if (type.startsWith('video/')) return 'ti-video';
+        if (type.startsWith('audio/')) return 'ti-music';
+
+        const icons = {
+            pdf: 'ti-file-type-pdf',
+            doc: 'ti-file-type-doc',
+            docx: 'ti-file-type-doc',
+            xls: 'ti-file-type-xls',
+            xlsx: 'ti-file-type-xls',
+            csv: 'ti-file-spreadsheet',
+            ppt: 'ti-file-type-ppt',
+            pptx: 'ti-file-type-ppt',
+            txt: 'ti-file-text',
+            zip: 'ti-file-zip',
+            rar: 'ti-file-zip',
+            '7z': 'ti-file-zip'
+        };
+
+        return icons[extension] || 'ti-file';
+
+        }
+    function getAdminAttachmentProperty(data, pascalCase, camelCase) {
+        if (!data || typeof data !== 'object') {
+            return undefined;
+        }
+
+        return data[pascalCase] ?? data[camelCase];
+    }
+    function createAdminAttachmentIcon(file) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chat-pending-file-icon';
+
+        const icon = document.createElement('i');
+        icon.className = `ti ${getAdminAttachmentIcon(file)}`;
+        icon.setAttribute('aria-hidden', 'true');
+
+        wrapper.appendChild(icon);
+        return wrapper;
+
+    }
+    function renderAdminAttachmentList() {
+        const preview = document.getElementById('chatAttachmentPreview');
+        const list = document.getElementById('chatAttachmentList');
+
+        if (!preview || !list) {
+            return;
+        }
+
+        list.replaceChildren();
+
+        for (const [key, attachment] of pendingAdminAttachments) {
+            const item = document.createElement('div');
+            item.className = 'chat-pending-file';
+            console.log('History attachment:', {
+                fileName: attachment?.fileName,
+                FileName: attachment?.FileName,
+                contentType: attachment?.contentType,
+                ContentType: attachment?.ContentType,
+                icon: getAdminAttachmentIcon(attachment)
+            });
+            if (attachment.previewUrl) {
+                const imageWrapper = document.createElement('div');
+                imageWrapper.className = 'chat-pending-file-preview';
+
+                const image = document.createElement('img');
+                image.src = attachment.previewUrl;
+                image.alt = attachment.file.name;
+                image.loading = 'lazy';
+
+                imageWrapper.appendChild(image);
+                item.appendChild(imageWrapper);
+            } else {
+                item.appendChild(
+                    createAdminAttachmentIcon(attachment.file)
+                );
+            }
+
+            const info = document.createElement('div');
+            info.className = 'chat-pending-file-info';
+
+            const name = document.createElement('div');
+            name.className = 'chat-pending-file-name';
+            name.textContent = attachment.file.name;
+            name.title = attachment.file.name;
+
+            const meta = document.createElement('div');
+            meta.className = 'chat-pending-file-size';
+
+            const statusText = {
+                uploading: 'Đang tải lên...',
+                uploaded: 'Đã tải lên',
+                failed: 'Tải lên thất bại'
+            }[attachment.status] ?? 'Chưa tải lên';
+
+            meta.textContent =
+                `${formatAdminAttachmentSize(attachment.file.size)} · ${statusText}`;
+
+            info.append(name, meta);
+            item.appendChild(info);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'chat-pending-file-remove';
+            removeButton.textContent = '×';
+            removeButton.setAttribute(
+                'aria-label',
+                `Xóa file ${attachment.file.name}`
+            );
+
+            removeButton.disabled =
+                attachment.status === 'uploading' ||
+                isSendingAdminMessage ||
+                isCurrentConversationReadOnly();
+
+            removeButton.addEventListener('click', () => {
+                removeAdminAttachment(key);
+            });
+
+            item.appendChild(removeButton);
+            list.appendChild(item);
+        }
+
+        preview.hidden = pendingAdminAttachments.size === 0;
+
+    }
+
+
+    function removeAdminAttachment(key) {
+        if (isSendingAdminMessage) return;
+
+        const attachment = pendingAdminAttachments.get(key);
+        if (!attachment || attachment.status === 'uploading') return;
+
+        if (attachment.previewUrl) {
+            URL.revokeObjectURL(attachment.previewUrl);
+        }
+
+        pendingAdminAttachments.delete(key);
+        renderAdminAttachmentList();
+    }
+
+    function clearAdminAttachments() {
+        for (const attachment of pendingAdminAttachments.values()) {
+            if (attachment.previewUrl) {
+                URL.revokeObjectURL(attachment.previewUrl);
+            }
+        }
+
+        pendingAdminAttachments.clear();
+
+        const fileInput = document.getElementById('chatFileInput');
+        if (fileInput) fileInput.value = '';
+
+        renderAdminAttachmentList();
+    }
+
+    async function uploadAdminAttachment(key, file) {
+        const attachment = pendingAdminAttachments.get(key);
+        if (!attachment) return false;
+
+        attachment.status = 'uploading';
+        renderAdminAttachmentList();
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/admin/chat/attachments/upload', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData
+            });
+
+            let result = null;
+
+            try {
+                result = await response.json();
+            } catch {
+                // Server có thể trả về response không phải JSON.
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    result?.message || 'Không thể tải file lên máy chủ.'
+                );
+            }
+
+            const uploadId = getAdminAttachmentProperty(
+                result, 'UploadId', 'uploadId'
+            );
+
+            if (!Number.isSafeInteger(Number(uploadId)) || Number(uploadId) <= 0) {
+                throw new Error('Máy chủ không trả về UploadId hợp lệ.');
+            }
+
+            attachment.uploadId = Number(uploadId);
+            attachment.fileName = getAdminAttachmentProperty(
+                result, 'FileName', 'fileName'
+            ) ?? file.name;
+            attachment.contentType = getAdminAttachmentProperty(
+                result, 'ContentType', 'contentType'
+            ) ?? file.type;
+            attachment.fileSize = Number(
+                getAdminAttachmentProperty(result, 'FileSize', 'fileSize')
+                ?? file.size
+            );
+            attachment.expiresAt = getAdminAttachmentProperty(
+                result, 'ExpiresAt', 'expiresAt'
+            );
+            attachment.uploadSessionToken = getAdminAttachmentProperty(
+                result, 'UploadSessionToken', 'uploadSessionToken'
+            );
+            attachment.status = 'uploaded';
+
+            renderAdminAttachmentList();
+            return true;
+        } catch (error) {
+            attachment.status = 'failed';
+            attachment.error = error.message;
+
+            renderAdminAttachmentList();
+            console.error('Admin attachment upload failed:', error);
+
+            return false;
+        }
+    }
+
+    async function handleAdminAttachmentSelection(event) {
+        const input = event.currentTarget;
+        const files = Array.from(input.files ?? []);
+
+        // Cho phép chọn lại cùng một file ở lần tiếp theo.
+        input.value = '';
+
+        if (isUploadingAdminAttachments || isSendingAdminMessage) return;
+        if (isCurrentConversationReadOnly()) return;
+
+        const remainingSlots =
+            CHAT_ATTACHMENT_CONFIG.maxFiles - pendingAdminAttachments.size;
+
+        if (remainingSlots <= 0) {
+            Toast.warning('Mỗi tin nhắn chỉ được đính kèm tối đa 5 file.');
+            return;
+        }
+
+        const acceptedFiles = [];
+
+        for (const file of files) {
+            if (acceptedFiles.length >= remainingSlots) {
+                Toast.warning('Đã đạt giới hạn 5 file cho mỗi tin nhắn.');
+                break;
+            }
+
+            const validationError = validateAdminAttachment(file);
+
+            if (validationError) {
+                console.warn(`${file.name}: ${validationError}`);
+                continue;
+            }
+
+            acceptedFiles.push(file);
+        }
+
+        if (acceptedFiles.length === 0) return;
+
+        isUploadingAdminAttachments = true;
+
+        try {
+            for (const file of acceptedFiles) {
+                const key = `admin-upload-${++adminAttachmentSequence}`;
+
+                const attachment = {
+                    file,
+                    uploadId: null,
+                    fileName: file.name,
+                    contentType: file.type,
+                    fileSize: file.size,
+                    expiresAt: null,
+                    uploadSessionToken: null,
+                    previewUrl: file.type.startsWith('image/')
+                        ? URL.createObjectURL(file)
+                        : null,
+                    status: 'uploading',
+                    error: null
+                };
+
+                pendingAdminAttachments.set(key, attachment);
+                renderAdminAttachmentList();
+
+                await uploadAdminAttachment(key, file);
+            }
+        } finally {
+            isUploadingAdminAttachments = false;
+            renderAdminAttachmentList();
+        }
+    }
+
+
+
+
+    /* =====================================================
+       INITIALIZATION
+    ===================================================== */
+
+    async function initialize() {
+        //conversationState.filters.inboxId = DOM.workspace?.dataset.inboxId || null;
+        conversationState.filters.inboxId = null;
+
+        initFilterEvents();
+
+        initSearch();
+
+        registerConversationActions();
+
+        initConversationEvents();
+
+        initContactEvents();
+
+        initMobileEvents();
+
+        initSendMessage();
+
+        initRefresh();
+
+        initMarkAllAsRead();
+
+        setupConversationLazyLoading();
+
+        setupMessageLazyLoading();
+
+        scrollChatToBottom();
+
+        await Promise.all([
+            loadInitialConversations(),
+            loadConversationCounts(),
+            loadChatLabels()
+        ]);
+        initMessageAttachmentEvents();
+
+        initChatSignalR();
+    }
 
 
     initialize();
 
-    }
+}
 );

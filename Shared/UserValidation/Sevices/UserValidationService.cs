@@ -74,8 +74,7 @@ namespace Shared.UserValidation.Sevices
             if (!result.Succeeded)
                 return result;
 
-            context.PermissionSnapshot = await _permissionService.
-                GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
+            context.PermissionSnapshot = await _permissionService.GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
 
             return UserValidationResult.Success();
         }

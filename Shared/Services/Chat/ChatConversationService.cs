@@ -11,6 +11,7 @@ using Shared.Interfaces.Chat;
 using Shared.Interfaces.Notification;
 using Shared.Requests.Chat;
 using Shared.Responses;
+using System.Linq;
 
 namespace Shared.Services.Chat
 {
@@ -501,40 +502,57 @@ namespace Shared.Services.Chat
 
         public async Task<ChatConversationContactDto?> GetConversationContactAsync(long conversationId, CancellationToken cancellationToken = default)
         {
-            var conversation = await _dbContext.ChatConversations.AsNoTracking().Where(x => x.Id == conversationId).Select(x => new
-                {
-                    ConversationId = x.Id,
-                    ContactId = x.ContactId,
+            var conversation = await _dbContext.ChatConversations
+    .AsNoTracking()
+    .Where(x => x.Id == conversationId)
+    .Select(x => new
+    {
+        ConversationId = x.Id,
+        ContactId = x.ContactId,
+        UserId = x.Contact.UserId,
 
-                    Contact = new
-                    {
-                        x.Contact.Id,
-                        x.Contact.UserId,
-                        x.Contact.Name,
-                        x.Contact.Email,
-                        x.Contact.Phone,
-                        x.Contact.AvatarUrl,
-                        x.Contact.CustomAttributesJson,
-                        x.Contact.CreatedAt
-                    }
-                }).FirstOrDefaultAsync(cancellationToken);
+        Contact = new
+        {
+            x.Contact.Name,
+            x.Contact.Email,
+            x.Contact.Phone,
+            x.Contact.AvatarUrl,
+            x.Contact.CustomAttributesJson,
+            x.Contact.CreatedAt
+        }
+    })
+    .FirstOrDefaultAsync(cancellationToken);
 
             if (conversation == null)
             {
                 return null;
             }
 
+            var user = !string.IsNullOrWhiteSpace(conversation.UserId)
+                ? await _dbContext.Users
+                    .AsNoTracking()
+                    .Where(x => x.Id == conversation.UserId)
+                    .Select(x => new
+                    {
+                        x.UserName,
+                        x.Email,
+                        x.PhoneNumber,
+                        x.Avatar
+                    })
+                    .FirstOrDefaultAsync(cancellationToken)
+                : null;
+
             var result = new ChatConversationContactDto
             {
                 ConversationId = conversation.ConversationId,
                 ContactId = conversation.ContactId,
 
-                Name = conversation.Contact.Name,
-                Email = conversation.Contact.Email,
-                Phone = conversation.Contact.Phone,
-                AvatarUrl = conversation.Contact.AvatarUrl,
-                CustomAttributesJson =
-                    conversation.Contact.CustomAttributesJson,
+                Name = user?.UserName ?? conversation.Contact.Name,
+                Email = user?.Email ?? conversation.Contact.Email,
+                Phone = user?.PhoneNumber ?? conversation.Contact.Phone,
+                AvatarUrl = user?.Avatar ?? conversation.Contact.AvatarUrl,
+
+                CustomAttributesJson = conversation.Contact.CustomAttributesJson,
                 CreatedAt = conversation.Contact.CreatedAt
             };
 
@@ -548,21 +566,49 @@ namespace Shared.Services.Chat
                 }).ToListAsync(cancellationToken);
 
             // Orders của AppUser liên kết với ChatContact
-            if (!string.IsNullOrEmpty(conversation.Contact.UserId))
-            {
-                result.RecentOrders = await _dbContext.Orders.AsNoTracking().Where(x => x.UserId == conversation.Contact.UserId)
-                    .OrderByDescending(x => x.CreatedAt).Take(5).Select(x => new ChatRecentOrderDto
-                    {
-                        Id = x.Id,
-                        OrderCode = x.OrderCode,
-                        Status = x.Status,
-                        PaymentStatus = x.PaymentStatus,
-                        TotalAmount = x.TotalAmount,
-                        CreatedAt = x.CreatedAt
-                    }).ToListAsync(cancellationToken);
-            }
+                //if (!string.IsNullOrEmpty(conversation.Contact.UserId))
+                //{
+                //    result.RecentOrders = await _dbContext.Orders.AsNoTracking().Where(x => x.UserId == conversation.Contact.UserId)
+                //        .OrderByDescending(x => x.CreatedAt).Take(5).Select(x => new ChatRecentOrderDto
+                //        {
+                //            Id = x.Id,
+                //            OrderCode = x.OrderCode,
+                //            Status = x.Status,
+                //            PaymentStatus = x.PaymentStatus,
+                //            TotalAmount = x.TotalAmount,
+                //            CreatedAt = x.CreatedAt
+                //        }).ToListAsync(cancellationToken);
+                //}
 
             return result;
+        }
+        public async Task<ChatConversationHeaderDto?> GetConversationHeaderAsync(
+        long conversationId,
+        CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.ChatConversations
+                .AsNoTracking()
+                .Where(x => x.Id == conversationId)
+                .Select(x => new ChatConversationHeaderDto
+                {
+                    ConversationId = x.Id,
+                    ContactId = x.ContactId,
+
+                    Name = x.Contact.UserId != null
+                        ? _dbContext.Users
+                            .Where(u => u.Id == x.Contact.UserId)
+                            .Select(u => u.UserName)
+                            .FirstOrDefault() ?? x.Contact.Name
+                        : x.Contact.Name,
+
+                    AvatarUrl = x.Contact.UserId != null
+                        ? _dbContext.Users
+                            .Where(u => u.Id == x.Contact.UserId)
+                            .Select(u => u.Avatar)
+                            .FirstOrDefault() ?? x.Contact.AvatarUrl
+                        : x.Contact.AvatarUrl
+                })
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<ServiceResult> UpdateStatusAsync(long conversationId, ChatConversationStatus status, CancellationToken cancellationToken = default)

@@ -156,27 +156,50 @@ namespace Shared.Extensions
 
         [Authorize]
         [PermissionAction(ActionType.Reply)]
-        public async Task SendAdminMessage(long conversationId, string content)
+        public async Task SendAdminMessage(
+    long conversationId,
+    string content,
+    List<long>? uploadIds = null)
         {
-            var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = Context.User?
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId))
                 throw new HubException("Authentication is required.");
 
-            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
-                    conversationId, null, userId, isAdmin: true);
+            var allowed = await _chatAuthorizationService
+                .CanAccessConversationAsync(
+                    conversationId,
+                    null,
+                    userId,
+                    isAdmin: true);
 
             if (!allowed)
-                throw new HubException("You do not have permission to send messages.");
+                throw new HubException(
+                    "You do not have permission to send messages.");
 
-            var message =
-                await _chatMessageService.SendAdminMessageAsync(
+            try
+            {
+                var message = await _chatMessageService.SendAdminMessageAsync(
                     conversationId,
                     userId,
                     content,
+                    uploadIds,
                     Context.ConnectionAborted);
 
-            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.MessageReceived, message);
+                // Service chịu trách nhiệm phát MessageReceived
+                // và ConversationUpdated, nên Hub không phát lại.
+            }
+            catch (OperationCanceledException)
+                when (Context.ConnectionAborted.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Không để lộ chi tiết lỗi nội bộ cho client.
+                throw new HubException(ex.Message);
+            }
         }
 
         public async Task<CustomerSendMessageResult> SendCustomerMessage(long inboxId, long? conversationId, long? contactId,

@@ -27,19 +27,23 @@ namespace Website.Areas.Admin.Controllers
         private readonly IChatAuthorizationService _chatAuthorizationService;
         private readonly IChatConversationService _chatConversationService;
         private readonly IChatMessageService _chatMessageService;
+        private readonly IChatAttachmentService _chatAttachmentService;
+
         private readonly IChatLabelService _chatLabelService;
         private readonly ICurrentUserService _currentUserService;
 
         private readonly ILogger<ChatController> _logger;
 
         public ChatController(IChatAuthorizationService chatAuthorizationService, IChatConversationService chatConversationService, 
-            IChatMessageService chatMessageService, IChatLabelService chatLabelService, ICurrentUserService currentUserService,
+            IChatMessageService chatMessageService, IChatAttachmentService chatAttachmentService,
+            IChatLabelService chatLabelService, ICurrentUserService currentUserService,
             ILogger<ChatController> logger)
         {
             _chatAuthorizationService = chatAuthorizationService;
             _chatConversationService = chatConversationService;
-            _chatLabelService = chatLabelService;
             _chatMessageService = chatMessageService;
+            _chatAttachmentService = chatAttachmentService;
+            _chatLabelService = chatLabelService;
             _currentUserService = currentUserService;
 
             _logger = logger;
@@ -71,6 +75,25 @@ namespace Website.Areas.Admin.Controllers
         {
             var result = await _chatConversationService.GetConversationListAsync(inboxId, status, search, _currentUserService.UserId, labelId,
                 limit, beforeLastMessageAt, beforeId, cancellationToken);
+
+            return Ok(result);
+        }
+
+        [HttpGet("{conversationId:long}/header")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> Header(
+    long conversationId,
+    CancellationToken cancellationToken)
+        {
+            var result = await _chatConversationService
+                .GetConversationHeaderAsync(
+                    conversationId,
+                    cancellationToken);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
 
             return Ok(result);
         }
@@ -234,6 +257,91 @@ namespace Website.Areas.Admin.Controllers
             {
                 success = true
             });
+        }
+
+        [HttpPost("attachments/upload")]
+        [PermissionAction(ActionType.View)]
+        [RequestSizeLimit(12 * 1024 * 1024)]
+        public async Task<IActionResult> UploadAttachment(
+    [FromForm] IFormFile file,
+    CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            try
+            {
+                var result = await _chatAttachmentService.UploadAsync(
+                    file,
+                    contactId: null,
+                    guestToken: null,
+                    uploadSessionToken: null,
+                    userId: userId,
+                    cancellationToken: cancellationToken);
+
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized(new
+                {
+                    message = "Không thể xác thực phiên upload."
+                });
+            }
+        }
+
+        [HttpGet("attachments/{attachmentId:long}/download")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> DownloadAttachment(
+    long attachmentId,
+    CancellationToken cancellationToken)
+        {
+            if (attachmentId <= 0)
+                return BadRequest(new { message = "File đính kèm không hợp lệ." });
+
+            var result = await _chatAttachmentService.OpenForAdminDownloadAsync(
+                attachmentId,
+                cancellationToken);
+
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy file đính kèm." });
+            Response.Headers["Cache-Control"] = "private, no-store";
+            return File(
+                result.Stream,
+                result.ContentType,
+                result.FileName,
+                enableRangeProcessing: true);
+        }
+
+        [HttpGet("attachments/{attachmentId:long}/preview")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> PreviewAttachment(
+            long attachmentId,
+            CancellationToken cancellationToken)
+        {
+            if (attachmentId <= 0)
+                return BadRequest(new { message = "File đính kèm không hợp lệ." });
+
+            var result = await _chatAttachmentService.OpenForAdminPreviewAsync(
+                attachmentId,
+                cancellationToken);
+
+            if (result == null)
+                return NotFound(new { message = "Không tìm thấy file đính kèm." });
+
+            Response.Headers["Cache-Control"] = "private, no-store";
+
+            return File(result.Stream, result.ContentType);
         }
     }
 }

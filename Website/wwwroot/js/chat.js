@@ -716,6 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
              * - Không phụ thuộc guestToken
              * - Backend sẽ xác định ChatContact từ userId
              */
+            console.log(CHAT_CONFIG.isAuthenticated);
             if (CHAT_CONFIG.isAuthenticated) {
 
                 /*
@@ -747,8 +748,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     state.currentConversationId &&
                     state.currentContactId
                 ) {
-                    const status =
-                        await joinConversation();
+                    const status = await joinConversation();
 
                     if (status !== null) {
                         updateCurrentConversationStatus(
@@ -990,7 +990,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     conversationId
                 );
             }
-
             state.chatSession.hasActiveHistory = true;
         }
         catch (error) {
@@ -1003,7 +1002,22 @@ document.addEventListener("DOMContentLoaded", () => {
             state.messagePaging.loading = false;
         }
     }
+    async function waitForImages(container) {
+        const images = [...container.querySelectorAll("img")];
 
+        await Promise.all(
+            images.map((img) => {
+                if (img.complete) {
+                    return Promise.resolve();
+                }
+
+                return new Promise((resolve) => {
+                    img.addEventListener("load", resolve, { once: true });
+                    img.addEventListener("error", resolve, { once: true });
+                });
+            })
+        );
+    }
     async function loadOlderMessagesForConversation(
         conversationId
     ) {
@@ -1647,19 +1661,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 async function joinConversation() {
-    if (
-        !state.currentConversationId ||
-        !state.currentContactId ||
-        !isConnectionReady()
-    ) {
+    if (!state.currentConversationId || !state.currentContactId || !isConnectionReady()) {
         return null;
     }
-
+    console.log("JOIN CONVERSATION");
+    console.log(CHAT_CONFIG.isAuthenticated);
+    console.log(state.guestToken);
     try {
-        const guestToken =
-            CHAT_CONFIG.isAuthenticated
-                ? null
-                : state.guestToken;
+        const guestToken = CHAT_CONFIG.isAuthenticated ? null : state.guestToken;
         const status =
             await connection.invoke(
                 "JoinConversation",
@@ -2834,8 +2843,7 @@ async function joinConversation() {
         separator.className =
             "chat-date";
 
-        const label =
-            getDateSeparatorLabel(date);
+        const label = getDateSeparatorLabel(date);
 
         separator.innerHTML = `
         <span>${escapeHtml(label)}</span>

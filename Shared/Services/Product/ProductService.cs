@@ -158,6 +158,7 @@ namespace Shared.Services.Product
                 FilteredCount = filteredCount
             };
         }
+
         public async Task<List<SelectListItem>> GetCreateProductCategoriesAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.ProductCategories.AsNoTracking().Where(x => x.IsActive).OrderBy(x => x.Name)
@@ -167,6 +168,7 @@ namespace Shared.Services.Product
                     Text = x.Name
                 }).ToListAsync(cancellationToken);
         }
+
         public async Task<List<SelectListItem>> GetCreateAttributesAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.Attributes.AsNoTracking().OrderBy(x => x.CreatedAt)
@@ -199,8 +201,7 @@ namespace Shared.Services.Product
                 slug = $"{slug}-{Guid.NewGuid():N}";
             }
             //Parse variant product
-            var productVariants = string.IsNullOrWhiteSpace(request.Variants) ? [] :
-                JsonSerializer.Deserialize<List<ProductVariantRequest>>(request.Variants,
+            var productVariants = string.IsNullOrWhiteSpace(request.Variants) ? [] : JsonSerializer.Deserialize<List<ProductVariantRequest>>(request.Variants,
                 new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -353,14 +354,15 @@ namespace Shared.Services.Product
         }
         private async Task<MediaFile> SaveMediaFileAsync(IFormFile file, CancellationToken cancellationToken = default)
         {
+            var now = DateTime.UtcNow;
             var extension = Path.GetExtension(file.FileName);
 
             var fileName = $"{Guid.NewGuid():N}{extension}";
 
             var relativeDirectory = Path.Combine(
                 _mediaStorage.ProductFolder,
-                DateTime.UtcNow.ToString("yyyy"),
-                DateTime.UtcNow.ToString("MM"));
+                now.ToString("yyyy"),
+                now.ToString("MM"));
 
             var relativePath = Path.Combine(
                 relativeDirectory,
@@ -393,7 +395,7 @@ namespace Shared.Services.Product
                 StoragePath = relativePath.Replace('\\', '/'),
                 ContentType = file.ContentType,
                 Size = file.Length,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = now
             };
 
             _dbContext.MediaFiles.Add(mediaFile);
@@ -1996,6 +1998,7 @@ namespace Shared.Services.Product
                     throw new InvalidOperationException($"SKU variant '{item.Sku}' đã tồn tại trong sản phẩm.");
             }
         }
+        
         private static ProductVariant BuildVariant(ProductEntity product, ProductVariantRequest request, int displayOrder = 0)
         {
             return new ProductVariant
@@ -2021,6 +2024,7 @@ namespace Shared.Services.Product
                 VariantMedias = []
             };
         }
+        
         private async Task AddVariantAttributesAsync(ProductVariant variant, Dictionary<string, string>? options, CancellationToken cancellationToken = default)
         {
             if (options == null || options.Count == 0)

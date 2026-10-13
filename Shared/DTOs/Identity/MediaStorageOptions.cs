@@ -9,6 +9,6 @@
         /// <summary>
         /// Thư mục lưu file đính kèm chat.
         /// </summary>
-        public string ChatFolder { get; set; } = "chat";
+        public string ChatFolder { get; set; } = "chats";
     }
 }

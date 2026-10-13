@@ -35,18 +35,13 @@ namespace Shared.Services.Media
         private const long MaxProductFileSize = 5 * 1024 * 1024;
         private const long MaxChatFileSize = 10 * 1024 * 1024;
 
-        public MediaService(
-            IWebHostEnvironment environment,
-            IOptions<MediaStorageOptions> options)
+        public MediaService(IWebHostEnvironment environment, IOptions<MediaStorageOptions> options)
         {
             _environment = environment;
             _options = options.Value;
         }
 
-        public async Task<MediaFile> UploadAsync(
-            IFormFile file,
-            string folder,
-            CancellationToken cancellationToken = default)
+        public async Task<MediaFile> UploadAsync(IFormFile file, string folder, CancellationToken cancellationToken = default)
         {
             if (file == null || file.Length <= 0)
                 throw new ArgumentException("File không hợp lệ.");
@@ -54,24 +49,18 @@ namespace Shared.Services.Media
             var safeFolder = NormalizeFolder(folder);
 
             // Chỉ cho phép những thư mục upload đã định nghĩa.
-            var isProduct = string.Equals(
-                safeFolder, "products", StringComparison.OrdinalIgnoreCase);
+            var isProduct = string.Equals(safeFolder, _options.ProductFolder, StringComparison.OrdinalIgnoreCase);
 
-            var isChat = string.Equals(
-                safeFolder, "chat", StringComparison.OrdinalIgnoreCase);
+            var isChat = string.Equals(safeFolder, _options.ChatFolder, StringComparison.OrdinalIgnoreCase);
 
             if (!isProduct && !isChat)
                 throw new InvalidOperationException("Thư mục upload không hợp lệ.");
 
-            var extension = Path.GetExtension(file.FileName);
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-            var allowedExtensions = isProduct
-                ? ProductExtensions
-                : ChatExtensions;
+            var allowedExtensions = isProduct ? ProductExtensions : ChatExtensions;
 
-            var maxFileSize = isProduct
-                ? MaxProductFileSize
-                : MaxChatFileSize;
+            var maxFileSize = isProduct ? MaxProductFileSize : MaxChatFileSize;
 
             if (!allowedExtensions.Contains(extension))
                 throw new InvalidOperationException(
@@ -83,21 +72,32 @@ namespace Shared.Services.Media
 
             ValidateContentType(extension, file.ContentType);
 
-            var physicalFolder = GetPhysicalPath(safeFolder);
-            Directory.CreateDirectory(physicalFolder);
+            var now = DateTime.UtcNow;
+            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
+            var baseFolder = isProduct ? _options.ProductFolder : _options.ChatFolder;
 
-            var generatedFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var physicalPath = Path.Combine(physicalFolder, generatedFileName);
+            var relativeDirectory = Path.Combine(baseFolder,
+                now.ToString("yyyy"),
+                now.ToString("MM"));
+
+            var relativePath = Path.Combine(
+                relativeDirectory,
+                fileName);
+
+            var physicalDirectory = Path.Combine(
+                _options.RootPath,
+                relativeDirectory);
+
+            Directory.CreateDirectory(physicalDirectory);
+
+            var physicalPath = Path.Combine(
+                _options.RootPath,
+                relativePath);
 
             try
             {
-                await using var stream = new FileStream(
-                    physicalPath,
-                    FileMode.CreateNew,
-                    FileAccess.Write,
-                    FileShare.None,
-                    81920,
-                    useAsync: true);
+                await using var stream = new FileStream(physicalPath,
+                    FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true);
 
                 await file.CopyToAsync(stream, cancellationToken);
             }
@@ -111,12 +111,12 @@ namespace Shared.Services.Media
 
             return new MediaFile
             {
-                FileName = generatedFileName,
+                FileName = fileName,
                 OriginalFileName = Path.GetFileName(file.FileName),
-                StoragePath = $"{safeFolder}/{generatedFileName}",
+                StoragePath = relativePath.Replace('\\', '/'),
                 ContentType = file.ContentType,
                 Size = file.Length,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = now
             };
         }
 

@@ -55,6 +55,8 @@ namespace Shared.Services.Authentication
         }
         public async Task<RotateTokenResult> RotateAsync(RefreshToken oldToken, CancellationToken cancellationToken = default)
         {
+            var now = DateTime.UtcNow;
+
             if (oldToken.IsRevoked)
             {
                 return new RotateTokenResult
@@ -64,7 +66,7 @@ namespace Shared.Services.Authentication
                 };
             }
 
-            if (oldToken.ExpiredAt <= DateTime.UtcNow)
+            if (oldToken.ExpiredAt <= now)
             {
                 return new RotateTokenResult
                 {
@@ -74,45 +76,75 @@ namespace Shared.Services.Authentication
             }
 
 
-            var refreshToken = _jwtService.GenerateRefreshToken();
-
             var http = _httpContextAccessor.HttpContext;
-            var now = DateTime.UtcNow;
+            var refreshToken = _jwtService.GenerateRefreshToken();
+            var tokenHash = CommonHelper.Hash(refreshToken);
 
             var newToken = new RefreshToken
             {
                 UserId = oldToken.UserId,
-                TokenHash = CommonHelper.Hash(refreshToken),
+                TokenHash = tokenHash,
                 CreatedAt = now,
                 ExpiredAt = now.Add(oldToken.Lifetime),
                 Lifetime = oldToken.Lifetime,
-
-                UserAgent = http?.Request.Headers.UserAgent,
+                UserAgent = http?.Request.Headers.UserAgent.ToString(),
                 IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
-
                 IsRevoked = false
             };
 
+            await using var transaction = await _dbcontext.Database.BeginTransactionAsync(cancellationToken);
 
-            oldToken.IsRevoked = true;
-            oldToken.RevokedAt = now;
-            oldToken.RevokedReason = "RefreshTokenRotated";
-            oldToken.ReplacedByTokenHash = newToken.TokenHash;
-
-
-            _dbcontext.RefreshTokens.Add(newToken);
-
-            await _dbcontext.SaveChangesAsync(cancellationToken);
-
-
-            return new RotateTokenResult
+            try
             {
-                Success = true,
-                RefreshToken = refreshToken,
-                RefreshTokenEntity = newToken,
-                User = oldToken.User
-            };
+                // Chỉ request đầu tiên thỏa điều kiện mới được rotate.
+                var affectedRows = await _dbcontext.RefreshTokens.Where(x =>
+                        x.Id == oldToken.Id && !x.IsRevoked && x.ExpiredAt > now)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.IsRevoked, true)
+                        .SetProperty(x => x.RevokedAt, now)
+                        .SetProperty(x => x.RevokedReason, "RefreshTokenRotated")
+                        .SetProperty(x => x.ReplacedByTokenHash, tokenHash),
+                        cancellationToken);
+
+                if (affectedRows != 1)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+
+                    return new RotateTokenResult
+                    {
+                        Success = false,
+                        Error = "Refresh token không còn hợp lệ hoặc đã được sử dụng"
+                    };
+                }
+
+                // Chỉ tạo token mới khi thu hồi token cũ thành công.
+                _dbcontext.RefreshTokens.Add(newToken);
+
+                await _dbcontext.SaveChangesAsync(cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+
+                // ExecuteUpdateAsync không đồng bộ entity đang được track.
+                oldToken.IsRevoked = true;
+                oldToken.RevokedAt = now;
+                oldToken.RevokedReason = "RefreshTokenRotated";
+                oldToken.ReplacedByTokenHash = tokenHash;
+
+                return new RotateTokenResult
+                {
+                    Success = true,
+                    RefreshToken = refreshToken,
+                    RefreshTokenEntity = newToken,
+                    User = oldToken.User
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
         }
+
         public async Task RevokeAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
         {
             refreshToken.IsRevoked = true;

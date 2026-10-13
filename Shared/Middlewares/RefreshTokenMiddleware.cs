@@ -17,9 +17,7 @@ public sealed class RefreshTokenMiddleware
 
     private ILogger<RefreshTokenMiddleware> _logger;
 
-    public RefreshTokenMiddleware(
-        RequestDelegate next,
-        IOptions<JwtSetting> jwtOptions, ILogger<RefreshTokenMiddleware> logger)
+    public RefreshTokenMiddleware(RequestDelegate next, IOptions<JwtSetting> jwtOptions, ILogger<RefreshTokenMiddleware> logger)
     {
         _next = next;
         _jwtSettings = jwtOptions.Value;
@@ -27,10 +25,7 @@ public sealed class RefreshTokenMiddleware
     }
 
     //Access token  hết hạn chạy để lấy lại token từ dựa vào refresh token
-    public async Task InvokeAsync(
-        HttpContext context,
-        IJwtService jwtService,
-        IAuthService authService)
+    public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService)
     {
         var accessToken = context.Request.Cookies["access_token"];
         var refreshToken = context.Request.Cookies["refresh_token"];
@@ -57,25 +52,27 @@ public sealed class RefreshTokenMiddleware
 
         try
         {
-
-            ///Log check expires access token và refresh token
-            //_logger.LogInformation("Access exists: {AccessExists}, Refresh exists: {RefreshExists}", !string.IsNullOrWhiteSpace(accessToken),
-            //    !string.IsNullOrWhiteSpace(refreshToken));
-
-            //if (!string.IsNullOrWhiteSpace(accessToken))
-            //{
-            //    var jwt = new JwtSecurityTokenHandler().ReadJwtToken(accessToken);
-            //    _logger.LogInformation("Access expires at: {Expire}", jwt.ValidTo);
-            //}
             var result = await authService.RefreshTokenAsync(refreshToken);
             
             if (result.Success)
             {
                 context.Items["token_refreshed"] = true;
+
                 context.Response.Cookies.Append("access_token", result.AccessToken, 
                     CookieHelper.AccessToken(_jwtSettings.AccessTokenExpirationMinutes));
+
                 context.Response.Cookies.Append( "refresh_token", result.RefreshToken, 
                     CookieHelper.RefreshToken(result.ExpireAt));
+
+                // Chỉ chuyển hướng với request GET tải trang HTML.
+                //Fix tình trạng accesstoken rotate vẫn xử dụng accesstoken cũ để check authentication
+                if (HttpMethods.IsGet(context.Request.Method) && context.Request.Headers.Accept.Any(
+                        x => x?.Contains("text/html", StringComparison.OrdinalIgnoreCase) == true))
+                {
+                    context.Response.Redirect(context.Request.PathBase + context.Request.Path + context.Request.QueryString);
+
+                    return;
+                }
             }
             else
             {

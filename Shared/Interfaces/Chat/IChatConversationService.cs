@@ -26,6 +26,8 @@ namespace Shared.Interfaces.Chat
 
         Task<ChatConversationContactDto?> GetConversationContactAsync(long conversationId, CancellationToken cancellationToken = default);
 
+        Task<ChatConversationHeaderDto?> GetConversationHeaderAsync(long conversationId, CancellationToken cancellationToken = default);
+
         Task<ServiceResult> UpdateStatusAsync(long conversationId, ChatConversationStatus status, CancellationToken cancellationToken = default);
 
         Task<int> GetUnreadCountAsync(long conversationId, long? contactId, string? guestToken, CancellationToken cancellationToken = default);

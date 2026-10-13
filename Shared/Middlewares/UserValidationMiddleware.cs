@@ -18,11 +18,8 @@ namespace Shared.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(
-            HttpContext context,
-            IUserValidationService validationService)
+        public async Task InvokeAsync(HttpContext context, IUserValidationService validationService)
         {
-            
             if (context.User.Identity?.IsAuthenticated != true)
             {
                 await _next(context);
@@ -43,8 +40,7 @@ namespace Shared.Middlewares
                 return;
             }
 
-            context.Items["UserValidationContext"] =
-                validationContext ; 
+            context.Items["UserValidationContext"] = validationContext ; 
 
             await _next(context);
         }

@@ -17,7 +17,7 @@
 
                 <div class="flex-shrink-0 avatar avatar-sm avatar-online">
 
-                    <img src="~/admin/assets/img/avatars/4.png"
+                    <img id="chatContactAvatarImage" src="~/admin/assets/img/avatars/4.png"
                          alt="Nguyễn Văn A"
                          class="rounded-circle" />
 
@@ -157,45 +157,64 @@
 
         <!-- Composer -->
         <footer class="chat-history-footer">
+            <div class="chat-footer-content">
 
-            <form class="form-send-message d-flex align-items-center"
-                  id="sendMessageForm">
+                <!-- Attachment preview -->
+                <div class="chat-attachment-preview"
+                     id="chatAttachmentPreview"
+                     aria-label="Danh sách file đính kèm"
+                     hidden>
 
-                <input type="text"
-                       class="form-control message-input border-0 shadow-none"
-                       id="messageInput"
-                       placeholder="Type your message here..."
-                       autocomplete="off" />
-
-                <div class="message-actions d-flex align-items-center">
-
-                    <label for="attach-doc"
-                           class="btn btn-sm btn-icon btn-text-secondary rounded-pill">
-
-                        <i class="ti ti-paperclip"></i>
-
-                    </label>
-
-                    <input type="file"
-                           id="attach-doc"
-                           hidden
-                           multiple />
-
-                    <button type="submit"
-                            class="btn btn-primary send-msg-btn">
-
-                        <span class="d-none d-md-inline">
-                            Send
-                        </span>
-
-                        <i class="ti ti-send ms-md-2"></i>
-
-                    </button>
+                    <div class="chat-attachment-list"
+                         id="chatAttachmentList">
+                    </div>
 
                 </div>
 
-            </form>
+                <form class="form-send-message d-flex align-items-center"
+                      id="sendMessageForm">
 
+                    <div class="chat-input-wrapper">
+
+                        <!-- Attachment button -->
+                        <button type="button"
+                                class="btn btn-sm btn-icon btn-text-secondary rounded-pill"
+                                id="attachmentBtn"
+                                aria-label="Đính kèm file"
+                                title="Đính kèm file">
+                            <i class="ti ti-paperclip" aria-hidden="true"></i>
+                        </button>
+
+                        <!-- File input -->
+                        <input type="file"
+                               id="chatFileInput"
+                               hidden
+                               multiple
+                               accept="image/jpeg,image/png,image/webp,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+                               aria-label="Chọn file đính kèm" />
+
+                        <!-- Message input -->
+                        <input type="text"
+                               class="form-control message-input border-0 shadow-none"
+                               id="messageInput"
+                               placeholder="Nhập tin nhắn..."
+                               autocomplete="off"
+                               aria-label="Nội dung tin nhắn" />
+
+                    </div>
+
+                    <!-- Send button -->
+                    <button type="submit"
+                            class="btn btn-primary send-msg-btn"
+                            id="sendMessageBtn">
+                        <span class="d-none d-md-inline">Gửi</span>
+                        <i class="ti ti-send ms-md-2"
+                           aria-hidden="true"></i>
+                    </button>
+
+                </form>
+
+            </div>
         </footer>
 
     </div>

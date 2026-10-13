@@ -483,12 +483,24 @@ namespace Shared.Services.Chat
         }
 
         public async Task<ChatMessageDto> SendAdminMessageAsync(long conversationId, string userId,
-            string content, CancellationToken cancellationToken = default)
+            string content, List<long>? uploadIds = null, CancellationToken cancellationToken = default)
         {
-            content = content.Trim();
+            content = (content ?? string.Empty).Trim();
+            var ids = (uploadIds ?? new List<long>()).Distinct().ToList();
 
-            if (string.IsNullOrWhiteSpace(content))
-                throw new ArgumentException("Nội dung tin nhắn không được rỗng.");
+            if (content.Length == 0 && ids.Count == 0)
+            {
+                throw new ArgumentException(
+                    "Tin nhắn phải có nội dung hoặc file đính kèm.");
+            }
+            if (ids.Count > 5)
+            {
+                throw new InvalidOperationException(
+                    "Mỗi tin nhắn chỉ được đính kèm tối đa 5 file.");
+            }
+            var now = DateTime.UtcNow;
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             var conversation = await _dbContext.ChatConversations
                 .FirstOrDefaultAsync(x => x.Id == conversationId, cancellationToken);
@@ -500,21 +512,75 @@ namespace Shared.Services.Chat
             {
                 throw new InvalidOperationException("Conversation đã kết thúc.");
             }
-            var now = DateTime.UtcNow;
+            var user = await _dbContext.Users
+        .AsNoTracking()
+        .Where(x => x.Id == userId)
+        .Select(x => new
+        {
+            x.UserName,
+            x.Avatar
+        })
+        .FirstOrDefaultAsync(cancellationToken);
 
+            if (user == null)
+                throw new InvalidOperationException(
+                    "Admin không tồn tại.");
+            // Claim upload trước khi tạo attachment.
+            // Điều kiện Status + UserId + ExpiresAt ngăn upload
+            // đã được sử dụng hoặc thuộc Admin khác bị claim lại.
+            if (ids.Count > 0)
+            {
+                var claimed = await _dbContext.ChatPendingUploads
+                    .Where(x =>
+                        ids.Contains(x.Id) &&
+                        x.UserId == userId &&
+                        x.GuestSessionId == null &&
+                        x.UploadTokenHash == null &&
+                        x.Status == ChatPendingUploadStatus.Pending &&
+                        x.ExpiresAt > now &&
+                        x.MessageId == null)
+                    .ExecuteUpdateAsync(
+                        setters => setters
+                            .SetProperty(
+                                x => x.Status,
+                                ChatPendingUploadStatus.Attached)
+                            .SetProperty(
+                                x => x.AttachedAt,
+                                (DateTime?)now),
+                        cancellationToken);
+
+                if (claimed != ids.Count)
+                {
+                    throw new InvalidOperationException(
+                        "Một hoặc nhiều file không hợp lệ, đã hết hạn hoặc đã được sử dụng.");
+                }
+            }
+
+            var pendingUploads = ids.Count == 0
+                ? new List<ChatPendingUpload>()
+                : await _dbContext.ChatPendingUploads
+                    .AsNoTracking()
+                    .Include(x => x.MediaFile)
+                    .Where(x =>
+                        ids.Contains(x.Id) &&
+                        x.UserId == userId &&
+                        x.Status == ChatPendingUploadStatus.Attached)
+                    .ToListAsync(cancellationToken);
+
+            if (pendingUploads.Count != ids.Count)
+            {
+                throw new InvalidOperationException(
+                    "Không thể tải thông tin file đính kèm.");
+            }
             var message = new ChatMessage
             {
                 ConversationId = conversation.Id,
-
                 InboxId = conversation.InboxId,
-
                 ContactId = conversation.ContactId, 
-
                 UserId = userId,
 
                 MessageType = ChatMessageType.Outgoing,
-
-                ContentType = ChatMessageContentType.Text,
+                ContentType = ResolveAdminMessageContentType(content, pendingUploads),
 
                 Status = ChatMessageStatus.Sent,
 
@@ -535,10 +601,50 @@ namespace Shared.Services.Chat
             conversation.UpdatedAt = now;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+            var attachments = pendingUploads.Select(upload =>
+            {
+                var media = upload.MediaFile;
 
-            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
-            if (user == null)
-                throw new InvalidOperationException("Admin không tồn tại.");
+                return new ChatAttachment
+                {
+                    MessageId = message.Id,
+                    MediaFileId = media.Id,
+                    FileName = media.OriginalFileName
+                        ?? media.FileName,
+                    ContentType = media.ContentType,
+                    FileSize = media.Size
+                };
+            }).ToList();
+
+            if (attachments.Count > 0)
+            {
+                _dbContext.ChatAttachments.AddRange(attachments);
+
+                // Liên kết upload với message trong cùng transaction.
+                await _dbContext.ChatPendingUploads
+                    .Where(x => ids.Contains(x.Id))
+                    .ExecuteUpdateAsync(
+                        setters => setters
+                            .SetProperty(
+                                x => x.MessageId,
+                                (long?)message.Id),
+                        cancellationToken);
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            var attachmentDtos = attachments.Select(attachment =>
+                new ChatAttachmentDto
+                {
+                    Id = attachment.Id,
+                    FileName = attachment.FileName,
+                    ContentType = attachment.ContentType,
+                    FileSize = attachment.FileSize,
+                    Url = IsPreviewableAttachment(attachment.ContentType)
+                        ? $"/admin/chat/attachments/{attachment.Id}/preview"
+                        : $"/admin/chat/attachments/{attachment.Id}/download"
+                }).ToList();
+
 
             var dto = new ChatMessageDto
             {
@@ -568,12 +674,16 @@ namespace Shared.Services.Chat
 
                 IsPrivate = message.IsPrivate,
 
-                CreatedAt = message.CreatedAt
+                CreatedAt = message.CreatedAt,
+
+                 Attachments = attachmentDtos
             };
+            await transaction.CommitAsync(cancellationToken);
+            await _hubContext.Clients.Group(ChatHubGroups.Conversation(conversation.Id))
+                .SendAsync(ChatHubEvents.MessageReceived, dto, cancellationToken);
 
-            await _hubContext.Clients.Group(ChatHubGroups.Conversation(conversation.Id)).SendAsync(ChatHubEvents.MessageReceived, dto, cancellationToken);
-
-            await _hubContext.Clients.Group(ChatHubGroups.Inbox(conversation.InboxId)).SendAsync(ChatHubEvents.ConversationUpdated, dto, cancellationToken);
+            await _hubContext.Clients.Group(ChatHubGroups.Inbox(conversation.InboxId))
+                .SendAsync(ChatHubEvents.ConversationUpdated, dto, cancellationToken);
 
             return dto;
         }
@@ -594,7 +704,6 @@ namespace Shared.Services.Chat
                     Id = x.Id,
                     ConversationId = x.ConversationId,
                     InboxId = x.InboxId,
-
                     ContactId = x.ContactId,
                     SenderId = x.UserId,
 
@@ -620,6 +729,51 @@ namespace Shared.Services.Chat
             }
 
             messages.Reverse();
+            var messageIds = messages.Select(x => x.Id).ToList();
+
+            if (messageIds.Count > 0)
+            {
+                var attachments = await _dbContext.ChatAttachments
+                    .AsNoTracking()
+                    .Where(x => messageIds.Contains(x.MessageId))
+                    .OrderBy(x => x.Id)
+                    .Select(x => new
+                    {
+                        x.MessageId,
+                        Dto = new ChatAttachmentDto
+                        {
+                            Id = x.Id,
+                            FileName = x.FileName,
+                            ContentType = x.ContentType,
+                            FileSize = x.FileSize
+                        }
+                    })
+                    .ToListAsync(cancellationToken);
+
+                var attachmentsByMessage = attachments
+                    .GroupBy(x => x.MessageId)
+                    .ToDictionary(
+                        group => group.Key,
+                        group => group.Select(x =>
+                        {
+                            x.Dto.Url = IsPreviewableAttachment(
+                                x.Dto.ContentType)
+                                ? $"/admin/chat/attachments/{x.Dto.Id}/preview"
+                                : $"/admin/chat/attachments/{x.Dto.Id}/download";
+
+                            return x.Dto;
+                        }).ToList());
+
+                foreach (var message in messages)
+                {
+                    if (attachmentsByMessage.TryGetValue(
+                        message.Id,
+                        out var messageAttachments))
+                    {
+                        message.Attachments = messageAttachments;
+                    }
+                }
+            }
 
             return new
             {
@@ -1008,6 +1162,48 @@ namespace Shared.Services.Chat
             _dbContext.ChatConversations.Add(conversation);
 
             return (conversation, true);
+        }
+
+        private static bool IsPreviewableAttachment(string? contentType)
+        {
+            return contentType?.StartsWith(
+                "image/",
+                StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        private static ChatMessageContentType ResolveAdminMessageContentType(
+            string content,
+            IReadOnlyList<ChatPendingUpload> uploads)
+        {
+            if (!string.IsNullOrWhiteSpace(content))
+                return ChatMessageContentType.Text;
+
+            var contentType = uploads
+                .Select(x => x.MediaFile.ContentType)
+                .FirstOrDefault();
+
+            if (contentType?.StartsWith(
+                "image/",
+                StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return ChatMessageContentType.Image;
+            }
+
+            if (contentType?.StartsWith(
+                "video/",
+                StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return ChatMessageContentType.Video;
+            }
+
+            if (contentType?.StartsWith(
+                "audio/",
+                StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return ChatMessageContentType.Audio;
+            }
+
+            return ChatMessageContentType.File;
         }
     }
 }

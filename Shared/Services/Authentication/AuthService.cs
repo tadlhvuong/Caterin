@@ -342,12 +342,10 @@ public class AuthService : IAuthService
 
         // Rotate refresht token
         var rotateResult = await _refreshTokenService.RotateAsync(refreshTokenEntity, cancellationToken);
+
         if (!rotateResult.Success)
         {
-            await _securityLogger.LogAsync(
-                SecurityActionType.RefreshTokenReuse,
-                false,
-                rotateResult.Error ?? "Refresh token rotate thất bại");
+            await _securityLogger.LogAsync(SecurityActionType.RefreshTokenReuse, false, rotateResult.Error ?? "Refresh token rotate thất bại");
 
             return new AuthResponse
             {

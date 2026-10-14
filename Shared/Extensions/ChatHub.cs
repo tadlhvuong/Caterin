@@ -244,41 +244,47 @@ namespace Shared.Extensions
 
         public async Task SendAdminTyping(long conversationId, bool isTyping)
         {
-            if (!Context.User?.Identity?.IsAuthenticated ?? true)
-                return;
+            try
+            {
+                if (!Context.User?.Identity?.IsAuthenticated ?? true)
+                    return;
 
-            var conversation = await _dbContext.ChatConversations.AsNoTracking().Where(x => x.Id == conversationId).Select(x => new
+                var conversation = await _dbContext.ChatConversations.AsNoTracking().Where(x => x.Id == conversationId).Select(x => new
                 {
                     x.Id,
                     x.InboxId,
                     x.Status
                 }).FirstOrDefaultAsync();
 
-            if (conversation == null)
-                return;
+                if (conversation == null)
+                    return;
 
-            // Resolved / Closed không được typing
-            if (conversation.Status == ChatConversationStatus.Resolved || conversation.Status == ChatConversationStatus.Closed)
-            {
-                return;
+                // Resolved / Closed không được typing
+                if (conversation.Status == ChatConversationStatus.Resolved || conversation.Status == ChatConversationStatus.Closed)
+                {
+                    return;
+                }
+                var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
+                        conversationId, null, userId, isAdmin: true, Context.ConnectionAborted);
+
+                if (!allowed)
+                    return;
+
+                await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.Typing,
+                        new
+                        {
+                            conversationId,
+                            senderType = ChatSenderType.Admin,
+                            isTyping
+                        });
             }
-            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            catch (Exception ex)
+            {
 
-            var allowed = await _chatAuthorizationService.CanAccessConversationAsync(
-                    conversationId, null, userId, isAdmin: true, Context.ConnectionAborted);
-
-            if (!allowed)
-                return;
-            // TODO:
-            // Validate admin có quyền truy cập conversation/inbox này.
-
-            await Clients.Group(ChatHubGroups.Conversation(conversationId)).SendAsync(ChatHubEvents.Typing,
-                    new
-                    {
-                        conversationId,
-                        senderType = ChatSenderType.Admin,
-                        isTyping
-                    });
+                throw new HubException(ex.Message);
+            }
         }
 
         public async Task SendTyping(long conversationId, long contactId, string? guestToken, bool isTyping)

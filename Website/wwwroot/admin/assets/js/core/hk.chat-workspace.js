@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
         processedMessageIds: new Set(),
 
         maxProcessedMessageIds: 500,
-
+        currentContact: null,
         /*
          * Current message request.
          *
@@ -412,6 +412,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const CHAT_ATTACHMENT_CONFIG = {
         maxFiles: 5,
         maxFileSize: 12 * 1024 * 1024,
+        maxTotalSize: 25*1024*1024,
 
         allowedExtensions: new Set([
             '.jpg', '.jpeg', '.png', '.webp',
@@ -980,7 +981,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ? 'chat-message chat-message-right'
             : 'chat-message';
 
-        const senderName = message.senderName?.trim() || 'Guest';
+        const senderName = message.senderName?.trim() || 'Customer';
 
         const guestAvatar = `
         <div class="flex-shrink-0 avatar">
@@ -992,8 +993,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         li.innerHTML = `
         <div class="chat-message-inner">
-            ${isContact ? guestAvatar : ''}
-
+            ${isContact ? `<div class="chat-contact-avatar-placeholder"></div>'` : ''}
             <div class="chat-message-wrapper">
                 ${isContact ? `
                     <div class="text-muted mb-1">
@@ -1002,18 +1002,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 ` : ''}
 
                 <div class="chat-message-text">
-                    <p class="mb-0">${escapeHtml(message.content || '')}</p>
+                    <p class="mb-0"></p>
                 </div>
 
                 <div class="${isAdmin ? 'text-end' : ''} text-muted mt-1">
                     <small>${formatMessageTime(message.createdAt)}</small>
                 </div>
             </div>
-        </div>
-    `;
-
+        </div>`;
+        const avatarPlaceholder = li.querySelector(".chat-contact-avatar-placeholder");
+        if (isContact && avatarPlaceholder) {
+            avatarPlaceholder.replaceWith(renderContactAvatar());
+        }
         const wrapper = li.querySelector('.chat-message-wrapper');
         const textElement = wrapper?.querySelector('.chat-message-text');
+        const paragraph = textElement?.querySelector('p');
+
+        // Chuyển URL trong nội dung thành thẻ <a>.
+        if (paragraph) {
+            paragraph.appendChild(
+                renderMessageText(message.content || '')
+            );
+        }
+
         const attachments = renderMessageAttachments(message.attachments);
 
         if (attachments && wrapper) {
@@ -1025,14 +1036,43 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Ẩn khung nội dung rỗng khi tin nhắn chỉ có file đính kèm.
-        if (textElement && !message.content && Array.isArray(message.attachments) && message.attachments.length > 0) {
+        if (
+            textElement &&
+            !message.content &&
+            Array.isArray(message.attachments) &&
+            message.attachments.length > 0
+        ) {
             textElement.remove();
         }
 
         return li;
     }
+    function renderContactAvatar() {
+        const defaultAvatar = "/images/Default/default-user.png";
+        const name = state.currentContact?.name || "GUEST";
+        const avatarUrl = state.currentContact?.avatarUrl || defaultAvatar;
 
+        const avatar = document.createElement("div");
+        avatar.className = "flex-shrink-0 avatar";
 
+        const image = document.createElement("img");
+        image.className = "rounded-circle";
+        image.src = avatarUrl;
+        image.alt = name;
+        image.width = 38;
+        image.height = 38;
+        image.loading = "lazy";
+        image.style.objectFit = "cover";
+
+        image.onerror = () => {
+            image.onerror = null;
+            image.src = defaultAvatar;
+        };
+
+        avatar.appendChild(image);
+
+        return avatar;
+    }
 
     function appendChatMessage(message) {
         if (
@@ -1083,8 +1123,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        const fragment =
-            document.createDocumentFragment();
+        const fragment = document.createDocumentFragment();
 
         messages.forEach(
             message => {
@@ -1246,110 +1285,272 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
+    function renderMessageText(content) {
+        const text = String(content ?? "");
+        const fragment = document.createDocumentFragment();
+
+        const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = urlPattern.exec(text)) !== null) {
+            let url = match[0];
+            let trailing = "";
+
+            // Tách dấu câu cuối URL để không đưa vào liên kết.
+            while (/[.,!?;:]$/.test(url)) {
+                trailing = url.slice(-1) + trailing;
+                url = url.slice(0, -1);
+            }
+
+            // Xử lý dấu đóng ngoặc không thuộc URL.
+            while (
+                /[)\]}]$/.test(url) &&
+                (
+                    (url.endsWith(")") && (url.match(/\(/g) || []).length < (url.match(/\)/g) || []).length) ||
+                    (url.endsWith("]") && (url.match(/\[/g) || []).length < (url.match(/\]/g) || []).length) ||
+                    (url.endsWith("}") && (url.match(/\{/g) || []).length < (url.match(/\}/g) || []).length)
+                )
+            ) {
+                trailing = url.slice(-1) + trailing;
+                url = url.slice(0, -1);
+            }
+
+            fragment.appendChild(
+                document.createTextNode(text.slice(lastIndex, match.index))
+            );
+
+            if (url) {
+                const link = document.createElement("a");
+                link.href = url;
+                link.textContent = url;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.className = "message-link";
+
+                fragment.appendChild(link);
+            }
+
+            if (trailing) {
+                fragment.appendChild(document.createTextNode(trailing));
+            }
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        fragment.appendChild(
+            document.createTextNode(text.slice(lastIndex))
+        );
+
+        return fragment;
+
+    }
+
     function getMessageAttachmentValue(attachment, camelName, pascalName) {
         return attachment?.[camelName] ?? attachment?.[pascalName] ?? null;
     }
+
+    function getAttachmentType(contentType, fileName) {
+        const mime = String(contentType || "").toLowerCase();
+        const extension = String(fileName || "")
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+        if (mime.startsWith("image/")) return "image";
+        if (mime === "application/pdf" || extension === "pdf") return "pdf";
+
+        if (
+            mime.includes("word") ||
+            ["doc", "docx", "odt", "rtf"].includes(extension)
+        ) {
+            return "word";
+        }
+
+        if (
+            mime.includes("spreadsheet") ||
+            mime.includes("excel") ||
+            ["xls", "xlsx", "csv", "ods"].includes(extension)
+        ) {
+            return "excel";
+        }
+
+        if (
+            mime.includes("presentation") ||
+            mime.includes("powerpoint") ||
+            ["ppt", "pptx", "odp"].includes(extension)
+        ) {
+            return "powerpoint";
+        }
+
+        if (
+            ["zip", "rar", "7z", "tar", "gz"].includes(extension) ||
+            mime.includes("zip") ||
+            mime.includes("compressed")
+        ) {
+            return "archive";
+        }
+
+        if (
+            ["txt", "md", "log"].includes(extension) ||
+            mime.startsWith("text/")
+        ) {
+            return "text";
+        }
+
+        return "file";
+    }
+
+    function getAttachmentTypeLabel(type) {
+        const labels = {
+            pdf: "PDF",
+            word: "DOC",
+            excel: "XLS",
+            powerpoint: "PPT",
+            archive: "ZIP",
+            text: "TXT",
+            file: "FILE"
+        };
+
+        return labels[type] || "FILE";
+    }
+
+    function getAttachmentTypeIcon(type) {
+        const icons = {
+            pdf: "ti-file-type-pdf",
+            word: "ti-file-type-doc",
+            excel: "ti-file-spreadsheet",
+            powerpoint: "ti-file-type-ppt",
+            archive: "ti-file-type-zip",
+            text: "ti-file-text",
+            file: "ti-file"
+        };
+
+        return icons[type] || icons.file;
+    }
+
+
 
     function renderMessageAttachments(attachments) {
         if (!Array.isArray(attachments) || attachments.length === 0) {
             return null;
         }
 
-        const container = document.createElement('div');
-        container.className = 'chat-message-attachments';
+        const container = document.createElement("div");
+        container.className = "chat-message-attachments";
 
         for (const attachment of attachments) {
-
-            const id = getMessageAttachmentValue(
-                attachment, 'id', 'Id'
-            );
-
-            const fileName = getMessageAttachmentValue(
-                attachment, 'fileName', 'FileName'
-            ) || 'Tệp đính kèm';
-
-            const contentType = getMessageAttachmentValue(
-                attachment, 'contentType', 'ContentType'
-            ) || 'application/octet-stream';
-
+            const id = getMessageAttachmentValue(attachment, "id", "Id");
+            const fileName =
+                getMessageAttachmentValue(attachment, "fileName", "FileName") ||
+                "Tệp đính kèm";
+            const contentType =
+                getMessageAttachmentValue(attachment, "contentType", "ContentType") ||
+                "application/octet-stream";
             const fileSize = Number(
-                getMessageAttachmentValue(
-                    attachment, 'fileSize', 'FileSize'
-                ) || 0
+                getMessageAttachmentValue(attachment, "fileSize", "FileSize") || 0
             );
+            const url = getMessageAttachmentValue(attachment, "url", "Url");
 
-            if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
-                console.warn('Attachment Id không hợp lệ:', attachment);
+            if (!url || !Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
+                console.warn("Attachment thiếu Id hoặc URL hợp lệ:", attachment);
                 continue;
             }
 
-            // Dùng endpoint dành cho Admin thống nhất cho cả ảnh và download.
-            const attachmentUrl =
-                `/admin/chat/attachments/${encodeURIComponent(id)}/download`;
+            const type = getAttachmentType(contentType, fileName);
+            const isImage = type === "image";
+            const urlDownload = `/admin/chat/attachments/${encodeURIComponent(id)}/download`;
 
+            const item = document.createElement("div");
+            item.className = `chat-message-attachment is-${type}`;
 
-            const item = document.createElement('div');
-            item.className = 'chat-message-attachment';
+            const download = document.createElement("a");
+            download.className = "chat-attachment-download";
+            download.href = urlDownload;
+            download.setAttribute("download", fileName);
+            download.setAttribute("aria-label", `Tải xuống ${fileName}`);
+            download.title = "";
+            download.innerHTML =
+                '<i class="ti ti-download" aria-hidden="true"></i>';
 
-            if (contentType.toLowerCase().startsWith('image/')) {
-                const imageButton = document.createElement('button');
-                imageButton.type = 'button';
-                imageButton.className = 'chat-attachment-image-button';
-                imageButton.dataset.lightboxSrc = attachmentUrl;
+            if (isImage) {
+                // Khung ảnh chứa cả ảnh và toolbar overlay.
+                const imageButton = document.createElement("button");
+                imageButton.type = "button";
+                imageButton.className = "chat-attachment-image-button";
+                imageButton.dataset.lightboxSrc = urlDownload;
                 imageButton.dataset.lightboxAlt = fileName;
-                imageButton.setAttribute('aria-label', `Xem ảnh ${fileName}`);
+                imageButton.setAttribute("aria-label", `Xem ảnh ${fileName}`);
 
-                const image = document.createElement('img');
-                image.className = 'chat-attachment-image';
-                image.src = attachmentUrl;
+                const image = document.createElement("img");
+                image.className = "chat-attachment-image is-image";
+                image.src = urlDownload;
                 image.alt = fileName;
-                image.loading = 'lazy';
-                image.decoding = 'async';
+                image.loading = "lazy";
+                image.decoding = "async";
 
-                image.addEventListener('error', () => {
-                    imageButton.classList.add('is-unavailable');
-                    imageButton.setAttribute('title', 'Không thể tải ảnh');
+                image.addEventListener("error", () => {
+                    imageButton.classList.add("is-unavailable");
+                    imageButton.title = "Không thể tải ảnh";
                 }, { once: true });
 
                 imageButton.appendChild(image);
                 item.appendChild(imageButton);
-            } else {
-                const fileCard = document.createElement('div');
-                fileCard.className = 'chat-attachment-file';
 
-                const icon = document.createElement('span');
-                icon.className = 'chat-attachment-file-icon';
-                icon.innerHTML = '<i class="ti ti-file"></i>';
+                // Toolbar được đặt trong item để CSS overlay giới hạn theo khung ảnh.
+                const meta = document.createElement("div");
+                meta.className = "chat-attachment-image-meta";
 
-                const info = document.createElement('div');
-                info.className = 'chat-attachment-file-info';
+                const info = document.createElement("div");
+                info.className = "chat-attachment-image-info";
 
-                const name = document.createElement('span');
-                name.className = 'chat-attachment-file-name';
+                const name = document.createElement("span");
+                name.className = "chat-attachment-file-name";
                 name.textContent = fileName;
                 name.title = fileName;
 
-                const size = document.createElement('span');
-                size.className = 'chat-attachment-file-size';
+                const size = document.createElement("span");
+                size.className = "chat-attachment-file-size";
                 size.textContent = formatAdminAttachmentSize(fileSize);
 
                 info.append(name, size);
-                fileCard.append(icon, info);
+                meta.append(info, download);
+                item.appendChild(meta);
+            } else {
+                // Giữ nguyên cấu trúc và hành vi file thông thường.
+                const fileCard = document.createElement("div");
+                fileCard.className = "chat-attachment-file";
+
+                const icon = document.createElement("span");
+                icon.className = `chat-attachment-file-icon is-${type}`;
+                icon.setAttribute("aria-hidden", "true");
+                icon.innerHTML =
+                    `<i class="ti ${getAttachmentTypeIcon(type)}"></i>`;
+
+                const info = document.createElement("div");
+                info.className = "chat-attachment-file-info";
+
+                const name = document.createElement("span");
+                name.className = "chat-attachment-file-name";
+                name.textContent = fileName;
+                name.title = fileName;
+
+                const size = document.createElement("span");
+                size.className = "chat-attachment-file-size";
+                size.textContent = formatAdminAttachmentSize(fileSize);
+
+                info.append(name, size);
+                fileCard.append(icon, info, download);
                 item.appendChild(fileCard);
             }
 
-            const download = document.createElement('a');
-            download.className = 'chat-attachment-download';
-            download.href = attachmentUrl;
-            download.setAttribute('download', fileName);
-            download.innerHTML = '<i class="ti ti-download"></i><span>Tải xuống</span>';
-
-            item.appendChild(download);
             container.appendChild(item);
         }
 
         return container.childElementCount > 0 ? container : null;
     }
+
+
 
     let chatAttachmentLightbox = null;
 
@@ -2154,7 +2355,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 );
 
-            console.log(result);
             /*
              * User changed conversation
              * while request was running.
@@ -2282,8 +2482,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         before: oldestMessageId
                     }
                 );
-
-            console.log(result);
             /*
              * Conversation đã bị đổi
              * trong lúc request.
@@ -2356,7 +2554,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadConversationCounts() {
-        console.log("loadConversationCounts");
         /*
          * Nếu đang có request:
          * không bỏ qua request mới.
@@ -2620,6 +2817,12 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         const header = await getConversationHeader(conversationId);
+        state.currentContact = {
+            name: header?.name?.trim() || "GUEST",
+            avatarUrl:
+                header?.avatarUrl?.trim() ||
+                "/images/Default/default-user.png"
+        };
         updateChatContactHeader(header);
 
         renderConversationLabels(conversationItem.labels);
@@ -2670,8 +2873,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateChatContactHeader(contact) {
         const avatarElement = document.getElementById("chatContactAvatarImage");
 
-        console.log('AAAA');
-        console.log(contact);
         if (!chatContactName || !avatarElement) {
             return;
         }
@@ -3191,15 +3392,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const statusKey =
                 getConversationStatusKey(status);
 
-            console.log(
-                '[JOIN]',
-                {
-                    conversationId: normalizedConversationId,
-                    status,
-                    statusKey
-                }
-            );
-
             await state.connection.invoke(
                 'JoinAdminConversation',
                 Number(normalizedConversationId)
@@ -3221,13 +3413,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     Number(normalizedConversationId)
                 );
             }
-
-            console.log(
-                'Joined conversation:',
-                normalizedConversationId,
-                statusKey
-            );
-
         }
         catch (error) {
 
@@ -3247,7 +3432,6 @@ document.addEventListener('DOMContentLoaded', function () {
     ===================================================== */
 
     function registerTypingReceived() {
-
         state.connection.on(
             'chat.typing',
             function (data) {
@@ -3293,8 +3477,8 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        DOM.typing.hidden =
-            false;
+        DOM.typing.hidden = false;
+        scrollChatToBottom();
     }
 
 
@@ -3325,12 +3509,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
-
             await state.connection.invoke(
-                'SendAdminTyping',
-                Number(
-                    state.currentConversationId
-                ),
+                'SendAdminTyping', Number( state.currentConversationId),
                 isTypingNow
             );
 
@@ -3615,12 +3795,6 @@ document.addEventListener('DOMContentLoaded', function () {
         state.connection.on(
             'chat.conversation.status.updated',
             async function (data) {
-
-                console.log(
-                    '[SIGNALR STATUS EVENT]',
-                    JSON.stringify(data)
-                );
-
                 if (!data?.conversationId) {
                     return;
                 }
@@ -4154,7 +4328,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const contact = await response.json();
-            console.log(contact);
             // Trong lúc request đang chạy,
             // user có thể đã click conversation khác
             if (
@@ -4217,9 +4390,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (DOM.contactAvatar) {
-            DOM.contactAvatar.src =
-                contact.avatarUrl ||
-                '/admin/assets/img/avatars/4.png';
+            DOM.contactAvatar.src = contact.avatarUrl || '/images/Default/default-user.png';
         }
     }
     function resetContact() {
@@ -4245,8 +4416,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (DOM.contactAvatar) {
-            DOM.contactAvatar.src =
-                '/admin/assets/img/avatars/4.png';
+            DOM.contactAvatar.src = '/images/Default/default-user.png';
         }
     }
 
@@ -4302,13 +4472,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
 
                     this.disabled = true;
-
-                    console.log(
-                        "[RESOLVE]",
-                        state.currentConversationId,
-                        state.currentConversationStatus,
-                        state.connection?.state
-                    );
 
                     await state.connection.invoke(
                         "ResolveConversation",
@@ -4910,6 +5073,10 @@ document.addEventListener('DOMContentLoaded', function () {
     );
 
 
+    DOM.messageInput.addEventListener(
+        'input',
+        handleAdminTyping
+    );
     /* Submit */
 
     createChatLabelForm?.addEventListener(
@@ -5568,7 +5735,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //ATTACHMENT
 
-
     function validateAdminAttachment(file) {
         const dotIndex = file.name.lastIndexOf('.');
         const extension = dotIndex >= 0
@@ -5576,6 +5742,7 @@ document.addEventListener('DOMContentLoaded', function () {
             : '';
 
         if (!CHAT_ATTACHMENT_CONFIG.allowedExtensions.has(extension)) {
+            Toast.warning("Định dạng file không được hỗ trợ")
             return 'Định dạng file không được hỗ trợ.';
         }
 
@@ -5583,14 +5750,17 @@ document.addEventListener('DOMContentLoaded', function () {
             file.type &&
             !CHAT_ATTACHMENT_CONFIG.allowedMimeTypes.has(file.type)
         ) {
+            Toast.warning("Loại file không được hỗ trợ.")
             return 'Loại file không được hỗ trợ.';
         }
 
         if (file.size <= 0) {
+            Toast.warning("File rỗng hoặc không hợp lệ.")
             return 'File rỗng hoặc không hợp lệ.';
         }
 
         if (file.size > CHAT_ATTACHMENT_CONFIG.maxFileSize) {
+            Toast.warning("File vượt quá giới hạn dung lượng cho phép.")
             return 'File vượt quá giới hạn dung lượng cho phép.';
         }
 
@@ -5643,10 +5813,13 @@ document.addEventListener('DOMContentLoaded', function () {
     function createAdminAttachmentIcon(file) {
         const wrapper = document.createElement('div');
         wrapper.className = 'chat-pending-file-icon';
+        const type = getAttachmentType(file.type, file.name);
 
-        const icon = document.createElement('i');
-        icon.className = `ti ${getAdminAttachmentIcon(file)}`;
-        icon.setAttribute('aria-hidden', 'true');
+        const icon = document.createElement("span");
+        icon.className = `chat-attachment-file-icon is-${type}`;
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML =
+            `<i class="ti ${getAttachmentTypeIcon(type)}"></i>`;
 
         wrapper.appendChild(icon);
         return wrapper;
@@ -5665,13 +5838,6 @@ document.addEventListener('DOMContentLoaded', function () {
         for (const [key, attachment] of pendingAdminAttachments) {
             const item = document.createElement('div');
             item.className = 'chat-pending-file';
-            console.log('History attachment:', {
-                fileName: attachment?.fileName,
-                FileName: attachment?.FileName,
-                contentType: attachment?.contentType,
-                ContentType: attachment?.ContentType,
-                icon: getAdminAttachmentIcon(attachment)
-            });
             if (attachment.previewUrl) {
                 const imageWrapper = document.createElement('div');
                 imageWrapper.className = 'chat-pending-file-preview';
@@ -5862,6 +6028,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (acceptedFiles.length >= remainingSlots) {
                 Toast.warning('Đã đạt giới hạn 5 file cho mỗi tin nhắn.');
                 break;
+            }
+            if (file.size <= 0) {
+                Toast.warning(`File "${file.name}" không hợp lệ.`);
+                throw new Error(`File "${file.name}" không hợp lệ.`);
+            }
+
+            if (file.size > CHAT_ATTACHMENT_CONFIG.maxFileSize) {
+                Toast.warning(`File "${file.name}" vượt quá giới hạn 12 MB.`);
+                throw new Error(`File "${file.name}" vượt quá giới hạn 12 MB.`);
             }
 
             const validationError = validateAdminAttachment(file);

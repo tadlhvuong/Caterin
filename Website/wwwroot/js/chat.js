@@ -198,6 +198,41 @@ document.addEventListener("DOMContentLoaded", () => {
     let pendingAttachments = [];
     let uploadSessionToken = null;
     const pendingAttachmentUploads = new Map();
+
+    const CHAT_ATTACHMENT_CONFIG = {
+        maxFiles: 5,
+        maxFileSize: 12 * 1024 * 1024,
+        maxTotalSize: 25 * 1024 * 1024,
+
+        allowedExtensions: new Set([
+            '.jpg', '.jpeg', '.png', '.webp',
+            '.pdf', '.csv', '.txt',
+            '.doc', '.docx', '.xls', '.xlsx'
+        ]),
+
+        allowedMimeTypes: new Set([
+            // Images
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+
+            // PDF
+            'application/pdf',
+
+            // Text and CSV
+            'text/csv',
+            'text/plain',
+            'application/csv',
+
+            // Word
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+
+            // Excel
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ])
+    };
     // ============================================================
     // SIGNALR
     // ============================================================
@@ -751,14 +786,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         setUnreadMessageCount(0);
                     }
                 }
-                console.log({
-                    scrollTop: DOM.chatBody.scrollTop,
-                    scrollHeight: DOM.chatBody.scrollHeight,
-                    clientHeight: DOM.chatBody.clientHeight,
-                    maxScrollTop:
-                        DOM.chatBody.scrollHeight -
-                        DOM.chatBody.clientHeight
-                });
                 return;
             }
 
@@ -1252,7 +1279,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleTyping() {
         const value =
             DOM.chatInput?.value.trim();
-
         if (!value) {
             stopTyping();
 
@@ -1309,10 +1335,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!DOM.typing) {
             return;
         }
-
         DOM.typing.hidden = false;
 
-        scrollBottom();
+        scrollBottom(true);
     }
 
 
@@ -1623,9 +1648,6 @@ async function joinConversation() {
     if (!state.currentConversationId || !state.currentContactId || !isConnectionReady()) {
         return null;
     }
-    console.log("JOIN CONVERSATION");
-    console.log(CHAT_CONFIG.isAuthenticated);
-    console.log(state.guestToken);
     try {
         const guestToken = CHAT_CONFIG.isAuthenticated ? null : state.guestToken;
         const status =
@@ -2746,7 +2768,6 @@ async function joinConversation() {
         }
     }
     function addMessage(message, shouldScroll = true) {
-        console.log("AAAA");
         if (!message?.id || !DOM.chatBody) {
             return false;
         }
@@ -3283,6 +3304,14 @@ async function joinConversation() {
                 throw new Error(`File "${file.name}" vượt quá giới hạn 12 MB.`);
             }
 
+
+            const validationError = validateAdminAttachment(file);
+
+            if (validationError) {
+                console.warn(`${file.name}: ${validationError}`);
+                continue;
+            }
+
             let upload = pendingAttachmentUploads.get(file);
 
             // Upload ID đã hết hạn thì không tái sử dụng.
@@ -3707,7 +3736,37 @@ async function joinConversation() {
 
         return container.childElementCount > 0 ? container : null;
     }
+    function validateAdminAttachment(file) {
+        const dotIndex = file.name.lastIndexOf('.');
+        const extension = dotIndex >= 0
+            ? file.name.slice(dotIndex).toLowerCase()
+            : '';
 
+        if (!CHAT_ATTACHMENT_CONFIG.allowedExtensions.has(extension)) {
+            Toast.warning("Định dạng file không được hỗ trợ")
+            return 'Định dạng file không được hỗ trợ.';
+        }
+
+        if (
+            file.type &&
+            !CHAT_ATTACHMENT_CONFIG.allowedMimeTypes.has(file.type)
+        ) {
+            Toast.warning("Loại file không được hỗ trợ.")
+            return 'Loại file không được hỗ trợ.';
+        }
+
+        if (file.size <= 0) {
+            Toast.warning("File rỗng hoặc không hợp lệ.")
+            return 'File rỗng hoặc không hợp lệ.';
+        }
+
+        if (file.size > CHAT_ATTACHMENT_CONFIG.maxFileSize) {
+            Toast.warning("File vượt quá giới hạn dung lượng cho phép.")
+            return 'File vượt quá giới hạn dung lượng cho phép.';
+        }
+
+        return null;
+    }
     function createAttachmentDownloadButton(attachmentId, fileName) {
         const button = document.createElement("button");
 
@@ -3721,7 +3780,7 @@ async function joinConversation() {
         icon.textContent = "↓";
 
         const label = document.createElement("span");
-        label.textContent = "Tải xuống";
+        label.textContent = "";
 
         button.append(icon, label);
 
@@ -4169,10 +4228,8 @@ async function joinConversation() {
 
             item.appendChild(image);
         } else {
-            console.log(file);
             const fileInfo = document.createElement("div");
             const type = getAttachmentType(file.type, file.name);
-            console.log(type);
             fileInfo.className = "chat-attachment-file is-${type}";
 
             const icon = document.createElement("div");

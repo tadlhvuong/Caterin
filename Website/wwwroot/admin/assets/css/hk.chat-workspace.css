@@ -1374,6 +1374,137 @@
    CHAT ATTACHMENTS - MESSAGE HISTORY
 ========================================================= */
 
+/* =========================================================
+   MESSAGE HISTORY - IMAGE BOTTOM TOOLBAR
+========================================================= */
+
+.chat-message-attachment:has(.chat-attachment-image-button) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* Ảnh */
+.chat-message-attachment .chat-attachment-image-button {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    width: min(280px, 100%);
+    height: 220px;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 0.65rem;
+}
+
+/* Toolbar phủ cạnh dưới ảnh, đúng chiều rộng ảnh */
+.chat-message-attachment .chat-attachment-image-meta {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.6rem 0.65rem;
+
+    background: rgba(20, 24, 32, 0.9);
+    color: #fff;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(100%);
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+}
+
+/* Hiện toolbar khi hover ảnh hoặc toolbar */
+.chat-message-attachment:has(.chat-attachment-image-button):hover
+.chat-attachment-image-meta,
+.chat-message-attachment:has(.chat-attachment-image-button):focus-within
+.chat-attachment-image-meta {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Thông tin file bên trái */
+.chat-attachment-image-meta .chat-attachment-file-info {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.chat-attachment-image-meta .chat-attachment-file-name {
+    display: block;
+    overflow: hidden;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chat-attachment-image-meta .chat-attachment-file-size {
+    display: block;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.68rem;
+    line-height: 1.35;
+}
+
+/* Download luôn nằm bên phải, không bị co hoặc biến mất */
+.chat-message-attachment .chat-attachment-image-meta
+.chat-attachment-download {
+    position: static;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+
+    width: auto;
+    min-width: 34px;
+    min-height: 32px;
+    margin: 0;
+    padding: 0.35rem 0.5rem;
+
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.chat-message-attachment .chat-attachment-image-meta
+.chat-attachment-download:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-message-attachment .chat-attachment-image-meta {
+        transition: none;
+    }
+}
+
 .chat-message-attachments {
     display: flex;
     flex-direction: column;
@@ -1602,19 +1733,20 @@ body.chat-lightbox-open {
     }
 }
 
-/* =========================================================
-   ADMIN CHAT - DOCUMENT FILE ICONS
-   ========================================================= */
 
-/* Icon dùng chung cho file preview và file đã gửi */
+/* =========================================================
+   ADMIN CHAT - FILE TYPE ICONS
+========================================================= */
+
 .chat-pending-file .chat-attachment-file-icon,
+.chat-pending-file-icon,
 .chat-message-attachment .chat-attachment-file-icon {
     display: inline-flex;
-    flex: 0 0 44px;
+    flex: 0 1 50px;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 48px;
+    width: 49px;
+    height: 49px;
     box-sizing: border-box;
     border: 1px solid currentColor;
     border-radius: 8px;
@@ -1622,41 +1754,54 @@ body.chat-lightbox-open {
     color: #64748b;
     font-size: 11px;
     font-weight: 800;
-    letter-spacing: .2px;
+    letter-spacing: 0.2px;
     line-height: 1;
     text-transform: uppercase;
 }
 
-/* Phân biệt loại tài liệu */
+/* Màu theo loại file */
 .chat-attachment-file-icon.is-pdf,
-.chat-attachment-file-icon[data-file-type="pdf"] {
+.chat-attachment-file-icon[data-file-type="pdf"],
+.chat-pending-file-icon.is-pdf,
+.chat-pending-file-icon[data-file-type="pdf"] {
     color: #dc3545;
 }
 
 .chat-attachment-file-icon.is-word,
-.chat-attachment-file-icon[data-file-type="word"] {
+.chat-attachment-file-icon[data-file-type="word"],
+.chat-pending-file-icon.is-word,
+.chat-pending-file-icon[data-file-type="word"] {
     color: #2563eb;
 }
 
 .chat-attachment-file-icon.is-excel,
-.chat-attachment-file-icon[data-file-type="excel"] {
+.chat-attachment-file-icon[data-file-type="excel"],
+.chat-pending-file-icon.is-excel,
+.chat-pending-file-icon[data-file-type="excel"] {
     color: #16834a;
 }
 
 .chat-attachment-file-icon.is-powerpoint,
-.chat-attachment-file-icon[data-file-type="powerpoint"] {
+.chat-attachment-file-icon[data-file-type="powerpoint"],
+.chat-pending-file-icon.is-powerpoint,
+.chat-pending-file-icon[data-file-type="powerpoint"] {
     color: #d65b28;
 }
 
 .chat-attachment-file-icon.is-archive,
-.chat-attachment-file-icon[data-file-type="archive"] {
+.chat-attachment-file-icon[data-file-type="archive"],
+.chat-pending-file-icon.is-archive,
+.chat-pending-file-icon[data-file-type="archive"] {
     color: #946200;
 }
 
 .chat-attachment-file-icon.is-text,
-.chat-attachment-file-icon[data-file-type="text"] {
+.chat-attachment-file-icon[data-file-type="text"],
+.chat-pending-file-icon.is-text,
+.chat-pending-file-icon[data-file-type="text"] {
     color: #64748b;
 }
+
 
 /* File đã gửi: bố cục giống Client */
 .chat-message-attachment .chat-attachment-file {
@@ -1759,3 +1904,272 @@ body.chat-lightbox-open {
         height: 100%;
         object-fit: cover;
     }
+
+
+/* Image attachment: keep the toolbar inside the image frame. */
+.chat-message-attachment-image {
+    position: relative;
+    display: inline-block;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    vertical-align: top;
+    border-radius: 12px;
+}
+
+    /* Image button */
+    .chat-message-attachment-image .chat-attachment-image-button {
+        position: relative;
+        display: block;
+        width: fit-content;
+        max-width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: inherit;
+        background: var(--bs-tertiary-bg, #f3f4f6);
+        line-height: 0;
+        cursor: pointer;
+    }
+
+    .chat-message-attachment-image .chat-attachment-image {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        /*max-height: 320px;*/
+        object-fit: contain;
+    }
+
+    /* Bottom overlay: exactly the width of the image. */
+    .chat-message-attachment-image .chat-attachment-image-meta {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        min-width: 0;
+        padding: 9px 10px;
+        overflow: hidden;
+        border-radius: 0 0 12px 12px;
+        background: rgba(0, 0, 0, 0.72);
+        color: #fff;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        /* Fade in place: no slide from outside the image. */
+        transition: opacity 180ms ease, visibility 180ms ease;
+    }
+
+    .chat-message-attachment-image:hover .chat-attachment-image-meta,
+    .chat-message-attachment-image:focus-within .chat-attachment-image-meta {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    /* Filename area can shrink; download button cannot. */
+    .chat-message-attachment-image .chat-attachment-file-info {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .chat-message-attachment-image .chat-attachment-file-name {
+        display: block;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .chat-message-attachment-image .chat-attachment-file-size {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    /* Keep the download control anchored to the right. */
+    .chat-message-attachment-image .chat-attachment-download {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-width: max-content;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+/* Respect reduced-motion preferences. */
+@media (prefers-reduced-motion: reduce) {
+    .chat-message-attachment-image .chat-attachment-image-meta {
+        transition: none;
+    }
+}
+/* ========================================
+   Image attachment
+   Giữ nguyên cấu trúc HTML/JS hiện tại
+======================================== */
+
+.chat-message-attachment.is-image {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: fit-content;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 0.65rem;
+}
+
+    /* Khung ảnh */
+    .chat-message-attachment.is-image .chat-attachment-image-button {
+        position: relative;
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: min(280px, 100%);
+        height: 220px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: inherit;
+        background: var(--bs-tertiary-bg);
+    }
+
+    /* Ảnh nằm gọn trong khung */
+    .chat-message-attachment.is-image .chat-attachment-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    /* Toolbar phủ bên trong cạnh dưới ảnh */
+    .chat-message-attachment.is-image .chat-attachment-image-meta {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        padding: 0.6rem 0.65rem;
+        overflow: hidden;
+        border-radius: 0 0 0.65rem 0.65rem;
+        background: rgba(20, 24, 32, 0.88);
+        color: #fff;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        /* Chỉ fade tại chỗ, không trượt từ dưới lên */
+        transform: none;
+        transition: opacity 180ms ease, visibility 180ms ease;
+    }
+
+    /* Hiện toolbar tại đúng vị trí */
+    .chat-message-attachment.is-image:hover .chat-attachment-image-meta,
+    .chat-message-attachment.is-image:focus-within .chat-attachment-image-meta {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    /* Quan trọng: JS dùng chat-attachment-image-info */
+    .chat-message-attachment.is-image .chat-attachment-image-info {
+        display: flex;
+        flex: 1 1 0;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    /* Tên dài được rút gọn bằng dấu ... */
+    .chat-message-attachment.is-image .chat-attachment-file-name {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        color: #fff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        line-height: 1.35;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Dung lượng */
+    .chat-message-attachment.is-image .chat-attachment-file-size {
+        display: block;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.68rem;
+        line-height: 1.35;
+    }
+
+    /* Download luôn ở bên phải */
+    .chat-message-attachment.is-image .chat-attachment-download {
+        position: static;
+        display: inline-flex;
+        flex: 0 0 34px;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        min-width: 34px;
+        height: 32px;
+        min-height: 32px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        border-radius: 0.4rem;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 0.9rem;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+        .chat-message-attachment.is-image .chat-attachment-download:hover {
+            border-color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.22);
+            color: #fff;
+        }
+
+        .chat-message-attachment.is-image .chat-attachment-download:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: -3px;
+        }
+
+@media (prefers-reduced-motion: reduce) {
+    .chat-message-attachment.is-image .chat-attachment-image-meta {
+        transition: none;
+    }
+}

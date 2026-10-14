@@ -642,59 +642,59 @@
 
 
         <!-- Chat Window -->
-            <div class="chat-window" id="chatWindow" data-inbox-id="1" data-authenticated="@User.Identity?.IsAuthenticated.ToString().ToLower()"
+
+        <div class="caterin-chat">
+            <div class="chat-window"
+                 id="chatWindow"
+                 data-inbox-id="1"
+                 data-authenticated="@User.Identity?.IsAuthenticated.ToString().ToLower()"
                  data-name=""
                  data-email=""
-                 data-phone="">
-
+                 data-phone=""
+                 aria-label="Trò chuyện với Caterin">
                 <!-- Header -->
-                <div class="chat-header">
+                <header class="chat-header">
                     <div class="chat-header-left">
-                        <div class="agent-avatar">
+                        <div class="agent-avatar" aria-hidden="true">
                             <span>C</span>
                             <i id="chatAdminStatusDot" class="online-dot"></i>
                         </div>
 
                         <div class="agent-info">
-                            <div class="agent-name">
-                                Caterin
-                                @* <span class="verified">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M12 2L14.8 4.1L18.2 4.2L19.5 7.4L22 9.7L20.7 12.8L21.3 16.1L18.3 17.8L16.6 20.7L13.3 20.1L10.2 21.4L7.9 18.9L4.6 17.6L4.7 14.2L2.6 11.4L4.7 8.6L4.6 5.3L7.9 4L10.2 1.5L12 2Z" />
-                                    </svg>
-                                </span> *@
-                            </div>
+                            <div class="agent-name">Caterin</div>
 
                             <div id="chatStatusText" class="admin-status">
-                                <span></span>
+                                <span aria-hidden="true"></span>
                                 <span class="status-label">Đang trực tuyến</span>
                             </div>
                         </div>
                     </div>
 
-                    <button class="chat-close" id="chatClose" aria-label="Đóng chat">
-                        <svg viewBox="0 0 24 24">
+                    <button type="button"
+                            class="chat-close"
+                            id="chatClose"
+                            aria-label="Đóng chat">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M6 6L18 18M18 6L6 18"
                                   stroke="currentColor"
                                   stroke-width="1.8"
                                   stroke-linecap="round" />
                         </svg>
                     </button>
+                </header>
 
+                <!-- Previous conversation -->
+                <div id="chatHistoryLoader" class="hidden">
+                    <button type="button" id="loadPreviousConversationBtn">
+                        <i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>
+                        <span>Xem cuộc trò chuyện trước</span>
+                    </button>
                 </div>
-            <!-- History message -->
-            <div id="chatHistoryLoader" class="hidden">
-                <button type="button" id="loadPreviousConversationBtn">
-                    <i class="ph ph-clock-counter-clockwise"></i>
-                    Xem cuộc trò chuyện trước
-                </button>
-            </div>
-                <!-- Quick replies -->
-                <div class="quick-replies" hidden>
 
+                <!-- Quick replies and welcome message -->
+                <section class="quick-replies" hidden aria-label="Gợi ý tin nhắn">
                     <div class="welcome-message">
-
-                        <div class="welcome-icon">
+                        <div class="welcome-icon" aria-hidden="true">
                             <svg viewBox="0 0 24 24" fill="none">
                                 <path d="M12 3L19 6V11.5C19 16 16.1 19.5 12 21C7.9 19.5 5 16 5 11.5V6L12 3Z"
                                       stroke="currentColor"
@@ -708,84 +708,67 @@
                             </svg>
                         </div>
 
-                        <div>
+                        <div class="welcome-message-content">
                             <strong>Xin chào 👋</strong>
                             <p>
                                 Caterin rất vui được hỗ trợ bạn.
                                 Bạn cần tư vấn sản phẩm hay đơn hàng?
                             </p>
                         </div>
-
                     </div>
-                    <button data-message="Tư vấn sản phẩm">
-                        🧴 Tư vấn sản phẩm
-                    </button>
 
-                    <button data-message="Kiểm tra đơn hàng">
-                        📦 Kiểm tra đơn hàng
-                    </button>
+                    <div class="quick-replies-options">
+                        <button type="button" data-message="Tư vấn sản phẩm">
+                            🧴 Tư vấn sản phẩm
+                        </button>
+                        <button type="button" data-message="Kiểm tra đơn hàng">
+                            📦 Kiểm tra đơn hàng
+                        </button>
+                        <button type="button" data-message="Tư vấn combo">
+                            🏠 Tư vấn combo
+                        </button>
+                        <button type="button" data-message="Chính sách giao hàng">
+                            🚚 Chính sách giao hàng
+                        </button>
+                    </div>
+                </section>
 
-                    <button data-message="Tư vấn combo">
-                        🏠 Tư vấn combo
-                    </button>
+                <!-- Messages: rendered and managed by ClientJS -->
+                <div class="chat-body"
+                     id="chatBody"
+                     role="log"
+                     aria-live="polite"
+                     aria-relevant="additions text"
+                     aria-label="Tin nhắn"></div>
 
-                    <button data-message="Chính sách giao hàng">
-                        🚚 Chính sách giao hàng
-                    </button>
-
-                    @* <button data-message="Tư vấn làm đại lý">
-                            🤝 Làm đại lý
-                        </button> *@
-                </div>
-                <!-- Body -->
-
-                <div class="chat-body" id="chatBody">
-                    <!-- Welcome -->
-                    <!-- Agent message -->
-                    <div class="message-row admin">
-                        <div class="mini-avatar">C</div>
-
-                        <div>
-                            <div class="message admin-message">
-                                Chào bạn! Mình có thể giúp gì cho bạn hôm nay? 🌿
-                            </div>
-
-                            <div class="message-time">
-                                10:32
-                            </div>
+                <!-- Invalid session -->
+                <section id="chatSessionReset"
+                         class="chat-session-reset"
+                         hidden
+                         aria-live="polite">
+                    <div class="chat-session-reset-content">
+                        <div class="chat-session-reset-icon" aria-hidden="true">
+                            <i class="ph ph-warning-circle"></i>
                         </div>
 
+                        <div class="chat-session-reset-text">
+                            <strong>Phiên trò chuyện không hợp lệ</strong>
+                            <span class="chat-session-reset-description">
+                                Phiên trò chuyện hiện tại không còn hợp lệ.
+                                Vui lòng bắt đầu lại để tiếp tục.
+                            </span>
+                        </div>
+
+                        <button type="button" id="resetChatBox">
+                            Bắt đầu lại
+                        </button>
                     </div>
-                </div>
-            <!-- Invalid chat session -->
-            <div id="chatSessionReset"
-                 class="chat-session-reset"
-                 hidden>
+                </section>
 
-                <div class="chat-session-reset-content">
-                    <div class="chat-session-reset-icon">
-                        <i class="ph ph-warning-circle"></i>
-                    </div>
-
-                    <div class="chat-session-reset-text">
-                        <strong>Phiên trò chuyện không hợp lệ</strong>
-
-                        <span class="d-none d-sm-block">
-                            Phiên trò chuyện hiện tại không còn hợp lệ.
-                            Vui lòng bắt đầu lại để tiếp tục.
-                        </span>
-                    </div>
-
-                    <button type="button"
-                            id="resetChatBox">
-                        Bắt đầu lại
-                    </button>
-                </div>
-            </div>
-                <!-- Typing -->
-                <div class="typing" id="typing" hidden>
-                    <div class="typing-avatar">C</div>
-                    <div class="typing-bubble">
+                <!-- Typing indicator -->
+                <div class="typing" id="typing" hidden aria-live="polite">
+                    <div class="typing-avatar" aria-hidden="true">C</div>
+                    <div class="typing-bubble" aria-hidden="true">
                         <span></span>
                         <span></span>
                         <span></span>
@@ -793,69 +776,78 @@
                     <span class="typing-text">Đang nhập</span>
                 </div>
 
+                <!-- Composer -->
+                <footer class="chat-footer">
+                    <div class="chat-footer-content">
+                        <!-- Selected attachment previews -->
+                        <div class="chat-attachment-preview"
+                             id="chatAttachmentPreview"
+                             hidden>
+                            <div class="chat-attachment-list"
+                                 id="chatAttachmentList"></div>
+                        </div>
 
-                <!-- Footer -->
-                <div class="chat-footer">
-                <div class="chat-footer-content">
-                <!-- Attachment preview -->
-                <div class="chat-attachment-preview"
-                     id="chatAttachmentPreview"
-                     hidden>
-                    <div class="chat-attachment-list"
-                         id="chatAttachmentList">
+                        <div class="chat-input-row">
+                            <div class="chat-input-wrapper">
+                                <button type="button"
+                                        class="input-action"
+                                        id="attachmentBtn"
+                                        aria-label="Đính kèm tệp">
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M21 11.5L12.5 20C10 22.5 6 22.5 3.5 20C1 17.5 1 13.5 3.5 11L12.5 2C14.5 0 17.5 0 19.5 2C21.5 4 21.5 7 19.5 9L11 17.5C9.5 19 7 19 5.5 17.5C4 16 4 13.5 5.5 12L13.5 4"
+                                              stroke="currentColor"
+                                              stroke-width="1.7"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+
+                                <input type="file"
+                                       id="chatFileInput"
+                                       hidden
+                                       multiple
+                                       tabindex="-1" />
+
+                                <input type="text"
+                                       id="chatInput"
+                                       placeholder="Nhập tin nhắn..."
+                                       autocomplete="off"
+                                       aria-label="Nhập tin nhắn" />
+
+                                <button type="button"
+                                        class="emoji-btn"
+                                        id="emojiBtn"
+                                        aria-label="Chọn biểu tượng cảm xúc">
+                                    😊
+                                </button>
+                            </div>
+
+                            <button type="button"
+                                    class="send-btn"
+                                    id="sendBtn"
+                                    aria-label="Gửi tin nhắn">
+                                <svg viewBox="0 0 24 24" fill="green" aria-hidden="true">
+                                    <path d="M21 3L10.5 13.5"
+                                          stroke="currentColor"
+                                          stroke-width="1.8"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                    <path d="M21 3L14.3 21L10.5 13.5L3 9.7L21 3Z"
+                                          stroke="currentColor"
+                                          stroke-width="1.8"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="chat-input-row">
-                    <div class="chat-input-wrapper">
-                        <button class="input-action" id="attachmentBtn">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M21 11.5L12.5 20C10 22.5 6 22.5 3.5 20C1 17.5 1 13.5 3.5 11L12.5 2C14.5 0 17.5 0 19.5 2C21.5 4 21.5 7 19.5 9L11 17.5C9.5 19 7 19 5.5 17.5C4 16 4 13.5 5.5 12L13.5 4"
-                                      stroke="currentColor"
-                                      stroke-width="1.7"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round" />
-                            </svg>
-                        </button>
-                    <input type="file"
-                           id="chatFileInput"
-                           hidden
-                           multiple />
-                        <input type="text"
-                               id="chatInput"
-                               placeholder="Nhập tin nhắn..."
-                               autocomplete="off" />
-
-                        <button class="emoji-btn" id="emojiBtn"> 😊 </button>
-
-                    </div>
-                  </div>
-                </div>
-                    <button class="send-btn" id="sendBtn">
-
-                        <svg viewBox="0 0 24 24" fill="green">
-                            <path d="M21 3L10.5 13.5"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round" />
-
-                            <path d="M21 3L14.3 21L10.5 13.5L3 9.7L21 3Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linejoin="round" />
-                        </svg>
-
-                    </button>
-
-                </div>
+                </footer>
 
                 <div class="chat-powered">
                     <span>Được hỗ trợ bởi</span>
-                    <strong>Caterin</strong>
+                    <strong>Caterin Việt nam</strong>
                 </div>
-
             </div>
+        </div>
 
     </div>
 

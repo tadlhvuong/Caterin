@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using Shared.Common;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.DTOs;
 using Shared.DTOs.Auth;
+using Shared.Enums;
 using Shared.Interfaces.AuthServices;
-using Shared.UserValidation.Interface;
+using Shared.Interfaces.Log;
+using Shared.Services.Log;
 namespace Shared.Services.Authentication
 {
     public class RefreshTokenService : IRefreshTokenService
@@ -17,12 +18,18 @@ namespace Shared.Services.Authentication
         private readonly IJwtService _jwtService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RefreshTokenService(AppDbContext dbcontext,
-            IJwtService jwtService, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<RefreshToken> _logger;
+        private readonly ISecurityLogger _securityLogger;
+
+        public RefreshTokenService(AppDbContext dbcontext, IJwtService jwtService, IHttpContextAccessor httpContextAccessor,
+            ILogger<RefreshToken> logger, ISecurityLogger securityLogger)
         {
             _dbcontext = dbcontext;
             _jwtService = jwtService;
             _httpContextAccessor = httpContextAccessor;
+
+            _logger = logger;
+            _securityLogger = securityLogger;
         }
 
         public async Task<RefreshTokenResult> CreateAsync(string userId, TimeSpan lifeTime, CancellationToken cancellationToken = default)
@@ -44,8 +51,11 @@ namespace Shared.Services.Authentication
             _dbcontext.RefreshTokens.Add(result);
             await _dbcontext.SaveChangesAsync(cancellationToken);
 
+            await _securityLogger.LogAsync(SecurityActionType.RefreshToken, true, $"Refresh token created. UserId={userId}");
+
             return new RefreshTokenResult { RefreshToken = refreshToken, ExpireAt = result.ExpiredAt };
         }
+
         public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             var tokenHash = CommonHelper.Hash(refreshToken);
@@ -53,12 +63,17 @@ namespace Shared.Services.Authentication
             return await _dbcontext.RefreshTokens.Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.TokenHash == tokenHash, cancellationToken);
         }
+
         public async Task<RotateTokenResult> RotateAsync(RefreshToken oldToken, CancellationToken cancellationToken = default)
         {
             var now = DateTime.UtcNow;
 
             if (oldToken.IsRevoked)
             {
+                _logger.LogWarning("Refresh token rotation rejected because token is revoked. UserId={UserId}, TokenId={TokenId}",
+                    oldToken.UserId, oldToken.Id);
+                await _securityLogger.LogAsync(SecurityActionType.RefreshTokenReuse, false, $"Refresh token already revoked. UserId={oldToken.UserId}");
+                
                 return new RotateTokenResult
                 {
                     Success = false,
@@ -68,6 +83,10 @@ namespace Shared.Services.Authentication
 
             if (oldToken.ExpiredAt <= now)
             {
+                _logger.LogInformation("Refresh token rotation rejected because token is expired. UserId={UserId}, TokenId={TokenId}",
+                    oldToken.UserId, oldToken.Id);
+                await _securityLogger.LogAsync(SecurityActionType.RefreshToken, false, $"Refresh token expired. UserId={oldToken.UserId}");
+                
                 return new RotateTokenResult
                 {
                     Success = false,
@@ -110,6 +129,10 @@ namespace Shared.Services.Authentication
                 {
                     await transaction.RollbackAsync(cancellationToken);
 
+                    _logger.LogWarning("Refresh token rotation rejected by conditional update. UserId={UserId}, TokenId={TokenId}",
+                        oldToken.UserId, oldToken.Id);
+                    await _securityLogger.LogAsync(SecurityActionType.RefreshTokenReuse, false, $"Refresh token rotation rejected. UserId={oldToken.UserId}");
+                    
                     return new RotateTokenResult
                     {
                         Success = false,
@@ -130,6 +153,10 @@ namespace Shared.Services.Authentication
                 oldToken.RevokedReason = "RefreshTokenRotated";
                 oldToken.ReplacedByTokenHash = tokenHash;
 
+                _logger.LogInformation("Refresh token rotated successfully. UserId={UserId}, TokenId={TokenId}, NewTokenId={NewTokenId}",
+                    oldToken.UserId, oldToken.Id, newToken.Id);
+                await _securityLogger.LogAsync(SecurityActionType.RefreshToken, true, $"Refresh token rotated successfully. UserId={oldToken.UserId}");
+                
                 return new RotateTokenResult
                 {
                     Success = true,
@@ -138,9 +165,14 @@ namespace Shared.Services.Authentication
                     User = oldToken.User
                 };
             }
-            catch
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync(cancellationToken);
+
+                _logger.LogError(ex, "Unexpected error while rotating refresh token. UserId={UserId}, TokenId={TokenId}",
+                    oldToken.UserId,  oldToken.Id);
+                await _securityLogger.LogAsync(SecurityActionType.RefreshToken, false, $"Unexpected error while rotating refresh token. UserId={oldToken.UserId}, TokenId={oldToken.Id}");
+
                 throw;
             }
         }
@@ -151,6 +183,8 @@ namespace Shared.Services.Authentication
             refreshToken.RevokedAt = DateTime.UtcNow;
 
             await _dbcontext.SaveChangesAsync(cancellationToken);
+
+            await _securityLogger.LogAsync(SecurityActionType.JwtRevoked, true, $"Refresh token revoked. UserId={refreshToken.UserId}");
         }
         public async Task RevokeAllUserTokensAsync(string userId, CancellationToken cancellationToken = default)
         {

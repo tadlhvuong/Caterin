@@ -274,32 +274,19 @@ namespace Shared.Services.Chat
                 previewOnly: false, cancellationToken);
         }
 
-        public Task<ChatAttachmentReadResponse?> OpenForPreviewAsync(
-            long attachmentId,
-            long? contactId,
-            string? guestToken,
-            string? userId,
-            CancellationToken cancellationToken = default)
+        public Task<ChatAttachmentReadResponse?> OpenForPreviewAsync(long attachmentId, long? contactId,
+            string? guestToken, string? userId, CancellationToken cancellationToken = default)
         {
             return OpenAttachmentAsync(
                 attachmentId, contactId, guestToken, userId,
                 previewOnly: true, cancellationToken);
         }
 
-        private async Task<ChatAttachmentReadResponse?> OpenAttachmentAsync(
-    long attachmentId,
-    long? contactId,
-    string? guestToken,
-    string? userId,
-    bool previewOnly,
-    CancellationToken cancellationToken,
-    bool isAdmin = false)
+        private async Task<ChatAttachmentReadResponse?> OpenAttachmentAsync(long attachmentId, long? contactId, string? guestToken,
+            string? userId, bool previewOnly, CancellationToken cancellationToken, bool isAdmin = false)
         {
-            var attachment = await _dbContext.ChatAttachments
-                .AsNoTracking()
-                .Include(x => x.Message)
-                .Include(x => x.MediaFile)
-                .FirstOrDefaultAsync(
+            var attachment = await _dbContext.ChatAttachments.AsNoTracking().Include(x => x.Message)
+                .Include(x => x.MediaFile).FirstOrDefaultAsync(
                     x => x.Id == attachmentId,
                     cancellationToken);
 
@@ -362,9 +349,7 @@ namespace Shared.Services.Chat
             return new ChatAttachmentReadResponse
             {
                 Stream = stream,
-                ContentType = previewOnly
-                    ? contentType!
-                    : "application/octet-stream",
+                ContentType = previewOnly ? contentType! : "application/octet-stream",
                 FileName = fileName
             };
         }

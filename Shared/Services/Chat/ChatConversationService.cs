@@ -11,7 +11,6 @@ using Shared.Interfaces.Chat;
 using Shared.Interfaces.Notification;
 using Shared.Requests.Chat;
 using Shared.Responses;
-using System.Linq;
 
 namespace Shared.Services.Chat
 {

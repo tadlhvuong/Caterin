@@ -30,22 +30,26 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+
+    private readonly IConfiguration _configuration;
     private readonly IJwtService _jwtService;
     private readonly JwtSetting _jwtSettings;
-    private readonly IUserService _userService;
     private readonly IAppCache _cache;
-    private readonly IRefreshTokenService _refreshTokenService;
-    private readonly IUserValidationService _userValidationService;
-    private readonly IEmailSender _emailSender;
-    private readonly ISecurityLogger _securityLogger;
+
+    private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger<AuthService> _logger;
-    private readonly IConfiguration _configuration;
+    private readonly IUserValidationService _userValidationService;
+
+    private readonly IRefreshTokenService _refreshTokenService;
+
+    private readonly IEmailSender _emailSender;
     private readonly IEmailTemplateService _emailTemplate;
     private readonly IEmailActionService _emailActionService;
 
-    public AuthService(
-        UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager,
+    private readonly ILogger<AuthService> _logger;
+    private readonly ISecurityLogger _securityLogger;
+
+    public AuthService(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager,
         IJwtService jwtService, IOptions<JwtSetting> jwtOptions, IRefreshTokenService refreshTokenService,
         AppDbContext context, IAppCache appCache, IConfiguration configuration,
         IOptions<JwtSetting> jwtSettings, IOptions<AppSettings> appSettings,
@@ -53,13 +57,16 @@ public class AuthService : IAuthService
         IEmailSender emailSender, IEmailActionService emailActionService,IEmailTemplateService emailTemplate,
         ISecurityLogger securityLogger, ILogger<AuthService> logger)
     {
+        _configuration = configuration;
+
         _userManager = userManager;
         _signInManager = signInManager;
+
         _jwtService = jwtService;
         _jwtSettings = jwtOptions.Value;
-        _refreshTokenService = refreshTokenService;
         _cache = appCache;
-        _configuration = configuration;
+
+        _refreshTokenService = refreshTokenService;
 
         _userService = userService;
         _userValidationService = userValidationService;

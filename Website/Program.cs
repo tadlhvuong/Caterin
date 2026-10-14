@@ -91,6 +91,7 @@ services.AddIdentity<AppUser, AppRole>(options =>
 }).AddEntityFrameworkStores<AppDbContext>()
     .AddTokenProvider<EmailConfirmationTokenProvider<AppUser>>("EmailConfirmation")
     .AddDefaultTokenProviders();
+
 services.AddAuthentication()
     .AddGoogle(options =>
     {
@@ -145,27 +146,28 @@ services.AddScoped<IUserValidationService, UserValidationService>();
 services.AddScoped<IUserStatusValidator, UserStatusValidator>();
 
 services.Configure<MediaStorageOptions>(builder.Configuration.GetSection("AppSettings:MediaStorage"));
-builder.Services.AddScoped<IMediaService, MediaService>();
+services.AddScoped<IMediaService, MediaService>();
 
 services.AddScoped<IProductService, ProductService>();
 services.AddScoped<IOrderService, OrderService>();
 services.AddScoped<ICustomerService, CustomerService>();
 
-builder.Services.AddSignalR();
-builder.Services.AddScoped<IChatAuthorizationService, ChatAuthorizationService>();
-builder.Services.AddScoped<IChatConversationService, ChatConversationService>();
-builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
-builder.Services.AddScoped<IChatLabelService, ChatLabelService>();
-builder.Services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
+services.AddSignalR();
+services.AddScoped<IChatAuthorizationService, ChatAuthorizationService>();
+services.AddScoped<IChatConversationService, ChatConversationService>();
+services.AddScoped<IChatMessageService, ChatMessageService>();
+services.AddScoped<IChatLabelService, ChatLabelService>();
+services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 
-builder.Services.AddScoped<IChatRealtimeNotifier, ChatRealtimeNotifier>();
-builder.Services.AddSingleton<IChatPresenceService, ChatPresenceService>();
+services.AddScoped<IChatRealtimeNotifier, ChatRealtimeNotifier>();
+services.AddSingleton<IChatPresenceService, ChatPresenceService>();
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)
     services.AddSingleton<IAppCache, RedisCache>();
 else
     services.AddSingleton<IAppCache, AppMemoryCache>();
+services.Configure<CacheSettings>(builder.Configuration.GetSection("CacheSettings"));
 
 services.AddJwtConfiguration(builder.Configuration);
 services.AddPermissionAuthorization();

@@ -13,14 +13,12 @@ namespace Shared.Services.Media
         private readonly IWebHostEnvironment _environment;
         private readonly MediaStorageOptions _options;
 
-        private static readonly HashSet<string> ProductExtensions =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> ProductExtensions = new(StringComparer.OrdinalIgnoreCase)
             {
             ".jpg", ".jpeg", ".png", ".webp"
             };
 
-        private static readonly HashSet<string> ChatExtensions =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly HashSet<string> ChatExtensions = new(StringComparer.OrdinalIgnoreCase)
             {
             // Images
             ".jpg", ".jpeg", ".png", ".webp",
@@ -63,12 +61,10 @@ namespace Shared.Services.Media
             var maxFileSize = isProduct ? MaxProductFileSize : MaxChatFileSize;
 
             if (!allowedExtensions.Contains(extension))
-                throw new InvalidOperationException(
-                    "Định dạng file không được hỗ trợ.");
+                throw new InvalidOperationException("Định dạng file không được hỗ trợ.");
 
             if (file.Length > maxFileSize)
-                throw new InvalidOperationException(
-                    $"File không được vượt quá {maxFileSize / (1024 * 1024)} MB.");
+                throw new InvalidOperationException($"File không được vượt quá {maxFileSize / (1024 * 1024)} MB.");
 
             ValidateContentType(extension, file.ContentType);
 
@@ -140,9 +136,7 @@ namespace Shared.Services.Media
             return Task.CompletedTask;
         }
 
-        public Task DeleteFolderAsync(
-            string relativeFolder,
-            CancellationToken cancellationToken = default)
+        public Task DeleteFolderAsync(string relativeFolder, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -199,9 +193,7 @@ namespace Shared.Services.Media
             return fullPath;
         }
 
-        private static void ValidateContentType(
-            string extension,
-            string contentType)
+        private static void ValidateContentType(string extension, string contentType)
         {
             var allowedTypes = extension.ToLowerInvariant() switch
             {
@@ -229,12 +221,9 @@ namespace Shared.Services.Media
                 _ => Array.Empty<string>()
             };
 
-            if (!allowedTypes.Contains(
-                    contentType ?? string.Empty,
-                    StringComparer.OrdinalIgnoreCase))
+            if (!allowedTypes.Contains(contentType ?? string.Empty, StringComparer.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException(
-                    "Content-Type không phù hợp với định dạng file.");
+                throw new InvalidOperationException("Content-Type không phù hợp với định dạng file.");
             }
         }
 

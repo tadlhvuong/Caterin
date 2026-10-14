@@ -235,11 +235,8 @@ namespace Website.Controllers
         }
 
         [HttpGet("attachments/{attachmentId:long}/preview")]
-        public async Task<IActionResult> PreviewAttachment(
-    long attachmentId,
-    [FromHeader(Name = "X-Chat-Contact-Id")] long? contactId,
-    [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> PreviewAttachment(long attachmentId, [FromHeader(Name = "X-Chat-Contact-Id")] long? contactId,
+            [FromHeader(Name = "X-Chat-Guest-Token")] string? guestToken, CancellationToken cancellationToken)
         {
             if (attachmentId <= 0)
             {
@@ -250,16 +247,12 @@ namespace Website.Controllers
 
             // Guest phải cung cấp đầy đủ danh tính.
             // Khách hàng đã đăng nhập được xác thực qua userId.
-            if (string.IsNullOrWhiteSpace(userId) &&
-                (!contactId.HasValue ||
-                 contactId.Value <= 0 ||
-                 string.IsNullOrWhiteSpace(guestToken)))
+            if (string.IsNullOrWhiteSpace(userId) && (!contactId.HasValue || contactId.Value <= 0 || string.IsNullOrWhiteSpace(guestToken)))
             {
                 return Unauthorized();
             }
 
-            var result = await _chatAttachmentService.OpenForPreviewAsync(
-    attachmentId, contactId, guestToken, userId, cancellationToken);
+            var result = await _chatAttachmentService.OpenForPreviewAsync(attachmentId, contactId, guestToken, userId, cancellationToken);
 
             if (result == null)
                 return NotFound();

@@ -342,7 +342,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!DOM.chatBody) {
             return;
         }
-
         requestAnimationFrame(() => {
             DOM.chatBody.scrollTo({
                 top: DOM.chatBody.scrollHeight,
@@ -470,8 +469,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const newHeight = DOM.chatBody.scrollHeight;
 
-        DOM.chatBody.scrollTop =
-            previousTop + (newHeight - previousHeight);
+        DOM.chatBody.scrollTop = previousTop + (newHeight - previousHeight);
     }
     function showPreviousConversationButton() {
         const loader = DOM.chatHistoryLoader;
@@ -567,8 +565,6 @@ document.addEventListener("DOMContentLoaded", () => {
             syncPreviousConversationButton();
 
         } catch (error) {
-            console.log("preparePreviousConversationFor:", error);
-
             state.history.previousConversationId = null;
             state.history.hasPrevious = false;
 
@@ -690,13 +686,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // CHAT OPEN / CLOSE
     // ============================================================
-    function isConversationResolved() {
-        return (
-            Number(state.currentConversationStatus) ===
-            CONFIG.conversationStatus.resolved
-        );
-    }
-
     async function openChat() {
         if (!DOM.chatWindow) {
             return;
@@ -716,7 +705,6 @@ document.addEventListener("DOMContentLoaded", () => {
              * - Không phụ thuộc guestToken
              * - Backend sẽ xác định ChatContact từ userId
              */
-            console.log(CHAT_CONFIG.isAuthenticated);
             if (CHAT_CONFIG.isAuthenticated) {
 
                 /*
@@ -763,7 +751,14 @@ document.addEventListener("DOMContentLoaded", () => {
                         setUnreadMessageCount(0);
                     }
                 }
-
+                console.log({
+                    scrollTop: DOM.chatBody.scrollTop,
+                    scrollHeight: DOM.chatBody.scrollHeight,
+                    clientHeight: DOM.chatBody.clientHeight,
+                    maxScrollTop:
+                        DOM.chatBody.scrollHeight -
+                        DOM.chatBody.clientHeight
+                });
                 return;
             }
 
@@ -885,13 +880,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    async function loadConversationMessages({
-        initial = false
-    } = {}) {
-        if (
-            !state.currentConversationId ||
-            state.messagePaging.loading
-        ) {
+    async function loadConversationMessages({ initial = false } = {}) {
+        if (!state.currentConversationId || state.messagePaging.loading) {
             return;
         }
 
@@ -901,8 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         state.messagePaging.loading = true;
 
-        const conversationId =
-            state.currentConversationId;
+        const conversationId = state.currentConversationId;
 
         try {
             const paging = getConversationPaging(conversationId);
@@ -921,8 +910,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (initial) {
                 clearMessages();
 
-                state.history.loadedConversationId =
-                    conversationId;
+                state.history.loadedConversationId = conversationId;
 
                 paging.oldestMessageId = null;
                 paging.hasMore = true;
@@ -966,21 +954,15 @@ document.addEventListener("DOMContentLoaded", () => {
             /*
              * Message cũ nhất
              */
-            const oldestMessageId =
-                messages[0]?.id ??
-                state.messagePaging.oldestMessageId;
+            const oldestMessageId = messages[0]?.id ?? state.messagePaging.oldestMessageId;
 
-            state.messagePaging.oldestMessageId =
-                oldestMessageId;
+            state.messagePaging.oldestMessageId = oldestMessageId;
 
-            state.messagePaging.hasMore =
-                hasMore;
+            state.messagePaging.hasMore = hasMore;
 
-            paging.oldestMessageId =
-                oldestMessageId;
+            paging.oldestMessageId = oldestMessageId;
 
-            paging.hasMore =
-                hasMore;
+            paging.hasMore = hasMore;
 
             /*
              * Đã hết message của conversation hiện tại
@@ -993,34 +975,14 @@ document.addEventListener("DOMContentLoaded", () => {
             state.chatSession.hasActiveHistory = true;
         }
         catch (error) {
-            console.error(
-                "loadConversationMessages:",
-                error
-            );
+            console.error("loadConversationMessages:", error);
         }
         finally {
             state.messagePaging.loading = false;
         }
     }
-    async function waitForImages(container) {
-        const images = [...container.querySelectorAll("img")];
 
-        await Promise.all(
-            images.map((img) => {
-                if (img.complete) {
-                    return Promise.resolve();
-                }
-
-                return new Promise((resolve) => {
-                    img.addEventListener("load", resolve, { once: true });
-                    img.addEventListener("error", resolve, { once: true });
-                });
-            })
-        );
-    }
-    async function loadOlderMessagesForConversation(
-        conversationId
-    ) {
+    async function loadOlderMessagesForConversation(conversationId) {
         const id = Number(conversationId);
 
         if (!id) {
@@ -1030,11 +992,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const paging =
             getConversationPaging(id);
 
-        if (
-            !paging ||
-            paging.loading ||
-            !paging.hasMore
-        ) {
+        if (!paging || paging.loading || !paging.hasMore) {
             return;
         }
 
@@ -1370,6 +1328,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // SIGNALR CONNECTION
     // ============================================================
+    let chatResizeObserver;
 
     async function startChatConnection() {
         try {
@@ -1683,7 +1642,6 @@ async function joinConversation() {
         updateCurrentConversationStatus(
             state.currentConversationStatus
         );
-
         return state.currentConversationStatus;
     }
     catch (error) {
@@ -1850,7 +1808,6 @@ async function joinConversation() {
             await loadConversationMessages({
                 initial: true
             });
-
             await loadUnreadCount();
 
             updateCurrentConversationStatus(status);
@@ -1924,9 +1881,7 @@ async function joinConversation() {
             return true;
         }
 
-        await acknowledgeMessageDelivered(
-            message
-        );
+        await acknowledgeMessageDelivered(message);
 
         if (isChatOpen()) {
             const marked =
@@ -1955,7 +1910,6 @@ async function joinConversation() {
 
         return true;
     }
-
 
     function handleMessageStatusUpdated(data) {
         if (
@@ -2303,7 +2257,6 @@ async function joinConversation() {
         initializeQuickRepliesFromMessages(
             messages
         );
-
         scrollToBottom();
     }
     function normalizeDateSeparators() {
@@ -2364,8 +2317,11 @@ async function joinConversation() {
     function scrollToBottom() {
         if (!DOM.chatBody) return;
 
-        DOM.chatBody.scrollTop = DOM.chatBody.scrollHeight;
+        requestAnimationFrame(() => {
+            DOM.chatBody.scrollTop = DOM.chatBody.scrollHeight;
+        });
     }
+
     function resetChatBox() {
         /*
          * 1. Clear identity
@@ -2643,9 +2599,7 @@ async function joinConversation() {
             // =====================================================
             // 2. SEND MESSAGE
             // =====================================================
-            console.log("SendCustomerMessage");
-            console.log(CHAT_CONFIG.inboxId + " : " + state.currentContactId + " : " + state.currentContactId + " : " +
-                message + " : " + state.guestToken + " : " + uploadSessionToken + " : " + uploadIds);
+
             const result =
                 await connection.invoke("SendCustomerMessage", CHAT_CONFIG.inboxId,
                     state.currentConversationId || null, state.currentContactId || null,
@@ -2728,7 +2682,6 @@ async function joinConversation() {
                     true
                 );
             }
-
             // =====================================================
             // 7. CLEAR COMPOSER AFTER SUCCESS
             // =====================================================
@@ -2792,14 +2745,9 @@ async function joinConversation() {
             }
         }
     }
-    function addMessage(
-        message,
-        shouldScroll = true
-    ) {
-        if (
-            !message?.id ||
-            !DOM.chatBody
-        ) {
+    function addMessage(message, shouldScroll = true) {
+        console.log("AAAA");
+        if (!message?.id || !DOM.chatBody) {
             return false;
         }
 
@@ -2809,8 +2757,7 @@ async function joinConversation() {
             return false;
         }
 
-        const row =
-            createMessageElement(message);
+        const row = createMessageElement(message);
 
         if (!row) {
             return false;
@@ -2832,22 +2779,17 @@ async function joinConversation() {
         if (shouldScroll) {
             scrollBottom(true);
         }
-
         return true;
     }
 
     function createDateSeparator(date) {
-        const separator =
-            document.createElement("div");
+        const separator = document.createElement("div");
 
-        separator.className =
-            "chat-date";
+        separator.className = "chat-date";
 
         const label = getDateSeparatorLabel(date);
 
-        separator.innerHTML = `
-        <span>${escapeHtml(label)}</span>
-    `;
+        separator.innerHTML = `<span>${escapeHtml(label)}</span>`;
 
         return separator;
     }
@@ -2857,8 +2799,7 @@ async function joinConversation() {
         const messageDate =
             new Date(date);
 
-        const now =
-            new Date();
+        const now = new Date();
 
         const messageDay =
             new Date(
@@ -2919,14 +2860,12 @@ async function joinConversation() {
             );
         }
 
-        const element =
-            createMessageElement(message);
+        const element = createMessageElement(message);
 
         if (element) {
             fragment.appendChild(element);
         }
     }
-
 
     function isSameMessageDate(
         firstDate,
@@ -2967,10 +2906,11 @@ async function joinConversation() {
 
         const isCustomer = senderType === CONFIG.senderType.contact;
 
-
         const statusHtml = isCustomer ? buildMessageStatusHtml(message.status) : "";
 
         const isSystemMessage = senderType === CONFIG.senderType.system;
+
+        const isShowContent = escapeHtml(message.content) == "" ? "hidden" : "";
 
         const avatarHtml = isCustomer || isSystemMessage ? "" : buildAdminAvatar();
 
@@ -2981,7 +2921,7 @@ async function joinConversation() {
         row.dataset.createdAt = message.createdAt;
         row.innerHTML = `${avatarHtml}
         <div class="message-content">
-            <div class="message ${messageClass}">${escapeHtml(message.content)}</div>
+            <div class="message ${messageClass} ${isShowContent}"></div>
 
             <div class="message-meta">
                 <span class="message-time">${formatMessageTime(message.createdAt)}</span>
@@ -2989,6 +2929,13 @@ async function joinConversation() {
             </div>
         </div>
     `;
+        const messageElement = row.querySelector(".message");
+
+        if (messageElement) {
+            messageElement.appendChild(
+                renderMessageText(message.content)
+            );
+        }
         const messageContent = row.querySelector(".message-content");
         const attachmentsElement = renderMessageAttachments(message.attachments);
 
@@ -3002,7 +2949,66 @@ async function joinConversation() {
         }
         return row;
     }
+    function renderMessageText(content) {
+        const text = String(content ?? "");
+        const fragment = document.createDocumentFragment();
 
+        const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+        let lastIndex = 0;
+        let match;
+
+        while ((match = urlPattern.exec(text)) !== null) {
+            let url = match[0];
+            let trailing = "";
+
+            // Tách dấu câu cuối URL để không đưa vào liên kết.
+            while (/[.,!?;:]$/.test(url)) {
+                trailing = url.slice(-1) + trailing;
+                url = url.slice(0, -1);
+            }
+
+            // Xử lý dấu đóng ngoặc không thuộc URL.
+            while (
+                /[)\]}]$/.test(url) &&
+                (
+                    (url.endsWith(")") && (url.match(/\(/g) || []).length < (url.match(/\)/g) || []).length) ||
+                    (url.endsWith("]") && (url.match(/\[/g) || []).length < (url.match(/\]/g) || []).length) ||
+                    (url.endsWith("}") && (url.match(/\{/g) || []).length < (url.match(/\}/g) || []).length)
+                )
+            ) {
+                trailing = url.slice(-1) + trailing;
+                url = url.slice(0, -1);
+            }
+
+            fragment.appendChild(
+                document.createTextNode(text.slice(lastIndex, match.index))
+            );
+
+            if (url) {
+                const link = document.createElement("a");
+                link.href = url;
+                link.textContent = url;
+                link.target = "_blank";
+                link.rel = "noopener noreferrer";
+                link.className = "message-link";
+
+                fragment.appendChild(link);
+            }
+
+            if (trailing) {
+                fragment.appendChild(document.createTextNode(trailing));
+            }
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        fragment.appendChild(
+            document.createTextNode(text.slice(lastIndex))
+        );
+
+        return fragment;
+
+    }
     function getMessageClasses(senderType) {
         const name = MESSAGE_SENDER_CLASS[senderType];
 
@@ -3018,7 +3024,65 @@ async function joinConversation() {
             message: `${name}-message`
         };
     }
+    function renderMessageText(content) {
+    const text = String(content ?? "");
+    const fragment = document.createDocumentFragment();
 
+    const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = urlPattern.exec(text)) !== null) {
+        let url = match[0];
+        let trailing = "";
+
+        // Tách dấu câu cuối URL để không đưa vào liên kết.
+        while (/[.,!?;:]$/.test(url)) {
+            trailing = url.slice(-1) + trailing;
+            url = url.slice(0, -1);
+        }
+
+        // Xử lý dấu đóng ngoặc không thuộc URL.
+        while (
+            /[)\]}]$/.test(url) &&
+            (
+                (url.endsWith(")") && (url.match(/\(/g) || []).length < (url.match(/\)/g) || []).length) ||
+                (url.endsWith("]") && (url.match(/\[/g) || []).length < (url.match(/\]/g) || []).length) ||
+                (url.endsWith("}") && (url.match(/\{/g) || []).length < (url.match(/\}/g) || []).length)
+            )
+        ) {
+            trailing = url.slice(-1) + trailing;
+            url = url.slice(0, -1);
+        }
+
+        fragment.appendChild(
+            document.createTextNode(text.slice(lastIndex, match.index))
+        );
+
+        if (url) {
+            const link = document.createElement("a");
+            link.href = url;
+            link.textContent = url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.className = "message-link";
+
+            fragment.appendChild(link);
+        }
+
+        if (trailing) {
+            fragment.appendChild(document.createTextNode(trailing));
+        }
+
+        lastIndex = match.index + match[0].length;
+    }
+
+    fragment.appendChild(
+        document.createTextNode(text.slice(lastIndex))
+    );
+
+    return fragment;
+}
     function buildAdminAvatar() {
         return `<img src="/favicon.ico" width="20" alt="Favicon" class="avatar-initial rounded-circle">`;
     }
@@ -3102,7 +3166,7 @@ async function joinConversation() {
                         "Đã đọc",
 
                     content:
-                        "[●]"
+                        "✓✓"
                 };
 
             case CONFIG.messageStatus.failed:
@@ -3422,7 +3486,6 @@ async function joinConversation() {
         return labels[type] || "FILE";
     }
 
-
     async function loadAttachmentImage(img, attachmentId) {
         if (!img) {
             return;
@@ -3540,6 +3603,9 @@ async function joinConversation() {
             if (type === "image") {
                 item.classList.add("message-attachment-image");
 
+                const imageWrapper = document.createElement("div");
+                imageWrapper.className = "message-image-container";
+
                 const imageButton = document.createElement("button");
                 imageButton.type = "button";
                 imageButton.className = "message-attachment-image-button";
@@ -3547,7 +3613,7 @@ async function joinConversation() {
 
                 const image = document.createElement("img");
                 image.className = "message-attachment-preview";
-                image.alt = "Ảnh đính kèm";
+                image.alt = fileName;
                 image.loading = "lazy";
                 image.decoding = "async";
 
@@ -3564,36 +3630,50 @@ async function joinConversation() {
                 });
 
                 imageButton.addEventListener("click", () => {
-                    //downloadChatAttachment(attachmentId, fileName).catch(error => {
-                    //    console.error("Download attachment failed:", error);
-                    //    alert("Không thể tải ảnh. Vui lòng thử lại.");
-                    //});
-                    if (!image.dataset.objectUrl || !image.classList.contains("is-loaded")) {
+                    if (
+                        !image.dataset.objectUrl ||
+                        !image.classList.contains("is-loaded")
+                    ) {
                         return;
                     }
 
-                    openImageLightbox(image.dataset.objectUrl, "Ảnh đính kèm");
+                    openImageLightbox(image.dataset.objectUrl, fileName);
                 });
 
                 imageButton.append(image, loading);
-                item.appendChild(imageButton);
 
-                const meta = document.createElement("div");
-                meta.className = "message-attachment-image-meta";
+                // Thanh thông tin nằm ở đáy ảnh
+                const imageBottom = document.createElement("div");
+                imageBottom.className = "message-image-bottom";
+
+                // Bên trái: tên file và dung lượng
+                const imageInfo = document.createElement("div");
+                imageInfo.className = "message-image-info";
+
+                const name = document.createElement("span");
+                name.className = "message-image-name";
+                name.textContent = fileName;
+                name.title = fileName;
 
                 const size = document.createElement("span");
                 size.className = "message-attachment-size";
                 size.textContent = formatAttachmentSize(fileSize);
 
+                imageInfo.append(name, size);
+
+                // Bên phải: nút tải xuống
                 const downloadButton = createAttachmentDownloadButton(
                     attachmentId,
                     fileName
                 );
 
-                meta.append(size, downloadButton);
-                item.appendChild(meta);
+                imageBottom.append(imageInfo, downloadButton);
+
+                imageWrapper.append(imageButton, imageBottom);
+                item.appendChild(imageWrapper);
 
                 loadAttachmentImage(image, attachmentId);
+
             } else {
                 const icon = document.createElement("div");
                 icon.className = `message-attachment-icon is-${type}`;
@@ -4025,10 +4105,7 @@ async function joinConversation() {
             const lightbox = document.querySelector(".chat-image-lightbox");
             const lightboxImage = lightbox?.querySelector("img");
 
-            if (
-                lightbox?.classList.contains("is-open") &&
-                lightboxImage?.src === objectUrl
-            ) {
+            if (lightbox?.classList.contains("is-open") && lightboxImage?.src === objectUrl) {
                 closeImageLightbox();
             }
 
@@ -4092,35 +4169,42 @@ async function joinConversation() {
 
             item.appendChild(image);
         } else {
+            console.log(file);
             const fileInfo = document.createElement("div");
-            fileInfo.className = "chat-attachment-file";
+            const type = getAttachmentType(file.type, file.name);
+            console.log(type);
+            fileInfo.className = "chat-attachment-file is-${type}";
 
-            const icon = document.createElementNS(
-                "http://www.w3.org/2000/svg",
-                "svg"
-            );
+            const icon = document.createElement("div");
+            icon.className = `message-attachment-icon is-${type}`;
+            icon.setAttribute("aria-hidden", "true");
+            icon.textContent = getAttachmentTypeLabel(type);
 
-            icon.setAttribute("class", "chat-attachment-file-icon");
-            icon.setAttribute("viewBox", "0 0 24 24");
-            icon.setAttribute("fill", "none");
 
-            icon.innerHTML = `
-            <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linejoin="round" />
-            <path d="M14 2V8H20"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linejoin="round" />
-        `;
+            //icon.className = `message-attachment-icon is-${type}`;
+            //icon.setAttribute("aria-hidden", "true");
+            //icon.textContent = getAttachmentTypeLabel(type);
+            //icon.setAttribute("class", "chat-attachment-icon is-${type}");
+            //icon.setAttribute("viewBox", "0 0 24 24");
+            //icon.setAttribute("fill", "none");
+
+        //    icon.innerHTML = `
+        //    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+        //          stroke="currentColor"
+        //          stroke-width="1.7"
+        //          stroke-linejoin="round" />
+        //    <path d="M14 2V8H20"
+        //          stroke="currentColor"
+        //          stroke-width="1.7"
+        //          stroke-linejoin="round" />
+        //`;
 
             const fileName = document.createElement("span");
             fileName.className = "chat-attachment-file-name";
             fileName.title = file.name;
             fileName.textContent = file.name;
 
-            fileInfo.append(icon, fileName);
+            fileInfo.append(icon);
             item.appendChild(fileInfo);
         }
 
@@ -4682,7 +4766,6 @@ async function joinConversation() {
         initKeyboardEvents();
         initConversationHistory();
         initMessageLazyLoading();
-
         registerSignalREvents();
 
         startChatConnection();

@@ -3,8 +3,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Configurations;
 using Shared.DTOs.Auth;
+using Shared.Enums;
 using Shared.Helpers;
 using Shared.Interfaces.AuthServices;
+using Shared.Interfaces.Log;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace Shared.Middlewares;
@@ -17,15 +19,17 @@ public sealed class RefreshTokenMiddleware
 
     private ILogger<RefreshTokenMiddleware> _logger;
 
-    public RefreshTokenMiddleware(RequestDelegate next, IOptions<JwtSetting> jwtOptions, ILogger<RefreshTokenMiddleware> logger)
+    public RefreshTokenMiddleware(RequestDelegate next, IOptions<JwtSetting> jwtOptions, 
+        ILogger<RefreshTokenMiddleware> logger)
     {
         _next = next;
         _jwtSettings = jwtOptions.Value;
+
         _logger = logger;
     }
 
     //Access token  hết hạn chạy để lấy lại token từ dựa vào refresh token
-    public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService)
+    public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService, ISecurityLogger securityLogger)
     {
         var accessToken = context.Request.Cookies["access_token"];
         var refreshToken = context.Request.Cookies["refresh_token"];
@@ -82,7 +86,11 @@ public sealed class RefreshTokenMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Refresh token failed");
+            _logger.LogError(ex, "Refresh token middleware failed. TraceId={TraceId}, Path={Path}",
+                context.TraceIdentifier, context.Request.Path);
+
+            await securityLogger.LogAsync(SecurityActionType.RefreshToken, false,
+                $"Refresh token processing exception. " + $"ExceptionType={ex.GetType().Name}, " + $"TraceId={context.TraceIdentifier}");
 
         }
         await _next(context);

@@ -7,7 +7,6 @@ using Shared.Responses;
 namespace Shared.Services.Email
 {
     using Microsoft.EntityFrameworkCore;
-    using System.Net.WebSockets;
 
     public sealed class EmailActionService : IEmailActionService
     {

@@ -1,13 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Shared.Data.Context;
 using Shared.DTOs.Customer;
 using Shared.DTOs.Identity;
-using Shared.DTOs.Product;
-using Shared.Enums;
 using Shared.Interfaces.Core;
-using Shared.Interfaces.Media;
 using Shared.Responses.Datatables;
 
 namespace Shared.Services.Customer

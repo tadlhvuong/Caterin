@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Data.Context;
@@ -12,12 +11,6 @@ using Shared.Interfaces.Log;
 using Shared.Requests;
 using Shared.Responses;
 using Shared.Services.Caches;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Shared.Services.Authentication
 {
@@ -26,9 +19,10 @@ namespace Shared.Services.Authentication
         private readonly AppDbContext _dbContext;
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly IAppCache _cache;
+
         private readonly ILogger<UserService> _logger;
         private readonly ISecurityLogger _securityLogger;
-        private readonly IAppCache _cache;
         public UserService(AppDbContext dbContext, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager,
             ILogger<UserService> logger, ISecurityLogger securityLogger, IAppCache cache)
         {

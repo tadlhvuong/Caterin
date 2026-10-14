@@ -432,6 +432,7 @@
 
     .message-status.read {
         opacity: 1;
+        color: #1687e8;
     }
 
     .message-status.failed {
@@ -1017,6 +1018,7 @@
     padding: 11px 12px;
     background: white;
     border-top: 1px solid var(--chat-border);
+    box-shadow: 0 -8px 24px -10px rgba(0, 0, 0, 0.08);
 }
 .chat-footer-content {
     flex: 1;
@@ -1617,4 +1619,88 @@
     .chat-body {
         padding: 14px;
     }
+}
+.message-image-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.message-attachment-image-button {
+    display: block;
+    max-width: 100%;
+}
+
+.message-image-bottom {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.message-image-container .message-image-bottom,
+.message-image-container .message-image-bottom {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.message-image-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    gap: 3px;
+}
+
+.message-image-name {
+    overflow: hidden;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.message-image-info .message-attachment-size {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 11px;
+}
+
+.message-image-bottom .message-attachment-download {
+    flex: 0 0 auto;
+}
+
+@media (hover: none) {
+    .message-image-bottom {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+}
+
+.message-link {
+    color: #1687e8;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+}
+
+.message-link {
+    color: #0d6efd;
 }

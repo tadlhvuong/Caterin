@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Shared.Interfaces.IdentityServices;
 using Shared.Constants.Permission;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Shared.Services

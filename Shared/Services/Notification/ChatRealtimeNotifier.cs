@@ -3,11 +3,6 @@ using Shared.Constants.Core;
 using Shared.Enums.Chat;
 using Shared.Extensions;
 using Shared.Interfaces.Notification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Shared.Services.Notification
 {
@@ -20,15 +15,10 @@ namespace Shared.Services.Notification
             _hubContext = hubContext;
         }
 
-        public async Task NotifyConversationStatusUpdatedAsync(
-     long conversationId,
-     long inboxId,
-     ChatConversationStatus status,
-     DateTime? updatedAt)
+        public async Task NotifyConversationStatusUpdatedAsync(long conversationId, long inboxId,
+            ChatConversationStatus status, DateTime? updatedAt)
         {
-            await _hubContext.Clients
-                .Group(ChatHubGroups.Inbox(inboxId))
-                .SendAsync(
+            await _hubContext.Clients.Group(ChatHubGroups.Inbox(inboxId)).SendAsync(
                     ChatHubEvents.ConversationStatusUpdated,
                     new
                     {
@@ -39,13 +29,9 @@ namespace Shared.Services.Notification
                     });
         }
 
-        public async Task NotifyConversationReadAsync(
-    long conversationId,
-    long inboxId,
-    CancellationToken cancellationToken = default)
+        public async Task NotifyConversationReadAsync(long conversationId, long inboxId, CancellationToken cancellationToken = default)
         {
-            await _hubContext.Clients
-                .Group(ChatHubGroups.Conversation(conversationId))
+            await _hubContext.Clients.Group(ChatHubGroups.Conversation(conversationId))
                 .SendAsync(ChatHubEvents.ConversationRead,
                     new
                     {

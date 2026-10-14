@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity.Core;
@@ -14,12 +15,16 @@ namespace Shared.Services.Authentication
     {
         private readonly AppDbContext _dbContext;
         private readonly IAppCache _cache;
+        private readonly CacheSettings _cacheSettings;
+
         private readonly ILogger<PermissionService> _logger;
 
-        public PermissionService(AppDbContext dbContext, IAppCache cache, ILogger<PermissionService> logger)
+        public PermissionService(AppDbContext dbContext, IAppCache cache, IOptions<CacheSettings> cacheSettings, ILogger<PermissionService> logger)
         {
             _dbContext = dbContext;
             _cache = cache;
+            _cacheSettings = cacheSettings.Value;
+
             _logger = logger;
         }
 
@@ -74,6 +79,9 @@ namespace Shared.Services.Authentication
             {
                 await _dbContext.SaveChangesAsync();
                 await InvalidatePermissionLookupCacheAsync();
+
+                _logger.LogInformation("Generated {PermissionCount} permissions for module {ModuleId}.",
+                    newPermissions.Count, moduleId);
             }
         }
 
@@ -96,6 +104,8 @@ namespace Shared.Services.Authentication
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
                 await InvalidatePermissionLookupCacheAsync();
+
+                _logger.LogInformation("Permission synchronization completed successfully.");
             }
             catch (Exception ex)
             {
@@ -121,7 +131,7 @@ namespace Shared.Services.Authentication
                             x => x.Id,
                             StringComparer.OrdinalIgnoreCase);
                 },
-                TimeSpan.FromMinutes(30));
+                TimeSpan.FromMinutes(_cacheSettings.PermissionCodeLookupMinutes));
 
             if (lookup == null)
                 return null;
@@ -137,7 +147,7 @@ namespace Shared.Services.Authentication
             return await _cache.GetOrCreateAsync(
                 CacheKeys.UserPermissionSnapshot(userId, permissionVersion),
                 () => BuildSnapshotAsync(userId, cancellationToken),
-                TimeSpan.FromMinutes(30));
+                TimeSpan.FromMinutes(_cacheSettings.UserPermissionSnapshotMinutes));
         }
 
         #endregion

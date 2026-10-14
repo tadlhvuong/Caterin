@@ -14,13 +14,11 @@ namespace Shared.Services.Authentication
         private readonly AppDbContext _dbContext;
         private readonly IAppCache _cache;
         private readonly EndpointDataSource _endpointDataSource;
+
         private readonly ILogger<ModuleService> _logger;
 
-        public ModuleService(
-            AppDbContext dbContext,
-            EndpointDataSource endpointDataSource,
-            IAppCache cache,
-            ILogger<ModuleService> logger)
+        public ModuleService(AppDbContext dbContext, EndpointDataSource endpointDataSource,
+            IAppCache cache, ILogger<ModuleService> logger)
         {
             _dbContext = dbContext;
             _endpointDataSource = endpointDataSource;

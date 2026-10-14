@@ -134,8 +134,7 @@ namespace Shared.Services.Authentication
             _dbContext.RoutePermissions.Add(routePermission);
 
             routeLookup[routeKey] = routePermission;
-            _logger.LogInformation("Scan: Method={Method}, Route={Route}, Key={Key}", 
-                httpMethod, route, routeKey);
+            _logger.LogInformation("Scan: Method={Method}, Route={Route}, Key={Key}", httpMethod, route, routeKey);
         }
 
         private void DisableRemovedRoutes(Dictionary<string, RoutePermission> routeLookup, HashSet<string> scannedRoutes)
@@ -151,9 +150,8 @@ namespace Shared.Services.Authentication
                 }
                 route.IsActive = isActive;
                 route.UpdatedAt = DateTime.UtcNow;
-                _logger.LogInformation("DB: Method={Method}, Route={Route}, Key={Key}",
-                    route.HttpMethod, route.Route,
-    routeKey);
+                _logger.LogInformation("DB: Method={Method}, Route={Route}, Key={Key}", 
+                    route.HttpMethod, route.Route, routeKey);
             }
         }
 

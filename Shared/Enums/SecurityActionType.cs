@@ -5,8 +5,16 @@
         Login,
         ExternalLogin,
         Logout,
+
         RefreshToken,
         RefreshTokenReuse,
+        JwtIssued,
+        JwtRevoked,
+
+        RefreshTokenCreated,
+        RefreshTokenRevoked,
+        RefreshTokenExpired,
+
         Register,
         ForgotPassword,
         ChangePassword,
@@ -15,9 +23,6 @@
         ConfirmEmail,
         ConfirmPhone,
         ResendConfirmEmail,
-
-        JwtIssued,
-        JwtRevoked,
 
         AdminAccessDenied,
         ForbiddenAccess,
@@ -36,6 +41,5 @@
         UnLock,
         Enable,
         Disable,
-
     }
 }

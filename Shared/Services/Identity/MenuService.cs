@@ -5,7 +5,6 @@ using Shared.DTOs.Identity;
 using Shared.Interfaces.IdentityServices;
 using Microsoft.AspNetCore.Http;
 using Shared.Extensions;
-using Shared.Interfaces.AuthServices;
 
 namespace Shared.Services
 {
@@ -13,7 +12,6 @@ namespace Shared.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        
 
         public MenuService(AppDbContext dbContext)
         {
@@ -41,14 +39,12 @@ namespace Shared.Services
         }
         private List<MenuDto> BuildTree(List<Menu> menus, long? parentId)
         {
-            return menus.Where(x => x.ParentId == parentId)
-                .Select(x => new MenuDto
+            return menus.Where(x => x.ParentId == parentId).Select(x => new MenuDto
                 {
                     Id = x.Id,
                     Name = x.Name,
                     Url = x.Url,
                     Icon = x.Icon,
-
                     Children = BuildTree(menus, x.Id)
                 }).ToList();
         }

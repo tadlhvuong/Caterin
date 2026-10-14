@@ -363,7 +363,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         labels: [],
 
+        stopMessageLayoutObserver: null
+
     };
+
     const conversationState = {
         items: new Map(),
 
@@ -384,6 +387,7 @@ document.addEventListener('DOMContentLoaded', function () {
             labelId: null
         }
     };
+
     const conversationCountState = {
         all: 0,
         website: 0,
@@ -393,16 +397,17 @@ document.addEventListener('DOMContentLoaded', function () {
         resolved: 0,
         loading: false
     };
+
     const limitState = {
         list: 10, //limit lazy loading conversation list
-        message: 30 //limit lazy loading conversation message
+        message: 10 //limit lazy loading conversation message
     }
+
     let conversationSearchTimer = null;
     let conversationCountsRefreshQueued = false;
     /* =====================================================
        HELPERS
     ===================================================== */
-
 
     const CHAT_ATTACHMENT_CONFIG = {
         maxFiles: 5,
@@ -410,20 +415,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         allowedExtensions: new Set([
             '.jpg', '.jpeg', '.png', '.webp',
-            '.pdf', '.doc', '.docx',
-            '.xls', '.xlsx', '.txt'
+            '.pdf', '.csv', '.txt',
+            '.doc', '.docx', '.xls', '.xlsx'
         ]),
 
         allowedMimeTypes: new Set([
+            // Images
             'image/jpeg',
             'image/png',
             'image/webp',
+
+            // PDF
             'application/pdf',
+
+            // Text and CSV
+            'text/csv',
+            'text/plain',
+            'application/csv',
+
+            // Word
             'application/msword',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+
+            // Excel
             'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/plain'
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         ])
     };
 
@@ -554,20 +570,102 @@ document.addEventListener('DOMContentLoaded', function () {
        SCROLL
     ===================================================== */
 
-    function scrollChatToBottom() {
+    function scrollAfterMessageLayout(conversationId) {
+        const body = DOM.chatHistoryBody;
+        const history = DOM.chatHistory;
 
-        if (!DOM.chatHistoryBody) {
-            return;
-        }
+        if (!body || !history) return () => { };
+
+        let frameId = 0;
+        let stopped = false;
+        let previousHeight = -1;
+        let stableFrames = 0;
+
+        const isSameConversation = () =>
+            String(state.currentConversationId) ===
+            String(conversationId);
+
+        const updateAndScroll = () => {
+            if (stopped || !isSameConversation()) return;
+
+            ChatScroll.update(body);
+            body.scrollTop = body.scrollHeight;
+            ChatScroll.update(body);
+        };
+
+        const observer = new ResizeObserver(() => {
+            updateAndScroll();
+        });
+
+        observer.observe(body);
+        observer.observe(history);
+
+        // Theo dõi ảnh đang được render bên trong danh sách.
+        history.querySelectorAll('img').forEach(img => {
+            observer.observe(img);
+
+            if (!img.complete) {
+                img.addEventListener('load', updateAndScroll, {
+                    once: true
+                });
+
+                img.addEventListener('error', updateAndScroll, {
+                    once: true
+                });
+            }
+        });
+
+        // Đợi chiều cao ổn định qua một số frame.
+        const checkStability = () => {
+            if (stopped || !isSameConversation()) return;
+
+            updateAndScroll();
+
+            const currentHeight = history.scrollHeight;
+
+            if (currentHeight === previousHeight) {
+                stableFrames++;
+            } else {
+                stableFrames = 0;
+                previousHeight = currentHeight;
+            }
+
+            if (stableFrames < 3) {
+                frameId = requestAnimationFrame(checkStability);
+            } else {
+                observer.disconnect();
+            }
+        };
+
+        updateAndScroll();
+        frameId = requestAnimationFrame(checkStability);
+
+        // Gọi hàm này khi chuyển conversation hoặc hủy quá trình load.
+        return () => {
+            stopped = true;
+            cancelAnimationFrame(frameId);
+            observer.disconnect();
+        };
+    }
+
+    function scrollChatToBottom() {
+        const body = DOM.chatHistoryBody;
+
+        if (!body) return;
 
         requestAnimationFrame(() => {
+            // Đồng bộ kích thước nội dung trước.
+            ChatScroll.update(body);
+            // Cuộn xuống cuối sau khi cập nhật.
+            body.scrollTop = body.scrollHeight;
+            // Đồng bộ lại vị trí cuộn với PerfectScrollbar.
+            ChatScroll.update(body);
 
-            DOM.chatHistoryBody.scrollTop =
-                DOM.chatHistoryBody.scrollHeight;
-
-            ChatScroll.update(
-                DOM.chatHistoryBody
-            );
+            // Đồng bộ lại sau khi PerfectScrollbar cập nhật kích thước.
+            requestAnimationFrame(() => {
+                ChatScroll.update(body);
+                body.scrollTop = body.scrollHeight;
+            });
         });
     }
 
@@ -927,12 +1025,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Ẩn khung nội dung rỗng khi tin nhắn chỉ có file đính kèm.
-        if (
-            textElement &&
-            !message.content &&
-            Array.isArray(message.attachments) &&
-            message.attachments.length > 0
-        ) {
+        if (textElement && !message.content && Array.isArray(message.attachments) && message.attachments.length > 0) {
             textElement.remove();
         }
 
@@ -941,10 +1034,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-    function appendChatMessage(
-        message
-    ) {
-
+    function appendChatMessage(message) {
         if (
             !message ||
             !DOM.chatHistory
@@ -1027,22 +1117,7 @@ document.addEventListener('DOMContentLoaded', function () {
             DOM.chatHistoryBody
         );
     }
-    async function waitForImages(container) {
-        const images = [...container.querySelectorAll("img")];
 
-        await Promise.all(
-            images.map((img) => {
-                if (img.complete) {
-                    return Promise.resolve();
-                }
-
-                return new Promise((resolve) => {
-                    img.addEventListener("load", resolve, { once: true });
-                    img.addEventListener("error", resolve, { once: true });
-                });
-            })
-        );
-    }
     function prependMessages(
         messages
     ) {
@@ -1184,22 +1259,34 @@ document.addEventListener('DOMContentLoaded', function () {
         container.className = 'chat-message-attachments';
 
         for (const attachment of attachments) {
-            const id = getMessageAttachmentValue(attachment, 'id', 'Id');
-            const fileName =
-                getMessageAttachmentValue(attachment, 'fileName', 'FileName') ||
-                'Tệp đính kèm';
-            const contentType =
-                getMessageAttachmentValue(attachment, 'contentType', 'ContentType') ||
-                'application/octet-stream';
-            const fileSize = Number(
-                getMessageAttachmentValue(attachment, 'fileSize', 'FileSize') || 0
-            );
-            const url = getMessageAttachmentValue(attachment, 'url', 'Url');
 
-            if (!url || !Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
-                console.warn('Attachment thiếu Id hoặc URL hợp lệ:', attachment);
+            const id = getMessageAttachmentValue(
+                attachment, 'id', 'Id'
+            );
+
+            const fileName = getMessageAttachmentValue(
+                attachment, 'fileName', 'FileName'
+            ) || 'Tệp đính kèm';
+
+            const contentType = getMessageAttachmentValue(
+                attachment, 'contentType', 'ContentType'
+            ) || 'application/octet-stream';
+
+            const fileSize = Number(
+                getMessageAttachmentValue(
+                    attachment, 'fileSize', 'FileSize'
+                ) || 0
+            );
+
+            if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0) {
+                console.warn('Attachment Id không hợp lệ:', attachment);
                 continue;
             }
+
+            // Dùng endpoint dành cho Admin thống nhất cho cả ảnh và download.
+            const attachmentUrl =
+                `/admin/chat/attachments/${encodeURIComponent(id)}/download`;
+
 
             const item = document.createElement('div');
             item.className = 'chat-message-attachment';
@@ -1208,13 +1295,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const imageButton = document.createElement('button');
                 imageButton.type = 'button';
                 imageButton.className = 'chat-attachment-image-button';
-                imageButton.dataset.lightboxSrc = url;
+                imageButton.dataset.lightboxSrc = attachmentUrl;
                 imageButton.dataset.lightboxAlt = fileName;
                 imageButton.setAttribute('aria-label', `Xem ảnh ${fileName}`);
 
                 const image = document.createElement('img');
                 image.className = 'chat-attachment-image';
-                image.src = url;
+                image.src = attachmentUrl;
                 image.alt = fileName;
                 image.loading = 'lazy';
                 image.decoding = 'async';
@@ -1253,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const download = document.createElement('a');
             download.className = 'chat-attachment-download';
-            download.href = `/admin/chat/attachments/${encodeURIComponent(id)}/download`;
+            download.href = attachmentUrl;
             download.setAttribute('download', fileName);
             download.innerHTML = '<i class="ti ti-download"></i><span>Tải xuống</span>';
 
@@ -2026,9 +2113,7 @@ document.addEventListener('DOMContentLoaded', function () {
        LOAD CONVERSATION MESSAGES
     ===================================================== */
 
-    async function loadConversationMessages(
-        conversationId
-    ) {
+    async function loadConversationMessages(conversationId) {
 
         if (
             !conversationId ||
@@ -2059,7 +2144,6 @@ document.addEventListener('DOMContentLoaded', function () {
         renderLoadingMessages();
 
         try {
-
             const result =
                 await fetchConversationMessages(
                     conversationId,
@@ -2070,6 +2154,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 );
 
+            console.log(result);
             /*
              * User changed conversation
              * while request was running.
@@ -2090,12 +2175,8 @@ document.addEventListener('DOMContentLoaded', function () {
             /*
              * Initial render.
              */
-            renderMessages(
-                messages
-            );
-            waitForImages(chatHistoryBody).then(() => {
-                scrollChatToBottom();
-            });
+            renderMessages(messages);
+
             /*
              * Save lazy-loading cursor.
              */
@@ -2112,7 +2193,12 @@ document.addEventListener('DOMContentLoaded', function () {
              * Initial load always scrolls
              * to the newest message.
              */
-            scrollChatToBottom();
+            //scrollChatToBottom();
+
+
+            // Hủy observer của conversation trước nếu đang có.
+            state.stopMessageLayoutObserver?.();
+            state.stopMessageLayoutObserver = scrollAfterMessageLayout(conversationId);
 
         }
         catch (error) {
@@ -2197,6 +2283,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 );
 
+            console.log(result);
             /*
              * Conversation đã bị đổi
              * trong lúc request.
@@ -4433,8 +4520,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 sendButton.disabled = readOnly;
                 attachmentButton.disabled = readOnly;
                 input.disabled = readOnly;
-
                 renderAdminAttachmentList();
+
             }
         };
     }
@@ -5756,14 +5843,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const input = event.currentTarget;
         const files = Array.from(input.files ?? []);
 
-        // Cho phép chọn lại cùng một file ở lần tiếp theo.
+        // Cho phép chọn le ở lần tiếp theolại cùng một fi.
         input.value = '';
 
         if (isUploadingAdminAttachments || isSendingAdminMessage) return;
         if (isCurrentConversationReadOnly()) return;
 
-        const remainingSlots =
-            CHAT_ATTACHMENT_CONFIG.maxFiles - pendingAdminAttachments.size;
+        const remainingSlots = CHAT_ATTACHMENT_CONFIG.maxFiles - pendingAdminAttachments.size;
 
         if (remainingSlots <= 0) {
             Toast.warning('Mỗi tin nhắn chỉ được đính kèm tối đa 5 file.');
@@ -5804,9 +5890,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     fileSize: file.size,
                     expiresAt: null,
                     uploadSessionToken: null,
-                    previewUrl: file.type.startsWith('image/')
-                        ? URL.createObjectURL(file)
-                        : null,
+                    previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
                     status: 'uploading',
                     error: null
                 };

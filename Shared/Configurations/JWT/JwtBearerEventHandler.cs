@@ -16,12 +16,14 @@ namespace Shared.Configurations.JWT
         {
             _logger = logger;
         }
+
         public override Task MessageReceived(MessageReceivedContext context)
         {
             var token = context.Request.Cookies["access_token"];
             context.Token = token;
             return Task.CompletedTask;
         }
+
         public override async Task TokenValidated(TokenValidatedContext context)
         {
             var path = context.HttpContext.Request.Path;
@@ -37,11 +39,13 @@ namespace Shared.Configurations.JWT
             if (string.IsNullOrWhiteSpace(userId))
             {
                 context.Fail("UserId claim missing.");
+                _logger.LogInformation("UserId claim missing.");
                 return;
             }
             if (context.Principal?.Identity?.IsAuthenticated != true)
             {
                 context.Fail("Unauthenticated");
+                _logger.LogInformation("Unauthenticated");
                 return;
             }
             var userValidationService = context.HttpContext.RequestServices.GetRequiredService<IUserValidationService>();
@@ -62,7 +66,7 @@ namespace Shared.Configurations.JWT
                 return;
             }
             context.HttpContext.SetUserValidationContext(validationContext);
-            Console.WriteLine("Token validated");
+            _logger.LogInformation("Token validated");
             await base.TokenValidated(context);
         }
 
@@ -83,7 +87,6 @@ namespace Shared.Configurations.JWT
         public override Task Forbidden(ForbiddenContext context)
         {
             _logger.LogWarning("Forbidden request: {Path}", context.Request.Path);
-
             return Task.CompletedTask;
         }
     }

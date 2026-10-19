@@ -4,6 +4,8 @@
     {
         public const string AdminOnline = "chat.admin.online";
         public const string AdminOffline = "chat.admin.offline";
+        public const string ContactOnline = "chat.contact.online";
+        public const string ContactOffline = "chat.contact.offline";
 
         public const string AdminPresenceUpdated = "chat.admin.presence.updated";
 

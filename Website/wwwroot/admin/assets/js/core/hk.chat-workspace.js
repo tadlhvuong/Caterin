@@ -405,6 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let conversationSearchTimer = null;
     let conversationCountsRefreshQueued = false;
+    const onlineContactIds = new Set();
     /* =====================================================
        HELPERS
     ===================================================== */
@@ -2116,23 +2117,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         article.className = 'conversation-item';
 
-        article.dataset.conversationId =
-            conversation.id;
-        const statusKey =
-            getConversationStatusKey(
-                conversation.status
-            );
+        article.dataset.conversationId = conversation.id;
+        article.dataset.contactId = conversation.contactId ?? '';
+
+        const statusKey = getConversationStatusKey(
+            conversation.status
+        );
 
         article.dataset.status = statusKey;
-
-        article.dataset.inbox =
-            conversation.inboxId;
-
+        article.dataset.inbox = conversation.inboxId;
         article.dataset.assignedUserId =
             conversation.assignedUserId ?? '';
+        article.dataset.unreadCount = conversation.unreadCount ?? 0;
 
-        article.dataset.unreadCount =
-            conversation.unreadCount ?? 0;
+        const contactId = String(conversation.contactId ?? '');
+        const isOnline =
+            contactId !== '' && onlineContactIds.has(contactId);
 
         const firstLetter =
             conversation.contactName
@@ -2140,63 +2140,62 @@ document.addEventListener('DOMContentLoaded', function () {
                 ?.charAt(0)
                 ?.toUpperCase() || '?';
 
-        const avatar = conversation.contactAvatarUrl
-            ? `
-            <img src="${escapeHtml(conversation.contactAvatarUrl)}"
-                 alt="${escapeHtml(conversation.contactName ?? '')}"
-                 class="rounded-circle" />
-          `
-            : `
-            <span class="avatar-initial rounded-circle bg-label-primary">${escapeHtml(firstLetter)}</span>
-          `;
+        const avatarUrl =
+            conversation.contactAvatarUrl ||
+            '/images/Default/default-user.png';
 
-        const preview =
-            conversation.lastMessage?.trim()
-                ? conversation.lastMessage
-                : conversation.subject ?? '';
+        const avatarHtml = `
+        <img
+            src="${escapeHtml(avatarUrl)}"
+            alt="${escapeHtml(conversation.contactName ?? '')}"
+            class="rounded-circle"
+        />
+    `;
+
+        const preview = conversation.lastMessage?.trim()
+            ? conversation.lastMessage
+            : conversation.subject ?? '';
 
         article.innerHTML = `
         <div class="conversation-avatar">
-            <div class="avatar avatar-sm">
-                ${avatar}
+            <div class="avatar avatar ${isOnline ? 'avatar-online' : 'avatar-offline'}">
+                ${avatarHtml}
             </div>
         </div>
 
         <div class="conversation-content">
             <div class="conversation-top">
                 <h6 class="conversation-name">${escapeHtml(conversation.contactName ?? '')}</h6>
-
-                <time class="conversation-time">${formatConversationTime(conversation.lastMessageAt)}
-                </time>
+                <time class="conversation-time">${formatConversationTime(conversation.lastMessageAt)}</time>
             </div>
 
             <div class="conversation-bottom">
-
                 <p class="conversation-message">${escapeHtml(preview)}</p>
 
                 ${conversation.unreadCount > 0
-                ? `
-                            <span class="badge rounded-pill bg-primary">${conversation.unreadCount}</span>
-                          `
+                ? `<span class="badge rounded-pill bg-primary">${conversation.unreadCount}</span>`
                 : ''
             }
-
             </div>
 
             ${conversation.labels?.length
                 ? `
-                        <div class="conversation-meta">
-                            ${conversation.labels
-                    .map(label => `<span class="chat-label badge bg-label-success">${escapeHtml(label.name)}</span>`)
+                    <div class="conversation-meta">
+                        ${conversation.labels
+                    .map(label => `
+                                <span class="chat-label badge bg-label-success">
+                                    ${escapeHtml(label.name)}
+                                </span>
+                            `)
                     .join('')}
 
-                            <span class="conversation-status">${getConversationStatusText(conversation.status)}
-                            </span>
-                        </div>
-                      `
+                        <span class="conversation-status">
+                            ${getConversationStatusText(conversation.status)}
+                        </span>
+                    </div>
+                `
                 : ''
             }
-
         </div>
     `;
 
@@ -2870,15 +2869,22 @@ document.addEventListener('DOMContentLoaded', function () {
         state.contactData = null;
         resetContact();
     }
+
     function updateChatContactHeader(contact) {
-        const avatarElement = document.getElementById("chatContactAvatarImage");
+        const avatarElement = document.getElementById(
+            "chatContactAvatarImage"
+        );
 
         if (!chatContactName || !avatarElement) {
             return;
         }
+
+        const avatarContainer = avatarElement.closest(".avatar");
         const defaultAvatar = "/images/Default/default-user.png";
+
         const name = contact?.name?.trim() || "GUEST";
         const avatarUrl = contact?.avatarUrl?.trim() || defaultAvatar;
+        const contactId = contact?.contactId ?? contact?.id;
 
         chatContactName.textContent = name;
         avatarElement.alt = name;
@@ -2889,7 +2895,23 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         avatarElement.src = avatarUrl;
+
+        if (!avatarContainer) {
+            return;
+        }
+
+        avatarContainer.dataset.contactId =
+            contactId != null ? String(contactId) : "";
+
+        const isOnline =
+            contactId != null &&
+            onlineContactIds.has(String(contactId));
+
+        avatarContainer.classList.toggle("avatar-online", isOnline);
+        avatarContainer.classList.toggle("avatar-offline", !isOnline);
     }
+
+
     async function getConversationHeader(conversationId) {
         const response = await fetch(
             `/admin/chat/${encodeURIComponent(conversationId)}/header`,
@@ -3043,7 +3065,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         registerSignalREvents();
-
+        registerContactPresence();
 
         try {
 
@@ -3055,6 +3077,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             await joinInbox();
 
+            await syncOnlineContacts();
         }
         catch (error) {
 
@@ -3081,7 +3104,121 @@ document.addEventListener('DOMContentLoaded', function () {
         registerConnectionEvents();
     }
 
+    /* =====================================================
+   CONTACT PRESENCE
+===================================================== */
 
+      function registerContactPresence() {
+         state.connection.on('chat.contact.online', function (data) {
+        if (data?.contactId == null) return;
+
+        const contactId = String(data.contactId);
+
+        onlineContactIds.add(contactId);
+
+        updateContactPresence(contactId, true);
+    });
+
+    state.connection.on('chat.contact.offline', function (data) {
+        if (data?.contactId == null) return;
+
+        const contactId = String(data.contactId);
+
+        onlineContactIds.delete(contactId);
+
+        updateContactPresence(contactId, false);
+    });
+}
+
+
+    function updateContactPresence(contactId, isOnline) {
+        const id = String(contactId);
+
+        // Đồng bộ trạng thái online trong bộ nhớ.
+        if (isOnline) {
+            onlineContactIds.add(id);
+        } else {
+            onlineContactIds.delete(id);
+        }
+
+        // Cập nhật avatar trong danh sách hội thoại.
+        document
+            .querySelectorAll(".conversation-item[data-contact-id]")
+            .forEach(item => {
+                if (item.dataset.contactId !== id) {
+                    return;
+                }
+
+                const avatar = item.querySelector(
+                    ".conversation-avatar .avatar"
+                );
+
+                if (!avatar) {
+                    return;
+                }
+
+                avatar.classList.toggle("avatar-online", isOnline);
+                avatar.classList.toggle("avatar-offline", !isOnline);
+            });
+
+        // Cập nhật avatar trên header nếu đúng Contact đang mở.
+        const headerAvatar = document.getElementById(
+            "chatContactAvatarImage"
+        );
+
+        const headerContainer = headerAvatar?.closest(".avatar");
+
+        if (headerContainer?.dataset.contactId === id) {
+            headerContainer.classList.toggle("avatar-online", isOnline);
+            headerContainer.classList.toggle("avatar-offline", !isOnline);
+        }
+    }
+
+
+    async function syncOnlineContacts() {
+        if (
+            !state.connection ||
+            state.connection.state !==
+            signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
+
+        try {
+            const contactIds =
+                await state.connection.invoke(
+                    'GetOnlineContactIds'
+                );
+
+            onlineContactIds.clear();
+
+            for (const id of contactIds ?? []) {
+                onlineContactIds.add(String(id));
+            }
+
+            document
+                .querySelectorAll(
+                    '.conversation-item[data-contact-id]'
+                )
+                .forEach(item => {
+                    const contactId =
+                        item.dataset.contactId;
+
+                    updateContactPresence(
+                        contactId,
+                        onlineContactIds.has(
+                            String(contactId)
+                        )
+                    );
+                });
+        }
+        catch (error) {
+            console.error(
+                'Failed to sync online contacts:',
+                error
+            );
+        }
+    }
     /* =====================================================
        SIGNALR - MESSAGE RECEIVED
     ===================================================== */

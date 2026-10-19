@@ -19,5 +19,13 @@
         bool IsConversationActive(long conversationId);
 
         Task RemoveConnectionFromConversationsAsync(string connectionId);
+
+        Task<bool> AddContactConnectionAsync(long contactId, string connectionId);
+
+        Task<bool> RemoveContactConnectionAsync(long contactId, string connectionId);
+
+        bool IsContactOnline(long contactId);
+
+        IReadOnlyCollection<long> GetOnlineContactIds();
     }
 }

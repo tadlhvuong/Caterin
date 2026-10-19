@@ -6,7 +6,11 @@ namespace Shared.Services.Chat
 {
     public class ChatPresenceService : IChatPresenceService
     {
+        //Save connection Admin
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, byte>> _connections = new();
+
+        //Save connection Customer
+        private readonly ConcurrentDictionary<long, ConcurrentDictionary<string, byte>> _contactConnections = new();
         public Task<bool> AddConnectionAsync(string userId, string connectionId)
         {
             var connections = _connections.GetOrAdd(userId, _ => new ConcurrentDictionary<string, byte>());
@@ -129,5 +133,63 @@ namespace Shared.Services.Chat
 
             return Task.CompletedTask;
         }
+
+        #region Customer
+        public Task<bool> AddContactConnectionAsync(
+    long contactId,
+    string connectionId)
+        {
+            if (contactId <= 0 ||
+                string.IsNullOrWhiteSpace(connectionId))
+            {
+                return Task.FromResult(false);
+            }
+
+            var connections = _contactConnections.GetOrAdd(
+                contactId,
+                _ => new ConcurrentDictionary<string, byte>());
+
+            var added = connections.TryAdd(connectionId, 0);
+
+            return Task.FromResult(
+                added && connections.Count == 1);
+        }
+
+        public Task<bool> RemoveContactConnectionAsync(
+            long contactId,
+            string connectionId)
+        {
+            if (contactId <= 0 || string.IsNullOrWhiteSpace(connectionId))
+                return Task.FromResult(false);
+
+            if (!_contactConnections.TryGetValue(contactId, out var connections))
+                return Task.FromResult(false);
+
+            connections.TryRemove(connectionId, out _);
+
+            if (!connections.IsEmpty)
+                return Task.FromResult(false);
+
+            _contactConnections.TryRemove(contactId, out _);
+
+            return Task.FromResult(true);
+        }
+
+        public bool IsContactOnline(long contactId)
+        {
+            return _contactConnections.TryGetValue(
+                contactId,
+                out var connections)
+                && !connections.IsEmpty;
+        }
+
+        public IReadOnlyCollection<long> GetOnlineContactIds()
+        {
+            return _contactConnections
+                .Where(x => !x.Value.IsEmpty)
+                .Select(x => x.Key)
+                .ToList();
+        }
+        #endregion Customer
     }
 }

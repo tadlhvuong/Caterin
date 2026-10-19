@@ -8,6 +8,8 @@ namespace Shared.Responses
 
         public bool HasMore { get; set; }
 
+        public bool? BeforeIsPending { get; set; }
+
         public DateTime? OldestLastMessageAt { get; set; }
 
         public long? OldestId { get; set; }

@@ -891,8 +891,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
                 }
 
-                const marked =
-                    await markConversationAsRead();
+                const marked = await markConversationAsRead();
 
                 if (marked) {
                     setUnreadMessageCount(0);
@@ -1144,15 +1143,18 @@ document.addEventListener("DOMContentLoaded", () => {
         DOM.chatToggle?.classList.remove("active");
     }
 
-
     function initChatToggle() {
         DOM.chatToggle?.addEventListener(
             "click",
-            () => {
+            async () => {
+                if (!isChatReady) {
+                    return;
+                }
+
                 if (isChatOpen()) {
                     closeChat();
                 } else {
-                    openChat();
+                    await openChat();
                 }
             }
         );
@@ -1353,15 +1355,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // SIGNALR CONNECTION
     // ============================================================
-    let chatResizeObserver;
-
+    let isChatReady = false;
     async function startChatConnection() {
+        isChatReady = false;
+
         try {
             loadStoredSession();
 
             await ensureSignalRConnection();
 
             await initializeChatSession();
+            await registerCustomerPresence();
         }
         catch (error) {
             console.log(
@@ -1370,6 +1374,8 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
             scheduleReconnect();
+        } finally {
+            isChatReady = true;
         }
     }
 
@@ -1450,11 +1456,12 @@ document.addEventListener("DOMContentLoaded", () => {
          * Chỉ restore authenticated conversation nếu có.
          * =========================================================
          */
-        if (!hasConversationIdentity()) {
-            showQuickReplies();
+        //if (!hasConversationIdentity()) {
+        //    showQuickReplies();
 
-            return;
-        }
+        //    return;
+        //}
+        await initializeAuthenticatedChat();
 
         const status = await joinConversation();
 
@@ -1560,7 +1567,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem(
                 CONFIG.storage.guestToken
             );
-
+            await registerCustomerPresence();
             // =====================================================
             // Reset UI
             // =====================================================
@@ -1616,38 +1623,44 @@ document.addEventListener("DOMContentLoaded", () => {
             throw error;
         }
     }
-    function resetToNewChatState() {
-        clearMessages();
+    async function registerCustomerPresence() {
+        if (
+            !connection ||
+            connection.state !== signalR.HubConnectionState.Connected
+        ) {
+            return;
+        }
 
-        /*
-         * Chỉ reset conversation.
-         *
-         * Không xóa Contact.
-         * Không xóa guestToken.
-         */
-        state.currentConversationId = null;
-        state.currentConversationStatus = null;
+        // Backend tự xác định Contact của user đã đăng nhập.
+        if (CHAT_CONFIG.isAuthenticated) {
+            await connection.invoke(
+                "RegisterCustomerPresence",
+                null,
+                null
+            );
 
-        state.chatSession.hasActiveHistory =
-            false;
+            return;
+        }
 
-        state.messagePaging.oldestMessageId = null;
-        state.messagePaging.hasMore = true;
-        state.messagePaging.loading = false;
-
-        resetConversationHistoryState();
-
-        clearConversationIdentity();
-
-        setUnreadMessageCount(0);
-
-        showQuickReplies();
+        // Guest chỉ đăng ký khi đã có session hợp lệ.
+        if (
+            !state.currentContactId ||
+            !state.guestToken
+        ) {
+            console.warn("[Presence] Guest thiếu contactId hoặc guestToken.");  
+            return;
+        }
+        await connection.invoke(
+            "RegisterCustomerPresence",
+            Number(state.currentContactId),
+            state.guestToken
+        );
     }
 
-async function joinConversation() {
+    async function joinConversation() {
     if (!state.currentConversationId || !state.currentContactId || !isConnectionReady()) {
         return null;
-    }
+        }
     try {
         const guestToken = CHAT_CONFIG.isAuthenticated ? null : state.guestToken;
         const status =
@@ -1793,6 +1806,16 @@ async function joinConversation() {
 
     async function handleSignalRReconnected() {
         hideTyping();
+        try {
+            // Khôi phục trạng thái online của Contact hiện tại.
+            await registerCustomerPresence();
+        }
+        catch (error) {
+            console.error(
+                "Customer presence registration failed:",
+                error
+            );
+        }
 
         /*
          * Không có conversation/contact:
@@ -2641,7 +2664,7 @@ async function joinConversation() {
             if (result.contactId) {
                 persistContactIdentity(result.contactId, result.guestToken);
             }
-
+            await registerCustomerPresence();
             // =====================================================
             // 4. SYNC CONVERSATION
             // =====================================================
@@ -4846,10 +4869,48 @@ async function joinConversation() {
     else {
         init();
     }
+    async function stopChatConnectionForLogout() {
+        if (
+            connection &&
+            connection.state !== signalR.HubConnectionState.Disconnected
+        ) {
+            try {
+                await connection.stop();
+            } catch (error) {
+                console.error(
+                    "Failed to stop SignalR on logout:",
+                    error
+                );
+            }
+        }
 
+        clearCustomerIdentity();
+
+        state.currentConversationStatus = null;
+        state.chatSession.hasActiveHistory = false;
+
+        resetConversationHistoryState();
+        clearMessages();
+        showQuickReplies();
+    }
     window.addEventListener(
         "caterin:customer-logout",
-        function () {
+        async function () {
+            // Đóng kết nối SignalR để server xử lý OnDisconnectedAsync.
+            if (
+                connection &&
+                connection.state !== signalR.HubConnectionState.Disconnected
+            ) {
+                try {
+                    await connection.stop();
+                } catch (error) {
+                    console.error(
+                        "Failed to stop SignalR on logout:",
+                        error
+                    );
+                }
+            }
+
             clearCustomerIdentity();
 
             state.currentConversationStatus = null;

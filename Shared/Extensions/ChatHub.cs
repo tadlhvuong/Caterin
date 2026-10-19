@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Constants.Core;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
+using Shared.Data.Entities.Chat;
 using Shared.DTOs.Chat;
 using Shared.Enums;
 using Shared.Enums.Chat;
 using Shared.Interfaces.Chat;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 
 namespace Shared.Extensions
@@ -22,8 +23,10 @@ namespace Shared.Extensions
         private readonly IChatMessageService _chatMessageService;
         private readonly IChatPresenceService _chatPresenceService;
 
+        private readonly ILogger<ChatHub> _logger;
+
         public ChatHub(AppDbContext dbContext, IChatAuthorizationService chatAuthorizationService, IChatConversationService chatConversationService,
-            IChatMessageService chatMessageService, IChatPresenceService chatPresenceService)
+            IChatMessageService chatMessageService, IChatPresenceService chatPresenceService, ILogger<ChatHub> logger)
         {
             _dbContext = dbContext;
 
@@ -31,22 +34,40 @@ namespace Shared.Extensions
             _chatConversationService = chatConversationService;
             _chatMessageService = chatMessageService;
             _chatPresenceService = chatPresenceService;
+
+            _logger = logger;
         }
+
+        [Authorize]
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = Context.User?
+                .FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var clientType = Context.GetHttpContext()?.Request.Query["clientType"].ToString();
+            var clientType = Context.GetHttpContext()?
+                .Request.Query["clientType"].ToString();
 
-            if (clientType == "admin" && !string.IsNullOrWhiteSpace(userId))
+            if (clientType == "admin" &&
+                !string.IsNullOrWhiteSpace(userId))
             {
-                var becameOnline = await _chatPresenceService.AddConnectionAsync(userId, Context.ConnectionId);
+                // Nhận các sự kiện presence dành riêng cho Admin.
+                await Groups.AddToGroupAsync(
+                    Context.ConnectionId,
+                    "Admins");
+
+                var becameOnline =
+                    await _chatPresenceService.AddConnectionAsync(
+                        userId,
+                        Context.ConnectionId);
 
                 if (becameOnline)
                 {
-                    await Clients.All.SendAsync(ChatHubEvents.AdminOnline, new { userId });
+                    await Clients.All.SendAsync(
+                        ChatHubEvents.AdminOnline,
+                        new { userId });
                 }
             }
+
             await base.OnConnectedAsync();
         }
 
@@ -62,9 +83,28 @@ namespace Shared.Extensions
 
                 if (becameOffline)
                 {
-                    await Clients.All.SendAsync(ChatHubEvents.AdminOffline, new { userId });
+                    await Clients.Group("Admins").SendAsync(ChatHubEvents.AdminOffline, new { userId });
                 }
             }
+
+            // Contact presence.
+            if (clientType == "customer" &&
+                Context.Items.TryGetValue("ChatContactId", out var value) &&
+                value is long contactId)
+            {
+                var becameOffline =
+                    await _chatPresenceService.RemoveContactConnectionAsync(
+                        contactId,
+                        Context.ConnectionId);
+
+                if (becameOffline)
+                {
+                    await Clients.All.SendAsync(
+                        ChatHubEvents.ContactOffline,
+                        new { contactId });
+                }
+            }
+
 
             await _chatPresenceService.RemoveConnectionFromConversationsAsync(Context.ConnectionId);
 
@@ -507,6 +547,129 @@ namespace Shared.Extensions
         //    // guest thì validate contactId + guestToken + conversation
         //    return false;
         //}
+
+        public IReadOnlyCollection<long> GetOnlineContactIds()
+        {
+            var clientType = Context.GetHttpContext()?
+                .Request.Query["clientType"].ToString();
+
+            if (clientType != "admin" ||
+                Context.User?.Identity?.IsAuthenticated != true)
+            {
+                throw new HubException("Unauthorized.");
+            }
+
+            return _chatPresenceService.GetOnlineContactIds();
+        }
+        public async Task<bool> RegisterCustomerPresence(
+            long? contactId,
+            string? guestToken)
+        {
+            _logger.LogInformation(
+            "RegisterCustomerPresence invoked. ConnectionId: {ConnectionId}, ClientType: {ClientType}",
+            Context.ConnectionId,
+            Context.GetHttpContext()?.Request.Query["clientType"].ToString());
+            var clientType = Context.GetHttpContext()?
+                .Request.Query["clientType"].ToString();
+
+            if (clientType != "customer")
+                throw new HubException("Invalid client type.");
+
+            var ct = Context.ConnectionAborted;
+            var userId = Context.User?
+                .FindFirstValue(ClaimTypes.NameIdentifier);
+
+            ChatContact? contact;
+
+            // 1. Khách đã đăng nhập: chỉ tìm Contact canonical hiện có.
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                userId = userId.Trim();
+
+                contact = await _dbContext.ChatContacts
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(
+                        x => x.UserId == userId && !x.IsMerged,
+                        ct);
+
+                if (contact == null)
+                    return false;
+            }
+            else
+            {
+                // 2. Guest chưa có credential: không tạo Contact/session.
+                if (string.IsNullOrWhiteSpace(guestToken))
+                    return false;
+
+                var tokenHash = Common.CommonHelper.Hash(guestToken);
+                var now = DateTime.UtcNow;
+
+                var session = await _dbContext.ChatGuestSessions
+                    .AsNoTracking()
+                    .Include(x => x.Contact)
+                    .FirstOrDefaultAsync(
+                        x => x.TokenHash == tokenHash,
+                        ct);
+
+                if (session == null ||
+                    session.IsRevoked ||
+                    session.ExpiresAt <= now)
+                {
+                    throw new HubException("CHAT_SESSION_INVALID");
+                }
+
+                if (contactId.HasValue &&
+                    contactId.Value != session.ContactId)
+                {
+                    throw new HubException("CHAT_SESSION_INVALID");
+                }
+
+                contact = session.Contact;
+
+                // Contact đã merge: dùng Contact canonical.
+                if (contact.IsMerged)
+                {
+                    if (!contact.MergedIntoContactId.HasValue)
+                        return false;
+
+                    var canonicalId = contact.MergedIntoContactId.Value;
+
+                    contact = await _dbContext.ChatContacts
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(
+                            x => x.Id == canonicalId && !x.IsMerged,
+                            ct);
+
+                    if (contact == null)
+                        return false;
+                }
+            }
+
+            // 3. Ghi nhận Contact đã xác thực cho connection hiện tại.
+            Context.Items["ChatContactId"] = contact.Id;
+
+            _logger.LogInformation(
+                "RegisterCustomerPresence resolved ContactId: {ContactId}",
+                contact.Id);
+            var becameOnline =
+                await _chatPresenceService.AddContactConnectionAsync(
+                    contact.Id,
+                    Context.ConnectionId);
+            _logger.LogInformation(
+    "Contact presence registered. ContactId: {ContactId}, BecameOnline: {BecameOnline}",
+    contact.Id,
+    becameOnline);
+            if (becameOnline)
+            {
+                await Clients.Group("Admins").SendAsync(
+                    ChatHubEvents.ContactOnline,
+                    new { contactId = contact.Id },
+                    ct);
+            }
+
+            return true;
+        }
+
     }
 
 }

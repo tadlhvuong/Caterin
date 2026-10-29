@@ -346,7 +346,7 @@ namespace Shared.Services.Product
             var fileName = $"{Guid.NewGuid():N}{extension}";
 
             var relativeDirectory = Path.Combine(
-                _mediaStorage.ProductFolder,
+               "Product",
                 now.ToString("yyyy"),
                 now.ToString("MM"));
 
@@ -958,7 +958,7 @@ namespace Shared.Services.Product
                     {
                         var oldMedia = existingImage.MediaFile;
 
-                        var newMedia = await _mediaService.UploadAsync(request.File, _mediaStorage.ProductFolder, cancellationToken);
+                        var newMedia = await _mediaService.UploadAsync(request.File, "Product", cancellationToken);
 
                         existingImage.MediaFile = newMedia;
                         existingImage.MediaFileId = newMedia.Id;
@@ -981,7 +981,7 @@ namespace Shared.Services.Product
                     continue;
                 }
 
-                var media = await _mediaService.UploadAsync(request.File, _mediaStorage.ProductFolder, cancellationToken);
+                var media = await _mediaService.UploadAsync(request.File, "Product", cancellationToken);
 
                 var productMedia = new ProductMedia
                 {

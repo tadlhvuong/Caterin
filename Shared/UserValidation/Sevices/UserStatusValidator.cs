@@ -24,8 +24,7 @@ namespace Shared.UserValidation.Sevices
 
             if (!user.IsActive)
             {
-                return UserValidationResult.Fail(
-                    UserValidationError.UserInactive);
+                return UserValidationResult.Fail(UserValidationError.UserInactive);
             }
 
             if (await _userManager.IsLockedOutAsync(user))

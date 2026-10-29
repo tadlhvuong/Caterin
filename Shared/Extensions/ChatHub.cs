@@ -565,10 +565,6 @@ namespace Shared.Extensions
             long? contactId,
             string? guestToken)
         {
-            _logger.LogInformation(
-            "RegisterCustomerPresence invoked. ConnectionId: {ConnectionId}, ClientType: {ClientType}",
-            Context.ConnectionId,
-            Context.GetHttpContext()?.Request.Query["clientType"].ToString());
             var clientType = Context.GetHttpContext()?
                 .Request.Query["clientType"].ToString();
 
@@ -618,8 +614,7 @@ namespace Shared.Extensions
                     throw new HubException("CHAT_SESSION_INVALID");
                 }
 
-                if (contactId.HasValue &&
-                    contactId.Value != session.ContactId)
+                if (contactId.HasValue && contactId.Value != session.ContactId)
                 {
                     throw new HubException("CHAT_SESSION_INVALID");
                 }
@@ -648,17 +643,11 @@ namespace Shared.Extensions
             // 3. Ghi nhận Contact đã xác thực cho connection hiện tại.
             Context.Items["ChatContactId"] = contact.Id;
 
-            _logger.LogInformation(
-                "RegisterCustomerPresence resolved ContactId: {ContactId}",
-                contact.Id);
             var becameOnline =
                 await _chatPresenceService.AddContactConnectionAsync(
                     contact.Id,
                     Context.ConnectionId);
-            _logger.LogInformation(
-    "Contact presence registered. ContactId: {ContactId}, BecameOnline: {BecameOnline}",
-    contact.Id,
-    becameOnline);
+           
             if (becameOnline)
             {
                 await Clients.Group("Admins").SendAsync(

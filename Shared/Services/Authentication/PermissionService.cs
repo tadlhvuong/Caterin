@@ -144,10 +144,26 @@ namespace Shared.Services.Authentication
         public async Task<UserPermissionSnapshot> GetUserPermissionSnapshotAsync(string userId, long permissionVersion,
              CancellationToken cancellationToken = default)
         {
-            return await _cache.GetOrCreateAsync(
-                CacheKeys.UserPermissionSnapshot(userId, permissionVersion),
-                () => BuildSnapshotAsync(userId, cancellationToken),
-                TimeSpan.FromMinutes(_cacheSettings.UserPermissionSnapshotMinutes));
+            var cacheKey = CacheKeys.UserPermissionSnapshot(userId, permissionVersion);
+            Console.WriteLine(
+        $"[PermissionCache] GET | UserId={userId} | Version={permissionVersion} | Key={cacheKey}");
+            return await _cache.GetOrCreateAsync(cacheKey, async () =>
+               {
+                   Console.WriteLine(
+                       $"[PermissionCache] MISS | UserId={userId} | Version={permissionVersion} | Building snapshot");
+
+                   var snapshot = await BuildSnapshotAsync(
+                       userId, cancellationToken);
+
+                   Console.WriteLine(
+                       $"[PermissionCache] BUILT | UserId={userId} | Version={permissionVersion} | PermissionCount={snapshot.PermissionIds.Count} | IsRoot={snapshot.IsRoot}");
+
+                   return snapshot;
+               }, TimeSpan.FromMinutes(_cacheSettings.UserPermissionSnapshotMinutes));
+            //return await _cache.GetOrCreateAsync(
+            //    CacheKeys.UserPermissionSnapshot(userId, permissionVersion),
+            //    () => BuildSnapshotAsync(userId, cancellationToken),
+            //    TimeSpan.FromMinutes(_cacheSettings.UserPermissionSnapshotMinutes));
         }
 
         #endregion
@@ -165,7 +181,10 @@ namespace Shared.Services.Authentication
                 from ur in _dbContext.UserRoles.AsNoTracking()
                 join rp in _dbContext.RolePermissions.AsNoTracking()
                     on ur.RoleId equals rp.RoleId
+                join p in _dbContext.Permissions.AsNoTracking()
+                    on rp.PermissionId equals p.Id
                 where ur.UserId == userId
+                        && p.IsActive
                 select rp.PermissionId
             )
             .Distinct().ToListAsync(cancellationToken);
@@ -180,7 +199,18 @@ namespace Shared.Services.Authentication
                 IsRoot = isRoot
             };
         }
+        public async Task<bool> IsRootAsync(
+    string userId,
+    long permissionVersion,
+    CancellationToken cancellationToken = default)
+        {
+            var snapshot = await GetUserPermissionSnapshotAsync(
+                userId,
+                permissionVersion,
+                cancellationToken);
 
+            return snapshot.IsRoot;
+        }
         #endregion
     }
 }

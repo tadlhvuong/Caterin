@@ -148,6 +148,19 @@ public class AuthService : IAuthService
                 Message = validation.Error.ToString()
             };
         }
+
+        user.LastLogin = DateTime.UtcNow;
+        user.LastLoginIP = CommonHelper.GET_IP();
+
+        var updateResult = await _userManager.UpdateAsync(user);
+
+        if (!updateResult.Succeeded)
+        {
+            _logger.LogError(
+                "Failed to update LastLoginAt for user {UserId}: {Errors}",
+                user.Id,
+                string.Join(", ", updateResult.Errors.Select(x => x.Description)));
+        }
         //Lấy vai trò của user
         var roles = await _userService.GetRolesAsync(user.Id);
         var lifeTime = request.IsRemember ? TimeSpan.FromDays(_jwtSettings.RefreshTokenRememberExpirationDays) : TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays);

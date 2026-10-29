@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog.Core;
+using Shared.Constants.Permission;
 using Shared.DTOs.Auth;
 using Shared.Services.Log;
 using System;
@@ -44,6 +45,10 @@ namespace Shared.Configurations.JWT
                         ValidIssuer = jwtSettings?.Issuer,
                         ValidAudience = jwtSettings?.Audience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+
+                        NameClaimType = ClaimConstants.UserName,
+                        RoleClaimType = ClaimTypes.Role,
+
                         ClockSkew = TimeSpan.Zero
                     };
                     options.EventsType = typeof(JwtBearerEventHandler);

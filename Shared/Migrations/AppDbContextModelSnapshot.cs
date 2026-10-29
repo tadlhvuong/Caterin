@@ -719,8 +719,15 @@ namespace Shared.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AddressDetail")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.Property<string>("Avatar")
                         .HasColumnType("text");
+
+                    b.Property<long?>("AvatarMediaFileId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -737,12 +744,18 @@ namespace Shared.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("character varying(60)");
 
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("Gender")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -788,6 +801,10 @@ namespace Shared.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("ProvinceCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -817,7 +834,13 @@ namespace Shared.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("WardCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AvatarMediaFileId");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -1335,6 +1358,39 @@ namespace Shared.Migrations
                         .IsUnique();
 
                     b.ToTable("Settings", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSocialLink", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "Provider")
+                        .IsUnique();
+
+                    b.ToTable("UserSocialLinks", (string)null);
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Identity.Log.ActivityLog", b =>
@@ -2804,9 +2860,16 @@ namespace Shared.Migrations
 
             modelBuilder.Entity("Shared.Data.Entities.Identity.AppUser", b =>
                 {
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "AvatarMediaFile")
+                        .WithMany()
+                        .HasForeignKey("AvatarMediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Shared.Data.Entities.Identity.AppUser", "UpdatedByUser")
                         .WithMany()
                         .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("AvatarMediaFile");
 
                     b.Navigation("UpdatedByUser");
                 });
@@ -2927,6 +2990,17 @@ namespace Shared.Migrations
                         .IsRequired();
 
                     b.Navigation("Permission");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSocialLink", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Identity.AppUser", "User")
+                        .WithMany("SocialLinks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Identity.RefreshToken", b =>
@@ -3252,6 +3326,8 @@ namespace Shared.Migrations
                     b.Navigation("EmailActions");
 
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("SocialLinks");
 
                     b.Navigation("UserRoles");
                 });

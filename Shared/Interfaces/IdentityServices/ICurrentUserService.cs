@@ -16,6 +16,7 @@ namespace Shared.Interfaces.IdentityServices
 
         IReadOnlyList<string> Roles { get; }
 
+        int PermissionVersion { get; }
         //string? RoleId { get; }
 
         //int RoleLevel { get; }

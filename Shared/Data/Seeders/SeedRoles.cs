@@ -12,21 +12,21 @@ public static class SeedRoles
             Name = "System",
             NormalizedName = "SYSTEM",
             IsSystem = true,
-            Level = 1000
+            Level = 0
         },
         new AppRole
         {
             Name = "Admin",
             NormalizedName = "ADMIN",
             IsSystem = false,
-            Level = 500
+            Level = 10
         },
         new AppRole
         {
             Name = "User",
             NormalizedName = "USER",
             IsSystem = false,
-            Level = 100
+            Level = 1000
         }
     };
 

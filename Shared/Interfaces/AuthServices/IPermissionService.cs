@@ -33,5 +33,9 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<UserPermissionSnapshot> GetUserPermissionSnapshotAsync(string userId, long permissionVersion, CancellationToken cancellationToken = default);
+        Task<bool> IsRootAsync(
+    string userId,
+    long permissionVersion,
+    CancellationToken cancellationToken = default);
     }
 }

@@ -1,556 +1,542 @@
-﻿@*
+﻿@using Shared.DTOs.RolePermisison
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+    ViewData["Title"] = "Vai trò";
+    ViewData["Description"] = "Quản lý vai trò hệ thống";
+    ViewData["Image"] = "Roles";
+    ViewData["Name"] = "Roles";
+
+    var isRoot = ViewBag.CurrentUserIsRoot is true;
 }
+@model IReadOnlyList<RoleCardDto>
+
+    @section Styles {
+        <style>
+        #rolePermissionsModal .role-permissions-table-wrapper {
+            max-height: 60vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        #rolePermissionsModal #rolePermissionsHead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background-color: #f8f9fa;
+            box-shadow: inset 0 -1px var(--bs-border-color, #dee2e6);
+            white-space: nowrap;
+        }
+
+            /* Cố định thêm cột Module khi cuộn ngang */
+            #rolePermissionsModal #rolePermissionsHead th:first-child {
+                left: 0;
+                z-index: 7;
+            }
+
+        #rolePermissionsModal #rolePermissionsBody td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background-color: var(--bs-body-bg, #fff);
+        }
+
+        .role-permissions-btn:disabled {
+            cursor: not-allowed !important;
+            opacity: 0.65;
+            pointer-events: auto;
+        }
+
+            .role-permissions-btn:disabled:hover {
+                cursor: not-allowed !important;
+            }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        .swal2-container {
+            z-index: 20000 !important;
+        }
+        </style>
+    }
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="mb-1">Roles List</h4>
+    <h4 class="mb-1">Danh sách vai trò</h4>
 
     <p class="mb-6">
         A role provided access to predefined menus and features so that depending on <br />
         assigned role an administrator can have access to what user needs.
     </p>
-    <!-- Role cards -->
-    <div class="row g-6">
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-normal mb-0 text-body">Total 4 users</h6>
-                        <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Vinnie Mostowy"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/5.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Allen Rieske"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/12.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Julee Rossignol"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/6.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Kaith D'souza"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/3.png" alt="Avatar" />
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="role-heading">
-                            <h5 class="mb-1">Administrator</h5>
-                            <a href="javascript:;"
-                               data-bs-toggle="modal"
-                               data-bs-target="#addRoleModal"
-                               class="role-edit-modal"><span>Edit Role</span></a>
-                        </div>
-                        <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-normal mb-0 text-body">Total 7 users</h6>
-                        <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Jimmy Ressula"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/4.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="John Doe"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/1.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Kristi Lawker"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/2.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                                <span class="avatar-initial rounded-circle pull-up"
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="bottom"
-                                      title="4 more">+4</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="role-heading">
-                            <h5 class="mb-1">Manager</h5>
-                            <a href="javascript:;"
-                               data-bs-toggle="modal"
-                               data-bs-target="#addRoleModal"
-                               class="role-edit-modal"><span>Edit Role</span></a>
-                        </div>
-                        <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-normal mb-0 text-body">Total 5 users</h6>
-                        <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Andrew Tye"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/6.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Rishi Swaat"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/9.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Rossie Kim"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/12.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                                <span class="avatar-initial rounded-circle pull-up"
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="bottom"
-                                      title="2 more">+2</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="role-heading">
-                            <h5 class="mb-1">Users</h5>
-                            <a href="javascript:;"
-                               data-bs-toggle="modal"
-                               data-bs-target="#addRoleModal"
-                               class="role-edit-modal"><span>Edit Role</span></a>
-                        </div>
-                        <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-normal mb-0 text-body">Total 3 users</h6>
-                        <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Kim Karlos"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/3.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Katy Turner"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/9.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Peter Adward"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/4.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                                <span class="avatar-initial rounded-circle pull-up"
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="bottom"
-                                      title="3 more">+3</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="role-heading">
-                            <h5 class="mb-1">Support</h5>
-                            <a href="javascript:;"
-                               data-bs-toggle="modal"
-                               data-bs-target="#addRoleModal"
-                               class="role-edit-modal"><span>Edit Role</span></a>
-                        </div>
-                        <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-6 col-md-6">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h6 class="fw-normal mb-0 text-body">Total 2 users</h6>
-                        <ul class="list-unstyled d-flex align-items-center avatar-group mb-0">
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Kim Merchent"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/10.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Sam D'souza"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/13.png" alt="Avatar" />
-                            </li>
-                            <li data-bs-toggle="tooltip"
-                                data-popup="tooltip-custom"
-                                data-bs-placement="top"
-                                title="Nurvi Karlos"
-                                class="avatar pull-up">
-                                <img class="rounded-circle" src="~/admin/assets/img/avatars/5.png" alt="Avatar" />
-                            </li>
-                            <li class="avatar">
-                                <span class="avatar-initial rounded-circle pull-up"
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="bottom"
-                                      title="7 more">+7</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-end">
-                        <div class="role-heading">
-                            <h5 class="mb-1">Restricted User</h5>
-                            <a href="javascript:;"
-                               data-bs-toggle="modal"
-                               data-bs-target="#addRoleModal"
-                               class="role-edit-modal"><span>Edit Role</span></a>
-                        </div>
-                        <a href="javascript:void(0);"><i class="ti ti-copy ti-md text-heading"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4 col-lg-6 col-md-6">
+<!-- Role cards -->
+    <div id="roleCardsContainer" class="row g-6" data-roles-url="@Url.Action("GetRoles", "RolePermission", new { area = "Admin" })"  data-is-root="@isRoot.ToString().ToLowerInvariant()">
+    <template id="roleCardTemplate">
+        <div class="col-xl-4 col-lg-6 col-md-6 role-card-item" data-role-id="">
             <div class="card h-100">
-                <div class="row h-100">
-                    <div class="col-sm-5">
-                        <div class="d-flex align-items-end h-100 justify-content-center mt-sm-0 mt-4">
-                            <img src="~/admin/assets/img/illustrations/add-new-roles.png"
-                                 class="img-fluid mt-sm-4 mt-md-0"
-                                 alt="add-new-roles"
-                                 width="83" />
-                        </div>
-                    </div>
-                    <div class="col-sm-7">
-                        <div class="card-body text-sm-end text-center ps-sm-0">
-                            <button data-bs-target="#addRoleModal"
-                                    data-bs-toggle="modal"
-                                    class="btn btn-sm btn-primary mb-4 text-nowrap add-new-role">
-                                Add New Role
-                            </button>
-                            <p class="mb-0">
-                                Add new role, <br />
-                                if it doesn't exist.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12">
-            <h4 class="mt-6 mb-1">Total users with their roles</h4>
-            <p class="mb-0">Find all of your company’s administrator accounts and their associate roles.</p>
-        </div>
-        <div class="col-12">
-            <!-- Role Table -->
-            <div class="card">
-                <div class="card-datatable table-responsive">
-                    <table class="datatables-users table border-top">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Plan</th>
-                                <th>Billing</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-            <!--/ Role Table -->
-        </div>
-    </div>
-    <!--/ Role cards -->
-    <!-- Add Role Modal -->
-    <!-- Add Role Modal -->
-    <div class="modal fade" id="addRoleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-simple modal-dialog-centered modal-add-new-role">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div class="text-center mb-6">
-                        <h4 class="role-title mb-2">Add New Role</h4>
-                        <p>Set role permissions</p>
-                    </div>
-                    <!-- Add role form -->
-                    <form id="addRoleForm" class="row g-6" onsubmit="return false">
-                        <div class="col-12">
-                            <label class="form-label" for="modalRoleName">Role Name</label>
-                            <input type="text"
-                                   id="modalRoleName"
-                                   name="modalRoleName"
-                                   class="form-control"
-                                   placeholder="Enter a role name"
-                                   tabindex="-1" />
-                        </div>
-                        <div class="col-12">
-                            <h5 class="mb-6">Role Permissions</h5>
-                            <!-- Permission table -->
-                            <div class="table-responsive">
-                                <table class="table table-flush-spacing">
-                                    <tbody>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">
-                                                Administrator Access
-                                                <i class="ti ti-info-circle"
-                                                   data-bs-toggle="tooltip"
-                                                   data-bs-placement="top"
-                                                   title="Allows a full access to the system"></i>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="selectAll" />
-                                                        <label class="form-check-label" for="selectAll"> Select All </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">User Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="userManagementRead" />
-                                                        <label class="form-check-label" for="userManagementRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="userManagementWrite" />
-                                                        <label class="form-check-label" for="userManagementWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="userManagementCreate" />
-                                                        <label class="form-check-label" for="userManagementCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Content Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="contentManagementRead" />
-                                                        <label class="form-check-label" for="contentManagementRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="contentManagementWrite" />
-                                                        <label class="form-check-label" for="contentManagementWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="contentManagementCreate" />
-                                                        <label class="form-check-label" for="contentManagementCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Disputes Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="dispManagementRead" />
-                                                        <label class="form-check-label" for="dispManagementRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="dispManagementWrite" />
-                                                        <label class="form-check-label" for="dispManagementWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="dispManagementCreate" />
-                                                        <label class="form-check-label" for="dispManagementCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Database Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="dbManagementRead" />
-                                                        <label class="form-check-label" for="dbManagementRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="dbManagementWrite" />
-                                                        <label class="form-check-label" for="dbManagementWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="dbManagementCreate" />
-                                                        <label class="form-check-label" for="dbManagementCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Financial Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="finManagementRead" />
-                                                        <label class="form-check-label" for="finManagementRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="finManagementWrite" />
-                                                        <label class="form-check-label" for="finManagementWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="finManagementCreate" />
-                                                        <label class="form-check-label" for="finManagementCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Reporting</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="reportingRead" />
-                                                        <label class="form-check-label" for="reportingRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="reportingWrite" />
-                                                        <label class="form-check-label" for="reportingWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="reportingCreate" />
-                                                        <label class="form-check-label" for="reportingCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">API Control</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="apiRead" />
-                                                        <label class="form-check-label" for="apiRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="apiWrite" />
-                                                        <label class="form-check-label" for="apiWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="apiCreate" />
-                                                        <label class="form-check-label" for="apiCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Repository Management</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="repoRead" />
-                                                        <label class="form-check-label" for="repoRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="repoWrite" />
-                                                        <label class="form-check-label" for="repoWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="repoCreate" />
-                                                        <label class="form-check-label" for="repoCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="text-nowrap fw-medium text-heading">Payroll</td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="payrollRead" />
-                                                        <label class="form-check-label" for="payrollRead"> Read </label>
-                                                    </div>
-                                                    <div class="form-check mb-0 me-4 me-lg-12">
-                                                        <input class="form-check-input" type="checkbox" id="payrollWrite" />
-                                                        <label class="form-check-label" for="payrollWrite"> Write </label>
-                                                    </div>
-                                                    <div class="form-check mb-0">
-                                                        <input class="form-check-input" type="checkbox" id="payrollCreate" />
-                                                        <label class="form-check-label" for="payrollCreate"> Create </label>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                <div class="card-body d-flex flex-column">
+
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="avatar">
+                                <span class="avatar-initial rounded bg-label-primary">
+                                    <i class="ti ti-shield-check ti-md"></i>
+                                </span>
                             </div>
-                            <!-- Permission table -->
+
+                            <div>
+                                <h5 class="mb-1 role-name"></h5>
+                                <span class="text-body-secondary small role-level"></span>
+                            </div>
                         </div>
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-primary me-3">Submit</button>
-                            <button type="reset"
-                                    class="btn btn-label-secondary"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close">
-                                Cancel
+
+                        <span class="badge role-type"></span>
+                    </div>
+
+                    <p class="text-body-secondary mb-4 role-description"></p>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="ti ti-users ti-md text-primary"></i>
+                                    <span class="text-body-secondary small">Thành viên</span>
+                                </div>
+                                <h4 class="mb-0 role-member-count">0</h4>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="border rounded p-3 h-100">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="ti ti-key ti-md text-primary"></i>
+                                    <span class="text-body-secondary small">Quyền</span>
+                                </div>
+                                <h4 class="mb-0 role-permission-count">0</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <hr class="my-3">
+
+                            <div class="role-management-actions d-flex align-items-center justify-content-between mb-3">
+                                <a href="#"
+                                   class="role-edit-modal">
+                                    <i class="ti ti-edit me-1"></i>
+                                    Chỉnh sửa
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger role-delete-btn">
+                                    <i class="ti ti-trash me-1"></i>
+                                    Xóa
+                                </button>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="button"
+                                    class="btn btn-label-primary flex-fill role-permissions-btn">
+                                <i class="ti ti-shield-lock me-1"></i>
+                                Quyền hạn
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-label-secondary flex-fill role-members-btn">
+                                <i class="ti ti-users me-1"></i>
+                                Tài khoản
                             </button>
                         </div>
-                    </form>
-                    <!--/ Add role form -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Add New Role card -->
+    <div id="addRoleCard" class="col-xl-4 col-lg-6 col-md-6">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column
+                        align-items-center justify-content-center text-center">
+
+                <div class="avatar avatar-xl mb-3">
+                    <span class="avatar-initial rounded bg-label-primary">
+                        <i class="ti ti-shield-plus ti-xl"></i>
+                    </span>
+                </div>
+
+                <h5 class="mb-2">Add New Role</h5>
+
+                <p class="text-body-secondary mb-4">
+                    Tạo vai trò mới để quản lý quyền truy cập của nhân viên.
+                </p>
+
+                <button type="button"
+                        class="btn btn-primary add-new-role"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addRoleModal">
+                    <i class="ti ti-plus me-1"></i>
+                    Create Role
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Role cards -->
+    <!-- Add / Edit Role Modal -->
+    <div class="modal fade" id="addRoleModal" tabindex="-1"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <form id="addRoleForm" data-mode="create">
+                    <div class="modal-header">
+                        <h5 class="modal-title role-title">Thêm mới</h5>
+                        <button type="button" class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="modalRoleId" />
+
+                        <div class="mb-4">
+                            <label for="modalRoleName"
+                                   class="form-label">Tên</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="modalRoleName"
+                                   name="name"
+                                   maxlength="256"
+                                   required />
+                        </div>
+                        <div id="roleLevelGroup" class="mb-4 d-none">
+                            <label for="modalRoleLevel" class="form-label">Cấp bậc</label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="modalRoleLevel"
+                                   name="level"
+                                   min="0"
+                                   step="1"
+                                   required />
+                            <div class="form-text">
+                                Cấp độ của vai trò trong hệ thống.
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="modalRoleDescription"
+                                   class="form-label">Miêu tả</label>
+                            <textarea class="form-control"
+                                      id="modalRoleDescription"
+                                      name="description"
+                                      rows="3"
+                                      maxlength="500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-label-secondary"
+                                data-bs-dismiss="modal">
+                            Hủy
+                        </button>
+                        <button type="submit"
+                                class="btn btn-primary"
+                                id="saveRoleBtn">
+                            Xác nhận
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="rolePermissionsModal" tabindex="-1"
+         aria-labelledby="rolePermissionsTitle" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="rolePermissionsTitle">
+                            Role Permissions
+                        </h5>
+                        <div class="text-body-secondary small"
+                             id="rolePermissionsSubtitle"></div>
+                    </div>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="rolePermissionsLoading"
+                         class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary"
+                             role="status"></div>
+                        <p class="text-body-secondary mt-3 mb-0">
+                            Đang tải danh sách quyền...
+                        </p>
+                    </div>
+
+                    <div id="rolePermissionsError"
+                         class="alert alert-danger d-none"
+                         role="alert"></div>
+
+                    <div class="role-permissions-table-wrapper">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead id="rolePermissionsHead"></thead>
+                            <tbody id="rolePermissionsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary"
+                            data-bs-dismiss="modal">
+                        Đóng
+                    </button>
+                    <button type="button"
+        class="btn btn-primary"
+        id="saveRolePermissionsBtn">
+    <i class="ti ti-device-floppy me-1"></i>
+    Lưu quyền
+</button>
                 </div>
             </div>
         </div>
     </div>
-    <!--/ Add Role Modal -->
-    <!-- / Add Role Modal -->
+
+
+    <div class="modal fade" id="roleMembersModal" tabindex="-1"
+         aria-labelledby="roleMembersTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="roleMembersTitle">
+                            Thành viên của role
+                        </h5>
+                        <div class="text-body-secondary small"
+                             id="roleMembersSubtitle"></div>
+                    </div>
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-body-secondary">
+                            Tổng thành viên
+
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    id="openAssignRoleMembersBtn">
+                                <i class="ti ti-user-plus me-1"></i>
+                                Gán tài khoản
+                            </button>
+                        </span>
+                        <span class="badge bg-label-primary"
+                              id="roleMembersCount">0</span>
+                    </div>
+
+                    <div id="roleMembersLoading"
+                         class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary"
+                             role="status"></div>
+                        <p class="text-body-secondary mt-2 mb-0">
+                            Đang tải thành viên...
+                        </p>
+                    </div>
+
+                    <div id="roleMembersError"
+                         class="alert alert-danger d-none"
+                         role="alert"></div>
+
+                    <div id="roleMembersEmpty"
+                         class="text-center py-5 d-none">
+                        <i class="ti ti-users ti-xl text-body-secondary"></i>
+                        <p class="text-body-secondary mt-2 mb-0">
+                            Role này chưa có thành viên.
+                        </p>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Tài khoản</th>
+                                    <th>Trạng thái</th>
+                                    <th>Đăng nhập gần nhất</th>
+                                    <th class="text-end">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roleMembersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary"
+                            data-bs-dismiss="modal">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Members Modal -->
+    <div class="modal fade"
+         id="assignRoleMembersModal"
+         tabindex="-1"
+         aria-labelledby="assignRoleMembersTitle"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <!-- Header -->
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="assignRoleMembersTitle">
+                            Gán tài khoản vào role
+                        </h5>
+                        <div class="text-body-secondary small"
+                             id="assignRoleMembersSubtitle">
+                        </div>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Đóng">
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+
+                    <!-- Search -->
+                    <div class="mb-4">
+                        <label for="assignRoleMembersSearch"
+                               class="form-label">
+                            Tìm kiếm tài khoản
+                        </label>
+
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="ti ti-search"></i>
+                            </span>
+
+                            <input type="search"
+                                   class="form-control"
+                                   id="assignRoleMembersSearch"
+                                   placeholder="Nhập tên tài khoản hoặc email..."
+                                   autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <!-- Selection toolbar -->
+                    <div class="d-flex flex-wrap justify-content-between
+                            align-items-center gap-2 mb-3">
+
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="selectAllAvailableMembers" />
+
+                            <label class="form-check-label"
+                                   for="selectAllAvailableMembers">
+                                Chọn tất cả kết quả
+                            </label>
+                        </div>
+
+                        <span class="text-body-secondary small">
+                            Đã chọn
+                            <strong id="assignRoleMembersSelectedCount">0</strong>
+                            tài khoản
+                        </span>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="assignRoleMembersLoading"
+                         class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary mb-2"
+                             role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <div class="text-body-secondary">
+                            Đang tải danh sách tài khoản...
+                        </div>
+                    </div>
+
+                    <!-- Error -->
+                    <div id="assignRoleMembersError"
+                         class="alert alert-danger d-none"
+                         role="alert">
+                    </div>
+
+                    <!-- Empty -->
+                    <div id="assignRoleMembersEmpty"
+                         class="text-center py-5 d-none">
+                        <i class="ti ti-users-minus d-block fs-1 mb-2"></i>
+                        <div class="fw-medium">
+                            Không tìm thấy tài khoản phù hợp
+                        </div>
+                        <div class="text-body-secondary small">
+                            Có thể các tài khoản đã thuộc role này.
+                        </div>
+                    </div>
+
+                    <!-- Available members -->
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 45px;"></th>
+                                    <th>Tài khoản</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="assignRoleMembersBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Limit notice -->
+                    <div class="text-body-secondary small mt-3"
+                         id="assignRoleMembersLimitNotice">
+                        Hiển thị tối đa 50 tài khoản mỗi lần tìm kiếm.
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-label-secondary"
+                            data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-primary"
+                            id="confirmAssignRoleMembersBtn"
+                            disabled>
+                        <i class="ti ti-user-plus me-1"></i>
+                        Gán tài khoản
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
 
-
-
 @section Scripts {
-    <script src="~/admin/assets/js/app-access-roles.js"></script>
-    <script src="~/admin/assets/js/modal-add-role.js"></script>
+    <script src="~/admin/assets/js/core/hk.role.js"></script>
+    @* <script src="~/admin/assets/js/modal-add-role.js"></script> *@
 }

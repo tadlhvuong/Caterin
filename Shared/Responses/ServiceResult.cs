@@ -121,6 +121,7 @@
 
     public sealed class ServiceError
     {
+        public string? Code { get; init; }
         public string? Field { get; init; }
 
         public string Message { get; init; } = string.Empty;

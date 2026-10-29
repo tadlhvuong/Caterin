@@ -1,4 +1,5 @@
 ﻿@using Website.Areas.Admin.Models
+@using Website.Areas.Admin.Models.User
 @model UserDetailsViewModel
 @{
     ViewData["Title"] = "Thông tin tài khoản";
@@ -15,29 +16,90 @@
 }
 @section Styles {
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/sweetalert2/sweetalert2.css" />
+    <style>
+        .user-avatar-wrapper {
+            width: 128px;
+            height: 128px;
+            padding: 4px;
+            border: 1px solid var(--bs-border-color);
+            border-radius: 50%;
+            overflow: hidden;
+        }
 
+        .user-avatar-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .user-avatar-actions .btn {
+            min-width: 180px;
+        }
+    </style>
 }
 
-<div class="container-xxl flex-grow-1 container-p-y">
+<div class="container-xxl flex-grow-1 container-p-y" id="userDetails"
+     data-user-id="@Model.Id">
     <div class="row">
         <!-- User Sidebar -->
-        <div class="col-xl-4 col-lg-5 order-1 order-md-0">
+        <div class="col-xl-4 col-lg-5 order-0 order-md-0">
             <!-- User Card -->
             <div class="card mb-6">
                 <div class="card-body pt-12">
                     <div class="user-avatar-section">
                         <div class="d-flex align-items-center flex-column">
-                            <img class="img-fluid rounded mb-4"
-                                 src="~/admin/assets/img/avatars/1.png"
-                                 height="120"
-                                 width="120"
-                                 alt="User avatar" />
-                            <div class="user-info text-center">
-                                <h5>@Model.UserName</h5>
-                                <span class="badge bg-label-secondary">Author</span>
+
+                            <div class="user-avatar-wrapper mb-3">
+                                <img id="userAvatar"
+                                     class="user-avatar-image rounded"
+                                     src="@(Model.AvatarUrl ?? Url.Content("~/images/Default/default-user.png"))"
+                                     alt="User avatar"
+                                     width="120"
+                                     height="120" />
                             </div>
+
+                            <div class="user-avatar-actions text-center mb-4">
+                                <label for="upload"
+                                       class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 mb-2"
+                                       style="cursor: pointer;">
+                                    <i class="ti ti-camera"></i>
+                                    <span>Đổi ảnh đại diện</span>
+
+                                    <input type="file"
+                                           id="upload"
+                                           class="account-file-input"
+                                           accept=".jpg,.jpeg,.png,.webp"
+                                           hidden />
+                                </label>
+
+                                <div class="text-muted small">
+                                    JPG, JPEG, PNG hoặc WEBP · Tối đa 2 MB
+                                </div>
+                            </div>
+
+                            <div class="user-info text-center">
+                                <h5 id="detailUserName" class="mb-2">@Model.UserName</h5>
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    @if (Model.Roles != null && Model.Roles.Any())
+                                    {
+                                        foreach (var role in Model.Roles)
+                                        {
+                                            <span class="badge bg-label-secondary">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Chưa có vai trò</span>
+                                    }
+                                </div>
+                            </div>
+
                         </div>
                     </div>
+                    <form id="avatarAntiForgeryForm" class="d-none">
+                        @Html.AntiForgeryToken()
+                    </form>
                     <div class="my-6">
 
                         <!-- Email -->
@@ -47,13 +109,18 @@
                                     <i class="ti ti-mail ti-lg"></i>
                                 </div>
                             </div>
-
                             <div class="flex-grow-1">
                                 <div class="text-muted small">Email</div>
                                 <div class="fw-semibold">@Model.Email</div>
                             </div>
-
-                            <span class="badge bg-label-warning">Chưa xác minh</span>
+                            @if (Model.ConfirmEmail)
+                            {
+                                <span class="badge bg-label-success">Đã xác minh</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-label-warning">Chưa xác minh</span>
+                            }
                         </div>
 
                         <!-- Phone -->
@@ -66,10 +133,12 @@
 
                             <div class="flex-grow-1">
                                 <div class="text-muted small">Số điện thoại</div>
-                                <div class="fw-semibold">@Model.PhoneNumber</div>
+                                <div class="fw-semibold" id="detailPhoneNumber">
+                                    @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
+                                                                        ? "Chưa cập nhật"
+                                                                        : Model.PhoneNumber)
+                                </div>
                             </div>
-
-                            <span class="badge bg-label-success">Đã xác minh</span>
                         </div>
 
                         <!-- Role -->
@@ -82,7 +151,24 @@
 
                             <div class="flex-grow-1">
                                 <div class="text-muted small">Vai trò</div>
-                                <div class="fw-semibold">Thành viên</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if (Model.Roles.Any())
+                                    {
+                                        foreach (var role in Model.Roles)
+                                        {
+                                            <span class="badge bg-label-primary">@role</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Chưa có vai trò</span>
+                                    }
+                                    <a href="@Url.Action("Role", "RolePermission", new { area = "Admin" })"
+                                       class="btn btn-sm btn-label-secondary">
+                                        <i class="ti ti-shield-cog me-1"></i>
+                                        Quản lý vai trò
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -120,61 +206,34 @@
                                class="btn btn-primary me-4"
                                data-bs-target="#editUser"
                                data-bs-toggle="modal">Edit</a>
-                            <a href="javascript:;" class="btn btn-label-danger suspend-user">Suspend</a>
+                            @if (Model.IsActive)
+                            {
+                                <a href="javascript:;"
+                                   class="btn btn-label-danger suspend-user"
+                                   data-user-id="@Model.Id"
+                                   data-active="true">
+                                    Suspend
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="javascript:;"
+                                   class="btn btn-label-success suspend-user"
+                                   data-user-id="@Model.Id"
+                                   data-active="false">
+                                    Activate
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /User Card -->
-            <!-- Plan Card -->
-            <div class="card mb-6 border border-2 border-primary rounded primary-shadow">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="badge bg-label-primary">Standard</span>
-                        <div class="d-flex justify-content-center">
-                            <sub class="h5 pricing-currency mb-auto mt-1 text-primary">$</sub>
-                            <h1 class="mb-0 text-primary">99</h1>
-                            <sub class="h6 pricing-duration mt-auto mb-3 fw-normal">month</sub>
-                        </div>
-                    </div>
-                    <ul class="list-unstyled g-2 my-6">
-                        <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i><span>10 Users</span>
-                        </li>
-                        <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i><span>Up to 10 GB storage</span>
-                        </li>
-                        <li class="mb-2 d-flex align-items-center">
-                            <i class="ti ti-circle-filled ti-10px text-secondary me-2"></i><span>Basic Support</span>
-                        </li>
-                    </ul>
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="h6 mb-0">Days</span>
-                        <span class="h6 mb-0">26 of 30 Days</span>
-                    </div>
-                    <div class="progress mb-1 bg-label-primary" style="height: 6px">
-                        <div class="progress-bar"
-                             role="progressbar"
-                             style="width: 65%"
-                             aria-valuenow="65"
-                             aria-valuemin="0"
-                             aria-valuemax="100"></div>
-                    </div>
-                    <small>4 days remaining</small>
-                    <div class="d-grid w-100 mt-6">
-                        <button class="btn btn-primary" data-bs-target="#upgradePlanModal" data-bs-toggle="modal">
-                            Upgrade Plan
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- /Plan Card -->
         </div>
         <!--/ User Sidebar -->
 
-        <div class="col-xl-8 col-lg-7 order-0 order-md-1">
+        <div class="col-xl-8 col-lg-7 order-1 order-md-1">
             <partial name="_DetailsNav" model="@Model"  />
-
             <div id="tab-content"
                  hx-get="@Url.Action(initAction, "User", new { id = Model.Id })"
                  hx-trigger="load" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
@@ -185,49 +244,8 @@
             </div> *@
         </div>
     </div>
-    <partial name="_CreateUser" />
-    <!-- Add New Credit Card Modal -->
-    @* <div class="modal fade" id="upgradePlanModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-simple modal-upgrade-plan">
-                  <div class="modal-content">
-                    <div class="modal-body p-4">
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      <div class="text-center mb-6">
-                        <h4 class="mb-2">Upgrade Plan</h4>
-                        <p>Choose the best plan for user.</p>
-                      </div>
-                      <form id="upgradePlanForm" class="row g-4" onsubmit="return false">
-                        <div class="col-sm-9">
-                          <label class="form-label" for="choosePlan">Choose Plan</label>
-                          <select id="choosePlan" name="choosePlan" class="form-select" aria-label="Choose Plan">
-                            <option selected>Choose Plan</option>
-                            <option value="standard">Standard - $99/month</option>
-                            <option value="exclusive">Exclusive - $249/month</option>
-                            <option value="Enterprise">Enterprise - $499/month</option>
-                          </select>
-                        </div>
-                        <div class="col-sm-3 d-flex align-items-end">
-                          <button type="submit" class="btn btn-primary">Upgrade</button>
-                        </div>
-                      </form>
-                    </div>
-                    <hr class="mx-4 my-2" />
-                    <div class="modal-body p-4">
-                      <p class="mb-0">User current plan is standard plan</p>
-                      <div class="d-flex justify-content-between align-items-center flex-wrap">
-                        <div class="d-flex justify-content-center me-2 mt-1">
-                          <sup class="h6 pricing-currency pt-1 mt-2 mb-0 me-1 text-primary">$</sup>
-                          <h1 class="mb-0 text-primary">99</h1>
-                          <sub class="pricing-duration mt-auto mb-5 pb-1 small text-body">/month</sub>
-                        </div>
-                        <button class="btn btn-label-danger cancel-subscription">Cancel Subscription</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div> *@
-    <!--/ Add New Credit Card Modal -->
-    <!-- /Modal -->
+    <partial name="_UpdateUser"
+             model="@ViewData["UpdateUserModel"]" />
 </div>
 
                           @section Scripts {
@@ -245,5 +263,24 @@
             });
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const shouldOpenEditModal =
+                @System.Text.Json.JsonSerializer.Serialize(ViewData["OpenEditModal"] is true);
+
+            if (!shouldOpenEditModal) return;
+
+            const modalElement = document.getElementById('editUser');
+
+            if (!modalElement) {
+                console.error('Không tìm thấy modal #editUser.');
+                return;
+            }
+
+            bootstrap.Modal.getOrCreateInstance(modalElement).show();
+        });
+    </script>
+
 
                           }

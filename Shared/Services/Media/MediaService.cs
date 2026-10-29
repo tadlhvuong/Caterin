@@ -39,40 +39,70 @@ namespace Shared.Services.Media
             _options = options.Value;
         }
 
-        public async Task<MediaFile> UploadAsync(IFormFile file, string folder, CancellationToken cancellationToken = default)
+        public async Task<MediaFile> UploadAsync(
+    IFormFile file,
+    string policyName,
+    CancellationToken cancellationToken = default)
         {
             if (file == null || file.Length <= 0)
                 throw new ArgumentException("File không hợp lệ.");
 
-            var safeFolder = NormalizeFolder(folder);
+            if (string.IsNullOrWhiteSpace(policyName))
+                throw new ArgumentException("Chính sách upload không hợp lệ.");
 
-            // Chỉ cho phép những thư mục upload đã định nghĩa.
-            var isProduct = string.Equals(safeFolder, _options.ProductFolder, StringComparison.OrdinalIgnoreCase);
+            // Tìm policy không phân biệt chữ hoa/thường.
+            var policyEntry = _options.Policies.FirstOrDefault(
+                x => string.Equals(
+                    x.Key,
+                    policyName.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
 
-            var isChat = string.Equals(safeFolder, _options.ChatFolder, StringComparison.OrdinalIgnoreCase);
+            if (policyEntry.Value == null)
+                throw new InvalidOperationException(
+                    "Chính sách upload không được cấu hình.");
 
-            if (!isProduct && !isChat)
-                throw new InvalidOperationException("Thư mục upload không hợp lệ.");
+            var policy = policyEntry.Value;
+
+            if (string.IsNullOrWhiteSpace(policy.Folder))
+                throw new InvalidOperationException(
+                    "Thư mục upload chưa được cấu hình.");
+
+            if (policy.MaxFileSize <= 0)
+                throw new InvalidOperationException(
+                    "Dung lượng upload chưa được cấu hình hợp lệ.");
+
+            // Chỉ chấp nhận tên thư mục đơn, không cho phép truyền đường dẫn tùy ý.
+            var safeFolder = NormalizeFolder(policy.Folder);
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-            var allowedExtensions = isProduct ? ProductExtensions : ChatExtensions;
+            var isAllowedExtension = policy.AllowedExtensions.Any(
+                x => string.Equals(
+                    x,
+                    extension,
+                    StringComparison.OrdinalIgnoreCase));
 
-            var maxFileSize = isProduct ? MaxProductFileSize : MaxChatFileSize;
+            if (!isAllowedExtension)
+                throw new InvalidOperationException(
+                    "Định dạng file không được hỗ trợ.");
 
-            if (!allowedExtensions.Contains(extension))
-                throw new InvalidOperationException("Định dạng file không được hỗ trợ.");
+            if (file.Length > policy.MaxFileSize)
+            {
+                var maxSizeMb = policy.MaxFileSize / (1024d * 1024d);
 
-            if (file.Length > maxFileSize)
-                throw new InvalidOperationException($"File không được vượt quá {maxFileSize / (1024 * 1024)} MB.");
+                throw new InvalidOperationException(
+                    $"File không được vượt quá {maxSizeMb:0.##} MB.");
+            }
 
             ValidateContentType(extension, file.ContentType);
 
-            var now = DateTime.UtcNow;
-            var fileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-            var baseFolder = isProduct ? _options.ProductFolder : _options.ChatFolder;
+            cancellationToken.ThrowIfCancellationRequested();
 
-            var relativeDirectory = Path.Combine(baseFolder,
+            var now = DateTime.UtcNow;
+            var fileName = $"{Guid.NewGuid():N}{extension}";
+
+            var relativeDirectory = Path.Combine(
+                safeFolder,
                 now.ToString("yyyy"),
                 now.ToString("MM"));
 
@@ -80,27 +110,35 @@ namespace Shared.Services.Media
                 relativeDirectory,
                 fileName);
 
-            var physicalDirectory = Path.Combine(
-                _options.RootPath,
-                relativeDirectory);
+            // Dùng chung cách xác định đường dẫn với DeleteAsync/OpenReadAsync.
+            var physicalPath = GetPhysicalPath(relativePath);
+            var physicalDirectory = Path.GetDirectoryName(physicalPath)!;
 
             Directory.CreateDirectory(physicalDirectory);
 
-            var physicalPath = Path.Combine(
-                _options.RootPath,
-                relativePath);
-
             try
             {
-                await using var stream = new FileStream(physicalPath,
-                    FileMode.CreateNew, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+                await using var stream = new FileStream(
+                    physicalPath,
+                    FileMode.CreateNew,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 81920,
+                    useAsync: true);
 
                 await file.CopyToAsync(stream, cancellationToken);
             }
             catch
             {
-                if (File.Exists(physicalPath))
-                    File.Delete(physicalPath);
+                try
+                {
+                    if (File.Exists(physicalPath))
+                        File.Delete(physicalPath);
+                }
+                catch
+                {
+                    // Không để lỗi dọn file che mất lỗi upload ban đầu.
+                }
 
                 throw;
             }

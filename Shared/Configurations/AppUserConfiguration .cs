@@ -20,11 +20,22 @@ namespace Shared.Configurations
 
             builder.Property(x => x.UserName).HasMaxLength(200);
 
+            builder.Property(x => x.AddressDetail).HasMaxLength(500);
+
+            builder.Property(x => x.ProvinceCode).HasMaxLength(20);
+
+            builder.Property(x => x.WardCode).HasMaxLength(20);
+
+            builder.Property(x => x.DateOfBirth).IsRequired(false).HasColumnType("timestamp with time zone");
+
             builder.Property(x => x.CreatedAt).IsRequired(true).HasColumnType("timestamp with time zone");
 
             builder.Property(x => x.UpdatedAt).IsRequired(false).HasColumnType("timestamp with time zone");
 
             builder.Property(x => x.LastLogin).IsRequired(false).HasColumnType("timestamp with time zone");
+
+            builder.HasOne(u => u.AvatarMediaFile).WithMany()
+                .HasForeignKey(u => u.AvatarMediaFileId).OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

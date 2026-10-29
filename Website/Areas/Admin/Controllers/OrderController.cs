@@ -37,7 +37,7 @@ namespace Website.Areas.Admin.Controllers
 
         [PermissionAction(ActionType.View)]
         [HttpPost("get-orders")]
-        public async Task<IActionResult> GetProducts([FromBody] OrderDataTableRequest request)
+        public async Task<IActionResult> GetOrders([FromBody] OrderDataTableRequest request)
         {
             var result = await _orderService.GetOrdersAsync(request);
 

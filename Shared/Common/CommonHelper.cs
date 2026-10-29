@@ -147,6 +147,100 @@ namespace Shared.Common
             return responseread;
         }
 
+        public static string GET_Exchange()
+        {
+            var timeExchange = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var urlExchange = "http://" + timeExchange + ".currency-api.pages.dev/v1/currencies/vnd.json";
+            try
+            {
+                var rate = IPResquesHelper(urlExchange);
+                return rate;
+            }
+            catch (Exception)
+            {
+                timeExchange = DateTime.UtcNow.AddDays(-1).ToString("yyyy-MM-dd");
+                urlExchange = "http://" + timeExchange + ".currency-api.pages.dev/v1/currencies/vnd.json";
+                var rate = IPResquesHelper(urlExchange);
+                return rate;
+            }
+        }
+
+        public static string HashMD5(string input)
+        {
+            using (MD5 md5Hash = MD5.Create())
+            {
+                byte[] output = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
+                StringBuilder sBuilder = new StringBuilder();
+                for (int i = 0; i < output.Length; i++)
+                    sBuilder.Append(output[i].ToString("x2"));
+                return sBuilder.ToString();
+            }
+        }
+
+        public static string HashHMAC_SHA1(string input, string key, bool raw = false)
+        {
+            byte[] datBytes = Encoding.UTF8.GetBytes(input);
+            byte[] keyBytes = Encoding.Default.GetBytes(key);
+
+            using (HMACSHA1 hMac = new HMACSHA1(keyBytes))
+            {
+                byte[] output = hMac.ComputeHash(datBytes);
+                if (raw)
+                    return Encoding.Default.GetString(output);
+                else
+                {
+                    StringBuilder sBuilder = new StringBuilder();
+                    for (int i = 0; i < output.Length; i++)
+                        sBuilder.Append(output[i].ToString("x2"));
+
+                    return sBuilder.ToString();
+                }
+            }
+        }
+
+        public static string HashHMAC_SHA256(string input, string key, bool raw = false)
+        {
+            byte[] datBytes = Encoding.UTF8.GetBytes(input);
+            byte[] keyBytes = Encoding.Default.GetBytes(key);
+
+            using (HMACSHA256 hMac = new HMACSHA256(keyBytes))
+            {
+                byte[] output = hMac.ComputeHash(datBytes);
+                if (raw)
+                    return Encoding.Default.GetString(output);
+                else
+                {
+                    StringBuilder sBuilder = new StringBuilder();
+                    for (int i = 0; i < output.Length; i++)
+                        sBuilder.Append(output[i].ToString("x2"));
+
+                    return sBuilder.ToString();
+                }
+            }
+        }
+
+        public static DateTime? DateTimeToUtc(DateTime? value)
+        {
+            if (!value.HasValue)
+                return null;
+
+            var dateTime = value.Value;
+
+            return dateTime.Kind switch
+            {
+                DateTimeKind.Utc => dateTime,
+                DateTimeKind.Local => dateTime.ToUniversalTime(),
+                DateTimeKind.Unspecified =>
+                    DateTime.SpecifyKind(dateTime, DateTimeKind.Utc),
+                _ => dateTime
+            };
+        }
+
+        //public static Geography LatLonToDbGeography(double latitude, double longitude)
+        //{
+        //    var point = string.Format("POINT({1} {0})", latitude, longitude);
+        //    return DbGeography.FromText(point);
+        //}
         public static class SlugHelper
         {
             public static string Generate(string text)

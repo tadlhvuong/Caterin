@@ -27,7 +27,7 @@ namespace Shared.Middlewares
         {
             var path = context.Request.Path;
 
-            if (!path.StartsWithSegments("/admin"))
+            if (!path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
             {
                 await _next(context);
                 return;
@@ -42,7 +42,7 @@ namespace Shared.Middlewares
 
             if (!context.User.Identity?.IsAuthenticated ?? true)
             {
-                if (path.StartsWithSegments("/admin/auth") )
+                if (path.StartsWithSegments("/admin/auth", StringComparison.OrdinalIgnoreCase) )
                 {
                     await _next(context);
                     return;
@@ -69,7 +69,7 @@ namespace Shared.Middlewares
             if (!await userValidationService.HasAdminAccessAsync(validationContext))
             {
                 //đã đăng nhập và không có quyền system.access thì sẽ bỏ qua để không lặp lại
-                if (path.StartsWithSegments("/admin/auth/access-denied"))
+                if (path.StartsWithSegments("/admin/auth/access-denied", StringComparison.OrdinalIgnoreCase))
                 {
                     await _next(context);
                     return;

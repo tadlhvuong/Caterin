@@ -7,8 +7,7 @@ namespace Shared.Data.Seeders
     {
         public static async Task SeedAsync(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
-            var user =
-                await userManager.FindByNameAsync("root");
+            var user = await userManager.FindByNameAsync("root");
 
             if (user == null)
                 return;

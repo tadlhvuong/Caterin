@@ -7,7 +7,7 @@ namespace Shared.Data.Entities.Identity
     {
         public int Level { get; set; }
 
-        public bool IsSystem { get; set; }
+        public bool IsSystem { get; set; } = false;
 
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

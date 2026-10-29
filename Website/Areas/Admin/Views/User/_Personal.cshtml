@@ -1,222 +1,417 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿
 @{
     Layout = null;
 }
+@using Website.Areas.Admin.Models.User
+@model UpdatePersonalViewModel
 
-<!-- Project table -->
+
+@* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.css" /> *@
+<link rel="stylesheet" href="~/admin/assets/vendor/libs/flatpickr/flatpickr.css" />
+<style>
+    .address-dropdown {
+        max-height: 280px;
+        overflow: hidden;
+        z-index: 1080;
+    }
+
+        .address-dropdown.show {
+            display: block;
+        }
+
+    .address-dropdown-header {
+        border-bottom: 1px solid var(--bs-border-color);
+        background: var(--bs-tertiary-bg);
+    }
+
+    .address-options {
+        max-height: 235px;
+        overflow-y: auto;
+    }
+
+    .address-option {
+        display: block;
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border: 0;
+        background: transparent;
+        color: var(--bs-body-color);
+        text-align: left;
+        cursor: pointer;
+    }
+
+        .address-option:hover,
+        .address-option:focus {
+            background: var(--bs-secondary-bg);
+            outline: none;
+        }
+
+        .address-option.active {
+            background: var(--bs-primary-bg-subtle);
+            color: var(--bs-primary-text-emphasis);
+        }
+
+    .address-empty {
+        padding: 1rem;
+        color: var(--bs-secondary-color);
+        text-align: center;
+    }
+
+    .social-link-icon-wrapper {
+        width: 44px;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .social-link-icon {
+        font-size: 1.25rem;
+    }
+
+    .social-link-url {
+        min-width: 0;
+    }
+
+    .social-link-options {
+        max-height: 280px;
+        overflow-y: auto;
+    }
+</style>
+<!-- User Information -->
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Basic Layout & Basic with Icons -->
     <div class="row">
         <div class="col-xxl">
             <div class="card mb-6">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0"><i class="ti ti-user"></i> Thông tin tài khoản</h5>
-                    @* <small class="text-muted float-end">Merged input group</small> *@
-                </div>
-                <div class="card-body">
-                    <form>
-                        <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Name</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-fullname2" class="input-group-text">
-                                        <i class="ti ti-user"></i>
-                                    </span>
-                                    <input type="text"
-                                           class="form-control"
-                                           id="basic-icon-default-fullname"
-                                           placeholder="John Doe"
-                                           aria-label="John Doe"
-                                           aria-describedby="basic-icon-default-fullname2" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Email</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class="ti ti-mail"></i></span>
-                                    <input type="text"
-                                           id="basic-icon-default-email"
-                                           class="form-control"
-                                           placeholder="john.doe"
-                                           aria-label="john.doe"
-                                           aria-describedby="basic-icon-default-email2" />
-                                    <span id="basic-icon-default-email2" class="input-group-text">@@gmail.com</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-sm-2 form-label" for="basic-icon-default-phone">Phone No</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-phone2" class="input-group-text">
-                                        <i class="ti ti-phone"></i>
-                                    </span>
-                                    <input type="text"
-                                           id="basic-icon-default-phone"
-                                           class="form-control phone-mask"
-                                           placeholder="658 799 8941"
-                                           aria-label="658 799 8941"
-                                           aria-describedby="basic-icon-default-phone2" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-sm-2 form-label" for="basic-icon-default-message">Message</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-message2" class="input-group-text">
-                                        <i class="ti ti-message-dots"></i>
-                                    </span>
-                                    <textarea id="basic-icon-default-message"
-                                              class="form-control"
-                                              placeholder="Hi, Do you have a moment to talk Joe?"
-                                              aria-label="Hi, Do you have a moment to talk Joe?"
-                                              aria-describedby="basic-icon-default-message2"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row justify-content-end">
-                            <div class="col-sm-10">
-                                <button type="submit" class="btn btn-primary">Send</button>
-                            </div>
-                        </div>
-                    </form>
+                    <h5 class="mb-0">
+                        <i class="ti ti-user me-1"></i>
+                        Thông tin tài khoản
+                    </h5>
                 </div>
 
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="mb-0"><i class="ti ti-file-description"></i> Thông tin bổ sung</h5>
-                    @* <small class="text-muted float-end">Merged input group</small> *@
-                </div>
                 <div class="card-body">
-                    <form>
+                    <form id="userDetailsForm"
+                          method="post"
+                          action="@Url.Action("UpdatePersonal", "User", new { area = "Admin", id = Model.Id })">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" id="AddressDetail" name="AddressDetail"
+                               value="@Model.Address" />
+                        <input type="hidden" id="ProvinceCode" name="ProvinceCode"
+                               value="@Model.ProvinceCode" />
+                        <input type="hidden" id="WardCode" name="WardCode"
+                               value="@Model.WardCode" />
+                        <!-- Thông tin tài khoản -->
                         <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Địa chỉ</label>
+                            <label class="col-sm-2 col-form-label" for="DisplayName">
+                                Tên hiển thị
+                            </label>
                             <div class="col-sm-10">
                                 <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-fullname2" class="input-group-text">
-                                        <i class="ti ti-map-pin"></i>
+                                    <span class="input-group-text">
+                                        <i class="ti ti-user"></i>
+                                    </span>
+                                    <input type="text" asp-for="DisplayName" class="form-control" placeholder="Nhập tên hiển thị" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-6">
+                            <label class="col-sm-2 col-form-label" for="Address">
+                                Địa chỉ
+                            </label>
+
+                            <div class="col-sm-10">
+                                <div class="address-picker position-relative">
+                                    <div class="input-group input-group-merge">
+                                        <span class="input-group-text">
+                                            <i class="ti ti-map-pin"></i>
+                                        </span>
+
+                                        <input type="text"
+                                               id="Address"
+                                               name="Address"
+                                               class="form-control"
+                                               placeholder="Số nhà, phường/xã, tỉnh/thành"
+                                               autocomplete="off"
+                                               aria-expanded="false"
+                                               aria-controls="addressDropdown" />
+                                    </div>
+
+                                    <div id="addressDropdown"
+                                         class="address-dropdown dropdown-menu w-100 p-0"
+                                         role="listbox">
+                                        <div class="address-dropdown-header px-3 py-2 text-muted small">
+                                            Chọn tỉnh/thành
+                                        </div>
+
+                                        <div id="addressOptions" class="address-options"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-6">
+                            <label class="col-sm-2 col-form-label" for="BirthDate">
+                                Ngày sinh
+                            </label>
+                            <div class="col-sm-10">
+                                <div class="input-group input-group-merge">
+                                    <span class="input-group-text">
+                                        <i class="ti ti-calendar"></i>
                                     </span>
                                     <input type="text"
-                                           class="form-control"
-                                           id="basic-icon-default-fullname"
-                                           placeholder="John Doe"
-                                           aria-label="John Doe"
-                                           aria-describedby="basic-icon-default-fullname2" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-email">Ngày sinh</label>
-                            <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span class="input-group-text"><i class="ti ti-calendar"></i></span>
-                                    <input type="text"
-                                           id="multicol-birthdate"
+                                           asp-for="BirthDate"
                                            class="form-control dob-picker"
-                                           placeholder="YYYY-MM-DD" />
+                                           data-flatpickr
+                                           placeholder="DD-MM-YYYY"
+                                           autocomplete="off" />
                                 </div>
                             </div>
                         </div>
                         <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="Gender">Giới tính</label>
+                            <label class="col-sm-2 col-form-label" for="Gender">
+                                Giới tính
+                            </label>
                             <div class="col-sm-10">
                                 <div class="input-group input-group-merge">
                                     <span class="input-group-text">
                                         <i class="ti ti-gender-bigender"></i>
                                     </span>
-
-                                    <select id="Gender"
-                                            class="select2 form-select"
-                                            data-allow-clear="true">
+                                    <select id="Gender" name="Gender" class="form-select">
                                         <option value="">Lựa chọn</option>
-                                        <option value="Male">Nam</option>
-                                        <option value="Female">Nữ</option>
+                                        <option value="Male" selected="@(Model.Gender.ToString() == "Male")">Nam</option>
+                                        <option value="Female" selected="@(Model.Gender.ToString() == "Female")">Nữ</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
+
+
                         <div class="row mb-6">
-                            <label class="col-sm-2 col-form-label" for="basic-icon-default-fullname">Facebook</label>
+                            <label class="col-sm-2 col-form-label">
+                                Mạng xã hội
+                            </label>
+
                             <div class="col-sm-10">
-                                <div class="input-group input-group-merge">
-                                    <span id="basic-icon-default-fullname2" class="input-group-text">
-                                        <i class="ti ti-brand-facebook"></i>
-                                    </span>
-                                    <input type="text"
-                                           class="form-control"
-                                           id="basic-icon-default-fullname"
-                                           placeholder="John Doe"
-                                           aria-label="John Doe"
-                                           aria-describedby="basic-icon-default-fullname2" />
+                                <div id="socialLinksContainer">
+                                    @if (Model.SocialLinks != null && Model.SocialLinks.Count > 0)
+                                    {
+                                        @for (var i = 0; i < Model.SocialLinks.Count; i++)
+                                        {
+                                            var provider = Model.SocialLinks[i].Type;
+
+                                            <div class="input-group input-group-merge mb-3 social-link-item">
+                                                <button type="button"
+                                                        class="input-group-text social-link-icon-wrapper"
+                                                        data-bs-toggle="dropdown"
+                                                        aria-label="Chọn mạng xã hội">
+                                                    <i class="ti @GetSocialIcon(provider) social-link-icon"></i>
+                                                </button>
+                                        @functions {
+                                            private string GetSocialIcon(string? provider)
+                                            {
+                                                return provider switch
+                                                {
+                                                    "Facebook" => "ti-brand-facebook",
+                                                    "Instagram" => "ti-brand-instagram",
+                                                    "TikTok" => "ti-brand-tiktok",
+                                                    "YouTube" => "ti-brand-youtube",
+                                                    "Zalo" => "ti-message-circle",
+                                                    "LinkedIn" => "ti-brand-linkedin",
+                                                    "X" => "ti-brand-x",
+                                                    "Website" => "ti-world",
+                                                    _ => "ti-link"
+                                                };
+                                            }
+                                        }
+                                                <ul class="dropdown-menu social-link-options">
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="Facebook">
+                                                            <i class="ti ti-brand-facebook me-2"></i>Facebook
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="Instagram">
+                                                            <i class="ti ti-brand-instagram me-2"></i>Instagram
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="TikTok">
+                                                            <i class="ti ti-brand-tiktok me-2"></i>TikTok
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="YouTube">
+                                                            <i class="ti ti-brand-youtube me-2"></i>YouTube
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="Zalo">
+                                                            <i class="ti ti-message-circle me-2"></i>Zalo
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="LinkedIn">
+                                                            <i class="ti ti-brand-linkedin me-2"></i>LinkedIn
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="X">
+                                                            <i class="ti ti-brand-x me-2"></i>X
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button type="button" class="dropdown-item" data-type="Website">
+                                                            <i class="ti ti-world me-2"></i>Website
+                                                        </button>
+                                                    </li>
+                                                </ul>
+
+                                                <input type="hidden"
+                                                       class="social-link-type"
+                                                       name="SocialLinks[@i].Type"
+                                                       value="@provider" />
+
+                                                <input type="url"
+                                                       class="form-control social-link-url"
+                                                       name="SocialLinks[@i].Url"
+                                                       value="@Model.SocialLinks[i].Url"
+                                                       placeholder="Nhập liên kết" />
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="input-group input-group-merge mb-3 social-link-item">
+                                            <button type="button"
+                                                    class="input-group-text social-link-icon-wrapper"
+                                                    data-bs-toggle="dropdown"
+                                                    aria-label="Chọn mạng xã hội">
+                                                <i class="ti ti-brand-facebook social-link-icon"></i>
+                                            </button>
+
+                                            <ul class="dropdown-menu social-link-options">
+                                                <li><button type="button" class="dropdown-item" data-type="Facebook"><i class="ti ti-brand-facebook me-2"></i>Facebook</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="Instagram"><i class="ti ti-brand-instagram me-2"></i>Instagram</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="TikTok"><i class="ti ti-brand-tiktok me-2"></i>TikTok</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="YouTube"><i class="ti ti-brand-youtube me-2"></i>YouTube</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="Zalo"><i class="ti ti-message-circle me-2"></i>Zalo</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="LinkedIn"><i class="ti ti-brand-linkedin me-2"></i>LinkedIn</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="X"><i class="ti ti-brand-x me-2"></i>X</button></li>
+                                                <li><button type="button" class="dropdown-item" data-type="Website"><i class="ti ti-world me-2"></i>Website</button></li>
+                                            </ul>
+
+                                            <input type="hidden" class="social-link-type"
+                                                   name="SocialLinks[0].Type" value="Facebook" />
+
+                                            <input type="url" class="form-control social-link-url"
+                                                   name="SocialLinks[0].Url"
+                                                   placeholder="Nhập liên kết" />
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="d-flex justify-content-end mt-2">
+                                    <button type="button" id="addSocialLink"
+                                            class="btn btn-sm btn-outline-primary">
+                                        <i class="ti ti-plus me-1"></i>Thêm liên kết
+                                    </button>
                                 </div>
                             </div>
                         </div>
+
+
+                        <!-- Nút lưu chung -->
                         <div class="row justify-content-end">
                             <div class="col-sm-10">
-                                <button type="submit" class="btn btn-primary">Send</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti ti-device-floppy me-1"></i>
+                                    Lưu thay đổi
+                                </button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+    </div>
 </div>
-</div>
-<!-- /Project table -->
+<!-- /User Information -->
 <!-- Activity Timeline -->
 <div class="card mb-6">
-    <h5 class="card-header">User Activity Timeline</h5>
+    <h5 class="card-header">Lịch sử hoạt động</h5>
+
     <div class="card-body pt-1">
         <ul class="timeline mb-0">
             <li class="timeline-item timeline-item-transparent">
                 <span class="timeline-point timeline-point-primary"></span>
+
                 <div class="timeline-event">
                     <div class="timeline-header mb-3">
-                        <h6 class="mb-0">12 Invoices have been paid</h6>
-                        <small class="text-muted">12 min ago</small>
+                        <h6 class="mb-0">12 hóa đơn đã được thanh toán</h6>
+                        <small class="text-muted">12 phút trước</small>
                     </div>
-                    <p class="mb-2">Invoices have been paid to the company</p>
+
+                    <p class="mb-2">
+                        Các hóa đơn đã được thanh toán cho công ty.
+                    </p>
+
                     <div class="d-flex align-items-center mb-2">
                         <div class="badge bg-lighter rounded d-flex align-items-center">
-                            <img src="../../assets//img/icons/misc/pdf.png" alt="img" width="15" class="me-2" />
+                            <img src="../../assets/img/icons/misc/pdf.png"
+                                 alt="PDF"
+                                 width="15"
+                                 class="me-2" />
                             <span class="h6 mb-0 text-body">invoices.pdf</span>
                         </div>
                     </div>
                 </div>
             </li>
+
             <li class="timeline-item timeline-item-transparent">
                 <span class="timeline-point timeline-point-success"></span>
+
                 <div class="timeline-event">
                     <div class="timeline-header mb-3">
-                        <h6 class="mb-0">Client Meeting</h6>
-                        <small class="text-muted">45 min ago</small>
+                        <h6 class="mb-0">Cuộc họp với khách hàng</h6>
+                        <small class="text-muted">45 phút trước</small>
                     </div>
-                    <p class="mb-2">Project meeting with john 10:15am</p>
+
+                    <p class="mb-2">
+                        Họp dự án với khách hàng lúc 10:15.
+                    </p>
+
                     <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
                         <div class="d-flex flex-wrap align-items-center mb-50">
                             <div class="avatar avatar-sm me-2">
-                                <img src="../../assets/img/avatars/1.png" alt="Avatar" class="rounded-circle" />
+                                <img src="../../assets/img/avatars/1.png"
+                                     alt="Avatar"
+                                     class="rounded-circle" />
                             </div>
+
                             <div>
-                                <p class="mb-0 small fw-medium">Lester McCarthy (Client)</p>
+                                <p class="mb-0 small fw-medium">
+                                    Lester McCarthy (Khách hàng)
+                                </p>
                                 <small>CEO of Pixinvent</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </li>
+
             <li class="timeline-item timeline-item-transparent">
                 <span class="timeline-point timeline-point-info"></span>
+
                 <div class="timeline-event">
                     <div class="timeline-header mb-3">
-                        <h6 class="mb-0">Create a new project for client</h6>
-                        <small class="text-muted">2 Day Ago</small>
+                        <h6 class="mb-0">Tạo dự án mới cho khách hàng</h6>
+                        <small class="text-muted">2 ngày trước</small>
                     </div>
-                    <p class="mb-2">6 team members in a project</p>
+
+                    <p class="mb-2">
+                        Có 6 thành viên tham gia dự án.
+                    </p>
+
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap border-top-0 p-0">
                             <div class="d-flex flex-wrap align-items-center">
@@ -226,27 +421,38 @@
                                         data-bs-placement="top"
                                         title="Vinnie Mostowy"
                                         class="avatar pull-up">
-                                        <img class="rounded-circle" src="../../assets/img/avatars/5.png" alt="Avatar" />
+                                        <img class="rounded-circle"
+                                             src="../../assets/img/avatars/5.png"
+                                             alt="Avatar" />
                                     </li>
+
                                     <li data-bs-toggle="tooltip"
                                         data-popup="tooltip-custom"
                                         data-bs-placement="top"
                                         title="Allen Rieske"
                                         class="avatar pull-up">
-                                        <img class="rounded-circle" src="../../assets/img/avatars/12.png" alt="Avatar" />
+                                        <img class="rounded-circle"
+                                             src="../../assets/img/avatars/12.png"
+                                             alt="Avatar" />
                                     </li>
+
                                     <li data-bs-toggle="tooltip"
                                         data-popup="tooltip-custom"
                                         data-bs-placement="top"
                                         title="Julee Rossignol"
                                         class="avatar pull-up">
-                                        <img class="rounded-circle" src="../../assets/img/avatars/6.png" alt="Avatar" />
+                                        <img class="rounded-circle"
+                                             src="../../assets/img/avatars/6.png"
+                                             alt="Avatar" />
                                     </li>
+
                                     <li class="avatar">
                                         <span class="avatar-initial rounded-circle pull-up text-heading"
                                               data-bs-toggle="tooltip"
                                               data-bs-placement="bottom"
-                                              title="3 more">+3</span>
+                                              title="3 thành viên khác">
+                                            +3
+                                        </span>
                                     </li>
                                 </ul>
                             </div>
@@ -259,8 +465,8 @@
 </div>
 <!-- /Activity Timeline -->
 
-@section Scripts {
-
-    <script src="~/admin/assets/js/app-user-view-account.js"></script>
-    <script src="~/admin/assets/js/pages-profile.js"></script>
-}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.js"></script>
+<script src="~/admin/assets/js/core/flatpickr-init.js"></script>
+<script src="~/admin/assets/js/core/address-picker.js"></script>
+<script src="~/admin/assets/js/core/social-link-input.js"></script>
+<script src="~/admin/assets/js/user/hk.user-personal.js"></script>

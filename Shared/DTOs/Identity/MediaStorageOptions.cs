@@ -4,11 +4,17 @@
     {
         public string RootPath { get; set; } = "wwwroot/uploads";
 
-        public string ProductFolder { get; set; } = "products";
+        public Dictionary<string, MediaUploadPolicy> Policies { get; set; }
+            = new(StringComparer.OrdinalIgnoreCase);
+    }
 
-        /// <summary>
-        /// Thư mục lưu file đính kèm chat.
-        /// </summary>
-        public string ChatFolder { get; set; } = "chats";
+    public class MediaUploadPolicy
+    {
+        public string Folder { get; set; } = string.Empty;
+
+        public HashSet<string> AllowedExtensions { get; set; }
+            = new(StringComparer.OrdinalIgnoreCase);
+
+        public long MaxFileSize { get; set; }
     }
 }

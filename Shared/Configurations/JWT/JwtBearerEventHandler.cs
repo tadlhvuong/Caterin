@@ -19,8 +19,13 @@ namespace Shared.Configurations.JWT
 
         public override Task MessageReceived(MessageReceivedContext context)
         {
-            var token = context.Request.Cookies["access_token"];
-            context.Token = token;
+            if (context.HttpContext.Items.TryGetValue("refreshed_access_token", out var refreshedToken)
+                && refreshedToken is string token && !string.IsNullOrWhiteSpace(token))
+            {
+                context.Token = token;
+                return Task.CompletedTask;
+            }
+            context.Token = context.Request.Cookies["access_token"];
             return Task.CompletedTask;
         }
 

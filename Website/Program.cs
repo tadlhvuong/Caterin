@@ -18,6 +18,7 @@ using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
 using Shared.Interfaces.Media;
 using Shared.Interfaces.Notification;
+using Shared.Interfaces.User;
 using Shared.Middlewares;
 using Shared.Resources;
 using Shared.Services;
@@ -31,6 +32,7 @@ using Shared.Services.Media;
 using Shared.Services.Notification;
 using Shared.Services.Order;
 using Shared.Services.Product;
+using Shared.Services.User;
 using Shared.UserValidation.Interface;
 using Shared.UserValidation.Sevices;
 
@@ -77,16 +79,23 @@ services.AddDatabaseDeveloperPageExceptionFilter();
 
 services.AddIdentity<AppUser, AppRole>(options =>
 {
+    // Password policy
+    options.Password.RequiredLength = 12; //length
+    options.Password.RequiredUniqueChars = 4; //4 char different
     options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = true;
 
+    // User
     options.User.RequireUniqueEmail = true;
 
+    // Lockout
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.AllowedForNewUsers = true;
 
+    // Token
     options.Tokens.EmailConfirmationTokenProvider = "EmailConfirmation";
 }).AddEntityFrameworkStores<AppDbContext>()
     .AddTokenProvider<EmailConfirmationTokenProvider<AppUser>>("EmailConfirmation")
@@ -127,6 +136,7 @@ services.AddScoped<IJwtService, JwtService>();
 services.AddScoped<IAuthService, AuthService>();
 services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 services.AddScoped<IModuleService, ModuleService>();
+services.AddScoped<IRoleService, RoleService>();
 services.AddScoped<IPermissionService, PermissionService>();
 
 services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -145,7 +155,7 @@ services.AddScoped<Shared.UserValidation.Interface.ISecurityStampValidator, Shar
 services.AddScoped<IUserValidationService, UserValidationService>();
 services.AddScoped<IUserStatusValidator, UserStatusValidator>();
 
-services.Configure<MediaStorageOptions>(builder.Configuration.GetSection("AppSettings:MediaStorage"));
+services.Configure<MediaStorageOptions>(builder.Configuration.GetSection("MediaStorage"));
 services.AddScoped<IMediaService, MediaService>();
 
 services.AddScoped<IProductService, ProductService>();
@@ -235,7 +245,7 @@ using (var scope = app.Services.CreateScope())
 }
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/admin") && context.Request.Path.Value?.TrimEnd('/') == "/admin")
+    if (context.Request.Path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase) && context.Request.Path.Value?.TrimEnd('/') == "/admin")
     {
         if (context.User.Identity?.IsAuthenticated == true)
         {

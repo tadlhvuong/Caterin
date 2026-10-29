@@ -21,6 +21,17 @@ namespace Shared.Responses.Datatables
 
         public string? SortDirection { get; set; }
     }
+    public class UserDataTableRequest : DataTableRequest
+    {
+        public bool? IsActive { get; set; }
+
+        public bool? IsLocked { get; set; }
+
+        public string? RoleId { get; set; }
+        public int? UserStatus { get; set; }
+
+        public string? UserRole { get; set; }
+    }
     public class ProductDataTableRequest : DataTableRequest
     {
         public int? Status { get; set; }

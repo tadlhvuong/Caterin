@@ -1,41 +1,173 @@
 ﻿@using Website.Areas.Admin.Models
+@using Website.Areas.Admin.Models.User
 @model UserDetailsViewModel
 @{
     Layout = null;
 }
 
-<!-- User Pills -->
-<div class="nav-align-top">
-    <ul class="nav nav-pills flex-column flex-md-row flex-wrap mb-6 row-gap-2">
+<style>
+        .user-details-nav-wrapper {
+    padding: 0.375rem;
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.875rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.user-details-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    width: max-content;
+    min-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.user-details-nav .nav-item {
+    flex: 0 0 auto;
+}
+
+.user-details-nav .nav-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.625rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.user-details-nav .nav-link i {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.user-details-nav .nav-link:hover {
+    color: var(--bs-primary);
+    background: var(--bs-secondary-bg);
+}
+
+.user-details-nav .nav-link.active {
+    color: var(--bs-primary);
+    background: var(--bs-body-bg);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+    font-weight: 600;
+}
+
+.user-details-nav .nav-link:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+    @@media (max-width: 767.98px) {
+        .user-details-nav-wrapper
+
+    {
+        margin-right: -0.25rem;
+    }
+
+    .user-details-nav .nav-link {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    }
+</style>
+
+<div class="user-details-nav-wrapper mb-6" >
+    <ul class="nav user-details-nav flex-nowrap"
+        role="tablist">
+
         <li class="nav-item">
             <a class="nav-link"
+               href="javascript:void(0);"
                hx-get="/admin/user/details-personal?id=@Model.Id"
                hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=personal" data-tab="personal" data-i18n="Personal">
-                Account
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=personal"
+               data-tab="personal"
+               data-i18n="Personal">
+                <i class="ti ti-user-circle"></i>
+                <span>Account</span>
             </a>
         </li>
+
         <li class="nav-item">
             <a class="nav-link"
+               href="javascript:void(0);"
                hx-get="/admin/user/details-security?id=@Model.Id"
                hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=security" data-tab="security" data-i18n="Security">
-                Security
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=security"
+               data-tab="security"
+               data-i18n="Security">
+                <i class="ti ti-shield-lock"></i>
+                <span>Security</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link" hx-get="/admin/user/details-billing?id=@Model.Id"
+            <a class="nav-link"
+               href="javascript:void(0);"
+               hx-get="/admin/user/details-billing?id=@Model.Id"
                hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=billing" data-tab="billing" data-i18n="Billing"><i class="ti ti-bookmark ti-sm me-1_5"></i>Billing & Plans</a>
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=billing"
+               data-tab="billing"
+               data-i18n="Billing">
+                <i class="ti ti-credit-card"></i>
+                <span>Billing &amp; Plans</span>
+            </a>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link" hx-get="/admin/user/details-notification?id=@Model.Id" hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=notification" data-tab="notification" data-i18n="Notification"><i class="ti ti-bell ti-sm me-1_5"></i>Notifications</a>
+            <a class="nav-link"
+               href="javascript:void(0);"
+               hx-get="/admin/user/details-notification?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=notification"
+               data-tab="notification"
+               data-i18n="Notification">
+                <i class="ti ti-bell"></i>
+                <span>Notifications</span>
+            </a>
         </li>
+
         <li class="nav-item">
-            <a class="nav-link" hx-get="/admin/user/details-connection?id=@Model.Id" hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=connection" data-tab="connection" data-i18n="Connection"><i class="ti ti-link ti-sm me-1_5"></i>Connections</a>
+            <a class="nav-link"
+               href="javascript:void(0);"
+               hx-get="/admin/user/details-connection?id=@Model.Id"
+               hx-target="#tab-content"
+               hx-push-url="/admin/user/user-details/@Model.Id?tab=connection"
+               data-tab="connection"
+               data-i18n="Connection">
+                <i class="ti ti-link"></i>
+                <span>Connections</span>
+            </a>
         </li>
+
     </ul>
 </div>
-<!--/ User Pills -->
+
+        <script>
+                function setActiveUserTab(tab) {
+        document.querySelectorAll('.user-details-nav [data-tab]')
+            .forEach(link => {
+                const isActive = link.dataset.tab === tab;
+
+                link.classList.toggle('active', isActive);
+
+                if (isActive) {
+                    link.setAttribute('aria-current', 'page');
+                } else {
+                    link.removeAttribute('aria-current');
+                }
+            });
+    }
+        </script>

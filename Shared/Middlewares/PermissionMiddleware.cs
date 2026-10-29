@@ -26,7 +26,7 @@ namespace Shared.Middlewares
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUser,
             IRoutePermissionCache routeCache, IPermissionService permissionService,  ISecurityLogger securityLogger)
         {
-            if (!context.Request.Path.StartsWithSegments("/admin"))
+            if (!context.Request.Path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
             {
                 await _next(context);
                 return;
@@ -63,7 +63,12 @@ namespace Shared.Middlewares
             var route = routeEndpoint.RoutePattern.RawText ?? "";
 
             var method = context.Request.Method;
-
+            _logger.LogWarning(
+    "[Permission Debug] Path={Path}, Endpoint={Endpoint}, Route={Route}, Method={Method}",
+    context.Request.Path,
+    endpoint.DisplayName,
+    route,
+    method);
             _logger.LogInformation("{Prefix} Checking permission | {Method} {Route}", LogPrefix, method, route);
             await routeCache.EnsureInitializedAsync();
             if (!routeCache.TryGetPermission(route, method, out var permission))
@@ -86,7 +91,11 @@ namespace Shared.Middlewares
                 return;
             }
             var snapshot = validationContext.PermissionSnapshot;
-
+            _logger.LogWarning(
+    "[Permission Debug] User={User}, IsRoot={IsRoot}, PermissionCount={Count}",
+    currentUser.UserName,
+    validationContext?.PermissionSnapshot?.IsRoot,
+    validationContext?.PermissionSnapshot?.PermissionIds.Count);
             if (snapshot.IsRoot)
             {
                 _logger.LogInformation("{Prefix} ROOT user => Skip permission check. User={User}", LogPrefix, currentUser.UserName);
@@ -105,7 +114,8 @@ namespace Shared.Middlewares
                 return;
             }
             _logger.LogInformation("{Prefix} ACCESS GRANTED | User={User} | Permission={Permission}",
-          LogPrefix, currentUser.UserName, permission.PermissionCode);
+            LogPrefix, currentUser.UserName, permission.PermissionCode);
+
             await _next(context);
         }
     }

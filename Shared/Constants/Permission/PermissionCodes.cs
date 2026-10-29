@@ -6,4 +6,9 @@
 
         public const string AdminAccess = "system.admin.access";
     }
+
+    public static class PermisisonActions
+    {
+        public const string AdminAccess = "Access";
+    }
 }

@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Shared.Configurations;
+using Shared.Constants.Permission;
+using Shared.Data.Entities.Identity;
 using Shared.DTOs.Auth;
 using Shared.Enums;
 using Shared.Helpers;
@@ -29,7 +32,8 @@ public sealed class RefreshTokenMiddleware
     }
 
     //Access token  hết hạn chạy để lấy lại token từ dựa vào refresh token
-    public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService, ISecurityLogger securityLogger)
+    public async Task InvokeAsync(HttpContext context, IJwtService jwtService, IAuthService authService,
+        UserManager<AppUser> userManager, ISecurityLogger securityLogger)
     {
         var accessToken = context.Request.Cookies["access_token"];
         var refreshToken = context.Request.Cookies["refresh_token"];
@@ -41,8 +45,38 @@ public sealed class RefreshTokenMiddleware
             return;
         }
 
-        // Nếu access token còn hợp lệ → không cần refresh
+        // Nếu access token còn hợp lệ (trừ trường hợp nếu thay đổi quyền hạn) → không cần refresh
+        var shouldRefresh = string.IsNullOrWhiteSpace(accessToken) || jwtService.IsTokenExpired(accessToken);
         if (!string.IsNullOrWhiteSpace(accessToken) && !jwtService.IsTokenExpired(accessToken))
+        {
+            var handler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var jwt = handler.ReadJwtToken(accessToken);
+
+                var userId = jwt.Claims
+                    .FirstOrDefault(x => x.Type == ClaimConstants.UserId)?.Value;
+
+                var versionValue = jwt.Claims
+                    .FirstOrDefault(x => x.Type == ClaimConstants.PermissionVersion)?.Value;
+
+                if (!string.IsNullOrWhiteSpace(userId)
+                    && long.TryParse(versionValue, out var jwtVersion))
+                {
+                    var user = await userManager.FindByIdAsync(userId);
+
+                    shouldRefresh = user != null
+                        && jwtVersion != user.PermissionVersion;
+                }
+            }
+            catch
+            {
+                // Token không đọc được: để luồng xác thực JWT xử lý.
+            }
+        }
+
+        if (!shouldRefresh)
         {
             await _next(context);
             return;
@@ -67,7 +101,7 @@ public sealed class RefreshTokenMiddleware
 
                 context.Response.Cookies.Append( "refresh_token", result.RefreshToken, 
                     CookieHelper.RefreshToken(result.ExpireAt));
-
+                context.Items["refreshed_access_token"] = result.AccessToken;
                 // Chỉ chuyển hướng với request GET tải trang HTML.
                 //Fix tình trạng accesstoken rotate vẫn xử dụng accesstoken cũ để check authentication
                 if (HttpMethods.IsGet(context.Request.Method) && context.Request.Headers.Accept.Any(

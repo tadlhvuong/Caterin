@@ -6,28 +6,33 @@ namespace Shared.Interfaces.Media
     public interface IMediaService
     {
         /// <summary>
-        /// Tải file
+        /// Tải file theo chính sách upload được cấu hình.
+        /// Ví dụ: Product, Chat, Avatar.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="folder"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<MediaFile> UploadAsync(IFormFile file,string folder, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Xóa file
-        /// </summary>
-        /// <param name="mediaFile"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task DeleteAsync(MediaFile mediaFile, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Xóa file vật lí
-        /// </summary>
-        /// <param name="relativeFolder"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task DeleteFolderAsync(string relativeFolder, CancellationToken cancellationToken = default);
+        Task<MediaFile> UploadAsync(
+            IFormFile file,
+            string policyName,
+            CancellationToken cancellationToken = default);
 
-        Task<FileStream?> OpenReadAsync(MediaFile mediaFile, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Xóa file vật lý.
+        /// </summary>
+        Task DeleteAsync(
+            MediaFile mediaFile,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Xóa thư mục vật lý.
+        /// </summary>
+        Task DeleteFolderAsync(
+            string relativeFolder,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Mở file để đọc.
+        /// </summary>
+        Task<FileStream?> OpenReadAsync(
+            MediaFile mediaFile,
+            CancellationToken cancellationToken = default);
     }
 }

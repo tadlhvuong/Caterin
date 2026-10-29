@@ -60,6 +60,25 @@
                 <div data-i18n="Returns">Returns</div>
             </a>
         </li>
+
+        <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons ti ti-truck"></i>
+                <div data-i18n="Logistics">Logistics</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a href="app-logistics-dashboard.html" class="menu-link">
+                        <div data-i18n="Dashboard">Dashboard</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="app-logistics-fleet.html" class="menu-link">
+                        <div data-i18n="Fleet">Fleet</div>
+                    </a>
+                </li>
+            </ul>
+        </li>
         <!-- Order end -->
 
         <!-- Product -->
@@ -134,15 +153,19 @@
                 </li>
             </ul>
         </li>
-        <li class="menu-item">
+
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="CUSTOMERCARE">CHĂM SÓC KHÁCH HÀNG</span>
+        </li>
+        <li class="menu-item @(Html.IsActive("Chat", "", "Admin") ? "active open" : "")">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons ti ti-messages"></i>
                 <div data-i18n="Customer Communication">Customer Communication</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a asp-controller="Chat" asp-action="Index" class="menu-link  @(Html.IsActive("Chat", "Index", "Admin") ? "active" : "")">
-                        <div data-i18n="Email">Chat</div>
+                    <a asp-controller="Chat" asp-action="Index" class="menu-link @(Html.IsActive("Chat", "Index", "Admin") ? "active" : "")">
+                        <div data-i18n="Chat">Chat</div>
                         @* <div id="chat-pending-count"
                              class="badge bg-danger rounded-pill ms-auto">
                             0
@@ -150,16 +173,23 @@
                     </a>
                 </li>
                 <li class="menu-item">
-                    <a asp-controller="Chat" asp-action="Message" class="menu-link">
-                        <div data-i18n="Chat">Email</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="app-ecommerce-customer-all.html" class="menu-link">
-                        <div data-i18n="Reviews">Reviews</div>
+                    <a asp-controller="Chat" asp-action="Chatbot" class="menu-link">
+                        <div data-i18n="chatbot">Chatbot</div>
                     </a>
                 </li>
             </ul>
+        </li>
+        <li class="menu-item">
+            <a asp-controller="Chat" asp-action="Message" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-mail"></i>
+                <div data-i18n="Email">Email</div>
+            </a>
+        </li>
+        <li class="menu-item">
+            <a href="app-ecommerce-customer-all.html" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-star"></i>
+                <div data-i18n="Reviews">Đánh giá sản phẩm</div>
+            </a>
         </li>
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -435,9 +465,9 @@
                 </li>
             </ul>
         </li>
-        <li class="menu-item">
+       @*  <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-settings"></i>
+                <i class="menu-icon tf-icons ti ti-shield-lock"></i>
                 <div data-i18n="Roles & Permissions">Roles & Permissions</div>
             </a>
             <ul class="menu-sub">
@@ -452,39 +482,28 @@
                     </a>
                 </li>
             </ul>
+        </li> *@
+        <li class="menu-item @(Html.IsActive("RolePermission", "Role", "Admin") ? "active" : "")">
+            <a asp-controller="RolePermission" asp-action="Role" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-shield-lock"></i>
+                <div data-i18n="Roles & Permissions">Roles & Permissions</div>
+            </a>
+        </li>
+        <li class="menu-header small">
+            <span class="menu-header-text" data-i18n="system">SYSTEM</span>
         </li>
         <!-- Account end -->
-
-        <!-- Setting -->
-        <li class="menu-header small">
-            <span class="menu-header-text" data-i18n="settings">Settings</span>
-        </li>
-
-        <!-- Logistic -->
-        <li class="menu-item">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-                <i class="menu-icon tf-icons ti ti-truck"></i>
-                <div data-i18n="Logistics">Logistics</div>
-            </a>
-            <ul class="menu-sub">
-                <li class="menu-item">
-                    <a href="app-logistics-dashboard.html" class="menu-link">
-                        <div data-i18n="Dashboard">Dashboard</div>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a href="app-logistics-fleet.html" class="menu-link">
-                        <div data-i18n="Fleet">Fleet</div>
-                    </a>
-                </li>
-            </ul>
-        </li>
-        <!-- Logistic end -->
         <li class="menu-item @(Html.IsActive("Setting", "", "Admin") ? "active" : "")">
-            
             <a asp-controller="Setting" asp-action="Index" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-settings"></i>
                 <div data-i18n="Setting">Setting</div>
+            </a>
+        </li>
+
+        <li class="menu-item @(Html.IsActive("Setting", "", "Admin") ? "active" : "")">
+            <a asp-controller="Setting" asp-action="Index" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-tool"></i>
+                <div data-i18n="Setting">Bảo trì hệ thống</div>
             </a>
         </li>
         <!-- Setting end -->

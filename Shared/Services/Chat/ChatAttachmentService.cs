@@ -153,7 +153,7 @@ namespace Shared.Services.Chat
 
             try
             {
-                mediaFile = await _mediaService.UploadAsync(file, _mediaStorage.ChatFolder, cancellationToken);
+                mediaFile = await _mediaService.UploadAsync(file, "Chat", cancellationToken);
 
                 fileSavedToDisk = true;
 

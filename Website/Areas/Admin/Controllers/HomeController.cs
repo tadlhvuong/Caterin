@@ -39,16 +39,18 @@ namespace Website.Areas.Admin.Controllers
         [PermissionAction(ActionType.View)]
         public IActionResult Index()
         {
-            var isAuth = User.Identity?.IsAuthenticated;
-            var name = User.Identity?.Name;
-            var claims = User.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
+            //var isAuth = User.Identity?.IsAuthenticated;
+            //var name = User.Identity?.Name;
+            //var claims = User.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
 
-            return Ok(new
-            {
-                isAuth,
-                name,
-                claims
-            });
+            //return Ok(new
+            //{
+            //    isAuth,
+            //    name,
+            //    claims
+            //});
+
+            return RedirectToAction(nameof(Dashboard));
         }
 
         [HttpGet("dashboard")]

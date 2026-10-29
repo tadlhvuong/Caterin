@@ -9,5 +9,6 @@
         Approve = 5,
         Export = 6,
         Reply,
+        ResetPassword,
     }
 }

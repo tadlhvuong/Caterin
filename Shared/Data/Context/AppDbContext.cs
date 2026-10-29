@@ -66,11 +66,12 @@ namespace Shared.Data.Context
         public virtual DbSet<ChatPendingUpload> ChatPendingUploads { get; set; }
         public virtual DbSet<ChatTeam> ChatTeams { get; set; }
         public virtual DbSet<ChatTeamMember> ChatTeamMembers { get; set; }
-
         public virtual DbSet<ChatGuestSession> ChatGuestSessions { get; set; }
 
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
+
+        public DbSet<UserSocialLink> UserSocialLinks { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

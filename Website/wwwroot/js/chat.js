@@ -1365,7 +1365,14 @@ document.addEventListener("DOMContentLoaded", () => {
             await ensureSignalRConnection();
 
             await initializeChatSession();
-            await registerCustomerPresence();
+            try {
+                await registerCustomerPresence();
+            } catch (error) {
+                console.warn(
+                    "Register customer presence failed:",
+                    error
+                );
+            }
         }
         catch (error) {
             console.log(
@@ -1567,7 +1574,14 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.removeItem(
                 CONFIG.storage.guestToken
             );
-            await registerCustomerPresence();
+            try {
+                await registerCustomerPresence();
+            } catch (error) {
+                console.warn(
+                    "Register customer presence failed:",
+                    error
+                );
+            }
             // =====================================================
             // Reset UI
             // =====================================================
@@ -2664,7 +2678,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (result.contactId) {
                 persistContactIdentity(result.contactId, result.guestToken);
             }
-            await registerCustomerPresence();
             // =====================================================
             // 4. SYNC CONVERSATION
             // =====================================================
@@ -2683,6 +2696,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 persistConversation(newConversationId, result.status);
             }
 
+
+            try {
+                await registerCustomerPresence();
+            } catch (error) {
+                console.warn(
+                    "Register customer presence failed:",
+                    error
+                );
+            }
             // =====================================================
             // 5. HANDLE NEW CONVERSATION
             // =====================================================
@@ -2700,16 +2722,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     initial: true
                 });
             }
-            else if (
-                result.status !== undefined &&
-                result.status !== null
-            ) {
-                state.currentConversationStatus =
-                    Number(result.status);
+            //else if (
+            //    result.status !== undefined &&
+            //    result.status !== null
+            //) {
+            //    state.currentConversationStatus =
+            //        Number(result.status);
 
-                updateCurrentConversationStatus(
-                    state.currentConversationStatus
-                );
+            //    updateCurrentConversationStatus(
+            //        state.currentConversationStatus
+            //    );
+            //}
+            else {
+                if (
+                    result.status !== undefined &&
+                    result.status !== null
+                ) {
+                    state.currentConversationStatus =
+                        Number(result.status);
+
+                    updateCurrentConversationStatus(
+                        state.currentConversationStatus
+                    );
+                }
+                const status = Number(state.currentConversationStatus);
+
+                // Hội thoại cũ vẫn đang mở hoặc chờ xử lý:
+                // tải lại lịch sử sau khi token mới đã được lưu.
+                console.log("NEW");
+                console.log(status);
+                if (status !== 3 && status !== 4 &&
+                    !state.chatSession.hasActiveHistory
+                ) {
+                    await joinConversation();
+                    await loadConversationMessages({ initial: true });
+                }
             }
 
             // =====================================================

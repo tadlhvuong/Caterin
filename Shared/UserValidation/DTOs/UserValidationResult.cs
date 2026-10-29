@@ -14,11 +14,8 @@
             Error = error;
         }
 
-        public static UserValidationResult Success()
-            => new(true, UserValidationError.None);
+        public static UserValidationResult Success() => new(true, UserValidationError.None);
 
-        public static UserValidationResult Fail(
-            UserValidationError error)
-            => new(false, error);
+        public static UserValidationResult Fail(UserValidationError error) => new(false, error);
     }
 }

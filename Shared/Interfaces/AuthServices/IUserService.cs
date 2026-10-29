@@ -1,7 +1,12 @@
-﻿using Shared.Data.Entities.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Shared.Data.Entities.Identity;
 using Shared.DTOs.Identity;
 using Shared.Requests;
+using Shared.Requests.User;
 using Shared.Responses;
+using Shared.Responses.Datatables;
+using Shared.Responses.User;
 
 namespace Shared.Interfaces.AuthServices
 {
@@ -38,6 +43,24 @@ namespace Shared.Interfaces.AuthServices
         Task<IReadOnlyList<string>> GetRolesAsync(string userId, CancellationToken cancellationToken = default);
         #endregion
 
+        #region User
+        Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserDataTableRequest request);
+        Task<AppUser> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
+
+        Task UpdateUserAsync(
+            string userId,
+            UpdateUserRequest request,
+            CancellationToken cancellationToken = default);
+
+        Task<string> UpdateAvatarAsync(
+    string userId,
+    IFormFile file,
+    CancellationToken cancellationToken = default);
+
+        Task<ServiceResult> DeactivateAsync(string userId, CancellationToken cancellationToken = default);
+
+        #endregion User
+
         #region Role
         /// <summary>
         /// Gán vai trò cho user
@@ -63,6 +86,9 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task ReplaceRolesAsync(string userId, IEnumerable<string> roles, CancellationToken cancellationToken = default);
+
+        Task<int?> GetUserLevelAsync(string userId, CancellationToken cancellationToken = default);
+
         #endregion
 
         #region Permission
@@ -140,6 +166,5 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<PagedResult<UserListResponse>> GetUsersAsync(UserQueryRequest request, CancellationToken cancellationToken = default);
     }
 }

@@ -11,7 +11,7 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="user"></param>
         /// <param name="roles"></param>
         /// <returns></returns>
-        string GenerateAccessToken(AppUser user, IEnumerable<string> roles);
+        string GenerateAccessToken(AppUser user, IEnumerable<string> roles, Guid sessionId);
         /// <summary>
         /// Tạo refresh token
         /// </summary>

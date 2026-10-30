@@ -7,6 +7,7 @@ using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
+using Shared.DTOs.User;
 using Shared.Enums;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Log;
@@ -16,6 +17,7 @@ using Shared.Responses.Datatables;
 using Shared.Services.Authentication;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using System.Security.Claims;
 using Website.Areas.Admin.Models;
 using Website.Areas.Admin.Models.User;
 
@@ -125,6 +127,7 @@ namespace Website.Areas.Admin.Controllers
 
             ViewData["UpdateUserModel"] = updateUserVm;
             ViewData["OpenEditModal"] = edit;
+          
 
             return View(vm);
         }
@@ -329,7 +332,7 @@ namespace Website.Areas.Admin.Controllers
                     Id = id.ToString()
                 });
 
-            return RedirectToAction(nameof(Index), new { id = id, tab = "security" });
+            return RedirectToAction(nameof(Details), new { id = id, tab = "security" });
         }
         [HttpGet("details-billing")]
         [PermissionAction(ActionType.View)]
@@ -825,6 +828,92 @@ namespace Website.Areas.Admin.Controllers
             return Ok(statuses);
         }
 
+        [HttpGet("{userId}/sessions")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GetSessions(
+      string userId,
+      CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest();
+
+            var sid = User.FindFirstValue(ClaimConstants.SessionId);
+
+            var now = DateTime.UtcNow;
+
+            var sessions = await _dbContext.UserSessions
+                .AsNoTracking()
+                .Where(x =>
+                    x.UserId == userId &&
+                    x.RevokedAt == null &&
+                    x.ExpiresAt > now)
+                .OrderByDescending(x => x.LastActivityAt)
+                .Select(x => new UserSessionDto
+                {
+                    Id = x.Id,
+                    DeviceName = x.DeviceName,
+                    UserAgent = x.UserAgent,
+                    IpAddress = x.IpAddress,
+                    CreatedAt = x.CreatedAt,
+                    LastActivityAt = x.LastActivityAt,
+                    ExpiresAt = x.ExpiresAt,
+                    IsCurrent = sid != null &&
+                                x.Id.ToString() == sid
+                })
+                .ToListAsync(cancellationToken);
+
+            return Ok(sessions);
+        }
+        [HttpPost("{userId}/sessions/{sessionId:guid}/revoke")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> RevokeUserSession(
+    string userId,
+    Guid sessionId,
+    CancellationToken cancellationToken)
+        {
+            var userExists = await _dbContext.Users
+                .AnyAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken);
+
+            if (!userExists)
+                return NotFound("Không tìm thấy người dùng.");
+
+            var now = DateTime.UtcNow;
+
+            await using var transaction =
+                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            var session = await _dbContext.UserSessions
+                .FirstOrDefaultAsync(
+                    x => x.Id == sessionId && x.UserId == userId,
+                    cancellationToken);
+
+            if (session == null)
+                return NotFound("Không tìm thấy phiên đăng nhập.");
+
+            if (session.RevokedAt != null)
+                return BadRequest("Phiên đăng nhập đã được thu hồi.");
+
+            session.RevokedAt = now;
+            session.RevokedReason = "RevokedByAdmin";
+
+            var revokedTokens = await _dbContext.RefreshTokens
+                .Where(x => x.SessionId == sessionId && !x.IsRevoked)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.IsRevoked, true)
+                    .SetProperty(x => x.RevokedAt, now)
+                    .SetProperty(x => x.RevokedReason, "SessionRevokedByAdmin"),
+                    cancellationToken);
+
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Đã thu hồi phiên đăng nhập.",
+                revokedRefreshTokens = revokedTokens
+            });
+        }
         private Dictionary<string, string[]> GetModelErrors()
         {
             return ModelState.Where(x => x.Value?.Errors.Count > 0)

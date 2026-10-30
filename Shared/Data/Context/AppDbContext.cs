@@ -23,6 +23,7 @@ namespace Shared.Data.Context
         public virtual DbSet<ActivityLog> ActivityLogs { get; set; }
         public virtual DbSet<Language> Languages { get; set; }
         public virtual DbSet<Currency> Currencies { get; set; }
+        public DbSet<UserSession> UserSessions { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<PermissionLog> PermissionLogs { get; set; }
@@ -72,7 +73,6 @@ namespace Shared.Data.Context
         public virtual DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
 
         public DbSet<UserSocialLink> UserSocialLinks { get; set; }
-
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

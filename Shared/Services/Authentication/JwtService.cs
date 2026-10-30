@@ -21,10 +21,9 @@ public class JwtService : IJwtService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateAccessToken(AppUser user, IEnumerable<string> roles)
+    public string GenerateAccessToken(AppUser user, IEnumerable<string> roles, Guid sessionId)
     {
-        var claims = CreateClaims(user, roles);
-
+        var claims = CreateClaims(user, roles, sessionId);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
 
         var credentials = new SigningCredentials( key, SecurityAlgorithms.HmacSha256);
@@ -47,7 +46,7 @@ public class JwtService : IJwtService
     {
         return Common.CommonHelper.GenerateSecureToken(64);
     }
-    private List<Claim> CreateClaims(AppUser user, IEnumerable<string> roles)
+    private List<Claim> CreateClaims(AppUser user, IEnumerable<string> roles, Guid sessionId)
     {
         var claims =
             new List<Claim>
@@ -55,6 +54,7 @@ public class JwtService : IJwtService
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new(JwtRegisteredClaimNames.Sub, user.Id),
                 new(ClaimConstants.UserId, user.Id ?? string.Empty),
+                new Claim(ClaimConstants.SessionId, sessionId.ToString()),
                 new(ClaimConstants.UserName, user.UserName ?? string.Empty),
                 new Claim(ClaimConstants.SecurityStamp, user.SecurityStamp ?? string.Empty),
                 new(ClaimConstants.PermissionVersion, user.PermissionVersion.ToString()),

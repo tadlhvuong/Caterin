@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+﻿using Microsoft.AspNetCore.Http;
+using System.Globalization;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -128,7 +130,18 @@ namespace Shared.Common
             if (pubIp == null) return "";
             return pubIp;
         }
+        public static string? GetClientIp(HttpContext? http)
+        {
+            var ip = http?.Connection.RemoteIpAddress;
 
+            if (ip == null)
+                return null;
+
+            if (ip.AddressFamily == AddressFamily.InterNetworkV6 && ip.IsIPv4MappedToIPv6)
+                ip = ip.MapToIPv4();
+
+            return ip.ToString();
+        }
 
         public static string GET_Location()
         {
@@ -264,6 +277,68 @@ namespace Shared.Common
                 var chars = normalized.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark).ToArray();
 
                 return new string(chars).Normalize(NormalizationForm.FormC).Replace('đ', 'd');
+            }
+        }
+
+        public static class DeviceNameHelper
+        {
+            public static string GetDeviceName(string? userAgent)
+            {
+                if (string.IsNullOrWhiteSpace(userAgent))
+                    return "Thiết bị không xác định";
+
+                var os = GetOperatingSystem(userAgent);
+                var browser = GetBrowser(userAgent);
+
+                return $"{os} · {browser}";
+            }
+
+            private static string GetOperatingSystem(string userAgent)
+            {
+                if (Regex.IsMatch(userAgent, @"Windows NT", RegexOptions.IgnoreCase))
+                    return "Windows";
+
+                if (Regex.IsMatch(userAgent, @"Android", RegexOptions.IgnoreCase))
+                    return "Android";
+
+                if (Regex.IsMatch(userAgent, @"iPhone|iPad|iPod", RegexOptions.IgnoreCase))
+                    return "iOS";
+
+                if (Regex.IsMatch(userAgent, @"Macintosh|Mac OS X", RegexOptions.IgnoreCase))
+                    return "macOS";
+
+                if (Regex.IsMatch(userAgent, @"Linux", RegexOptions.IgnoreCase))
+                    return "Linux";
+
+                return "Thiết bị không xác định";
+            }
+
+            private static string GetBrowser(string userAgent)
+            {
+                var patterns = new (string Name, string Pattern)[]
+                {
+            ("Edge", @"Edg/([\d.]+)"),
+            ("Opera", @"OPR/([\d.]+)"),
+            ("Firefox", @"Firefox/([\d.]+)"),
+            ("Chrome", @"Chrome/([\d.]+)"),
+            ("Safari", @"Version/([\d.]+).*Safari")
+                };
+
+                foreach (var (name, pattern) in patterns)
+                {
+                    var match = Regex.Match(
+                        userAgent,
+                        pattern,
+                        RegexOptions.IgnoreCase);
+
+                    if (match.Success)
+                    {
+                        var version = match.Groups[1].Value.Split('.')[0];
+                        return $"{name} {version}";
+                    }
+                }
+
+                return "Trình duyệt không xác định";
             }
         }
     }

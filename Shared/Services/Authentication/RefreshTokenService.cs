@@ -32,7 +32,7 @@ namespace Shared.Services.Authentication
             _securityLogger = securityLogger;
         }
 
-        public async Task<RefreshTokenResult> CreateAsync(string userId, TimeSpan lifeTime, CancellationToken cancellationToken = default)
+        public async Task<RefreshTokenResult> CreateAsync(string userId, Guid sessionId, TimeSpan lifeTime, CancellationToken cancellationToken = default)
         {
             var refreshToken = _jwtService.GenerateRefreshToken();
             var http = _httpContextAccessor.HttpContext;
@@ -40,12 +40,13 @@ namespace Shared.Services.Authentication
             var result = new RefreshToken
             {
                 UserId = userId,
+                SessionId = sessionId,
                 TokenHash = CommonHelper.Hash(refreshToken),
                 CreatedAt = now,
                 ExpiredAt = now.Add(lifeTime),
                 Lifetime = lifeTime,
                 UserAgent = http?.Request.Headers.UserAgent,
-                IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
+                IpAddress = CommonHelper.GetClientIp(http),
                 IsRevoked = false
             };
             _dbcontext.RefreshTokens.Add(result);
@@ -102,12 +103,13 @@ namespace Shared.Services.Authentication
             var newToken = new RefreshToken
             {
                 UserId = oldToken.UserId,
+                SessionId = oldToken.SessionId,
                 TokenHash = tokenHash,
                 CreatedAt = now,
                 ExpiredAt = now.Add(oldToken.Lifetime),
                 Lifetime = oldToken.Lifetime,
                 UserAgent = http?.Request.Headers.UserAgent.ToString(),
-                IpAddress = http?.Connection.RemoteIpAddress?.ToString(),
+                IpAddress = CommonHelper.GetClientIp(http),
                 IsRevoked = false
             };
 

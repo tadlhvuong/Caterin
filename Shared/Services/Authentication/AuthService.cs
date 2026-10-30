@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,7 @@ using Shared.Services.Email.EmailModels;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
 using System.Data;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -49,13 +51,16 @@ public class AuthService : IAuthService
     private readonly ILogger<AuthService> _logger;
     private readonly ISecurityLogger _securityLogger;
 
+    private readonly AppDbContext _dbContext;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
     public AuthService(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager,
         IJwtService jwtService, IOptions<JwtSetting> jwtOptions, IRefreshTokenService refreshTokenService,
-        AppDbContext context, IAppCache appCache, IConfiguration configuration,
+        AppDbContext dbContext, IAppCache appCache, IConfiguration configuration,
         IOptions<JwtSetting> jwtSettings, IOptions<AppSettings> appSettings,
         IUserService userService, IUserValidationService userValidationService, ICurrentUserService currentUserService,
         IEmailSender emailSender, IEmailActionService emailActionService,IEmailTemplateService emailTemplate,
-        ISecurityLogger securityLogger, ILogger<AuthService> logger)
+        ISecurityLogger securityLogger, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor)
     {
         _configuration = configuration;
 
@@ -78,6 +83,9 @@ public class AuthService : IAuthService
 
         _securityLogger = securityLogger;
         _logger = logger;
+
+        _dbContext = dbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     #region Login
@@ -377,7 +385,7 @@ public class AuthService : IAuthService
         var roles = await _userManager.GetRolesAsync(rotateResult.User);
 
         // Tạo lại AccessToken
-        var accessToken = _jwtService.GenerateAccessToken(rotateResult.User, roles);
+        var accessToken = _jwtService.GenerateAccessToken(rotateResult.User, roles, rotateResult.RefreshTokenEntity.SessionId);
 
         await _securityLogger.LogAsync(SecurityActionType.RefreshToken, true, "Refresh token đổi thành công");
         return new AuthResponse
@@ -594,8 +602,25 @@ public class AuthService : IAuthService
     private async Task<AuthResponse> GenerateAuthResponseAsync(AppUser user, IReadOnlyList<string> roles, TimeSpan lifeTime,
         CancellationToken cancellationToken = default)
     {
-        var accessToken = _jwtService.GenerateAccessToken(user, roles);
-        var refreshToken = await _refreshTokenService.CreateAsync(user.Id, lifeTime, cancellationToken);
+        var http = _httpContextAccessor.HttpContext;
+        var now = DateTime.UtcNow;
+        var userAgent = http?.Request.Headers.UserAgent.ToString();
+        var session = new UserSession
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            DeviceName = CommonHelper.DeviceNameHelper.GetDeviceName(userAgent),
+            UserAgent = userAgent,
+            IpAddress = CommonHelper.GetClientIp(http),
+            CreatedAt = now,
+            LastActivityAt = now,
+            ExpiresAt = now.Add(lifeTime)
+        };
+
+        _dbContext.UserSessions.Add(session);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        var accessToken = _jwtService.GenerateAccessToken(user, roles, session.Id);
+        var refreshToken = await _refreshTokenService.CreateAsync(user.Id, session.Id, lifeTime, cancellationToken);
         return new AuthResponse
         {
             Success = true,

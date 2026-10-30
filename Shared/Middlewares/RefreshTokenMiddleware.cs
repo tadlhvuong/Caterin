@@ -116,6 +116,23 @@ public sealed class RefreshTokenMiddleware
             {
                 context.Response.Cookies.Delete("access_token");
                 context.Response.Cookies.Delete("refresh_token");
+
+                if (HttpMethods.IsGet(context.Request.Method) &&
+                    context.Request.Headers.Accept.Any(x =>
+                        x?.Contains("text/html",
+                            StringComparison.OrdinalIgnoreCase) == true))
+                {
+                    var path = context.Request.Path.Value ?? string.Empty;
+
+                    var loginUrl = path.StartsWith(
+                        "/admin",
+                        StringComparison.OrdinalIgnoreCase)
+                            ? "/admin/auth/login"
+                            : "/account/login";
+
+                    context.Response.Redirect(loginUrl);
+                    return;
+                }
             }
         }
         catch (Exception ex)

@@ -1360,6 +1360,57 @@ namespace Shared.Migrations
                     b.ToTable("Settings", (string)null);
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeviceName")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<DateTime>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RevokedById")
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("RevokedReason")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "RevokedAt");
+
+                    b.ToTable("UserSessions", (string)null);
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSocialLink", b =>
                 {
                     b.Property<int>("Id")
@@ -1648,6 +1699,9 @@ namespace Shared.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<Guid>("SessionId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -1666,6 +1720,8 @@ namespace Shared.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("ExpiredAt");
+
+                    b.HasIndex("SessionId");
 
                     b.HasIndex("TokenHash")
                         .IsUnique();
@@ -2992,6 +3048,17 @@ namespace Shared.Migrations
                     b.Navigation("Permission");
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSession", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Identity.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSocialLink", b =>
                 {
                     b.HasOne("Shared.Data.Entities.Identity.AppUser", "User")
@@ -3009,11 +3076,19 @@ namespace Shared.Migrations
                         .WithMany("RefreshTokens")
                         .HasForeignKey("AppUserId");
 
+                    b.HasOne("Shared.Data.Entities.Identity.Core.UserSession", "Session")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("Shared.Data.Entities.Identity.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Session");
 
                     b.Navigation("User");
                 });
@@ -3352,6 +3427,11 @@ namespace Shared.Migrations
                     b.Navigation("RolePermissions");
 
                     b.Navigation("RoutePermissions");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Identity.Core.UserSession", b =>
+                {
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Inventory.Warehouse", b =>

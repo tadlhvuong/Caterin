@@ -26,13 +26,17 @@ namespace Shared.Middlewares
             ISecurityLogger securityLogger)
         {
             var path = context.Request.Path;
-
             if (!path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
             {
                 await _next(context);
                 return;
             }
 
+            _logger.LogWarning(
+    "AdminAccessMiddleware: Path={Path}, Authenticated={Authenticated}, SnapshotNull={SnapshotNull}",
+    context.Request.Path,
+    context.User.Identity?.IsAuthenticated,
+    context.GetUserValidationContext()?.PermissionSnapshot == null);
             var endpoint = context.GetEndpoint();
             if (endpoint?.Metadata.GetMetadata<IAllowAnonymous>() != null)
             {
@@ -60,6 +64,15 @@ namespace Shared.Middlewares
             }
 
             var validationContext = context.GetUserValidationContext();
+            _logger.LogWarning(
+    "Admin check: Path={Path}, Authenticated={Authenticated}, ValidationContextNull={ContextNull}, Scenario={Scenario}, ValidatePermissions={ValidatePermissions}, SnapshotNull={SnapshotNull}, IsRoot={IsRoot}",
+    path,
+    context.User.Identity?.IsAuthenticated,
+    validationContext == null,
+    validationContext?.Scenario,
+    validationContext?.ValidatePermissions,
+    validationContext?.PermissionSnapshot == null,
+    validationContext?.PermissionSnapshot?.IsRoot);
             if (validationContext == null)
             {
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;

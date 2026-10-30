@@ -153,7 +153,8 @@
 </div>
 <!--/ Change Password -->
 <!-- Recent Devices -->
-<div class="card mb-6">
+<div class="card mb-6" id="userDevicesSection" data-user-id="@Model.Id">
+    @Html.AntiForgeryToken()
     <div class="card-header d-flex align-items-center justify-content-between">
         <div>
             <h5 class="mb-1">Recent Devices</h5>

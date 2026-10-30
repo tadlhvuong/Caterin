@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Constants.Permission;
+using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
@@ -12,6 +14,7 @@ namespace Shared.UserValidation.Sevices
     public sealed class UserValidationService : IUserValidationService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly AppDbContext _dbContext;
 
         private readonly Interface.IUserStatusValidator _userStatusValidator;
         private readonly Interface.ISecurityStampValidator _securityStampValidator;
@@ -21,7 +24,7 @@ namespace Shared.UserValidation.Sevices
         private readonly ILogger<UserValidationService> _logger;
         private readonly IAppCache _cache;
 
-        public UserValidationService(UserManager<AppUser> userManager,
+        public UserValidationService(UserManager<AppUser> userManager, AppDbContext dbcontext,
             IUserStatusValidator userStatusValidator, Interface.ISecurityStampValidator securityStampValidator,
             IRefreshTokenValidator refreshTokenValidator,
             IPermissionVersionValidator permissionVersionValidator, IPermissionService permissionService, 
@@ -29,6 +32,7 @@ namespace Shared.UserValidation.Sevices
             IAppCache cache)
         {
             _userManager = userManager;
+            _dbContext = dbcontext;
 
             _userStatusValidator = userStatusValidator;
             _securityStampValidator = securityStampValidator;
@@ -56,6 +60,15 @@ namespace Shared.UserValidation.Sevices
             if (!result.Succeeded)
                 return result;
 
+            // User Session
+            if (context.Scenario == UserValidationScenario.AccessToken || context.Scenario == UserValidationScenario.RefreshToken)
+            {
+                var sessionValid = await ValidateSessionAsync(context, user, cancellationToken);
+
+                if (!sessionValid)
+                    return UserValidationResult.Fail(UserValidationError.SessionInvalid);
+            }
+
             // Security Stamp
             result = await _securityStampValidator.ValidateAsync(context, user, cancellationToken);
 
@@ -69,16 +82,95 @@ namespace Shared.UserValidation.Sevices
                 return result;
 
             // Permission Version
-            result = await _permissionVersionValidator.ValidateAsync(context, user, cancellationToken);
+            //result = await _permissionVersionValidator.ValidateAsync(context, user, cancellationToken);
 
-            if (!result.Succeeded)
-                return result;
+            //if (!result.Succeeded)
+            //    return result;
 
-            context.PermissionSnapshot = await _permissionService.GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
+            //context.PermissionSnapshot = await _permissionService.GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
 
+            // Dynamic Permission - Admin only
+            if (context.Scenario == UserValidationScenario.AccessToken && context.ValidatePermissions)
+            {
+                result = await _permissionVersionValidator.ValidateAsync(context, user, cancellationToken);
+
+                if (!result.Succeeded)
+                    return result;
+
+                context.PermissionSnapshot = await _permissionService.GetUserPermissionSnapshotAsync(
+                        user.Id, user.PermissionVersion, cancellationToken);
+            }
+
+            if (context.Scenario == UserValidationScenario.AccessToken)
+            {
+                var sid = context.Principal?.FindFirst(ClaimConstants.SessionId)?.Value;
+
+                if (Guid.TryParse(sid, out var sessionId))
+                {
+                    await UpdateSessionActivityAsync(sessionId, cancellationToken);
+                }
+            }
             return UserValidationResult.Success();
         }
+        
+        private async Task<bool> ValidateSessionAsync(UserValidationContext context, AppUser user,
+            CancellationToken cancellationToken)
+        {
+            Guid sessionId;
 
+            switch (context.Scenario)
+            {
+                case UserValidationScenario.AccessToken:
+                    {
+                        var sid = context.Principal?
+                            .FindFirst(ClaimConstants.SessionId)?.Value;
+
+                        if (!Guid.TryParse(sid, out sessionId))
+                            return false;
+
+                        break;
+                    }
+
+                case UserValidationScenario.RefreshToken:
+                    {
+                        if (context.RefreshTokenEntity == null)
+                            return false;
+
+                        sessionId = context.RefreshTokenEntity.SessionId;
+                        break;
+                    }
+
+                default:
+                    return true;
+            }
+
+            var now = DateTime.UtcNow;
+
+            return await _dbContext.UserSessions.AnyAsync(
+                x => x.Id == sessionId
+                     && x.UserId == user.Id
+                     && x.RevokedAt == null
+                     && x.ExpiresAt > now,
+                cancellationToken);
+        }
+
+        private async Task UpdateSessionActivityAsync(Guid sessionId, CancellationToken cancellationToken)
+        {
+            var now = DateTime.UtcNow;
+
+            await _dbContext.UserSessions
+                .Where(x =>
+                    x.Id == sessionId &&
+                    x.RevokedAt == null &&
+                    x.ExpiresAt > now &&
+                    x.LastActivityAt < now.AddMinutes(-5))
+                .ExecuteUpdateAsync(
+                    setters => setters.SetProperty(
+                        x => x.LastActivityAt,
+                        now),
+                    cancellationToken);
+        }
+        
         private async Task<AppUser?> LoadUserAsync(UserValidationContext context, CancellationToken cancellationToken)
         {
             switch (context.Scenario)
@@ -105,6 +197,7 @@ namespace Shared.UserValidation.Sevices
                     return null;
             }
         }
+        
         #region Permission Check
         public async Task<bool> HasPermissionAsync(UserValidationContext context, string permissionCode)
         {
@@ -126,7 +219,6 @@ namespace Shared.UserValidation.Sevices
 
             return snapshot.PermissionIds.Contains(permissionId.Value);
         }
-
         #endregion
 
         #region Root User Check
@@ -140,7 +232,12 @@ namespace Shared.UserValidation.Sevices
         #region Admin Access Check
         public async Task<bool> HasAdminAccessAsync(UserValidationContext context)
         {
-            if (context.PermissionSnapshot?.IsRoot == true)
+            var snapshot = context.PermissionSnapshot;
+
+            if (snapshot == null)
+                return false;
+
+            if (snapshot.IsRoot)
                 return true;
 
             var permissionId =

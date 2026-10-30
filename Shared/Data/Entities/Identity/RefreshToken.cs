@@ -1,4 +1,6 @@
-﻿namespace Shared.Data.Entities.Identity
+﻿using Shared.Data.Entities.Identity.Core;
+
+namespace Shared.Data.Entities.Identity
 {
     public class RefreshToken
     {
@@ -18,6 +20,7 @@
         public DateTime CreatedAt { get; set; }
         public AppUser User { get; set; } = null!;
         public TimeSpan Lifetime { get; set; }
-
+        public Guid SessionId { get; set; }
+        public UserSession Session { get; set; } = null!;
     }
 }

@@ -13,7 +13,7 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="lifeTime"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<RefreshTokenResult> CreateAsync(string userId, TimeSpan lifeTime, CancellationToken cancellationToken = default);
+        Task<RefreshTokenResult> CreateAsync(string userId, Guid sessionId, TimeSpan lifeTime, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Lấy token trong DB

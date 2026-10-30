@@ -21,5 +21,7 @@ namespace Shared.UserValidation.DTOs
         public string? RefreshToken { get; init; }
         public RefreshToken? RefreshTokenEntity { get; init; }
         public IReadOnlyList<string>? Permissions { get; set; }
+
+        public bool ValidatePermissions { get; init; } = false;
     }
 }

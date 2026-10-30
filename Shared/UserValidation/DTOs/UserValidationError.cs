@@ -34,5 +34,6 @@
 
         SecurityStampMissed,
         SecurityStampChanged,
+        SessionInvalid,
     }
 }

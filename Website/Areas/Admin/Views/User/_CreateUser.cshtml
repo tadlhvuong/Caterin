@@ -1,165 +1,168 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Website.Areas.Admin.Models.User
+@model CreateUserViewModel
+
 @{
     Layout = null;
 }
 
-<!-- Modal -->
-<!-- Edit User Modal -->
-<div class="modal fade" id="editUser" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                <div class="text-center mb-6">
-                    <h4 class="mb-2">Edit User Information</h4>
-                    <p>Updating user details will receive a privacy audit.</p>
-                </div>
-                <form id="editUserForm" class="row g-6" onsubmit="return false">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserFirstName">First Name</label>
-                        <input type="text"
-                               id="modalEditUserFirstName"
-                               name="modalEditUserFirstName"
-                               class="form-control"
-                               placeholder="John"
-                               value="John" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserLastName">Last Name</label>
-                        <input type="text"
-                               id="modalEditUserLastName"
-                               name="modalEditUserLastName"
-                               class="form-control"
-                               placeholder="Doe"
-                               value="Doe" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label" for="modalEditUserName">Username</label>
-                        <input type="text"
-                               id="modalEditUserName"
-                               name="modalEditUserName"
-                               class="form-control"
-                               placeholder="johndoe007"
-                               value="johndoe007" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserEmail">Email</label>
-                        <input type="text"
-                               id="modalEditUserEmail"
-                               name="modalEditUserEmail"
-                               class="form-control"
-                               placeholder="example@domain.com"
-                               value="example@domain.com" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserStatus">Status</label>
-                        <select id="modalEditUserStatus"
-                                name="modalEditUserStatus"
-                                class="select2 form-select"
-                                aria-label="Default select example">
-                            <option selected>Status</option>
-                            <option value="1">Active</option>
-                            <option value="2">Inactive</option>
-                            <option value="3">Suspended</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditTaxID">Tax ID</label>
-                        <input type="text"
-                               id="modalEditTaxID"
-                               name="modalEditTaxID"
-                               class="form-control modal-edit-tax-id"
-                               placeholder="123 456 7890"
-                               value="123 456 7890" />
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserPhone">Phone Number</label>
-                        <div class="input-group">
-                            <span class="input-group-text">US (+1)</span>
-                            <input type="text"
-                                   id="modalEditUserPhone"
-                                   name="modalEditUserPhone"
-                                   class="form-control phone-number-mask"
-                                   placeholder="202 555 0111"
-                                   value="202 555 0111" />
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserLanguage">Language</label>
-                        <select id="modalEditUserLanguage"
-                                name="modalEditUserLanguage"
-                                class="select2 form-select"
-                                multiple>
-                            <option value="">Select</option>
-                            <option value="english" selected>English</option>
-                            <option value="spanish">Spanish</option>
-                            <option value="french">French</option>
-                            <option value="german">German</option>
-                            <option value="dutch">Dutch</option>
-                            <option value="hebrew">Hebrew</option>
-                            <option value="sanskrit">Sanskrit</option>
-                            <option value="hindi">Hindi</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <label class="form-label" for="modalEditUserCountry">Country</label>
-                        <select id="modalEditUserCountry"
-                                name="modalEditUserCountry"
-                                class="select2 form-select"
-                                data-allow-clear="true">
-                            <option value="">Select</option>
-                            <option value="Australia">Australia</option>
-                            <option value="Bangladesh">Bangladesh</option>
-                            <option value="Belarus">Belarus</option>
-                            <option value="Brazil">Brazil</option>
-                            <option value="Canada">Canada</option>
-                            <option value="China">China</option>
-                            <option value="France">France</option>
-                            <option value="Germany">Germany</option>
-                            <option value="India" selected>India</option>
-                            <option value="Indonesia">Indonesia</option>
-                            <option value="Israel">Israel</option>
-                            <option value="Italy">Italy</option>
-                            <option value="Japan">Japan</option>
-                            <option value="Korea">Korea, Republic of</option>
-                            <option value="Mexico">Mexico</option>
-                            <option value="Philippines">Philippines</option>
-                            <option value="Russia">Russian Federation</option>
-                            <option value="South Africa">South Africa</option>
-                            <option value="Thailand">Thailand</option>
-                            <option value="Turkey">Turkey</option>
-                            <option value="Ukraine">Ukraine</option>
-                            <option value="United Arab Emirates">United Arab Emirates</option>
-                            <option value="United Kingdom">United Kingdom</option>
-                            <option value="United States">United States</option>
-                        </select>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check form-switch">
-                            <input type="checkbox" class="form-check-input" id="editBillingAddress" />
-                            <label for="editBillingAddress" class="switch-label">Use as a billing address?</label>
-                        </div>
-                    </div>
-                    <div class="col-12 text-center">
-                        <button type="submit" class="btn btn-primary me-3">Submit</button>
-                        <button type="reset"
-                                class="btn btn-label-secondary"
-                                data-bs-dismiss="modal"
-                                aria-label="Close">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+<div class="offcanvas offcanvas-end"
+     tabindex="-1"
+     id="offcanvasAddUser"
+     aria-labelledby="offcanvasAddUserLabel">
+
+    <div class="offcanvas-header border-bottom">
+        <h5 id="offcanvasAddUserLabel" class="offcanvas-title">
+            Thêm tài khoản
+        </h5>
+
+        <button type="button"
+                class="btn-close text-reset"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close">
+        </button>
+    </div>
+
+    <div class="offcanvas-body mx-0 flex-grow-0 p-6 h-100">
+
+        <form id="createUserForm" class="pt-0">
+
+            @Html.AntiForgeryToken()
+
+            <!-- Username -->
+            <div class="mb-6">
+                <label asp-for="UserName" class="form-label">
+                    Tên đăng nhập <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="UserName"
+                       class="form-control"
+                       placeholder="Nhập tên đăng nhập"
+                       autocomplete="off" />
+
+                <span asp-validation-for="UserName"
+                      class="text-danger"></span>
             </div>
-        </div>
+
+            <!-- Email -->
+            <div class="mb-6">
+                <label asp-for="Email" class="form-label">
+                    Email <span class="text-danger">*</span>
+                </label>
+
+                <input asp-for="Email"
+                       type="email"
+                       class="form-control"
+                       placeholder="example@domain.com"
+                       autocomplete="off" />
+
+                <span asp-validation-for="Email"
+                      class="text-danger"></span>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-6">
+                <label asp-for="PhoneNumber" class="form-label">
+                    Số điện thoại
+                </label>
+
+                <input asp-for="PhoneNumber"
+                       type="tel"
+                       class="form-control"
+                       placeholder="Nhập số điện thoại" />
+
+                <span asp-validation-for="PhoneNumber"
+                      class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-6">
+                <label asp-for="Password" class="form-label">
+                    Mật khẩu <span class="text-danger">*</span>
+                </label>
+
+                <div class="input-group">
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-control"
+                           placeholder="Nhập mật khẩu"
+                           autocomplete="new-password" minlength="12" required />
+
+                    <button class="btn btn-outline-secondary toggle-password"
+                            type="button"
+                            data-target="Password">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+
+                <span asp-validation-for="Password"
+                      class="text-danger"></span>
+
+                <small class="text-muted">
+                    Mật khẩu tối thiểu 12 ký tự, bao gồm chữ hoa,
+                    chữ thường, số.
+                </small>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-6">
+                <label asp-for="ConfirmPassword" class="form-label">
+                    Xác nhận mật khẩu <span class="text-danger">*</span>
+                </label>
+
+                <div class="input-group">
+                    <input asp-for="ConfirmPassword"
+                           type="password"
+                           class="form-control"
+                           placeholder="Nhập lại mật khẩu"
+                           autocomplete="new-password" minlength="12"
+                           required />
+
+                    <button class="btn btn-outline-secondary toggle-password"
+                            type="button"
+                            data-target="ConfirmPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+
+                <span asp-validation-for="ConfirmPassword"
+                      class="text-danger"></span>
+            </div>
+
+            <!-- Roles -->
+            <div class="mb-6">
+                <label asp-for="RoleIds" class="form-label">
+                    Vai trò
+                </label>
+
+                <select asp-for="RoleIds"
+                        id="createUserRoleIds"
+                        class="form-select"
+                        multiple>
+                </select>
+
+                <span asp-validation-for="RoleIds" class="text-danger"></span>
+
+                <small class="text-muted">
+                    Có thể chọn nhiều vai trò cho tài khoản.
+                </small>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-6">
+                <button type="submit"
+                        class="btn btn-primary me-3"
+                        id="btnCreateUser">
+                    <i class="ti ti-user-plus me-1"></i>
+                    Tạo tài khoản
+                </button>
+
+                <button type="button"
+                        class="btn btn-label-secondary"
+                        data-bs-dismiss="offcanvas">
+                    Hủy
+                </button>
+            </div>
+
+        </form>
     </div>
 </div>
-<!--/ Edit User Modal -->
-@section Scritps {
-    <script>
-        console.log('load script create usser');
-
-    </script>
-}

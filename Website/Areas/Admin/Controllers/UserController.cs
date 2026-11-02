@@ -86,39 +86,56 @@ namespace Website.Areas.Admin.Controllers
         [HttpGet("user-details/{id?}")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> Details(
-            string id,
-            string tab = "personal",
-            bool edit = false)
+    string id,
+    string tab = "personal",
+    bool edit = false)
         {
-            var user = await _dbContext.Users.Include(x => x.AvatarMediaFile).FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+            var allowedTabs = new[]
+            {
+        "personal",
+        "security",
+        "billing",
+        "notification",
+        "connection"
+    };
 
-            if (user == null || user.IsDeleted)
+            if (string.IsNullOrWhiteSpace(id))
                 return NotFound();
 
-            var allowedTabs = new List<string> { "personal", "security", "billing", "notification", "connection" };
-
-            if (!allowedTabs.Contains(tab))
+            if (!allowedTabs.Contains(tab, StringComparer.OrdinalIgnoreCase))
                 return NotFound();
-            var roles = await _userManager.GetRolesAsync(user);
+
+            var user = await _userService.GetUserDetailsAsync(id);
+
+            if (user == null)
+                return NotFound();
+
             var vm = new UserDetailsViewModel
             {
-                CurrentTab = tab,
-                Id = id,
-                AvatarUrl = user.AvatarMediaFile != null ? $"/uploads/{user.AvatarMediaFile.StoragePath}" : Url.Content("~/images/Default/default-user.png"),
-                UserName = user.UserName!,
-                Email = user.Email!,
+                CurrentTab = tab.ToLowerInvariant(),
+                Id = user.Id,
+
+                AvatarUrl = !string.IsNullOrWhiteSpace(user.AvatarStoragePath)
+                    ? $"/uploads/{user.AvatarStoragePath}"
+                    : Url.Content("~/images/Default/default-user.png"),
+
+                UserName = user.UserName,
+                Email = user.Email,
                 ConfirmEmail = user.EmailConfirmed,
-                PhoneNumber = user.PhoneNumber!,
-                Roles = roles.ToList(),
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
+
+                Roles = user.Roles,
+
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.LastLogin,
-                IsActive = user.IsActive,
+                IsActive = user.IsActive
             };
+
             var updateUserVm = new UpdateUserViewModel
             {
                 Id = user.Id,
-                UserName = user.UserName ?? string.Empty,
-                Email = user.Email ?? string.Empty,
+                UserName = user.UserName,
+                Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
@@ -127,60 +144,37 @@ namespace Website.Areas.Admin.Controllers
 
             ViewData["UpdateUserModel"] = updateUserVm;
             ViewData["OpenEditModal"] = edit;
-          
 
             return View(vm);
         }
 
-        [HttpGet("details-personal/{id?}")]
+        [HttpGet("details-personal/{id}")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> DetailsPersonalAsync(string id)
         {
-            try
+            var user = await _userService.GetUserPersonalDetailsAsync(id);
+
+            if (user == null)
+                return NotFound();
+
+            var model = new UpdatePersonalViewModel
             {
-                var user = await _dbContext.Users
-    .Include(u => u.SocialLinks)
-    .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+                Id = user.Id,
+                DisplayName = user.DisplayName,
+                Address = user.Address,
+                ProvinceCode = user.ProvinceCode,
+                WardCode = user.WardCode,
+                BirthDate = user.BirthDate,
+                Gender = user.Gender,
+                SocialLinks = user.SocialLinks
+            };
 
-                if (user == null)
-                    return NotFound();
-
-                if (!Request.Headers.ContainsKey("HX-Request"))
-                {
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id, tab = "personal" });
-                }
-
-                var model = new UpdatePersonalViewModel
-                {
-                    Id = user.Id,
-                    DisplayName = user.NormalizedUserName,
-                    Address = user.AddressDetail,
-                    ProvinceCode = user.ProvinceCode,
-                    WardCode = user.WardCode,
-                    BirthDate = user.DateOfBirth,
-                    Gender = user.Gender,
-                    SocialLinks = user.SocialLinks
-                        .Select(x => new UserSocialLinkInputModel
-                        {
-                            Type = x.Provider,
-                            Url = x.Url
-                        })
-                        .ToList()
-                };
-
-                if (!model.SocialLinks.Any())
-                {
-                    model.SocialLinks.Add(new UserSocialLinkInputModel());
-                }
-
-                return PartialView("_Personal", model);
-            }
-            catch (Exception ex)
+            if (!model.SocialLinks.Any())
             {
-                return Content(ex.ToString());
+                model.SocialLinks.Add(new UserSocialLinkDto());
             }
+
+            return PartialView("_Personal", model);
         }
 
         [HttpPost("user-details/{id}/update-personal")]
@@ -188,103 +182,60 @@ namespace Website.Areas.Admin.Controllers
         [PermissionAction(ActionType.Edit)]
         public async Task<IActionResult> UpdatePersonal(
     string id,
-    UpdatePersonalViewModel model)
+    UpdatePersonalViewModel model,
+    CancellationToken cancellationToken)
         {
             if (id != model.Id)
-                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ." });
-
-            var user = await _dbContext.Users
-                .Include(u => u.SocialLinks)
-                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
-
-            if (user == null)
-                return NotFound(new { success = false, message = "Không tìm thấy tài khoản." });
-
-            // Bỏ qua dòng mạng xã hội chưa nhập URL.
-            var socialLinks = model.SocialLinks
-                .Where(x => !string.IsNullOrWhiteSpace(x.Url))
-                .ToList();
-
-            var allowedProviders = new HashSet<string>(
-                new[] { "Facebook", "Instagram", "TikTok", "YouTube",
-                "Zalo", "LinkedIn", "X", "Website" },
-                StringComparer.OrdinalIgnoreCase);
-
-            if (socialLinks.Any(x =>
-                !allowedProviders.Contains(x.Type) ||
-                !Uri.TryCreate(x.Url, UriKind.Absolute, out var uri) ||
-                (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)))
             {
-                return BadRequest(new { success = false, message = "Liên kết mạng xã hội không hợp lệ." });
-            }
-
-            if (socialLinks.GroupBy(x => x.Type, StringComparer.OrdinalIgnoreCase)
-                           .Any(g => g.Count() > 1))
-            {
-                return BadRequest(new { success = false, message = "Không được chọn trùng nền tảng mạng xã hội." });
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Dữ liệu không hợp lệ."
+                });
             }
 
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { success = false, message = "Dữ liệu gửi lên không hợp lệ." });
-            }
-
-            try
-            {
-                user.NormalizedUserName = model.DisplayName?.Trim();
-                user.AddressDetail = model.Address?.Trim();
-                user.ProvinceCode = model.ProvinceCode?.Trim();
-                user.WardCode = model.WardCode?.Trim();
-                user.DateOfBirth = CommonHelper.DateTimeToUtc(model.BirthDate);
-                user.Gender = model.Gender;
-
-                var submittedProviders = socialLinks
-                    .Select(x => x.Type)
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-                var removedLinks = user.SocialLinks.Where(x => !submittedProviders.Contains(x.Provider)).ToList();
-
-                _dbContext.UserSocialLinks.RemoveRange(removedLinks);
-
-                foreach (var item in socialLinks)
-                {
-                    var existing = user.SocialLinks.FirstOrDefault(x =>
-                        string.Equals(x.Provider, item.Type, StringComparison.OrdinalIgnoreCase));
-
-                    if (existing == null)
-                    {
-                        user.SocialLinks.Add(new UserSocialLink
-                        {
-                            UserId = user.Id,
-                            Provider = item.Type,
-                            Url = item.Url!.Trim()
-                        });
-                    }
-                    else
-                    {
-                        existing.Url = item.Url!.Trim();
-                    }
-                }
-
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-
-                return Ok(new
+                return BadRequest(new
                 {
                     success = false,
-                    message = ex.Message ?? "Cập nhật thông tin cá nhân thất bại."
+                    message = "Dữ liệu gửi lên không hợp lệ."
                 });
-                throw;
+            }
+
+            var request = new UpdateUserPersonalDto
+            {
+                DisplayName = model.DisplayName,
+                Address = model.Address,
+                ProvinceCode = model.ProvinceCode,
+                WardCode = model.WardCode,
+                BirthDate = model.BirthDate,
+                Gender = model.Gender,
+                SocialLinks = model.SocialLinks
+            };
+
+            var result = await _userService.UpdatePersonalAsync(
+                id,
+                request,
+                cancellationToken);
+
+            // Giả sử ServiceResult của bạn có property IsSuccess.
+            if (!result.Succeeded)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = result.Message
+                });
             }
 
             return Ok(new
             {
                 success = true,
-                message = "Cập nhật thông tin cá nhân thành công."
+                message = result.Message
             });
         }
+
         [HttpPost("{id}/avatar")]
         [PermissionAction(ActionType.Edit)]
         [ValidateAntiForgeryToken]
@@ -322,18 +273,22 @@ namespace Website.Areas.Admin.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("details-security/{id?}")]
-        [PermissionAction(ActionType.View)]
-        public IActionResult DetailsSecurity(Guid id)
-        {
-            if (Request.Headers.ContainsKey("HX-Request"))
-                return PartialView("_Security", new UserDetailsViewModel
-                {
-                    Id = id.ToString()
-                });
 
-            return RedirectToAction(nameof(Details), new { id = id, tab = "security" });
+        [HttpGet("details-security/{id}")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> DetailsSecurity(string id)
+        {
+            var userExists = await _dbContext.Users.AnyAsync(x => x.Id == id && !x.IsDeleted);
+
+            if (!userExists)
+                return NotFound();
+
+            return PartialView("_Security", new UserDetailsViewModel
+            {
+                Id = id
+            });
         }
+
         [HttpGet("details-billing")]
         [PermissionAction(ActionType.View)]
         public IActionResult DetailsBilling(Guid id)
@@ -373,7 +328,8 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("user-create")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Create)]
-        public async Task<IActionResult> Create([FromForm] CreateUserRequest request)
+        public async Task<IActionResult> Create([FromForm] CreateUserRequest request,
+    CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new
@@ -385,11 +341,8 @@ namespace Website.Areas.Admin.Controllers
 
             try
             {
-                var user = await _userService.CreateUserAsync(request);
+                var user = await _userService.CreateUserAsync(request, cancellationToken);
 
-                await _activityLogger.LogAsync(ActivityType.CreateData, "User",
-    user.Id,
-    $"Created user account: {user.UserName}");
                 return Ok(new
                 {
                     success = true,
@@ -631,11 +584,9 @@ namespace Website.Areas.Admin.Controllers
 
                 //await _activityLogger.LogAsync($"Reset password for user: {userId}");
 
-                await _activityLogger.LogAsync(
-    ActivityType.ChangePass,
-    "User",
-    userId,
-   $"Reset password for user: {userId}");
+                await _activityLogger.LogAsync(ActivityType.ChangePass, "User",
+                userId, $"Reset password for user: {userId}");
+
                 return Ok(new
                 {
                     success = true,
@@ -674,23 +625,21 @@ namespace Website.Areas.Admin.Controllers
                 }
 
                 await _userService.DisableAsync(id);
+                var updatedUser = await _userService.FindByIdAsync(id);
 
-                await _activityLogger.LogAsync(
-                    ActivityType.SuspendAccount,
-                    "User",
-                    id,
-                    $"Suspended user account: {user.UserName}");
+                await _activityLogger.LogAsync(ActivityType.SuspendAccount, "User",
+                    id, $"Suspended user account: {user.UserName}");
 
                 return Ok(new
                 {
                     success = true,
-                    message = "Đã tạm ngưng tài khoản."
+                    message = "Đã tạm ngưng tài khoản.",
+                    isActive = updatedUser.IsActive
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error suspending user {UserId}", id);
+                _logger.LogError(ex, "Error suspending user {UserId}", id);
 
                 return StatusCode(500, new
                 {
@@ -719,7 +668,7 @@ namespace Website.Areas.Admin.Controllers
                 }
 
                 await _userService.EnableAsync(id);
-
+                var updatedUser = await _userService.FindByIdAsync(id);
                 await _activityLogger.LogAsync(
                     ActivityType.UnsuspendAccount,
                     "User",
@@ -729,7 +678,8 @@ namespace Website.Areas.Admin.Controllers
                 return Ok(new
                 {
                     success = true,
-                    message = "Đã kích hoạt tài khoản."
+                    message = "Đã kích hoạt tài khoản.",
+                    isActive = updatedUser.IsActive
                 });
             }
             catch (Exception ex)
@@ -792,20 +742,15 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("roles")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> GetRoles()
+        public async Task<IActionResult> GetRoles(CancellationToken cancellationToken)
         {
-            var roles = await _roleManager.Roles
-                .AsNoTracking()
-                .Where(x => x.IsSystem || !x.IsSystem) // Có thể bỏ điều kiện này
-                .OrderBy(x => x.Name)
-                .Select(x => new
-                {
-                    value = x.Id,
-                    name = x.Name
-                })
-                .ToListAsync();
+            var roles = await _userService.GetRoleOptionsAsync(cancellationToken);
 
-            return Ok(roles);
+            return Ok(roles.Select(x => new
+            {
+                value = x.Value,
+                name = x.Name
+            }));
         }
 
         [HttpGet("statuses")]
@@ -831,89 +776,54 @@ namespace Website.Areas.Admin.Controllers
         [HttpGet("{userId}/sessions")]
         [PermissionAction(ActionType.View)]
         public async Task<IActionResult> GetSessions(
-      string userId,
-      CancellationToken cancellationToken)
+     string userId,
+     CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(userId))
                 return BadRequest();
 
-            var sid = User.FindFirstValue(ClaimConstants.SessionId);
+            var currentSessionId = User.FindFirstValue(ClaimConstants.SessionId);
 
-            var now = DateTime.UtcNow;
-
-            var sessions = await _dbContext.UserSessions
-                .AsNoTracking()
-                .Where(x =>
-                    x.UserId == userId &&
-                    x.RevokedAt == null &&
-                    x.ExpiresAt > now)
-                .OrderByDescending(x => x.LastActivityAt)
-                .Select(x => new UserSessionDto
-                {
-                    Id = x.Id,
-                    DeviceName = x.DeviceName,
-                    UserAgent = x.UserAgent,
-                    IpAddress = x.IpAddress,
-                    CreatedAt = x.CreatedAt,
-                    LastActivityAt = x.LastActivityAt,
-                    ExpiresAt = x.ExpiresAt,
-                    IsCurrent = sid != null &&
-                                x.Id.ToString() == sid
-                })
-                .ToListAsync(cancellationToken);
+            var sessions = await _userService.GetUserSessionsAsync(
+                userId,
+                currentSessionId,
+                cancellationToken);
 
             return Ok(sessions);
         }
+
         [HttpPost("{userId}/sessions/{sessionId:guid}/revoke")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> RevokeUserSession(
-    string userId,
-    Guid sessionId,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> RevokeUserSession(string userId, Guid sessionId,
+        CancellationToken cancellationToken)
         {
-            var userExists = await _dbContext.Users
-                .AnyAsync(x => x.Id == userId && !x.IsDeleted, cancellationToken);
+            if (string.IsNullOrWhiteSpace(userId))
+                return BadRequest("Tài khoản không hợp lệ.");
 
-            if (!userExists)
-                return NotFound("Không tìm thấy người dùng.");
-
-            var now = DateTime.UtcNow;
-
-            await using var transaction =
-                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
-            var session = await _dbContext.UserSessions
-                .FirstOrDefaultAsync(
-                    x => x.Id == sessionId && x.UserId == userId,
-                    cancellationToken);
-
-            if (session == null)
-                return NotFound("Không tìm thấy phiên đăng nhập.");
-
-            if (session.RevokedAt != null)
-                return BadRequest("Phiên đăng nhập đã được thu hồi.");
-
-            session.RevokedAt = now;
-            session.RevokedReason = "RevokedByAdmin";
-
-            var revokedTokens = await _dbContext.RefreshTokens
-                .Where(x => x.SessionId == sessionId && !x.IsRevoked)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(x => x.IsRevoked, true)
-                    .SetProperty(x => x.RevokedAt, now)
-                    .SetProperty(x => x.RevokedReason, "SessionRevokedByAdmin"),
-                    cancellationToken);
-
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            return Ok(new
+            try
             {
-                success = true,
-                message = "Đã thu hồi phiên đăng nhập.",
-                revokedRefreshTokens = revokedTokens
-            });
+                var revokedTokens = await _userService.RevokeUserSessionAsync(
+                    userId,
+                    sessionId,
+                    cancellationToken);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Đã thu hồi phiên đăng nhập.",
+                    revokedRefreshTokens = revokedTokens
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
         private Dictionary<string, string[]> GetModelErrors()
         {
             return ModelState.Where(x => x.Value?.Errors.Count > 0)

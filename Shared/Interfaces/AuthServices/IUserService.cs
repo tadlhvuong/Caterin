@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Shared.Data.Entities.Identity;
 using Shared.DTOs.Identity;
+using Shared.DTOs.User;
 using Shared.Requests;
 using Shared.Requests.User;
 using Shared.Responses;
@@ -166,5 +167,25 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        /// 
+
+        Task<UserDetailsDto?> GetUserDetailsAsync(string userId, CancellationToken cancellationToken = default);
+        Task<UserPersonalDetailsDto?> GetUserPersonalDetailsAsync(
+    string userId,
+    CancellationToken cancellationToken = default);
+        Task<ServiceResult> UpdatePersonalAsync(
+    string userId,
+    UpdateUserPersonalDto request,
+    CancellationToken cancellationToken = default);
+        Task<List<UserRoleOptionDto>> GetRoleOptionsAsync(
+    CancellationToken cancellationToken = default);
+        Task<List<UserSessionDto>> GetUserSessionsAsync(
+    string userId,
+    string? currentSessionId,
+    CancellationToken cancellationToken = default);
+        Task<int> RevokeUserSessionAsync(
+    string userId,
+    Guid sessionId,
+    CancellationToken cancellationToken = default);
     }
 }

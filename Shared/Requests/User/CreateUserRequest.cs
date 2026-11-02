@@ -25,8 +25,8 @@ namespace Shared.Requests.User
         public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập mật khẩu.")]
-        [StringLength(128, MinimumLength = 8,
-            ErrorMessage = "Mật khẩu phải có ít nhất 8 ký tự.")]
+        [StringLength(128, MinimumLength = 12,
+        ErrorMessage = "Mật khẩu phải có ít nhất 12 ký tự.")]
         public string Password { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu.")]

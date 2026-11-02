@@ -2,8 +2,7 @@
 
 $(function () {
   const adminChatConnection =
-        new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/chat")
+        new signalR.HubConnectionBuilder().withUrl("/hubs/chat")
             .withAutomaticReconnect()
           .build();
 

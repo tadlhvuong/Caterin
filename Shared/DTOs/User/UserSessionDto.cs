@@ -2,7 +2,7 @@
 {
     public class UserSessionDto
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         public string? DeviceName { get; set; }
         public string? UserAgent { get; set; }
         public string? IpAddress { get; set; }

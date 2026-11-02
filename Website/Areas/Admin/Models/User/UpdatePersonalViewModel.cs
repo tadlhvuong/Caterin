@@ -1,4 +1,5 @@
-﻿using Shared.Enums;
+﻿using Shared.DTOs.User;
+using Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace Website.Areas.Admin.Models.User
@@ -24,7 +25,7 @@ namespace Website.Areas.Admin.Models.User
 
         public Gender? Gender { get; set; }
 
-        public List<UserSocialLinkInputModel> SocialLinks { get; set; } = new();
+        public List<UserSocialLinkDto> SocialLinks { get; set; } = new();
     }
 
     public class UserSocialLinkInputModel

@@ -47,16 +47,7 @@ $(function () {
                 contentType: 'application/json',
                 data: function (res) {
                     var orderBy = res.order && res.order.length ? res.order[0] : null;
-                    console.log(JSON.stringify({
-                        draw: res.draw,
-                        start: res.start,
-                        length: res.length,
-                        search: res.search ? res.search.value : null,
-                        sortColumn: orderBy ? res.columns[orderBy.column].data : null,
-                        sortDirection: orderBy ? orderBy.dir : null,
-                        userStatus: $('#FilterUsersStatus').val() ? parseInt($('#FilterUsersStatus').val(), 10) : null,
-                        userRole: $('#FilterUsersRole').val() || null
-                    }));
+                    
                     return JSON.stringify({
                         draw: res.draw,
                         start: res.start,
@@ -133,7 +124,6 @@ $(function () {
                             + encodeURIComponent(full.id);
 
                         let output;
-                        console.log(full);
                         if (full.avatarUrl) {
                             output =
                                 '<img src="' + full.avatarUrl + '" alt="Avatar" class="rounded-circle" style=" object-fit: contain;">';
@@ -214,7 +204,6 @@ $(function () {
                     // User Status
                     targets: 5,
                     render: function (data, type, full, meta) {
-                        console.log(full);
                         return renderUserStatus(full);
                     }
                 },
@@ -570,11 +559,65 @@ $(function () {
         );
     });
 
+    $(document).on('click', '.toggle-password', function () {
+        const targetId = $(this).data('target');
+        const input = document.getElementById(targetId);
 
-    $(document).on('click', '.add-new', function () {
-        window.location.href = '/admin/user/user-create'
+        if (!input) return;
+
+        const isPassword = input.type === 'password';
+
+        input.type = isPassword ? 'text' : 'password';
+
+        $(this).find('i')
+            .toggleClass('ti-eye', !isPassword)
+            .toggleClass('ti-eye-off', isPassword);
     });
+    $(document).on('click', '.add-new', function (e) {
+        e.preventDefault();
 
+        const element = document.getElementById('offcanvasAddUser');
+
+        if (!element) return;
+
+        bootstrap.Offcanvas.getOrCreateInstance(element).show();
+    });
+    function initCreateUser() {
+        const offcanvasElement = document.getElementById('offcanvasAddUser');
+
+        if (!offcanvasElement) return;
+
+        const roleSelect = $('#createUserRoleIds');
+
+        // Initialize Select2
+        if (!roleSelect.hasClass('select2-hidden-accessible')) {
+            roleSelect.select2({
+                placeholder: 'Chọn vai trò',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $(offcanvasElement)
+            });
+        }
+
+        // Load roles
+        $.get('/admin/user/roles')
+            .done(function (roles) {
+                roleSelect.empty();
+
+                roles.forEach(function (role) {
+                    roleSelect.append(
+                        new Option(role.name, role.value, false, false)
+                    );
+                });
+
+                roleSelect.trigger('change');
+            })
+            .fail(function () {
+                console.error('Không thể tải danh sách vai trò.');
+            });
+    }
+
+    initCreateUser();
     // Lấy antiforgery token từ Razor form hoặc token được render trong trang.
     function getAntiforgeryToken() {
         return $('input[name="__RequestVerificationToken"]')
@@ -638,6 +681,79 @@ $(function () {
         });
     }
 
+    $(document).on('submit', '#createUserForm', function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const $form = $(form);
+        const submitButton = $('#btnCreateUser');
+
+        if (form.dataset.submitting === 'true') return;
+
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        $.ajax({
+            url: '/admin/user/user-create',
+            type: 'POST',
+            data: $form.serialize(),
+
+            beforeSend: function () {
+                form.dataset.submitting = 'true';
+                submitButton.prop('disabled', true);
+            },
+
+            success: function (response) {
+                if (!response.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Có lỗi xảy ra',
+                        text: response.message
+                    });
+                    return;
+                }
+
+                const offcanvasElement =
+                    document.getElementById('offcanvasAddUser');
+
+                bootstrap.Offcanvas
+                    .getOrCreateInstance(offcanvasElement)
+                    .hide();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: response.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                form.reset();
+                $('#createUserRoleIds').val(null).trigger('change');
+
+                if (dt_user) {
+                    dt_user.ajax.reload(null, false);
+                }
+            },
+
+            error: function (xhr) {
+                const response = xhr.responseJSON;
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Có lỗi xảy ra',
+                    text: response?.message || 'Không thể tạo tài khoản.'
+                });
+            },
+
+            complete: function () {
+                form.dataset.submitting = 'false';
+                submitButton.prop('disabled', false);
+            }
+        });
+    });
     // Tạm ngưng tài khoản.
     $(document).on('click', '.suspend-user', function (e) {
         e.preventDefault();
@@ -678,8 +794,6 @@ $(function () {
         if (!button) return;
 
         const userId = button.dataset.id;
-        console.log('AAA');
-        console.log(userId);
         if (!userId) {
             Toast.error('Không tìm thấy tài khoản.');
             return;

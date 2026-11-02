@@ -89,12 +89,9 @@
 
         <li class="nav-item">
             <a class="nav-link"
-               href="javascript:void(0);"
-               hx-get="/admin/user/details-personal?id=@Model.Id"
-               hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=personal"
-               data-tab="personal"
-               data-i18n="Personal">
+               href="@Url.Action("Details", "User", new { area = "Admin", id = Model.Id, tab = "personal" })"
+   data-tab="personal" data-ajax-tab="true"
+   data-tab-url="@Url.Content($"~/Admin/User/details-personal/{Model.Id}")">
                 <i class="ti ti-user-circle"></i>
                 <span>Account</span>
             </a>
@@ -102,12 +99,14 @@
 
         <li class="nav-item">
             <a class="nav-link"
-               href="javascript:void(0);"
-               hx-get="/admin/user/details-security?id=@Model.Id"
-               hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=security"
-               data-tab="security"
-               data-i18n="Security">
+               href="@Url.Action("Details", "User", new {
+          area = "Admin",
+          id = Model.Id,
+          tab = "security"
+      })"
+   data-tab="security"
+   data-ajax-tab="true"
+   data-tab-url="@Url.Content($"~/Admin/User/details-security/{Model.Id}")">
                 <i class="ti ti-shield-lock"></i>
                 <span>Security</span>
             </a>
@@ -116,9 +115,6 @@
         <li class="nav-item">
             <a class="nav-link"
                href="javascript:void(0);"
-               hx-get="/admin/user/details-billing?id=@Model.Id"
-               hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=billing"
                data-tab="billing"
                data-i18n="Billing">
                 <i class="ti ti-credit-card"></i>
@@ -129,9 +125,6 @@
         <li class="nav-item">
             <a class="nav-link"
                href="javascript:void(0);"
-               hx-get="/admin/user/details-notification?id=@Model.Id"
-               hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=notification"
                data-tab="notification"
                data-i18n="Notification">
                 <i class="ti ti-bell"></i>
@@ -142,9 +135,7 @@
         <li class="nav-item">
             <a class="nav-link"
                href="javascript:void(0);"
-               hx-get="/admin/user/details-connection?id=@Model.Id"
-               hx-target="#tab-content"
-               hx-push-url="/admin/user/user-details/@Model.Id?tab=connection"
+              
                data-tab="connection"
                data-i18n="Connection">
                 <i class="ti ti-link"></i>

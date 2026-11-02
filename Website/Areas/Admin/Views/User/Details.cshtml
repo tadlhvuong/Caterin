@@ -3,16 +3,6 @@
 @model UserDetailsViewModel
 @{
     ViewData["Title"] = "Thông tin tài khoản";
-    // var currentTab = (ViewData["CurrentTab"] as string ?? "personal").ToLower();
-    var curent = Model.CurrentTab;
-    var initAction = Model.CurrentTab switch
-    {
-        "security" => "details-security",
-        "billing" => "details-billing",
-        "notification" => "details-notification",
-        "connection" => "details-connection",
-        "personal" => "details-personal"
-    };
 }
 @section Styles {
     <link rel="stylesheet" href="~/admin/assets/vendor/libs/sweetalert2/sweetalert2.css" />
@@ -234,36 +224,32 @@
 
         <div class="col-xl-8 col-lg-7 order-1 order-md-1">
             <partial name="_DetailsNav" model="@Model"  />
-            <div id="tab-content"
-                 hx-get="@Url.Action(initAction, "User", new { id = Model.Id })"
-                 hx-trigger="load" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
+            <div id="tab-content" class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
             </div>
-            @* <div id="profile-content"
-                 hx-get="/profile/@url" hx-trigger="load"
-                 class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
-            </div> *@
         </div>
     </div>
-    <partial name="_UpdateUser"
-             model="@ViewData["UpdateUserModel"]" />
+    <partial name="_UpdateUser" model="@ViewData["UpdateUserModel"]" />
 </div>
 
                           @section Scripts {
 
     <script src="~/admin/assets/vendor/libs/sweetalert2/sweetalert2.js"></script>
-    <script src="~/admin/assets/js/modal-edit-user.js"></script>
-    <script src="~/admin/assets/js/hk.user-view.js"></script>
-    <script>
-            document.body.addEventListener("htmx:afterRequest", function (e) {
-            const url = new URL(window.location.href);
-            const currentTab = url.searchParams.get("tab") || "personal";
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.js"></script>
 
-            document.querySelectorAll("[data-tab]").forEach(el => {
-                el.classList.toggle("active", el.dataset.tab === currentTab);
-            });
-        });
-    </script>
+    @* DETAILS *@
+    <script src="~/admin/assets/js/user/modal-edit-user.js"></script>
+    <script src="~/admin/assets/js/user/hk.user-details.js"></script>
 
+    @* _Personal *@
+    <script src="~/admin/assets/js/customize/flatpickr-init.js"></script>
+    <script src="~/admin/assets/js/customize/address-picker.js"></script>
+    <script src="~/admin/assets/js/customize/social-link-input.js"></script>
+    <script src="~/admin/assets/js/user/hk.user-personal.js"></script>
+
+    @* SECURITY *@
+    <script src="~/admin/assets/js/user/hk.user-security.js"></script>
+
+    <script src="~/admin/assets/js/user/hk.user-tabs.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const shouldOpenEditModal =

@@ -5,7 +5,7 @@
      aria-labelledby="editUserLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="updateUserForm" method="POST" action="@Url.Action("Update", "User", new { area = "Admin", id = Model.Id })">
+            <form id="updateUserForm" method="POST" autocomplete="off" action="@Url.Action("Update", "User", new { area = "Admin", id = Model.Id })">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
 
@@ -20,8 +20,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <div asp-validation-summary="ModelOnly"
-                         class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
                         <label asp-for="UserName" class="form-label">
@@ -29,7 +28,7 @@
                         </label>
                         <input asp-for="UserName"
                                class="form-control"
-                               readonly />
+                               readonly autocomplete="username" />
                         <div class="form-text">
                             Tên đăng nhập không thể thay đổi.
                         </div>
@@ -42,7 +41,7 @@
                         <input asp-for="Email"
                                class="form-control"
                                type="email"
-                               readonly />
+                               readonly autocomplete="email" />
 
                         <div class="d-flex align-items-center gap-2 mt-2">
                             @if (Model.EmailConfirmed)

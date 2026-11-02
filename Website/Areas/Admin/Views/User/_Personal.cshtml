@@ -94,12 +94,9 @@
                           action="@Url.Action("UpdatePersonal", "User", new { area = "Admin", id = Model.Id })">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="Id" value="@Model.Id" />
-                        <input type="hidden" id="AddressDetail" name="AddressDetail"
-                               value="@Model.Address" />
-                        <input type="hidden" id="ProvinceCode" name="ProvinceCode"
-                               value="@Model.ProvinceCode" />
-                        <input type="hidden" id="WardCode" name="WardCode"
-                               value="@Model.WardCode" />
+                        <input type="hidden" id="AddressDetail" name="AddressDetail" value="@Model.Address" />
+                        <input type="hidden" id="ProvinceCode" name="ProvinceCode" value="@Model.ProvinceCode" />
+                        <input type="hidden" id="WardCode" name="WardCode" value="@Model.WardCode" />
                         <!-- Thông tin tài khoản -->
                         <div class="row mb-6">
                             <label class="col-sm-2 col-form-label" for="DisplayName">
@@ -206,23 +203,7 @@
                                                         aria-label="Chọn mạng xã hội">
                                                     <i class="ti @GetSocialIcon(provider) social-link-icon"></i>
                                                 </button>
-                                        @functions {
-                                            private string GetSocialIcon(string? provider)
-                                            {
-                                                return provider switch
-                                                {
-                                                    "Facebook" => "ti-brand-facebook",
-                                                    "Instagram" => "ti-brand-instagram",
-                                                    "TikTok" => "ti-brand-tiktok",
-                                                    "YouTube" => "ti-brand-youtube",
-                                                    "Zalo" => "ti-message-circle",
-                                                    "LinkedIn" => "ti-brand-linkedin",
-                                                    "X" => "ti-brand-x",
-                                                    "Website" => "ti-world",
-                                                    _ => "ti-link"
-                                                };
-                                            }
-                                        }
+                                       
                                                 <ul class="dropdown-menu social-link-options">
                                                     <li>
                                                         <button type="button" class="dropdown-item" data-type="Facebook">
@@ -307,6 +288,23 @@
                                                    name="SocialLinks[0].Url"
                                                    placeholder="Nhập liên kết" />
                                         </div>
+                                    }
+                                    @functions {
+                                        private string GetSocialIcon(string? provider)
+                                        {
+                                            return provider switch
+                                            {
+                                                "Facebook" => "ti-brand-facebook",
+                                                "Instagram" => "ti-brand-instagram",
+                                                "TikTok" => "ti-brand-tiktok",
+                                                "YouTube" => "ti-brand-youtube",
+                                                "Zalo" => "ti-message-circle",
+                                                "LinkedIn" => "ti-brand-linkedin",
+                                                "X" => "ti-brand-x",
+                                                "Website" => "ti-world",
+                                                _ => "ti-link"
+                                            };
+                                        }
                                     }
                                 </div>
 
@@ -464,9 +462,3 @@
     </div>
 </div>
 <!-- /Activity Timeline -->
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.js"></script>
-<script src="~/admin/assets/js/core/flatpickr-init.js"></script>
-<script src="~/admin/assets/js/core/address-picker.js"></script>
-<script src="~/admin/assets/js/core/social-link-input.js"></script>
-<script src="~/admin/assets/js/user/hk.user-personal.js"></script>

@@ -1,12 +1,16 @@
 ﻿/// Customer input create, remove and submit social links
+'use strict';
 
-(function () {
-    'use strict';
+window.initSocialLinks = function (container = document) {
+    const socialContainer = container.querySelector('#socialLinksContainer');
 
-    const container = document.getElementById('socialLinksContainer');
-    const addButton = document.getElementById('addSocialLink');
+    if (!socialContainer || socialContainer.dataset.initialized === 'true') {
+        return;
+    }
 
-    if (!container) return;
+    socialContainer.dataset.initialized = 'true';
+
+    const addButton = container.querySelector('#addSocialLink');
 
     const iconMap = {
         Facebook: 'ti-brand-facebook',
@@ -20,7 +24,7 @@
     };
 
     const getRows = () =>
-        [...container.querySelectorAll('.social-link-item')];
+        [...socialContainer.querySelectorAll('.social-link-item')];
 
     function updateIndexes() {
         const rows = getRows();
@@ -95,7 +99,7 @@
     }
 
     function createRow() {
-        const firstRow = container.querySelector('.social-link-item');
+        const firstRow = socialContainer.querySelector('.social-link-item');
 
         if (!firstRow) return null;
 
@@ -139,19 +143,19 @@
                 return;
             }
 
-            container.appendChild(row);
+            socialContainer.appendChild(row);
 
             updateIndexes();
             updateAvailableSocialTypes();
         });
     }
 
-    container.addEventListener('click', function (event) {
+    socialContainer.addEventListener('click', function (event) {
         const removeButton = event.target.closest(
             '[data-action="remove-social-link"]'
         );
 
-        if (removeButton && container.contains(removeButton)) {
+        if (removeButton && socialContainer.contains(removeButton)) {
             const rows = getRows();
 
             // Không xóa dòng cuối cùng.
@@ -191,7 +195,7 @@
     });
 
     // Kiểm tra lại dữ liệu trước khi form submit.
-    const form = container.closest('form');
+    const form = socialContainer.closest('form');
 
     if (form) {
         form.addEventListener('submit', function () {
@@ -202,4 +206,5 @@
     updateIndexes();
     getRows().forEach(updateIcon);
     updateAvailableSocialTypes();
-})();
+
+};

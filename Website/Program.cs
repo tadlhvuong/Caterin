@@ -85,7 +85,7 @@ services.AddIdentity<AppUser, AppRole>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequireNonAlphanumeric = false;
 
     // User
     options.User.RequireUniqueEmail = true;

@@ -8,6 +8,8 @@ namespace Shared.Data.Entities.Identity
         public string UserId { get; set; } = null!;
         public string TokenHash { get; set; } = null!;
         public string? ReplacedByTokenHash { get; set; }
+        public string? ProtectedReplacedByToken { get; set; }
+        public DateTime? RotationRetryUntil { get; set; }
         public string? JwtId { get; set; } = null!;
         public string? DeviceName { get; set; }
         public string? UserAgent { get; set; }

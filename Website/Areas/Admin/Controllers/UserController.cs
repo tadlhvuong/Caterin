@@ -18,6 +18,7 @@ using Shared.Services.Authentication;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading;
 using Website.Areas.Admin.Models;
 using Website.Areas.Admin.Models.User;
 
@@ -34,28 +35,24 @@ namespace Website.Areas.Admin.Controllers
         private readonly IAuthService _authService;
 
         private readonly ILogger<UserController> _logger;
-        private readonly IActivityLogger _activityLogger;
+        private readonly ILogSafetyService _logSafetyService;
 
-        private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<AppRole> _roleManager;
-        public UserController(AppDbContext dbContext, IUserService userService,  RoleManager<AppRole> roleManager,
-            ILogger<UserController> logger, IActivityLogger activityLogger, IAuthService authService, UserManager<AppUser> userManager)
+        public UserController(AppDbContext dbContext, IUserService userService,  
+            ILogger<UserController> logger, ILogSafetyService logSafetyService, IAuthService authService)
         {
             _dbContext = dbContext;
+            _authService = authService;
             _userService = userService;
-            _roleManager = roleManager;
 
             _logger = logger;
-            _activityLogger = activityLogger;
-            _authService = authService;
-            _userManager = userManager;
+            _logSafetyService = logSafetyService;
         }
+        
         [HttpGet("")]
         [PermissionAction(ActionType.View)]
         public ActionResult Index()
         {
-            var user = _dbContext.Users.ToList();
-            return View(user);
+            return View();
         }
 
         [HttpGet("user-list")]
@@ -85,19 +82,16 @@ namespace Website.Areas.Admin.Controllers
 
         [HttpGet("user-details/{id?}")]
         [PermissionAction(ActionType.View)]
-        public async Task<IActionResult> Details(
-    string id,
-    string tab = "personal",
-    bool edit = false)
+        public async Task<IActionResult> Details(string id, string tab = "personal", bool edit = false)
         {
             var allowedTabs = new[]
             {
-        "personal",
-        "security",
-        "billing",
-        "notification",
-        "connection"
-    };
+                "personal",
+                "security",
+                "billing",
+                "notification",
+                "connection"
+            };
 
             if (string.IsNullOrWhiteSpace(id))
                 return NotFound();
@@ -120,12 +114,12 @@ namespace Website.Areas.Admin.Controllers
                     : Url.Content("~/images/Default/default-user.png"),
 
                 UserName = user.UserName,
+                DisplayName = user.DisplayName,
                 Email = user.Email,
                 ConfirmEmail = user.EmailConfirmed,
                 PhoneNumber = user.PhoneNumber ?? string.Empty,
-
+                Status = user.Status,
                 Roles = user.Roles,
-
                 CreatedAt = user.CreatedAt,
                 LastLoginAt = user.LastLogin,
                 IsActive = user.IsActive
@@ -134,10 +128,8 @@ namespace Website.Areas.Admin.Controllers
             var updateUserVm = new UpdateUserViewModel
             {
                 Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
+                DisplayName = user.DisplayName,
                 PhoneNumber = user.PhoneNumber,
-                EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsActive = user.IsActive
             };
@@ -169,9 +161,12 @@ namespace Website.Areas.Admin.Controllers
                 SocialLinks = user.SocialLinks
             };
 
-            if (!model.SocialLinks.Any())
+            if (model.SocialLinks == null || !model.SocialLinks.Any())
             {
-                model.SocialLinks.Add(new UserSocialLinkDto());
+                model.SocialLinks = new List<UserSocialLinkDto>
+                {
+                    new UserSocialLinkDto()
+                };
             }
 
             return PartialView("_Personal", model);
@@ -219,7 +214,6 @@ namespace Website.Areas.Admin.Controllers
                 request,
                 cancellationToken);
 
-            // Giả sử ServiceResult của bạn có property IsSuccess.
             if (!result.Succeeded)
             {
                 return BadRequest(new
@@ -271,6 +265,17 @@ namespace Website.Areas.Admin.Controllers
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "Error uploading avatar for user {UserId}", id);
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Không thể cập nhật ảnh đại diện lúc này."
+                });
             }
         }
 
@@ -350,6 +355,14 @@ namespace Website.Areas.Admin.Controllers
                     id = user.Id
                 });
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(new
@@ -360,12 +373,13 @@ namespace Website.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating user account.");
+                _logger.LogError(ex,
+                    "Error resetting password");
 
                 return StatusCode(500, new
                 {
                     success = false,
-                    message = "Không thể tạo tài khoản lúc này."
+                    message = "Không thể đặt lại mật khẩu lúc này."
                 });
             }
         }
@@ -417,14 +431,24 @@ namespace Website.Areas.Admin.Controllers
 
                 var request = new UpdateUserRequest
                 {
+                    DisplayName = model.DisplayName,
                     PhoneNumber = model.PhoneNumber,
                     IsActive = model.IsActive
                 };
 
-                await _userService.UpdateUserAsync(
-                    id, request, cancellationToken);
+                var result = await _userService.UpdateUserAsync(id, request, cancellationToken);
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = result.Message
+                    });
+                }
 
-                await _activityLogger.LogAsync(
+                var noChanges = result.Data == "NoChanges";
+
+                await _logSafetyService.TryLogActivityAsync(
                     ActivityType.UpdateData,
                     "User",
                     id,
@@ -433,7 +457,16 @@ namespace Website.Areas.Admin.Controllers
                 return Ok(new
                 {
                     success = true,
-                    message = "Cập nhật tài khoản thành công."
+                    noChanges,
+                    message = noChanges ? "Thông tin không có thay đổi." : "Cập nhật tài khoản thành công.",
+                    data = new
+                    {
+                        displayName = string.IsNullOrWhiteSpace(request.DisplayName) ? null
+                            : request.DisplayName.Trim(),
+                        phoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber)
+                            ? null : request.PhoneNumber.Trim(),
+                        isActive = request.IsActive
+                    }
                 });
             }
             catch (InvalidOperationException ex)
@@ -513,9 +546,18 @@ namespace Website.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
         public async Task<IActionResult> ResendConfirmEmail(
-    string id,
-    CancellationToken cancellationToken)
+     string id,
+     CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Tài khoản không hợp lệ."
+                });
+            }
+
             var user = await _userService.FindByIdAsync(
                 id, cancellationToken);
 
@@ -528,16 +570,32 @@ namespace Website.Areas.Admin.Controllers
                 });
             }
 
+            if (user.EmailConfirmed)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Email của tài khoản đã được xác minh."
+                });
+            }
+
             try
             {
-                var result = await _authService.ResendConfirmEmailAsync(
-                    user.Email!,
-                    cancellationToken);
+                var result = await _userService.ResendConfirmEmailForAdminAsync(id, cancellationToken);
+
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = result.Message
+                    });
+                }
 
                 return Ok(new
                 {
-                    success = result.Succeeded,
-                    message = result.Message
+                    success = true,
+                    message = "Đã gửi lại email xác thực."
                 });
             }
             catch (Exception ex)
@@ -555,13 +613,29 @@ namespace Website.Areas.Admin.Controllers
             }
         }
 
-        [HttpPost("user-assign-role/{id?}/{role?}")]
+        [HttpPost("user-assign-role/{userId?}/{role?}")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> AssignRole(string userId, string role)
+        public async Task<IActionResult> AssignRole(string userId, string role,
+    CancellationToken cancellationToken)
         {
-            await _userService.AssignRoleAsync(userId, role);
+            try
+            {
+                await _userService.AssignRoleAsync(
+                    userId,
+                    role,
+                    cancellationToken);
 
-            return RedirectToAction(nameof(Details), new { id = userId });
+                return RedirectToAction(nameof(Details), new { id = userId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { success = false, message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+
         }
 
 
@@ -582,9 +656,9 @@ namespace Website.Areas.Admin.Controllers
             {
                 await _userService.ResetPasswordAsync(userId, request.NewPassword);
 
-                //await _activityLogger.LogAsync($"Reset password for user: {userId}");
+                //await _logSafetyService.TryLogActivityAsync($"Reset password for user: {userId}");
 
-                await _activityLogger.LogAsync(ActivityType.ChangePass, "User",
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ChangePass, "User",
                 userId, $"Reset password for user: {userId}");
 
                 return Ok(new
@@ -609,11 +683,12 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("user-suspend/{id}")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> Suspend(string id)
+        public async Task<IActionResult> Suspend(string id,
+    CancellationToken cancellationToken)
         {
             try
             {
-                var user = await _userService.FindByIdAsync(id);
+                var user = await _userService.FindByIdAsync(id,cancellationToken);
 
                 if (user == null || user.IsDeleted)
                 {
@@ -624,17 +699,21 @@ namespace Website.Areas.Admin.Controllers
                     });
                 }
 
-                await _userService.DisableAsync(id);
-                var updatedUser = await _userService.FindByIdAsync(id);
+                await _userService.SuspendAsync(id,cancellationToken);
 
-                await _activityLogger.LogAsync(ActivityType.SuspendAccount, "User",
-                    id, $"Suspended user account: {user.UserName}");
+                var updatedUser = await _userService.FindByIdAsync(id, cancellationToken);
+                
+                await _logSafetyService.TryLogActivityAsync(
+                    ActivityType.SuspendAccount,
+                    "User",
+                    id,
+                    $"Suspended user account: {user.UserName}");
 
                 return Ok(new
                 {
                     success = true,
                     message = "Đã tạm ngưng tài khoản.",
-                    isActive = updatedUser.IsActive
+                    status = (int)updatedUser.Status
                 });
             }
             catch (Exception ex)
@@ -652,11 +731,11 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("user-activate/{id}")]
         [ValidateAntiForgeryToken]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> Activate(string id)
+        public async Task<IActionResult> Activate(string id,CancellationToken cancellationToken = default)
         {
             try
             {
-                var user = await _userService.FindByIdAsync(id);
+                var user = await _userService.FindByIdAsync(id,cancellationToken);
 
                 if (user == null || user.IsDeleted)
                 {
@@ -667,9 +746,9 @@ namespace Website.Areas.Admin.Controllers
                     });
                 }
 
-                await _userService.EnableAsync(id);
-                var updatedUser = await _userService.FindByIdAsync(id);
-                await _activityLogger.LogAsync(
+                await _userService.UnsuspendAsync(id, cancellationToken);
+                var updatedUser = await _userService.FindByIdAsync(id, cancellationToken);
+                await _logSafetyService.TryLogActivityAsync(
                     ActivityType.UnsuspendAccount,
                     "User",
                     id,
@@ -679,7 +758,7 @@ namespace Website.Areas.Admin.Controllers
                 {
                     success = true,
                     message = "Đã kích hoạt tài khoản.",
-                    isActive = updatedUser.IsActive
+                    status = (int)updatedUser.Status
                 });
             }
             catch (Exception ex)
@@ -715,7 +794,7 @@ namespace Website.Areas.Admin.Controllers
 
                 await _userService.UnlockAsync(id);
 
-                await _activityLogger.LogAsync(
+                await _logSafetyService.TryLogActivityAsync(
                     ActivityType.UnlockAccount,
                     "User",
                     id,
@@ -822,6 +901,62 @@ namespace Website.Areas.Admin.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("{userId}/sessions/revoke-all")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> RevokeAllSessions(
+    string userId,
+    CancellationToken cancellationToken)
+        {
+            try
+            {
+                var revokedCount = await _userService.RevokeAllUserSessionsAsync(
+                    userId,
+                    cancellationToken);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Đã thu hồi {revokedCount} phiên đăng nhập."
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to revoke all user sessions. UserId: {UserId}",
+                    userId);
+
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Không thể đăng xuất tất cả thiết bị."
+                });
+            }
+        }
+
+        [HttpGet("statistics")]
+        [PermissionAction(ActionType.View)]
+        public async Task<IActionResult> GetStatistics(
+    CancellationToken cancellationToken)
+        {
+            var statistics = await _userService.GetUserStatisticsAsync(
+                cancellationToken);
+
+            return Json(statistics);
         }
 
         private Dictionary<string, string[]> GetModelErrors()

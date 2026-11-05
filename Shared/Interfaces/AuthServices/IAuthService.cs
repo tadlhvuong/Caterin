@@ -43,7 +43,7 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<ServiceResult> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default);
-
+       
         /// <summary>
         /// Refresh access token bằng refresh token
         /// </summary>
@@ -59,6 +59,15 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task LogoutAsync(string refreshToken, CancellationToken cancellationToken = default);
+
+        // <summary>
+        /// Logout user và revoke refresh token all
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task LogoutAllAsync(string userId, CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Quên mật khẩu
         /// </summary>

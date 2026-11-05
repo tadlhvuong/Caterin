@@ -24,7 +24,5 @@ namespace Website.Areas.Admin.Models.User
         [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu.")]
         [Compare(nameof(Password), ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmPassword { get; set; } = string.Empty;
-
-        public List<string> RoleIds { get; set; } = new();
     }
 }

@@ -23,7 +23,7 @@ namespace Shared.Data.Entities.Identity
         public bool IsActive { get; set; } = true;
         public long PermissionVersion { get; set; } = 1;
         public int TokenVersion { get; set; } = 1;
-
+        public string DisplayName { get; set; }
         [Display(Name = "Ngày sinh")]
         public DateTime? DateOfBirth { get; set; }
 

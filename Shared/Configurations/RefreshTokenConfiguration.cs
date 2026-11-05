@@ -16,6 +16,10 @@ namespace Shared.Configurations
 
             builder.Property(x => x.ReplacedByTokenHash).IsRequired(false).HasMaxLength(64);
 
+            builder.Property(x => x.ProtectedReplacedByToken).HasMaxLength(2000).IsRequired(false);
+
+            builder.Property(x => x.RotationRetryUntil).IsRequired(false).HasColumnType("timestamp with time zone");
+
             builder.Property(x => x.JwtId).IsRequired(false).HasMaxLength(100);
 
             builder.Property(x => x.RevokedReason).HasMaxLength(500);

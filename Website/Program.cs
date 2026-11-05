@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using Shared.Data.Seeders;
 using Shared.DTOs.Auth;
 using Shared.DTOs.Identity;
 using Shared.Extensions;
+using Shared.Helpers;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
 using Shared.Interfaces.Chat;
@@ -45,7 +47,7 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 var services = builder.Services;
 var configuration = builder.Configuration;
-
+services.AddDataProtection().SetApplicationName("Caterin");
 // Add services to the container.
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 var connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -56,6 +58,7 @@ services.AddSingleton<ILogPipeline, LogPipeline>();
 
 services.AddScoped<IActivityLogger, ActivityLogger>();
 services.AddScoped<ISecurityLogger, SecurityLogger>();
+services.AddScoped<ILogSafetyService, LogSafetyService>();
 
 services.Configure<LogWorkerOptions>(builder.Configuration.GetSection("LogWorker"));
 Console.WriteLine(">>> REGISTER LogBackgroundWorker");
@@ -138,13 +141,16 @@ services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 services.AddScoped<IModuleService, ModuleService>();
 services.AddScoped<IRoleService, RoleService>();
 services.AddScoped<IPermissionService, PermissionService>();
+services.AddScoped<ILevelAuthorizationService, LevelAuthorizationService>();
 
 services.AddScoped<ICurrentUserService, CurrentUserService>();
 services.AddScoped<IUserService, UserService>();
 services.AddScoped<IMenuService, MenuService>();
+
 services.AddScoped<IEmailSender, EmailSender>();
 services.AddScoped<IEmailTemplateService, EmailTemplateService>();
 services.AddScoped<IEmailActionService, EmailActionService>();
+services.AddScoped<IUserEmailService, UserEmailService>();
 
 services.AddScoped<IRoutePermissionService, RoutePermissionService>();
 services.AddScoped<IRoutePermissionCache, RoutePermissionCache>();
@@ -203,6 +209,8 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.UseExceptionHandler("/StatusCode/500");
 app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
 var options = new ForwardedHeadersOptions
@@ -216,7 +224,7 @@ options.KnownNetworks.Clear();
 options.KnownProxies.Clear();
 
 app.UseForwardedHeaders(options);
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();  
 app.UseStaticFiles();
 app.UseRouting();

@@ -23,7 +23,7 @@ namespace Shared.Middlewares
 
         public async Task InvokeAsync(HttpContext context, IPermissionService permissionService, 
             ICurrentUserService currentUser, IUserValidationService userValidationService,
-            ISecurityLogger securityLogger)
+            ILogSafetyService logSafeService)
         {
             var path = context.Request.Path;
             if (!path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
@@ -32,7 +32,7 @@ namespace Shared.Middlewares
                 return;
             }
 
-            _logger.LogWarning(
+            _logger.LogDebug(
     "AdminAccessMiddleware: Path={Path}, Authenticated={Authenticated}, SnapshotNull={SnapshotNull}",
     context.Request.Path,
     context.User.Identity?.IsAuthenticated,
@@ -88,11 +88,11 @@ namespace Shared.Middlewares
                     return;
                 }
 
-                await securityLogger.LogAsync(SecurityActionType.AdminAccessDenied, false,
+                await logSafeService.TryLogSecurityAsync(SecurityActionType.AdminAccessDenied, false,
                     "User tried to access Admin area.");
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 _logger.LogWarning("User {UserId} tried to access Admin area ", userId);
-                if (context.Request.Path.StartsWithSegments("/api"))
+                if (context.Request.Path.StartsWithSegments("/admin/api"))
                 {
                     context.Response.StatusCode = StatusCodes.Status403Forbidden;
                 }

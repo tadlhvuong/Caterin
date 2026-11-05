@@ -8,4 +8,5 @@ namespace Shared.Interfaces.Log
         /// Lưu lịch sử bảo mật hệ thống
         /// </summary>
         Task LogAsync(SecurityActionType action, bool success, string message);
-    }}
+    }
+}

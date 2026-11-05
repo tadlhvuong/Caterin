@@ -32,30 +32,34 @@ namespace Website.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
-        private readonly ILogger _logger;
         SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly AppDbContext _dbContext;
         private readonly JwtSetting _jwtSettings;
         private readonly IMemoryCache _cache;
-        private readonly ISecurityLogger _securityLogger;
         private readonly IEmailTemplateService _emailTemplate;
         private readonly IEmailSender _emailSender;
 
-        public AccountController(IAuthService authService, ILogger<AuthController> logger,
+
+        private readonly ILogger _logger;
+        private readonly ILogSafetyService _logSafetyService;
+
+        public AccountController(IAuthService authService,
         UserManager<AppUser> userManager, SignInManager<AppUser> signInManager,
-            AppDbContext dbContext, IOptions<JwtSetting> jwtSettings, ISecurityLogger securityLogger,
-            IEmailTemplateService emailTemplate, IEmailSender emailSender)
+            AppDbContext dbContext, IOptions<JwtSetting> jwtSettings, 
+            IEmailTemplateService emailTemplate, IEmailSender emailSender,
+            ILogger<AuthController> logger, ILogSafetyService logSafetyService)
         {
             _authService = authService;
-            _logger = logger;
             _signInManager = signInManager;
             _userManager = userManager;
             _dbContext = dbContext;
             _jwtSettings = jwtSettings.Value;
-            _securityLogger = securityLogger;
             _emailTemplate = emailTemplate;
             _emailSender = emailSender;
+
+            _logger = logger;
+            _logSafetyService = logSafetyService;
         }
         public ActionResult Index()
         {
@@ -102,7 +106,7 @@ namespace Website.Controllers
             Response.Cookies.Append("refresh_token", result.RefreshToken!,
                 CookieHelper.RefreshToken(expiresAt));
 
-            await _securityLogger.LogAsync(SecurityActionType.Login, true, "Login success");
+            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.Login, true, "Login success");
             if (!string.IsNullOrWhiteSpace(
                     model.ReturnUrl))
             {

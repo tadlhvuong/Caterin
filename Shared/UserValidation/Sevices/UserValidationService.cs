@@ -76,18 +76,14 @@ namespace Shared.UserValidation.Sevices
                 return result;
 
             // Refresh Token
-            result = await _refreshTokenValidator.ValidateAsync(context, user, cancellationToken);
+            if (!context.IsRotationRetry)
+            {
+                result = await _refreshTokenValidator.ValidateAsync(
+                    context, user, cancellationToken);
 
-            if (!result.Succeeded)
-                return result;
-
-            // Permission Version
-            //result = await _permissionVersionValidator.ValidateAsync(context, user, cancellationToken);
-
-            //if (!result.Succeeded)
-            //    return result;
-
-            //context.PermissionSnapshot = await _permissionService.GetUserPermissionSnapshotAsync(user.Id, user.PermissionVersion, cancellationToken);
+                if (!result.Succeeded)
+                    return result;
+            }
 
             // Dynamic Permission - Admin only
             if (context.Scenario == UserValidationScenario.AccessToken && context.ValidatePermissions)

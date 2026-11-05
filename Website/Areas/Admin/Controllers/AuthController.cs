@@ -33,12 +33,11 @@ namespace Website.Areas.Admin.Controllers
         private readonly IEmailActionService _emailActionService;
 
         private readonly ILogger _logger;
-        private readonly IActivityLogger _activityLogger;
-        private readonly ISecurityLogger _securityLogger;
+        private readonly ILogSafetyService _logSafetyService;
 
         public AuthController(IAuthService authService, SignInManager<AppUser> signInManager,
-            AppDbContext dbContext, IOptions<JwtSetting> jwtSettings, ISecurityLogger securityLogger, 
-            ILogger<AuthController> logger, IActivityLogger activityLogger, IEmailActionService emailActionService)
+            AppDbContext dbContext, IOptions<JwtSetting> jwtSettings, 
+            ILogger<AuthController> logger, ILogSafetyService logSafetyService, IEmailActionService emailActionService)
         {
             _authService = authService;
             _signInManager = signInManager;
@@ -46,9 +45,8 @@ namespace Website.Areas.Admin.Controllers
             _jwtSettings = jwtSettings.Value;
             _emailActionService = emailActionService;
 
-            _activityLogger = activityLogger;
             _logger = logger;
-            _securityLogger = securityLogger;
+            _logSafetyService = logSafetyService;
         }
         public ActionResult Index()
         {
@@ -99,7 +97,7 @@ namespace Website.Areas.Admin.Controllers
             }
 
             _logger.LogInformation(result.UserName + ": login success");
-            await _securityLogger.LogAsync(SecurityActionType.Login, true, "Login success");
+            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.Login, true, "Login success");
             return RedirectToAction("Index", "Home", new { area = "Admin" });
         }
 
@@ -139,7 +137,7 @@ namespace Website.Areas.Admin.Controllers
                 return View(model);
             }
 
-            await _securityLogger.LogAsync(SecurityActionType.Login, true, "Login success");
+            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.Login, true, "Login success");
             TempData["Email"] = model.Email;
             return RedirectToAction(nameof(ConfirmEmail));
         }
@@ -370,17 +368,23 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("logout")]
         [ValidateAntiForgeryToken]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout(
+            CancellationToken cancellationToken)
         {
             var refreshToken = Request.Cookies["refresh_token"];
 
             if (!string.IsNullOrWhiteSpace(refreshToken))
             {
-                await _authService.LogoutAsync(refreshToken);
+                await _authService.LogoutAsync(
+                    refreshToken,
+                    cancellationToken);
             }
 
-            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
-            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ApplicationScheme);
+
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ExternalScheme);
 
             ClearAuthCookies();
 
@@ -388,18 +392,27 @@ namespace Website.Areas.Admin.Controllers
         }
 
         [HttpPost("logout-all")]
+        [Authorize]
         [ValidateAntiForgeryToken]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-        public async Task<IActionResult> LogoutAll()
+        public async Task<IActionResult> LogoutAll(
+            CancellationToken cancellationToken)
         {
-            var refreshToken = Request.Cookies["refresh_token"];
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (!string.IsNullOrWhiteSpace(refreshToken))
+            if (!string.IsNullOrWhiteSpace(userId))
             {
-                await _authService.LogoutAsync(refreshToken);
+                await _authService.LogoutAllAsync(
+                    userId,
+                    cancellationToken);
             }
 
-            await HttpContext.SignOutAsync();
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ApplicationScheme);
+
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ExternalScheme);
+
             ClearAuthCookies();
 
             return RedirectToAction("Login");

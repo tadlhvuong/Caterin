@@ -23,5 +23,6 @@ namespace Shared.UserValidation.DTOs
         public IReadOnlyList<string>? Permissions { get; set; }
 
         public bool ValidatePermissions { get; init; } = false;
+        public bool IsRotationRetry { get; set; }
     }
 }

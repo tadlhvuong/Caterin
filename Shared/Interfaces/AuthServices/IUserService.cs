@@ -45,10 +45,10 @@ namespace Shared.Interfaces.AuthServices
         #endregion
 
         #region User
-        Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserDataTableRequest request);
+        Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserDataTableRequest request, CancellationToken cancellationToken = default);
         Task<AppUser> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default);
 
-        Task UpdateUserAsync(
+        Task<ServiceResult> UpdateUserAsync(
             string userId,
             UpdateUserRequest request,
             CancellationToken cancellationToken = default);
@@ -71,6 +71,10 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task AssignRoleAsync(string userId, string role, CancellationToken cancellationToken = default);
+
+        Task<ServiceResult> AssignDefaultRoleAsync(
+    string userId,
+    CancellationToken cancellationToken = default);
         /// <summary>
         /// Xóa vai trò của user
         /// </summary>
@@ -89,7 +93,7 @@ namespace Shared.Interfaces.AuthServices
         Task ReplaceRolesAsync(string userId, IEnumerable<string> roles, CancellationToken cancellationToken = default);
 
         Task<int?> GetUserLevelAsync(string userId, CancellationToken cancellationToken = default);
-
+        Task<ServiceResult> ResendConfirmEmailForAdminAsync(string userId, CancellationToken cancellationToken = default);
         #endregion
 
         #region Permission
@@ -120,13 +124,7 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task ResetPasswordAsync(string userId, string newPassword, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Khóa tạm mật tài khoản
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task LockAsync(string userId, CancellationToken cancellationToken = default);
+        
         /// <summary>
         /// Mở tài khoản đã khóa tạm
         /// </summary>
@@ -134,18 +132,6 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task UnlockAsync(string userId, CancellationToken cancellationToken = default);
-        /// <summary>
-        /// Kiểm tra tài khoản có đang bị khóa không
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        Task<bool> IsLockedAsync(AppUser user);
-        /// <summary>
-        /// Kiểm tra tài khoản có đang bị khóa không theo id user
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        Task<bool> IsLockedIdAsync(string userId);
         /// <summary>
         /// Mở lại tài khoản
         /// </summary>
@@ -168,7 +154,10 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         /// 
-
+        Task SuspendAsync(string userId, CancellationToken cancellationToken = default);
+        Task UnsuspendAsync(
+   string userId,
+   CancellationToken cancellationToken = default);
         Task<UserDetailsDto?> GetUserDetailsAsync(string userId, CancellationToken cancellationToken = default);
         Task<UserPersonalDetailsDto?> GetUserPersonalDetailsAsync(
     string userId,
@@ -186,6 +175,12 @@ namespace Shared.Interfaces.AuthServices
         Task<int> RevokeUserSessionAsync(
     string userId,
     Guid sessionId,
+    CancellationToken cancellationToken = default);
+        Task<int> RevokeAllUserSessionsAsync(
+    string userId,
+    CancellationToken cancellationToken = default);
+
+        Task<UserStatisticsDto> GetUserStatisticsAsync(
     CancellationToken cancellationToken = default);
     }
 }

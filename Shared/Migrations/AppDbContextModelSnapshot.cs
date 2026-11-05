@@ -747,6 +747,10 @@ namespace Shared.Migrations
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -1685,6 +1689,10 @@ namespace Shared.Migrations
                     b.Property<TimeSpan>("Lifetime")
                         .HasColumnType("interval");
 
+                    b.Property<string>("ProtectedReplacedByToken")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
                     b.Property<string>("ReplacedByTokenHash")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
@@ -1698,6 +1706,9 @@ namespace Shared.Migrations
                     b.Property<string>("RevokedReason")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("RotationRetryUntil")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("SessionId")
                         .HasColumnType("uuid");

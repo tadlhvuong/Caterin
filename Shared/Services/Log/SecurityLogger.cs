@@ -7,8 +7,7 @@ using System.Diagnostics;
 
 namespace Shared.Services.Log
 {
-    public sealed class SecurityLogger
-    : ISecurityLogger
+    public sealed class SecurityLogger : ISecurityLogger
     {
         private readonly ICurrentUserService _currentUser;
         private readonly IHttpContextAccessor _httpContext;

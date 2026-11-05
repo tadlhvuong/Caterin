@@ -58,10 +58,13 @@ namespace CATERIN.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public IActionResult Error(int statusCode = 500)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            Response.StatusCode = statusCode;
+
+            return View("~/Views/StatusCode/Index.html", statusCode);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Shared.Data.Entities.Identity;
+using Shared.Enums;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
 
@@ -14,7 +15,10 @@ namespace Shared.UserValidation.Sevices
             _userManager = userManager;
         }
 
-        public async Task<UserValidationResult> ValidateAsync(UserValidationContext context, AppUser user, CancellationToken cancellationToken = default)
+        public async Task<UserValidationResult> ValidateAsync(
+            UserValidationContext context,
+            AppUser user,
+            CancellationToken cancellationToken = default)
         {
             if (user is null)
                 return UserValidationResult.Fail(UserValidationError.UserNotFound);
@@ -22,10 +26,20 @@ namespace Shared.UserValidation.Sevices
             if (user.IsDeleted)
                 return UserValidationResult.Fail(UserValidationError.UserDeleted);
 
-            if (!user.IsActive)
-            {
+            if (user.Status == EntityStatus.Deactivated)
+                return UserValidationResult.Fail(UserValidationError.UserDeactivated);
+
+            if (user.Status == EntityStatus.Suspended)
+                return UserValidationResult.Fail(UserValidationError.UserSuspended);
+
+            if (user.Status == EntityStatus.Pending)
+                return UserValidationResult.Fail(UserValidationError.EmailNotConfirmed);
+
+            if (user.Status != EntityStatus.Active)
                 return UserValidationResult.Fail(UserValidationError.UserInactive);
-            }
+
+            if (!user.IsActive)
+                return UserValidationResult.Fail(UserValidationError.UserInactive);
 
             if (await _userManager.IsLockedOutAsync(user))
             {
@@ -40,7 +54,6 @@ namespace Shared.UserValidation.Sevices
                     return UserValidationResult.Fail(
                         UserValidationError.EmailNotConfirmed);
                 }
-
                 // Nếu hệ thống bắt buộc xác thực số điện thoại
                 /*
                 if (!await _userManager.IsPhoneNumberConfirmedAsync(user))
@@ -53,5 +66,5 @@ namespace Shared.UserValidation.Sevices
 
             return UserValidationResult.Success();
         }
-    }   
+    }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Common;
+using Shared.Constants.Core;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
@@ -20,7 +21,12 @@ using Shared.Responses;
 using Shared.Responses.Datatables;
 using Shared.Responses.User;
 using Shared.Services.Caches;
+using Shared.Services.Email;
+using Shared.UserValidation.Interface;
+using Shared.UserValidation.Sevices;
 using System;
+using System.Data;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Shared.Services.Authentication
 {
@@ -31,27 +37,29 @@ namespace Shared.Services.Authentication
         private readonly RoleManager<AppRole> _roleManager;
         private readonly IRefreshTokenService _refreshTokenService;
         private readonly ICurrentUserService _currentUserService;
+        private readonly ILevelAuthorizationService _levelService;
         private readonly IMediaService _mediaService;
         private readonly IAppCache _cache;
+        private readonly IUserEmailService _userEmailService;
 
         private readonly ILogger<UserService> _logger;
-        private readonly ISecurityLogger _securityLogger;
-        private readonly IActivityLogger _activityLogger;
+        private readonly ILogSafetyService _logSafetyService;
+
         public UserService(AppDbContext dbContext, UserManager<AppUser> userManager, IRefreshTokenService refreshTokenService, RoleManager<AppRole> roleManager,
-             ICurrentUserService currentUserService, IMediaService mediaService,
-             ILogger<UserService> logger, ISecurityLogger securityLogger, IActivityLogger activityLogger,
-             IAppCache cache)
+             ICurrentUserService currentUserService, IMediaService mediaService, ILevelAuthorizationService levelService,
+             ILogger<UserService> logger, ILogSafetyService logSafetyService,
+             IAppCache cache, IUserEmailService userEmailService)
         {
             _dbContext = dbContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _refreshTokenService = refreshTokenService;
             _currentUserService = currentUserService;
+            _levelService = levelService;
             _mediaService = mediaService;
-
+            _userEmailService = userEmailService;
             _logger = logger;
-            _securityLogger = securityLogger;
-            _activityLogger = activityLogger;
+            _logSafetyService = logSafetyService;
             _cache = cache;
         }
         public async Task<AppUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
@@ -79,12 +87,14 @@ namespace Shared.Services.Authentication
         }
         #region USER 
 
-        public async Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserDataTableRequest request)
+        public async Task<PagedResult<UserListItemResponse>> GetUsersAsync(UserDataTableRequest request, CancellationToken cancellationToken = default)
         {
-            var query = _dbContext.Users.Include(x => x.AvatarMediaFile).AsNoTracking().Where(x => !x.IsDeleted);
+            var query = _dbContext.Users.AsNoTracking().Where(x => !x.IsDeleted);
 
             // Tổng số tài khoản chưa bị xóa mềm.
-            var totalCount = await query.CountAsync();
+            var totalCount = await query.CountAsync(cancellationToken);
+
+            var now = DateTimeOffset.UtcNow;
 
             // Tìm kiếm.
             if (!string.IsNullOrWhiteSpace(request.Search))
@@ -105,15 +115,23 @@ namespace Shared.Services.Authentication
             }
 
             // Lọc trạng thái khóa.
-            if (request.IsLocked.HasValue)
+            if (request.IsIdentityLocked.HasValue)
             {
-                query = query.Where(x => x.IsLocked == request.IsLocked.Value);
+                query = request.IsIdentityLocked.Value
+                    ? query.Where(x =>
+                        x.LockoutEnabled &&
+                        x.LockoutEnd.HasValue &&
+                        x.LockoutEnd.Value > now)
+                    : query.Where(x =>
+                        !x.LockoutEnabled ||
+                        !x.LockoutEnd.HasValue ||
+                        x.LockoutEnd.Value <= now);
             }
 
             // Lọc theo vai trò.
-            if (!string.IsNullOrWhiteSpace(request.UserRole))
+            if (!string.IsNullOrWhiteSpace(request.RoleId))
             {
-                var roleId = request.UserRole.Trim();
+                var roleId = request.RoleId.Trim();
 
                 query = query.Where(x =>
                     x.UserRoles.Any(ur => ur.RoleId == roleId));
@@ -124,7 +142,7 @@ namespace Shared.Services.Authentication
                 query = query.Where(x =>
                     (int)x.Status == request.UserStatus.Value);
             }
-            var filteredCount = await query.CountAsync();
+            var filteredCount = await query.CountAsync(cancellationToken);
 
             // Sắp xếp theo các cột được cho phép.
             var descending = string.Equals(
@@ -146,9 +164,15 @@ namespace Shared.Services.Authentication
                     ? query.OrderByDescending(x => x.IsActive)
                     : query.OrderBy(x => x.IsActive),
 
-                "IsLocked" => descending
-                    ? query.OrderByDescending(x => x.IsLocked)
-                    : query.OrderBy(x => x.IsLocked),
+                "IsIdentityLocked" => descending
+                    ? query.OrderByDescending(x =>
+                        x.LockoutEnabled &&
+                        x.LockoutEnd.HasValue &&
+                        x.LockoutEnd.Value > now)
+                    : query.OrderBy(x =>
+                        x.LockoutEnabled &&
+                        x.LockoutEnd.HasValue &&
+                        x.LockoutEnd.Value > now),
 
                 "LastLogin" => descending
                     ? query.OrderByDescending(x => x.LastLogin)
@@ -156,19 +180,19 @@ namespace Shared.Services.Authentication
 
                 _ => descending
                     ? query.OrderByDescending(x => x.CreatedAt)
-                    : query.OrderBy(x => x.CreatedAt)
-            };
+                    : query.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id)
 
+            };
             // Phân trang an toàn.
             var start = Math.Max(0, request.Start);
             var length = request.Length <= 0
                 ? 10
                 : Math.Min(request.Length, 100);
-            var now = DateTimeOffset.UtcNow;
             var items = await query
                 .Skip(start)
                 .Take(length)
-                .Select(x => new {
+                .Select(x => new
+                {
                     User = new UserListItemResponse
                     {
                         Id = x.Id,
@@ -178,18 +202,19 @@ namespace Shared.Services.Authentication
                         AvatarUrl = x.AvatarMediaFile != null ? $"/uploads/{x.AvatarMediaFile.StoragePath}" : null,
                         Status = x.Status,
                         IsActive = x.IsActive,
-                        IsLocked = x.IsLocked,
                         CreatedAt = x.CreatedAt,
                         LastLogin = x.LastLogin
                     },
+                    x.LockoutEnabled,
                     x.LockoutEnd
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
             var resultItems = items.Select(x =>
             {
                 x.User.IsIdentityLocked =
-                    x.LockoutEnd.HasValue &&
-                    x.LockoutEnd.Value > now;
+    x.LockoutEnabled &&
+    x.LockoutEnd.HasValue &&
+    x.LockoutEnd.Value > now;
 
                 return x.User;
             }).ToList();
@@ -206,7 +231,7 @@ namespace Shared.Services.Authentication
                         x.UserId,
                         RoleName = x.Role.Name
                     })
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
 
                 var rolesByUser = userRoles
                     .GroupBy(x => x.UserId)
@@ -236,7 +261,7 @@ namespace Shared.Services.Authentication
                 FilteredCount = filteredCount
             };
         }
-        
+
         public async Task<UserDetailsDto?> GetUserDetailsAsync(string userId, CancellationToken cancellationToken = default)
         {
             try
@@ -251,6 +276,11 @@ namespace Shared.Services.Authentication
                 if (user == null)
                     return null;
 
+                await _levelService.EnsureCanManageUserAsync(
+                    userId,
+                    allowSelf: true,
+                    cancellationToken);
+
                 var roles = await _userManager.GetRolesAsync(user);
 
                 return new UserDetailsDto
@@ -259,6 +289,7 @@ namespace Shared.Services.Authentication
                     AvatarStoragePath = user.AvatarMediaFile?.StoragePath,
 
                     UserName = user.UserName ?? string.Empty,
+                    DisplayName = user.DisplayName ?? string.Empty,
                     Email = user.Email ?? string.Empty,
                     EmailConfirmed = user.EmailConfirmed,
 
@@ -270,8 +301,16 @@ namespace Shared.Services.Authentication
                     CreatedAt = user.CreatedAt,
                     LastLogin = user.LastLogin,
 
-                    IsActive = user.IsActive
+                    Status = user.Status,
+                    IsActive = user.IsActive,
+                    IsIdentityLocked = user.LockoutEnabled && user.LockoutEnd.HasValue &&
+                        user.LockoutEnd.Value > DateTimeOffset.UtcNow
                 };
+            }
+
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -300,11 +339,14 @@ namespace Shared.Services.Authentication
 
                 if (user == null)
                     return null;
-
+                await _levelService.EnsureCanManageUserAsync(
+    userId,
+    allowSelf: true,
+    cancellationToken);
                 return new UserPersonalDetailsDto
                 {
                     Id = user.Id,
-                    DisplayName = user.NormalizedUserName,
+                    DisplayName = user.DisplayName,
                     Address = user.AddressDetail,
                     ProvinceCode = user.ProvinceCode,
                     WardCode = user.WardCode,
@@ -320,6 +362,10 @@ namespace Shared.Services.Authentication
                         .ToList()
                 };
             }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(
@@ -333,6 +379,12 @@ namespace Shared.Services.Authentication
 
         public async Task<AppUser> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(request.UserName))
+                throw new InvalidOperationException("Tên đăng nhập không được để trống.");
+
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw new InvalidOperationException("Email không được để trống.");
+
             var userName = request.UserName.Trim();
             var email = request.Email.Trim();
 
@@ -350,18 +402,33 @@ namespace Shared.Services.Authentication
                 throw new InvalidOperationException(
                     $"Role '{defaultRole}' không tồn tại.");
 
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(defaultRole, cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user");
+
+                throw;
+            }
             var user = new AppUser
             {
                 UserName = userName,
+                DisplayName = userName,
                 Email = email,
-                PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber)
-                    ? null
-                    : request.PhoneNumber.Trim(),
+                PhoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber) ? null : request.PhoneNumber.Trim(),
 
                 EmailConfirmed = false,
                 IsActive = true,
-                IsLocked = false,
                 IsDeleted = false,
+                Status = EntityStatus.Pending,
 
                 PermissionVersion = 1,
                 TokenVersion = 1,
@@ -370,20 +437,14 @@ namespace Shared.Services.Authentication
                 CreatedById = _currentUserService.UserId
             };
 
-            await using var transaction =
-                await _dbContext.Database.BeginTransactionAsync(
-                    cancellationToken);
-
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
             {
-                var createResult = await _userManager.CreateAsync(
-                    user,
-                    request.Password);
+                var createResult = await _userManager.CreateAsync(user, request.Password);
 
                 if (!createResult.Succeeded)
                 {
-                    var errors = string.Join(
-                        ", ",
+                    var errors = string.Join(", ",
                         createResult.Errors.Select(x => x.Description));
 
                     _logger.LogWarning(
@@ -414,21 +475,11 @@ namespace Shared.Services.Authentication
                 user.Id);
 
             // Chỉ ghi ActivityLog sau khi tạo tài khoản thành công.
-            try
-            {
-                await _activityLogger.LogAsync(
+            await _logSafetyService.TryLogActivityAsync(
                     ActivityType.CreateData,
                     "User",
                     user.Id,
                     $"Created user account: {user.UserName}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user creation activity. UserId: {UserId}",
-                    user.Id);
-            }
 
             return user;
         }
@@ -438,6 +489,7 @@ namespace Shared.Services.Authentication
     string role,
     CancellationToken cancellationToken = default)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
             role = role.Trim();
 
             if (!await _roleManager.RoleExistsAsync(role))
@@ -460,7 +512,7 @@ namespace Shared.Services.Authentication
             }
         }
 
-        public async Task UpdateUserAsync(string userId, UpdateUserRequest request, CancellationToken cancellationToken = default)
+        public async Task<ServiceResult> UpdateUserAsync(string userId, UpdateUserRequest request, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
@@ -469,7 +521,24 @@ namespace Shared.Services.Authentication
                 throw new InvalidOperationException(
                     "Tài khoản không tồn tại.");
             }
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(userId, allowSelf: false, cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
+                throw;
+            }
+            var displayNameChanged = user.DisplayName != request.DisplayName;
             var phoneNumber = string.IsNullOrWhiteSpace(request.PhoneNumber)
                 ? null
                 : request.PhoneNumber.Trim();
@@ -477,40 +546,57 @@ namespace Shared.Services.Authentication
             var phoneChanged = user.PhoneNumber != phoneNumber;
             var activeChanged = user.IsActive != request.IsActive;
 
+            if (!displayNameChanged && !phoneChanged && !activeChanged)
+                return ServiceResult.Success("NoChanges");
+
+            user.DisplayName = request.DisplayName;
             user.PhoneNumber = phoneNumber;
             user.IsActive = request.IsActive;
-
-            // Tạm thời xác nhận số điện thoại theo quy tắc hiện tại.
-            // Khi triển khai xác thực SMS, cần thay đổi logic này.
-            if (phoneChanged && !string.IsNullOrWhiteSpace(phoneNumber))
+            if (phoneChanged)
             {
-                user.PhoneNumberConfirmed = true;
+                user.PhoneNumberConfirmed = false;
             }
 
             user.UpdatedAt = DateTime.UtcNow;
             user.UpdatedById = _currentUserService.UserId;
+
             if (activeChanged)
             {
                 user.PermissionVersion++;
                 user.TokenVersion++;
             }
-            var result = await _userManager.UpdateAsync(user);
-
-            if (!result.Succeeded)
+            await using var transaction =  await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+            try
             {
-                var errors = string.Join(
-                    ", ",
-                    result.Errors.Select(x => x.Description));
-                _logger.LogError(
-            "Failed to update user account. UserId: {UserId}. Errors: {Errors}",
-            userId,
-            errors);
-                throw new InvalidOperationException(
-                    $"Không thể cập nhật tài khoản: {errors}");
-            }
 
-            // Vô hiệu hóa các cache liên quan khi trạng thái tài khoản đổi.
-            
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(
+                        ", ",
+                        result.Errors.Select(x => x.Description));
+                    _logger.LogError(
+                "Failed to update user account. UserId: {UserId}. Errors: {Errors}",
+                userId,
+                errors);
+                    throw new InvalidOperationException(
+                        $"Không thể cập nhật tài khoản: {errors}");
+                }
+
+                if (activeChanged && !request.IsActive)
+                {
+                    await _refreshTokenService.RevokeAllUserTokensAsync(
+                        userId, TokenRevocationReasons.UpdatedUser,
+                        cancellationToken);
+                }
+                await transaction.CommitAsync(cancellationToken);
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
 
             await InvalidateUserCache(userId);
 
@@ -519,43 +605,20 @@ namespace Shared.Services.Authentication
                 userId);
             if (phoneChanged || activeChanged)
             {
-                try
-                {
-                    await _activityLogger.LogAsync(
+                await _logSafetyService.TryLogActivityAsync(
                         ActivityType.UpdateData,
                         "User",
                         userId,
                         "Updated user account information.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(
-                        ex,
-                        "Failed to log user update activity. UserId: {UserId}",
-                        userId);
-                }
             }
             if (activeChanged)
             {
-                try
-                {
-                    await _securityLogger.LogAsync(
-                        request.IsActive
-                            ? SecurityActionType.Enable
-                            : SecurityActionType.Disable,
+                await _logSafetyService.TryLogSecurityAsync(
+                        request.IsActive ? SecurityActionType.Enable : SecurityActionType.Disable,
                         true,
-                        request.IsActive
-                            ? "User account was enabled."
-                            : "User account was disabled.");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(
-                        ex,
-                        "Failed to log user account status security event. UserId: {UserId}",
-                        userId);
-                }
+                        request.IsActive ? "User account was enabled." : "User account was disabled.");
             }
+            return ServiceResult.Success("Updated");
         }
 
         public async Task<string> UpdateAvatarAsync(string userId, IFormFile file,
@@ -568,7 +631,27 @@ namespace Shared.Services.Authentication
 
             if (user == null)
                 throw new KeyNotFoundException("Tài khoản không tồn tại.");
+            try
+            {
 
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: true,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
             // Lưu lại ID avatar hiện tại để xử lý sau khi cập nhật thành công.
             var oldAvatarId = user.AvatarMediaFileId;
 
@@ -622,22 +705,24 @@ namespace Shared.Services.Authentication
             // Chỉ xử lý avatar cũ sau khi cập nhật thành công.
             if (oldAvatarId.HasValue && oldAvatarId.Value != newMedia.Id)
             {
-                await TryDeleteUnusedMediaAsync(oldAvatarId.Value, cancellationToken);
+                try
+                {
+                    await TryDeleteUnusedMediaAsync(
+                        oldAvatarId.Value,
+                        cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Failed to clean up old avatar. UserId: {UserId}, MediaFileId: {MediaFileId}",
+                        userId,
+                        oldAvatarId.Value);
+                }
             }
-            try
-            {
-                await _activityLogger.LogAsync(ActivityType.UpdateData, "User",
-                    userId,
-                    "Updated user avatar.");
-            }
-            catch (Exception ex)
-            {
-                // Không làm thất bại thao tác upload đã hoàn tất chỉ vì lỗi ghi ActivityLog.
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user avatar update activity. UserId: {UserId}",
-                    userId);
-            }
+            await _logSafetyService.TryLogActivityAsync(ActivityType.UpdateData, "User",
+                   userId,
+                   "Updated user avatar.");
             return $"/uploads/{newMedia.StoragePath}";
         }
 
@@ -720,70 +805,37 @@ namespace Shared.Services.Authentication
             }
         }
 
-        public async Task LockAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task UnlockAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null || user.IsDeleted)
                 return;
-
-            // Không thực hiện lại nếu tài khoản đã bị khóa.
-            if (await _userManager.IsLockedOutAsync(user))
-                return;
-
-            await using var transaction =
-                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
             try
             {
-                user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
-                user.UpdatedById = _currentUserService.UserId;
-                user.UpdatedAt = DateTime.UtcNow;
-
-                await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.Lock);
-
-                await transaction.CommitAsync(cancellationToken);
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                try
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                }
-                catch (Exception rollbackEx)
-                {
-                    _logger.LogError(
-                        rollbackEx,
-                        "Failed to rollback user lock transaction. UserId: {UserId}",
-                        userId);
-                }
-
                 _logger.LogError(
                     ex,
-                    "Failed to lock user account. UserId: {UserId}",
+                    "Failed to update user. UserId: {UserId}",
                     userId);
 
                 throw;
             }
-
-            await InvalidateUserCache(userId);
-
-            _logger.LogInformation(
-                "User account locked successfully. UserId: {UserId}",
-                userId);
-        }
-
-        public async Task UnlockAsync(string userId, CancellationToken cancellationToken = default)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null || user.IsDeleted)
-                return;
-
-            // Không thực hiện nếu tài khoản hiện không bị khóa.
-            if (!await _userManager.IsLockedOutAsync(user))
+            // Không thực hiện nếu không có trạng thái Lockout cần xử lý.
+            if (!user.LockoutEnd.HasValue &&
+                user.AccessFailedCount == 0)
                 return;
 
             await using var transaction =
@@ -791,16 +843,30 @@ namespace Shared.Services.Authentication
 
             try
             {
-                user.LockoutEnd = null;
-                user.AccessFailedCount = 0;
+                var lockoutResult =
+                    await _userManager.SetLockoutEndDateAsync(user, null);
+
+                if (!lockoutResult.Succeeded)
+                    throw new InvalidOperationException(
+                        string.Join("; ", lockoutResult.Errors.Select(x => x.Description)));
+
+                var resetResult =
+                    await _userManager.ResetAccessFailedCountAsync(user);
+
+                if (!resetResult.Succeeded)
+                    throw new InvalidOperationException(
+                        string.Join("; ", resetResult.Errors.Select(x => x.Description)));
+
                 user.UpdatedById = _currentUserService.UserId;
                 user.UpdatedAt = DateTime.UtcNow;
 
-                await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.UnLock);
-
+                await IncreasePermissionVersionInternalAsync(user);
                 await transaction.CommitAsync(cancellationToken);
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.UnLock,
+                    true,
+                    $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -825,26 +891,16 @@ namespace Shared.Services.Authentication
             }
 
             await InvalidateUserCache(userId);
-
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.UnlockAccount,
+    "User",
+    userId,
+    "Unlocked user account.");
             _logger.LogInformation(
                 "User account unlocked successfully. UserId: {UserId}",
                 userId);
         }
 
-        public Task<bool> IsLockedAsync(AppUser user)
-        {
-            return _userManager.IsLockedOutAsync(user);
-        }
-        
-        public async Task<bool> IsLockedIdAsync(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-                return false;
-
-            return await _userManager.IsLockedOutAsync(user);
-        }
 
         public async Task DisableAsync(string userId, CancellationToken cancellationToken = default)
         {
@@ -852,7 +908,26 @@ namespace Shared.Services.Authentication
 
             if (user == null || user.IsDeleted)
                 return;
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
+                throw;
+            }
             // Không thực hiện lại nếu tài khoản đã bị vô hiệu hóa.
             if (!user.IsActive)
                 return;
@@ -865,12 +940,20 @@ namespace Shared.Services.Authentication
                 user.IsActive = false;
                 user.UpdatedById = _currentUserService.UserId;
                 user.UpdatedAt = DateTime.UtcNow;
+                user.TokenVersion++;
 
                 await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.Disable);
+                    user);
+
+                await _refreshTokenService.RevokeAllUserTokensAsync(
+                    userId, TokenRevocationReasons.AccountDisabled,
+                    cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.Disable,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -895,7 +978,11 @@ namespace Shared.Services.Authentication
             }
 
             await InvalidateUserCache(userId);
-
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.DisabledAccount,
+    "User",
+    userId,
+    "Unsuspended user account.");
             _logger.LogInformation(
                 "User account disabled successfully. UserId: {UserId}",
                 userId);
@@ -907,7 +994,26 @@ namespace Shared.Services.Authentication
 
             if (user == null || user.IsDeleted)
                 return;
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
+                throw;
+            }
             // Không thực hiện lại nếu tài khoản đã được kích hoạt.
             if (user.IsActive)
                 return;
@@ -920,12 +1026,15 @@ namespace Shared.Services.Authentication
                 user.IsActive = true;
                 user.UpdatedById = _currentUserService.UserId;
                 user.UpdatedAt = DateTime.UtcNow;
-
+                user.TokenVersion++;
                 await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.Enable);
+                    user);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.Enable,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -950,20 +1059,218 @@ namespace Shared.Services.Authentication
             }
 
             await InvalidateUserCache(userId);
-
+            await _logSafetyService.TryLogActivityAsync(
+   ActivityType.EnabledAccount,
+   "User",
+   userId,
+   "Unsuspended user account.");
             _logger.LogInformation(
                 "User account enabled successfully. UserId: {UserId}",
                 userId);
         }
+        public async Task SuspendAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
 
-        public async Task<ServiceResult> DeactivateAsync(string userId, CancellationToken cancellationToken = default)
+            if (user == null || user.IsDeleted)
+                return;
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
+            // Không thực hiện lại nếu tài khoản đã bị đình chỉ.
+            if (user.Status == EntityStatus.Suspended)
+                return;
+
+            await using var transaction =
+                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                user.Status = EntityStatus.Suspended;
+                user.UpdatedById = _currentUserService.UserId;
+                user.UpdatedAt = DateTime.UtcNow;
+                user.TokenVersion++;
+
+                await IncreasePermissionVersionInternalAsync(
+                    user);
+
+                await _refreshTokenService.RevokeAllUserTokensAsync(
+                    userId, TokenRevocationReasons.AccountSuspended,
+                    cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.Suspend,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError(
+                        rollbackEx,
+                        "Failed to rollback user suspend transaction. UserId: {UserId}",
+                        userId);
+                }
+
+                _logger.LogError(
+                    ex,
+                    "Failed to suspend user account. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
+
+            await InvalidateUserCache(userId);
+            await _logSafetyService.TryLogActivityAsync(
+   ActivityType.SuspendAccount,
+   "User",
+   userId,
+   "Unsuspended user account.");
+            _logger.LogInformation(
+                "User account suspended successfully. UserId: {UserId}",
+                userId);
+        }
+
+        public async Task UnsuspendAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null || user.IsDeleted)
+                return;
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
+            // Chỉ gỡ đình chỉ khi tài khoản đang Suspended.
+            if (user.Status != EntityStatus.Suspended)
+                return;
+
+            await using var transaction =
+                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
+                user.Status = EntityStatus.Active;
+                user.UpdatedById = _currentUserService.UserId;
+                user.UpdatedAt = DateTime.UtcNow;
+                user.TokenVersion++;
+
+                await IncreasePermissionVersionInternalAsync(
+                    user);
+
+                await _refreshTokenService.RevokeAllUserTokensAsync(
+                    userId, TokenRevocationReasons.AccountUnSuspended,
+                    cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.Unsuspend,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError(
+                        rollbackEx,
+                        "Failed to rollback user unsuspend transaction. UserId: {UserId}",
+                        userId);
+                }
+
+                _logger.LogError(
+                    ex,
+                    "Failed to unsuspend user account. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
+
+            await InvalidateUserCache(userId);
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.UnsuspendAccount,
+    "User",
+    userId,
+    "Unsuspended user account.");
+            _logger.LogInformation(
+                "User account unsuspended successfully. UserId: {UserId}",
+                userId);
+        }
+
+        public async Task<ServiceResult> DeactivateAsync(
+            string userId,
+            CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null || user.IsDeleted)
                 return ServiceResult.Fail("Tài khoản không tồn tại.");
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
-            if (!user.IsActive)
+                throw;
+            }
+            if (user.Status == EntityStatus.Deactivated)
                 return ServiceResult.Fail("Tài khoản đã bị vô hiệu hóa.");
 
             await using var transaction =
@@ -972,8 +1279,7 @@ namespace Shared.Services.Authentication
             try
             {
                 user.IsActive = false;
-                user.IsDeleted = true;
-                user.Status = EntityStatus.Deleted;
+                user.Status = EntityStatus.Deactivated;
                 user.PermissionVersion++;
                 user.TokenVersion++;
                 user.UpdatedById = _currentUserService.UserId;
@@ -990,8 +1296,24 @@ namespace Shared.Services.Authentication
                     throw new InvalidOperationException(
                         $"Không thể vô hiệu hóa tài khoản: {errors}");
                 }
-
+                await _refreshTokenService.RevokeAllUserTokensAsync(userId,TokenRevocationReasons.AccountDeactivated, cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                try
+                {
+                    await transaction.RollbackAsync(CancellationToken.None);
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError(
+                        rollbackEx,
+                        "Failed to rollback user deactivation transaction. UserId: {UserId}",
+                        userId);
+                }
+
+                throw;
             }
             catch (Exception ex)
             {
@@ -1018,36 +1340,16 @@ namespace Shared.Services.Authentication
 
             await InvalidateUserCache(userId);
 
-            try
-            {
-                await _securityLogger.LogAsync(
-                    SecurityActionType.Disable,
+            await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.Deactivate,
                     true,
                     $"User account deactivated. UserId: {userId}.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user deactivation security event. UserId: {UserId}",
-                    userId);
-            }
 
-            try
-            {
-                await _activityLogger.LogAsync(
+            await _logSafetyService.TryLogActivityAsync(
                     ActivityType.UpdateData,
                     "User",
                     userId,
                     "Deactivated user account.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user deactivation activity. UserId: {UserId}",
-                    userId);
-            }
 
             _logger.LogInformation(
                 "User account deactivated successfully. UserId: {UserId}",
@@ -1070,7 +1372,26 @@ namespace Shared.Services.Authentication
 
             if (user == null)
                 return ServiceResult.Fail("Không tìm thấy tài khoản.");
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: true,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
+                throw;
+            }
             // Bỏ qua các dòng mạng xã hội chưa nhập URL.
             var socialLinks = (request.SocialLinks ?? new List<UserSocialLinkDto>())
                 .Where(x => !string.IsNullOrWhiteSpace(x.Url))
@@ -1112,7 +1433,7 @@ namespace Shared.Services.Authentication
 
             try
             {
-                user.NormalizedUserName = request.DisplayName?.Trim();
+                user.DisplayName = request.DisplayName?.Trim();
                 user.AddressDetail = request.Address?.Trim();
                 user.ProvinceCode = request.ProvinceCode?.Trim();
                 user.WardCode = request.WardCode?.Trim();
@@ -1158,6 +1479,10 @@ namespace Shared.Services.Authentication
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(
@@ -1170,21 +1495,11 @@ namespace Shared.Services.Authentication
             }
 
             // Ghi nhận hoạt động sau khi cập nhật database thành công.
-            try
-            {
-                await _activityLogger.LogAsync(
+            await _logSafetyService.TryLogActivityAsync(
                     ActivityType.UpdateData,
                     "User",
                     userId,
                     "Updated user personal information.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user personal information update. UserId: {UserId}",
-                    userId);
-            }
 
             _logger.LogInformation(
                 "User personal information updated successfully. UserId: {UserId}",
@@ -1201,7 +1516,26 @@ namespace Shared.Services.Authentication
 
             if (user == null || user.IsDeleted)
                 throw new KeyNotFoundException("Tài khoản không tồn tại.");
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
+                throw;
+            }
             await using var transaction =
                 await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -1231,15 +1565,18 @@ namespace Shared.Services.Authentication
 
                 // Tăng PermissionVersion và ghi SecurityLog.
                 await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.ResetPassword);
+                    user);
 
                 // Thu hồi refresh token trên tất cả thiết bị.
                 await _refreshTokenService.RevokeAllUserTokensAsync(
-                    userId,
+                    userId, TokenRevocationReasons.ResetPassword,
                     cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.ResetPassword,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -1271,6 +1608,88 @@ namespace Shared.Services.Authentication
                 userId);
         }
 
+        public async Task<ServiceResult> ResendConfirmEmailForAdminAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "InvalidUserId",
+                    Message = "User ID is required."
+                });
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null || user.IsDeleted)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ResendConfirmEmail,
+                    false,
+                    $"Admin resend confirm email failed. Target user not found. UserId: {userId}");
+
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "UserNotFound",
+                    Message = "User not found."
+                });
+            }
+
+            if (user.EmailConfirmed)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ResendConfirmEmail,
+                    false,
+                    $"Admin resend confirm email ignored. Email already confirmed. UserId: {user.Id}");
+
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "EmailAlreadyConfirmed",
+                    Message = "Email has already been confirmed."
+                });
+            }
+
+            try
+            {
+                // Kiểm tra quyền quản lý tài khoản theo Level.
+                await _levelService.EnsureCanManageUserAsync(
+                    user.Id,
+                    allowSelf: false,
+                    cancellationToken);
+
+                var result = await _userEmailService.SendConfirmEmailAsync(
+                    user, cancellationToken);
+
+                if (!result.Succeeded)
+                {
+                    await _logSafetyService.TryLogSecurityAsync(
+                        SecurityActionType.ResendConfirmEmail,
+                        false,
+                        $"Admin resend confirm email failed. UserId: {user.Id}");
+
+                    return result;
+                }
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ResendConfirmEmail,
+                    true,
+                    $"Admin resend confirm email succeeded. UserId: {user.Id}");
+
+                return ServiceResult.Success(
+                    "Confirmation email sent successfully.");
+            }
+            catch (Exception ex)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ResendConfirmEmail,
+                    false,
+                    $"Admin resend confirm email exception. UserId: {user.Id}. Error: {ex.Message}");
+
+                throw;
+            }
+        }
         #endregion END-USER
 
 
@@ -1281,15 +1700,39 @@ namespace Shared.Services.Authentication
         {
             try
             {
+                var currentUserId = _currentUserService.UserId;
+
+                if (string.IsNullOrWhiteSpace(currentUserId))
+                    throw new UnauthorizedAccessException(
+                        "Không xác định được người thao tác.");
+
+                var currentLevel = await _levelService.GetUserLevelAsync(
+                    currentUserId,
+                    cancellationToken);
+
+                if (!currentLevel.HasValue)
+                    throw new UnauthorizedAccessException(
+                        "Bạn không có quyền thực hiện thao tác này.");
+
                 return await _roleManager.Roles
-                    .AsNoTracking()
-                    .OrderBy(x => x.Name)
-                    .Select(x => new UserRoleOptionDto
-                    {
-                        Value = x.Id,
-                        Name = x.Name
-                    })
-                    .ToListAsync(cancellationToken);
+     .AsNoTracking()
+     .Where(x => x.Level > currentLevel.Value)
+     .Where(x =>
+         !x.IsSystem &&
+         x.Name != "Root" &&
+         x.Name != "System" &&
+         x.Name != "Admin")
+     .OrderBy(x => x.Name)
+     .Select(x => new UserRoleOptionDto
+     {
+         Value = x.Id,
+         Name = x.Name
+     })
+     .ToListAsync(cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -1301,12 +1744,45 @@ namespace Shared.Services.Authentication
         public async Task AssignRoleAsync(string userId, string role, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            if (user == null || user.IsDeleted)
                 throw new Exception("Tài khoản không tồn tại.");
 
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
             role = role.Trim();
-            if (!await _roleManager.RoleExistsAsync(role))
-                throw new Exception($"Role '{role}' không tồn tại.");
+
+            var targetRole = await _roleManager.FindByNameAsync(role);
+
+            if (targetRole == null)
+                throw new KeyNotFoundException($"Role '{role}' không tồn tại.");
+
+            if (IsProtectedRole(targetRole))
+                throw new UnauthorizedAccessException(
+                    "This role cannot be assigned through normal user management.");
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+        userId,
+        allowSelf: false,
+        cancellationToken);
+
+                await _levelService.EnsureCanManageRoleAsync(
+                    role,
+                    cancellationToken);
+
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
 
             if (await _userManager.IsInRoleAsync(user, role))
                 return;
@@ -1333,10 +1809,13 @@ namespace Shared.Services.Authentication
                 }
 
                 await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.RoleAssigned);
+                    user);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.RoleAssigned,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -1371,24 +1850,56 @@ namespace Shared.Services.Authentication
                 role);
 
             // ActivityLog
-            try
-            {
-                await _activityLogger.LogAsync(
-                    ActivityType.UpdateData,
-                    "User",
-                    userId,
-                    $"Assigned role '{role}' to user.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log role assignment activity. UserId: {UserId}, Role: {Role}",
-                    userId,
-                    role);
-            }
+            await _logSafetyService.TryLogActivityAsync(
+                   ActivityType.UpdateData,
+                   "User",
+                   userId,
+                   $"Assigned role '{role}' to user.");
         }
-        
+
+        public async Task<ServiceResult> AssignDefaultRoleAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return ServiceResult.Fail("Tài khoản không hợp lệ.");
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null || user.IsDeleted)
+                return ServiceResult.Fail("Tài khoản không tồn tại.");
+
+            const string defaultRole = "User";
+
+            var role = await _roleManager.FindByNameAsync(defaultRole);
+
+            if (role == null)
+                return ServiceResult.Fail(
+                    "Vai trò mặc định không tồn tại trong hệ thống.");
+
+            // Tránh gán trùng role.
+            if (await _userManager.IsInRoleAsync(user, defaultRole))
+                return ServiceResult.Success();
+
+            var result = await _userManager.AddToRoleAsync(user, defaultRole);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(
+                    "; ",
+                    result.Errors.Select(x => x.Description));
+
+                return ServiceResult.Fail(
+                    $"Không thể cấp vai trò mặc định: {errors}");
+            }
+
+            await IncreasePermissionVersionAsync(
+                user.Id,
+                cancellationToken);
+
+            return ServiceResult.Success();
+        }
+
         public async Task RemoveRoleAsync(string userId, string role, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -1396,11 +1907,43 @@ namespace Shared.Services.Authentication
             if (user == null || user.IsDeleted)
                 throw new KeyNotFoundException("User not found.");
 
+            ArgumentException.ThrowIfNullOrWhiteSpace(role);
             role = role.Trim();
 
+            var targetRole = await _roleManager.FindByNameAsync(role);
+
+            if (targetRole == null)
+                throw new KeyNotFoundException($"Role '{role}' không tồn tại.");
+
+            if (IsProtectedRole(targetRole))
+                throw new UnauthorizedAccessException(
+                    "This role cannot be removed through normal user management.");
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+                userId,
+                allowSelf: false,
+                cancellationToken);
+
+                await _levelService.EnsureCanManageRoleAsync(
+                    role,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
             if (!await _userManager.IsInRoleAsync(user, role))
                 return;
-
             await using var transaction =
                 await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -1418,10 +1961,13 @@ namespace Shared.Services.Authentication
                 }
 
                 await IncreasePermissionVersionInternalAsync(
-                    user,
-                    SecurityActionType.RoleRemoved);
+                    user);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.RoleRemoved,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -1456,28 +2002,26 @@ namespace Shared.Services.Authentication
                 role);
 
             // ActivityLog
-            try
-            {
-                await _activityLogger.LogAsync(
-                    ActivityType.UpdateData,
-                    "User",
-                    userId,
-                    $"Removed role '{role}' from user.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log role removal activity. UserId: {UserId}, Role: {Role}",
-                    userId,
-                    role);
-            }
+            await _logSafetyService.TryLogActivityAsync(
+                   ActivityType.UpdateData,
+                   "User",
+                   userId,
+                   $"Removed role '{role}' from user.");
         }
 
-        public async Task ReplaceRolesAsync(string userId, IEnumerable<string> roles, CancellationToken cancellationToken = default)
+        public async Task ReplaceRolesAsync(
+    string userId,
+    IEnumerable<string> roles,
+    CancellationToken cancellationToken = default)
         {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("User ID is required.", nameof(userId));
+
+            ArgumentNullException.ThrowIfNull(roles);
+
             var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+
+            if (user == null || user.IsDeleted)
                 throw new KeyNotFoundException("Tài khoản không tồn tại.");
 
             var targetRoles = roles
@@ -1486,33 +2030,95 @@ namespace Shared.Services.Authentication
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray();
 
-            foreach (var role in targetRoles)
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            // Xác định Role cần gỡ và Role cần thêm.
+            var rolesToRemove = currentRoles
+                .Where(r => !targetRoles.Contains(
+                    r,
+                    StringComparer.OrdinalIgnoreCase))
+                .ToArray();
+
+            var rolesToAdd = targetRoles
+                .Where(r => !currentRoles.Contains(
+                    r,
+                    StringComparer.OrdinalIgnoreCase))
+                .ToArray();
+
+            // Không có thay đổi thì không cần kiểm tra quyền,
+            // cập nhật PermissionVersion hoặc ghi log.
+            if (rolesToRemove.Length == 0 && rolesToAdd.Length == 0)
+                return;
+
+            // Kiểm tra quyền quản lý User và Role.
+            try
             {
-                if (!await _roleManager.RoleExistsAsync(role))
-                    throw new InvalidOperationException(
-                        $"Vai trò '{role}' không tồn tại.");
+                await _levelService.EnsureCanManageUserAsync(
+                    userId,
+                    allowSelf: false,
+                    cancellationToken);
+
+                // Kiểm tra các Role sẽ bị gỡ.
+                foreach (var roleName in rolesToRemove)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+
+                    if (role == null)
+                        throw new KeyNotFoundException(
+                            $"Vai trò '{roleName}' không tồn tại.");
+
+                    if (IsProtectedRole(role))
+                        throw new UnauthorizedAccessException(
+                            "Protected roles cannot be removed through normal user management.");
+
+                    await _levelService.EnsureCanManageRoleAsync(
+                        roleName,
+                        cancellationToken);
+                }
+
+                // Kiểm tra các Role mới sẽ được gán.
+                foreach (var roleName in rolesToAdd)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+
+                    if (role == null)
+                        throw new KeyNotFoundException(
+                            $"Vai trò '{roleName}' không tồn tại.");
+
+                    if (IsProtectedRole(role))
+                        throw new UnauthorizedAccessException(
+                            "Protected roles cannot be assigned through normal user management.");
+
+                    await _levelService.EnsureCanManageRoleAsync(
+                        roleName,
+                        cancellationToken);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to validate role replacement permissions. UserId: {UserId}",
+                    userId);
+
+                throw;
             }
 
-            var currentRoles = await _userManager.GetRolesAsync(user);
-            // Không có thay đổi thì không cần cập nhật version hoặc ghi log.
-            var rolesUnchanged =
-                currentRoles.Count == targetRoles.Length &&
-                currentRoles.All(r =>
-                    targetRoles.Contains(r, StringComparer.OrdinalIgnoreCase));
-
-            if (rolesUnchanged)
-                return;
             await using var transaction =
-      await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                // Xóa các role hiện tại.
-                if (currentRoles.Count > 0)
+                // Gỡ các Role cũ.
+                if (rolesToRemove.Length > 0)
                 {
                     var removeResult = await _userManager.RemoveFromRolesAsync(
                         user,
-                        currentRoles);
+                        rolesToRemove);
 
                     if (!removeResult.Succeeded)
                     {
@@ -1523,12 +2129,12 @@ namespace Shared.Services.Authentication
                     }
                 }
 
-                // Gán các role mới.
-                if (targetRoles.Length > 0)
+                // Gán các Role mới.
+                if (rolesToAdd.Length > 0)
                 {
                     var addResult = await _userManager.AddToRolesAsync(
                         user,
-                        targetRoles);
+                        rolesToAdd);
 
                     if (!addResult.Succeeded)
                     {
@@ -1539,14 +2145,29 @@ namespace Shared.Services.Authentication
                     }
                 }
 
-                // Tăng PermissionVersion và ghi SecurityLog.
-                await IncreasePermissionVersionInternalAsync(user, SecurityActionType.RoleReplaced);
+                // Chỉ tăng PermissionVersion trong transaction.
+                await IncreasePermissionVersionInternalAsync(
+                    user);
 
                 await transaction.CommitAsync(cancellationToken);
+                await _logSafetyService.TryLogSecurityAsync(
+        SecurityActionType.RoleReplaced,
+        true,
+        $"Permission version updated for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                try
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                }
+                catch (Exception rollbackEx)
+                {
+                    _logger.LogError(
+                        rollbackEx,
+                        "Failed to rollback role replacement transaction. UserId: {UserId}",
+                        userId);
+                }
 
                 _logger.LogError(
                     ex,
@@ -1556,28 +2177,23 @@ namespace Shared.Services.Authentication
                 throw;
             }
 
+            // Chỉ thực hiện sau khi transaction thành công.
             await InvalidateUserCache(userId);
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.RoleReplaced,
+                true,
+                $"Roles replaced for user '{userId}'.");
+
+            await _logSafetyService.TryLogActivityAsync(
+                ActivityType.UpdateData,
+                "User",
+                userId,
+                "User roles were replaced.");
 
             _logger.LogInformation(
                 "User roles replaced successfully. UserId: {UserId}",
                 userId);
-
-            // ActivityLog sau khi transaction thành công.
-            try
-            {
-                await _activityLogger.LogAsync(
-                    ActivityType.UpdateData,
-                    "User",
-                    userId,
-                    "User roles were replaced.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log user role replacement activity. UserId: {UserId}",
-                    userId);
-            }
         }
 
         public async Task<int?> GetUserLevelAsync(string userId, CancellationToken cancellationToken = default)
@@ -1600,13 +2216,16 @@ namespace Shared.Services.Authentication
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return;
 
-            await IncreasePermissionVersionInternalAsync(user, SecurityActionType.PermissionChanged);
+            await IncreasePermissionVersionInternalAsync(user);
+            await InvalidateUserCache(userId);
         }
-        
+
         public async Task IncreasePermissionVersionByRoleAsync(string role, CancellationToken cancellationToken = default)
         {
-            var roleId = await _dbContext.Roles.Where(r => r.Name == role).
-                Select(r => r.Id).FirstOrDefaultAsync();
+            var roleId = await _dbContext.Roles
+    .Where(r => r.Name == role)
+    .Select(r => r.Id)
+    .FirstOrDefaultAsync(cancellationToken);
 
             if (roleId == null)
                 return;
@@ -1616,15 +2235,17 @@ namespace Shared.Services.Authentication
 
             await _dbContext.Users.Where(u => userIds.Contains(u.Id))
                 .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.PermissionVersion, u => u.PermissionVersion + 1), cancellationToken);
-            await _securityLogger.LogAsync(SecurityActionType.RoleBulkUpdated, true,
-                $"PermissionVersion increased for role {role}");
+            await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.RoleBulkUpdated,
+                    true,
+                    $"PermissionVersion increased for role {role}");
             foreach (var userId in userIds)
             {
                 await InvalidateUserCache(userId);
             }
         }
-        
-        private async Task IncreasePermissionVersionInternalAsync(AppUser user, SecurityActionType action)
+
+        private async Task IncreasePermissionVersionInternalAsync(AppUser user)
         {
             user.PermissionVersion++;
             var result = await _userManager.UpdateAsync(user);
@@ -1632,22 +2253,8 @@ namespace Shared.Services.Authentication
             if (!result.Succeeded)
                 throw new Exception(string.Join(", ", result.Errors.Select(x => x.Description)));
 
-            try
-            {
-                await _securityLogger.LogAsync(
-                    action,
-                    true,
-                    $"Permission version updated for user '{user.Id}'.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log permission version update. UserId: {UserId}",
-                    user.Id);
-            }
         }
-        
+
         private async Task InvalidateUserCache(string userId)
         {
             await _cache.RemoveAsync(CacheKeys.UserPermission(userId));
@@ -1660,7 +2267,12 @@ namespace Shared.Services.Authentication
         {
             try
             {
+                await _levelService.EnsureCanManageUserAsync(
+    userId,
+    allowSelf: true,
+    cancellationToken);
                 var now = DateTime.UtcNow;
+                Guid? currentId = Guid.TryParse(currentSessionId, out var parsed) ? parsed : null;
 
                 return await _dbContext.UserSessions
                     .AsNoTracking()
@@ -1678,10 +2290,13 @@ namespace Shared.Services.Authentication
                         CreatedAt = x.CreatedAt,
                         LastActivityAt = x.LastActivityAt,
                         ExpiresAt = x.ExpiresAt,
-                        IsCurrent = currentSessionId != null &&
-                                    x.Id.ToString() == currentSessionId
+                        IsCurrent = currentId.HasValue && x.Id == currentId.Value
                     })
                     .ToListAsync(cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -1706,60 +2321,233 @@ namespace Shared.Services.Authentication
 
             if (!userExists)
                 throw new KeyNotFoundException("Không tìm thấy người dùng.");
-
-            var now = DateTime.UtcNow;
-
-            await using var transaction =
-                await _dbContext.Database.BeginTransactionAsync(cancellationToken);
-
             try
             {
-                var session = await _dbContext.UserSessions
-                    .FirstOrDefaultAsync(
-                        x => x.Id == sessionId && x.UserId == userId,
-                        cancellationToken);
-
-                if (session == null)
-                    throw new KeyNotFoundException("Không tìm thấy phiên đăng nhập.");
-
-                if (session.RevokedAt != null)
-                    throw new InvalidOperationException("Phiên đăng nhập đã được thu hồi.");
-
-                session.RevokedAt = now;
-                session.RevokedReason = "RevokedByAdmin";
-
-                var revokedTokens = await _dbContext.RefreshTokens
-                    .Where(x => x.SessionId == sessionId && !x.IsRevoked)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.IsRevoked, true)
-                        .SetProperty(x => x.RevokedAt, now)
-                        .SetProperty(x => x.RevokedReason, "SessionRevokedByAdmin"),
-                        cancellationToken);
-
-                await _dbContext.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-
-                _logger.LogInformation(
-                    "User session revoked by admin. UserId: {UserId}, SessionId: {SessionId}, RevokedTokens: {RevokedTokens}",
-                    userId,
-                    sessionId,
-                    revokedTokens);
-
-                return revokedTokens;
+                await _levelService.EnsureCanManageUserAsync(
+    userId,
+    allowSelf: false,
+    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellationToken);
-
                 _logger.LogError(
                     ex,
-                    "Failed to revoke user session. UserId: {UserId}, SessionId: {SessionId}",
-                    userId,
-                    sessionId);
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
 
                 throw;
             }
+            var revokedTokens = await _refreshTokenService.RevokeSessionAsync(
+                userId,
+                sessionId,
+                "RevokedByAdmin",
+                cancellationToken: cancellationToken);
+
+            _logger.LogInformation(
+                "Admin revoked user session. UserId={UserId}, SessionId={SessionId}",
+                userId,
+                sessionId);
+            await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.RevokeSession,
+                    true,
+                    $"Admin revoked session. UserId: {userId}, SessionId: {sessionId}");
+            return revokedTokens;
+        }
+        public async Task<int> RevokeAllUserSessionsAsync(
+    string userId,
+    CancellationToken cancellationToken = default)
+        {
+            var userExists = await _dbContext.Users
+                .AnyAsync(
+                    x => x.Id == userId && !x.IsDeleted,
+                    cancellationToken);
+
+            if (!userExists)
+                throw new KeyNotFoundException("Không tìm thấy người dùng.");
+
+            // Kiểm tra cấp bậc người thao tác.
+            try
+            {
+                await _levelService.EnsureCanManageUserAsync(
+                userId,
+                allowSelf: false,
+                cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Failed to update user. UserId: {UserId}",
+                    userId);
+
+                throw;
+            }
+
+            var revokedTokens = await _refreshTokenService.RevokeAllUserTokensAsync(
+                userId, TokenRevocationReasons.RevokeAllSession, cancellationToken);
+
+            _logger.LogInformation(
+                "Admin revoked all user sessions. UserId={UserId}, RevokedTokens={RevokedTokens}",
+                userId,
+                revokedTokens);
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.RevokeSession,
+                true,
+                $"Admin revoked all sessions. UserId: {userId}, RevokedTokens: {revokedTokens}");
+
+            return revokedTokens;
+        }
+
+        public async Task<UserStatisticsDto> GetUserStatisticsAsync(
+    CancellationToken cancellationToken = default)
+        {
+            var now = DateTime.UtcNow;
+
+            var currentPeriodStart = now.AddDays(-7);
+            var previousPeriodStart = now.AddDays(-14);
+
+            var currentUsers = await _dbContext.Users
+                .CountAsync(x =>
+                    !x.IsDeleted &&
+                    x.CreatedAt >= currentPeriodStart &&
+                    x.CreatedAt < now,
+                    cancellationToken);
+
+            var previousUsers = await _dbContext.Users
+                .CountAsync(x =>
+                    !x.IsDeleted &&
+                    x.CreatedAt >= previousPeriodStart &&
+                    x.CreatedAt < currentPeriodStart,
+                    cancellationToken);
+
+            var currentSessions = await _dbContext.UserSessions
+                .CountAsync(x =>
+                    x.CreatedAt >= currentPeriodStart &&
+                    x.CreatedAt < now,
+                    cancellationToken);
+
+            var previousSessions = await _dbContext.UserSessions
+                .CountAsync(x =>
+                    x.CreatedAt >= previousPeriodStart &&
+                    x.CreatedAt < currentPeriodStart,
+                    cancellationToken);
+
+            var currentActiveEvents = await _dbContext.ActivityLogs
+                .CountAsync(x =>
+                    x.EntityType == "User" &&
+                    (x.ActivityType == ActivityType.UnlockAccount ||
+                     x.ActivityType == ActivityType.UnsuspendAccount) &&
+                    x.CreatedAt >= currentPeriodStart &&
+                    x.CreatedAt < now,
+                    cancellationToken);
+
+            var previousActiveEvents = await _dbContext.ActivityLogs
+                .CountAsync(x =>
+                    x.EntityType == "User" &&
+                    (x.ActivityType == ActivityType.UnlockAccount ||
+                     x.ActivityType == ActivityType.UnsuspendAccount) &&
+                    x.CreatedAt >= previousPeriodStart &&
+                    x.CreatedAt < currentPeriodStart,
+                    cancellationToken);
+
+            var currentPendingEvents = await _dbContext.ActivityLogs
+                .CountAsync(x =>
+                    x.EntityType == "User" &&
+                    x.ActivityType == ActivityType.Register &&
+                    x.CreatedAt >= currentPeriodStart &&
+                    x.CreatedAt < now,
+                    cancellationToken);
+
+            var previousPendingEvents = await _dbContext.ActivityLogs
+                .CountAsync(x =>
+                    x.EntityType == "User" &&
+                    x.ActivityType == ActivityType.Register &&
+                    x.CreatedAt >= previousPeriodStart &&
+                    x.CreatedAt < currentPeriodStart,
+                    cancellationToken);
+
+            return new UserStatisticsDto
+            {
+                TotalUsers = await _dbContext.Users
+                    .CountAsync(x => !x.IsDeleted, cancellationToken),
+
+                TotalUsersChangePercent = CalculateChangePercent(
+                    currentUsers, previousUsers),
+
+                ActiveUsers = await _dbContext.Users
+                    .CountAsync(x =>
+                        !x.IsDeleted &&
+                        x.IsActive &&
+                        x.Status == EntityStatus.Active &&
+                        (!x.LockoutEnabled ||
+                         !x.LockoutEnd.HasValue ||
+                         x.LockoutEnd.Value <= now),
+                        cancellationToken),
+
+                ActiveUsersChangePercent = CalculateChangePercent(
+                    currentActiveEvents, previousActiveEvents),
+
+                PendingUsers = await _dbContext.Users
+                    .CountAsync(x =>
+                        !x.IsDeleted &&
+                        x.Status == EntityStatus.Pending,
+                        cancellationToken),
+
+                PendingUsersChangePercent = CalculateChangePercent(
+                    currentPendingEvents, previousPendingEvents),
+
+                SessionUsers = await _dbContext.UserSessions
+    .Where(x =>
+        x.RevokedAt == null &&
+        x.ExpiresAt > now &&
+        !x.User.IsDeleted &&
+        x.User.IsActive &&
+        x.User.Status == EntityStatus.Active &&
+        (!x.User.LockoutEnabled ||
+         !x.User.LockoutEnd.HasValue ||
+         x.User.LockoutEnd.Value <= now))
+    .Select(x => x.UserId)
+    .Distinct()
+    .CountAsync(cancellationToken),
+
+                SessionUsersChangePercent = CalculateChangePercent(
+                    currentSessions, previousSessions)
+            };
+        }
+
+        private static decimal CalculateChangePercent(int current, int previous)
+        {
+            if (previous == 0)
+                return current > 0 ? 100 : 0;
+
+            return Math.Round(
+                ((decimal)(current - previous) / previous) * 100,
+                1);
+        }
+        private static bool IsProtectedRole(AppRole role)
+        {
+            return role.IsSystem ||
+                   string.Equals(
+                       role.Name,
+                       "Root",
+                       StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(
+                       role.Name,
+                       "System",
+                       StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(
+                       role.Name,
+                       "Admin",
+                       StringComparison.OrdinalIgnoreCase);
         }
     }
 }

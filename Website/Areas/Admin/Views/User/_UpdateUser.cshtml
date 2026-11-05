@@ -23,52 +23,11 @@
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                     <div class="mb-3">
-                        <label asp-for="UserName" class="form-label">
-                            Tên đăng nhập
+                        <label asp-for="DisplayName" class="form-label">
+                            Tên hiển thị
                         </label>
-                        <input asp-for="UserName"
-                               class="form-control"
-                               readonly autocomplete="username" />
-                        <div class="form-text">
-                            Tên đăng nhập không thể thay đổi.
-                        </div>
+                        <input asp-for="DisplayName" class="form-control" autocomplete="displayname" />
                     </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label">
-                            Email
-                        </label>
-                        <input asp-for="Email"
-                               class="form-control"
-                               type="email"
-                               readonly autocomplete="email" />
-
-                        <div class="d-flex align-items-center gap-2 mt-2">
-                            @if (Model.EmailConfirmed)
-                            {
-                                <span class="badge bg-label-success">
-                                    Đã xác thực email
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-label-warning">
-                                    Chưa xác thực email
-                                </span>
-
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-primary"
-                                        id="btnResendEmailVerification"
-                                        data-url="@Url.Action(
-                                                    "ResendConfirmEmail",
-                                                    "User",
-                                                    new { area = "Admin", id = Model.Id })">
-                                    Gửi lại email xác thực
-                                </button>
-                            }
-                        </div>
-                    </div>
-
                     <div class="mb-3">
                         <label asp-for="PhoneNumber" class="form-label">
                             Số điện thoại
@@ -95,7 +54,6 @@
                             }
                         </div> *@
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label d-block">
                             Trạng thái tài khoản
@@ -105,10 +63,15 @@
                             <input asp-for="IsActive"
                                    class="form-check-input"
                                    type="checkbox" />
-                            <label asp-for="IsActive"
-                                   class="form-check-label">
-                                Tài khoản đang hoạt động
+
+                            <label asp-for="IsActive" class="form-check-label">
+                                Cho phép đăng nhập
                             </label>
+                        </div>
+
+                        <div class="form-text">
+                            Tắt tùy chọn này để tạm thời vô hiệu hóa quyền đăng nhập.
+                            Không ảnh hưởng đến trạng thái đình chỉ hoặc khóa đăng nhập do sai mật khẩu.
                         </div>
                     </div>
                 </div>

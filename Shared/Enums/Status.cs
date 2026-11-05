@@ -12,6 +12,6 @@ namespace Shared.Enums
         [Display(Name = "Suspended", ShortName = "Đình chỉ"), StatusCss("warning")]
         Suspended,
         [Display(Name = "Deleted", ShortName = "Đã xóa"), StatusCss("danger")]
-        Deleted,
+        Deactivated
     }
 }

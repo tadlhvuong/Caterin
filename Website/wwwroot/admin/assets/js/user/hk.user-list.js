@@ -61,13 +61,7 @@ $(function () {
                 },
 
                 error: function (xhr, error, thrown) {
-                    console.error('DataTable error:', {
-                        status: xhr.status,
-                        response: xhr.responseText,
-                        error: error,
-                        thrown: thrown
-                    });
-
+                    
                     Swal.fire({
                         icon: 'error',
                         title: 'Có lỗi xảy ra',
@@ -218,24 +212,26 @@ $(function () {
                         const detailsUrl = '/admin/user/user-details/' + id;
                         const editUrl = '/admin/user/user-details/' + id + '?edit=true';
 
-                        const statusAction = full.isActive
+                        const statusAction = full.status === 2
                             ? `<button type="button"
-                       class="dropdown-item suspend-user"
-                       data-id="${id}">
-                   <i class="ti ti-user-off me-2"></i>Tạm ngưng
-               </button>`
-                            : `<button type="button"
-                       class="dropdown-item activate-user"
-                       data-id="${id}">
-                   <i class="ti ti-user-check me-2"></i>Kích hoạt lại
-               </button>`;
+               class="dropdown-item suspend-user"
+               data-id="${id}">
+           <i class="ti ti-user-off me-2"></i>Đình chỉ tài khoản
+       </button>`
+                            : full.status === 3
+                                ? `<button type="button"
+                   class="dropdown-item activate-user"
+                   data-id="${id}">
+               <i class="ti ti-user-check me-2"></i>Gỡ đình chỉ
+           </button>`
+                                : '';
 
                         const unlockAction = full.isIdentityLocked
                             ? `<button type="button"
-                       class="dropdown-item unlock-identity-user"
-                       data-id="${id}">
-                   <i class="ti ti-lock-open me-2"></i>Mở khóa đăng nhập
-               </button>`
+               class="dropdown-item unlock-identity-user"
+               data-id="${id}">
+           <i class="ti ti-lock-open me-2"></i>Mở khóa đăng nhập
+       </button>`
                             : '';
 
                         return `
@@ -453,12 +449,32 @@ $(function () {
             return '<span class="badge bg-label-danger">Đã xóa</span>';
         }
 
-        if (!user.isActive) {
-            return '<span class="badge bg-label-warning">Tạm ngưng</span>';
+        // Pending
+        if (user.status === 0) {
+            return '<span class="badge bg-label-info">Chờ kích hoạt</span>';
         }
 
-        if (user.isLocked) {
-            return '<span class="badge bg-label-danger">Bị khóa</span>';
+        // Suspended
+        if (user.status === 2) {
+            return '<span class="badge bg-label-warning">Đình chỉ</span>';
+        }
+
+        // Deactivated
+        if (user.status === 3) {
+            return '<span class="badge bg-label-danger">Đã vô hiệu hóa</span>';
+        }
+
+        // Active nhưng bị Disable
+        if (!user.isActive) {
+            return '<span class="badge bg-label-secondary">Disabled</span>';
+        }
+
+        // Active nhưng bị Identity Lockout
+        if (user.isIdentityLocked) {
+            return `
+            <span class="badge bg-label-success">Hoạt động</span>
+            <span class="badge bg-label-danger ms-1">Locked out</span>
+        `;
         }
 
         return '<span class="badge bg-label-success">Hoạt động</span>';
@@ -549,6 +565,7 @@ $(function () {
 
         $('.datatables-users tbody .dt-checkboxes').prop('checked', checked);
     });
+
     $('.datatables-users tbody').on('change', '.dt-checkboxes', function () {
         const total = $('.datatables-users tbody .dt-checkboxes').length;
         const checked = $('.datatables-users tbody .dt-checkboxes:checked').length;
@@ -754,25 +771,25 @@ $(function () {
             }
         });
     });
-    // Tạm ngưng tài khoản.
+    // Đình chỉ tài khoản
     $(document).on('click', '.suspend-user', function (e) {
         e.preventDefault();
 
         postUserAction(
             $(this).data('id'),
             'suspend',
-            'Tài khoản sẽ bị tạm ngưng truy cập hệ thống.'
+            'Tài khoản sẽ bị đình chỉ và không thể đăng nhập vào hệ thống.'
         );
     });
 
-    // Kích hoạt lại tài khoản.
+    // Gỡ đình chỉ
     $(document).on('click', '.activate-user', function (e) {
         e.preventDefault();
 
         postUserAction(
             $(this).data('id'),
             'activate',
-            'Bạn muốn kích hoạt lại tài khoản này?'
+            'Bạn muốn gỡ đình chỉ tài khoản này?'
         );
     });
 
@@ -788,18 +805,64 @@ $(function () {
     });
 
 
-    document.addEventListener('click', function (event) {
-        const button = event.target.closest('.reset-password-user');
+    // Chuyển đến tab Security để đặt lại mật khẩu.
+    $(document).on('click', '.reset-password-user', function (e) {
+        e.preventDefault();
 
-        if (!button) return;
+        const userId = $(this).data('id');
 
-        const userId = button.dataset.id;
         if (!userId) {
-            Toast.error('Không tìm thấy tài khoản.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Có lỗi xảy ra',
+                text: 'Không tìm thấy tài khoản.'
+            });
             return;
         }
 
         window.location.href =
             `/admin/user/user-details/${encodeURIComponent(userId)}?tab=security`;
     });
+    function updateStatisticChange(selector, value) {
+        const element = $(selector);
+        const percent = Number(value) || 0;
+
+        element.text(`${percent > 0 ? '+' : ''}${percent.toFixed(1)}%`);
+
+        element.removeClass('text-success text-danger text-muted');
+
+        if (percent > 0) {
+            element.addClass('text-success');
+        } else if (percent < 0) {
+            element.addClass('text-danger');
+        } else {
+            element.addClass('text-muted');
+        }
+    }
+
+    function loadUserStatistics() {
+        $.ajax({
+            url: '/admin/user/statistics',
+            type: 'GET',
+            success: function (response) {
+                $('#totalUsers').text(response.totalUsers);
+                $('#activeUsers').text(response.activeUsers);
+                $('#pendingUsers').text(response.pendingUsers);
+                $('#sessionUsers').text(response.sessionUsers);
+
+                updateStatisticChange('#totalUsersChange', response.totalUsersChangePercent);
+
+                updateStatisticChange('#activeUsersChange', response.activeUsersChangePercent);
+
+                updateStatisticChange('#pendingUsersChange', response.pendingUsersChangePercent);
+
+                updateStatisticChange('#sessionUsersChange', response.sessionUsersChangePercent);
+            },
+            error: function (xhr) {
+                console.error('Không thể tải thống kê User:', xhr);
+            }
+        });
+    }
+
+    loadUserStatistics();
 });

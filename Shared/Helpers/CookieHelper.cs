@@ -3,27 +3,43 @@
 namespace Shared.Helpers
 {
     public static class CookieHelper
+{
+    public static CookieOptions AccessToken(int expired)
     {
-        public static CookieOptions AccessToken(int exprired)
+        return new CookieOptions
         {
-            return new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddMinutes(exprired)
-            };
-        }
-
-        public static CookieOptions RefreshToken(DateTime expiresAt)
-        {
-            return new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Lax,
-                Expires = new DateTimeOffset(expiresAt)
-            };
-        }
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Expires = DateTimeOffset.UtcNow.AddMinutes(expired)
+        };
     }
+
+    public static CookieOptions RefreshToken(DateTime expiresAt)
+    {
+        var utcExpiresAt = DateTime.SpecifyKind(expiresAt, DateTimeKind.Utc);
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Expires = new DateTimeOffset(utcExpiresAt)
+        };
+    }
+
+    public static CookieOptions Delete()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/",
+            Expires = DateTimeOffset.UnixEpoch,
+            MaxAge = TimeSpan.Zero
+        };
+    }
+}
 }

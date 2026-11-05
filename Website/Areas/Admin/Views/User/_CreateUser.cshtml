@@ -1,5 +1,5 @@
-﻿@using Website.Areas.Admin.Models.User
-@model CreateUserViewModel
+﻿@using Shared.Requests.User
+@model CreateUserRequest
 
 @{
     Layout = null;
@@ -126,25 +126,6 @@
 
                 <span asp-validation-for="ConfirmPassword"
                       class="text-danger"></span>
-            </div>
-
-            <!-- Roles -->
-            <div class="mb-6">
-                <label asp-for="RoleIds" class="form-label">
-                    Vai trò
-                </label>
-
-                <select asp-for="RoleIds"
-                        id="createUserRoleIds"
-                        class="form-select"
-                        multiple>
-                </select>
-
-                <span asp-validation-for="RoleIds" class="text-danger"></span>
-
-                <small class="text-muted">
-                    Có thể chọn nhiều vai trò cho tài khoản.
-                </small>
             </div>
 
             <!-- Actions -->

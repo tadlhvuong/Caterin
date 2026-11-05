@@ -12,5 +12,6 @@
 
         public int RefreshTokenExpirationDays { get; set; }
         public int RefreshTokenRememberExpirationDays { get; set; }
+        public int RefreshTokenRotationRetrySeconds { get; set; } = 30;
     }
 }

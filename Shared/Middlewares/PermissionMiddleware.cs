@@ -24,25 +24,22 @@ namespace Shared.Middlewares
         }
 
         public async Task InvokeAsync(HttpContext context, ICurrentUserService currentUser,
-            IRoutePermissionCache routeCache, IPermissionService permissionService,  ISecurityLogger securityLogger)
+            IRoutePermissionCache routeCache, IPermissionService permissionService,  ILogSafetyService logSafetyService)
         {
-            if (!context.Request.Path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
+            var path = context.Request.Path;
+
+            if (!path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
             {
                 await _next(context);
                 return;
             }
 
             var endpoint = context.GetEndpoint();
-            Console.WriteLine(endpoint?.DisplayName);
 
-            foreach (var item in endpoint?.Metadata ?? Enumerable.Empty<object>())
-            {
-                Console.WriteLine(item.GetType().FullName);
-            }
             if (endpoint == null)
             {
-                _logger.LogWarning("{Prefix} Endpoint not found. Path={Path}", LogPrefix, context.Request.Path);
-                await _next(context);
+                _logger.LogWarning("{Prefix} Endpoint not found. Path={Path}", LogPrefix, path);
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
                 return;
             }
 
@@ -55,66 +52,62 @@ namespace Shared.Middlewares
 
             if (endpoint is not RouteEndpoint routeEndpoint)
             {
-                _logger.LogWarning("{Prefix} Endpoint is not RouteEndpoint. Path={Path}", LogPrefix, context.Request.Path);
-                await _next(context);
+                _logger.LogWarning("{Prefix} Endpoint is not RouteEndpoint. Path={Path}", LogPrefix, path);
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
                 return;
             }
 
             var route = routeEndpoint.RoutePattern.RawText ?? "";
-
             var method = context.Request.Method;
-            _logger.LogWarning(
-    "[Permission Debug] Path={Path}, Endpoint={Endpoint}, Route={Route}, Method={Method}",
-    context.Request.Path,
-    endpoint.DisplayName,
-    route,
-    method);
-            _logger.LogInformation("{Prefix} Checking permission | {Method} {Route}", LogPrefix, method, route);
+           
             await routeCache.EnsureInitializedAsync();
             if (!routeCache.TryGetPermission(route, method, out var permission))
             {
                 _logger.LogError("{Prefix} Route mapping NOT FOUND | {Method} {Route}", LogPrefix, method, route);
 
-                await securityLogger.LogAsync(SecurityActionType.PermissionDenied, false, $"Route '{route}' has no permission mapping.");
+                await logSafetyService.TryLogSecurityAsync(SecurityActionType.PermissionDenied, false, $"Route '{route}' has no permission mapping.");
                 context.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
                 return;
             }
-            _logger.LogDebug( "{Prefix} Route mapped => Permission={PermissionCode} ({PermissionId})", 
-                LogPrefix,  permission.PermissionCode, permission.PermissionId);
             var validationContext = context.GetUserValidationContext();
-
-            if (validationContext?.PermissionSnapshot == null)
+            var snapshot = validationContext?.PermissionSnapshot;
+            if (snapshot == null)
             {
-                _logger.LogError("{Prefix} PermissionSnapshot is NULL. User={User}", LogPrefix, currentUser.UserName);
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                _logger.LogError(
+                    "{Prefix} PermissionSnapshot is null. User={User}, Path={Path}",
+                    LogPrefix, currentUser.UserName, path);
+
+                context.Response.StatusCode =
+                    StatusCodes.Status500InternalServerError;
                 return;
             }
-            var snapshot = validationContext.PermissionSnapshot;
-            _logger.LogWarning(
-    "[Permission Debug] User={User}, IsRoot={IsRoot}, PermissionCount={Count}",
-    currentUser.UserName,
-    validationContext?.PermissionSnapshot?.IsRoot,
-    validationContext?.PermissionSnapshot?.PermissionIds.Count);
             if (snapshot.IsRoot)
             {
                 _logger.LogInformation("{Prefix} ROOT user => Skip permission check. User={User}", LogPrefix, currentUser.UserName);
                 await _next(context);
                 return;
             }
-            _logger.LogDebug("{Prefix} User={User} PermissionCount={Count}", LogPrefix, currentUser.UserName, snapshot.PermissionIds.Count);
             if (!snapshot.PermissionIds.Contains(permission.PermissionId))
             {
-                _logger.LogWarning("{Prefix} ACCESS DENIED | User={User} | Permission={Permission} | Route={Method} {Route}",
-                LogPrefix, currentUser.UserName, permission.PermissionCode, permission.HttpMethod, permission.Route);
-                await securityLogger.LogAsync(SecurityActionType.PermissionDenied, false,
-                     $"Permission denied. User={currentUser.UserName}, Permission={permission.PermissionCode}, method={permission.HttpMethod}, nameRoute={ permission.Route}");
+                _logger.LogWarning(
+                    "{Prefix} Access denied. User={User}, Permission={Permission}, Route={Route}",
+                    LogPrefix,
+                    currentUser.UserName,
+                    permission.PermissionCode,
+                    route);
 
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                await logSafetyService.TryLogSecurityAsync(SecurityActionType.PermissionDenied, false,
+                    $"Permission denied. User={currentUser.UserName}, " +
+                    $"Permission={permission.PermissionCode}, " +
+                    $"Method={method}, Route={route}");
+
+                context.Response.StatusCode =
+                    StatusCodes.Status403Forbidden;
                 return;
             }
-            _logger.LogInformation("{Prefix} ACCESS GRANTED | User={User} | Permission={Permission}",
-            LogPrefix, currentUser.UserName, permission.PermissionCode);
+            _logger.LogDebug("{Prefix} Access granted. User={User}, Permission={Permission}",
+                LogPrefix, currentUser.UserName, permission.PermissionCode);
 
             await _next(context);
         }

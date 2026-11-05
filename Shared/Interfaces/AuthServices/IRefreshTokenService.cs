@@ -42,6 +42,19 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="userId"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task RevokeAllUserTokensAsync(string userId, CancellationToken cancellationToken = default);
+        Task<int> RevokeAllUserTokensAsync(string userId, string? reason, CancellationToken cancellationToken = default);
+
+        Task<int> RevokeSessionAsync(
+    string userId,
+    Guid sessionId,
+    string reason,
+    string? revokedById = null,
+    CancellationToken cancellationToken = default);
+
+        Task<int> RevokeAllUserSessionsAsync(
+            string userId,
+            string reason,
+            string? revokedById = null,
+            CancellationToken cancellationToken = default);
     }
 }

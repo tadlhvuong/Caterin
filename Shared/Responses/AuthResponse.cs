@@ -1,4 +1,6 @@
-﻿namespace Shared.Responses
+﻿using Shared.Enums;
+
+namespace Shared.Responses
 {
     public class AuthResponse
     {
@@ -17,7 +19,7 @@
         public string Email { get; set; }
         public DateTime ExpireAt { get; set; }
         public IReadOnlyList<string> Errors { get; init; } = [];
-
+        public RotateTokenError ErrorCode { get; set; } = RotateTokenError.None;
         public static AuthResponse Fail(string message)
         {
             return new()

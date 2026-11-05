@@ -30,7 +30,7 @@
 }
 
 <div class="container-xxl flex-grow-1 container-p-y" id="userDetails"
-     data-user-id="@Model.Id">
+     data-user-id="@Model.Id" data-status="@((int)Model.Status)">
     <div class="row">
         <!-- User Sidebar -->
         <div class="col-xl-4 col-lg-5 order-0 order-md-0">
@@ -91,28 +91,56 @@
                         @Html.AntiForgeryToken()
                     </form>
                     <div class="my-6">
-
-                        <!-- Email -->
                         <div class="d-flex align-items-center py-3 border-bottom">
                             <div class="avatar me-3">
                                 <div class="avatar-initial bg-label-primary rounded">
-                                    <i class="ti ti-mail ti-lg"></i>
+                                    <i class="ti ti-user ti-lg"></i>
                                 </div>
                             </div>
                             <div class="flex-grow-1">
-                                <div class="text-muted small">Email</div>
-                                <div class="fw-semibold">@Model.Email</div>
+                                <div class="text-muted small">Tên hiển thị</div>
+                                <div class="fw-semibold" id="detailDisplayName">@Model.DisplayName</div>
                             </div>
-                            @if (Model.ConfirmEmail)
+                        </div>
+                        <!-- Email -->
+                        <div class="py-3 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar me-3">
+                                    <div class="avatar-initial bg-label-primary rounded">
+                                        <i class="ti ti-mail ti-lg"></i>
+                                    </div>
+                                </div>
+
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="text-muted small">Email</div>
+                                    <div class="fw-semibold text-break">@Model.Email</div>
+                                </div>
+
+                                @if (Model.ConfirmEmail)
+                                {
+                                    <span class="badge bg-label-success">
+                                        <i class="ti ti-check me-1"></i>Đã xác minh
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-label-warning">Chưa xác minh</span>
+                                }
+                            </div>
+
+                            @if (!Model.ConfirmEmail)
                             {
-                                <span class="badge bg-label-success">Đã xác minh</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-label-warning">Chưa xác minh</span>
+                                <div class="d-flex justify-content-center mt-3">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary w-50"
+                                            id="btnResendConfirmEmail"
+                                            data-url="@Url.Action("ResendConfirmEmail", "User", new { area = "Admin", id = Model.Id })">
+                                        <i class="ti ti-send me-1"></i>
+                                        Gửi lại email xác minh
+                                    </button>
+                                </div>
                             }
                         </div>
-
                         <!-- Phone -->
                         <div class="d-flex align-items-center py-3 border-bottom">
                             <div class="avatar me-3">
@@ -239,15 +267,6 @@
     @* DETAILS *@
     <script src="~/admin/assets/js/user/modal-edit-user.js"></script>
     <script src="~/admin/assets/js/user/hk.user-details.js"></script>
-
-    @* _Personal *@
-    <script src="~/admin/assets/js/customize/flatpickr-init.js"></script>
-    <script src="~/admin/assets/js/customize/address-picker.js"></script>
-    <script src="~/admin/assets/js/customize/social-link-input.js"></script>
-    <script src="~/admin/assets/js/user/hk.user-personal.js"></script>
-
-    @* SECURITY *@
-    <script src="~/admin/assets/js/user/hk.user-security.js"></script>
 
     <script src="~/admin/assets/js/user/hk.user-tabs.js"></script>
     <script>

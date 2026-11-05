@@ -142,10 +142,8 @@ namespace Website.Areas.Admin.Controllers
         // PUT: /admin/role-perms/api/roles/{id}
         [HttpPut("update/{id}")]
         [PermissionAction(ActionType.Edit)]
-        public async Task<IActionResult> UpdateRole(
-    string id,
-    [FromBody] UpdateRoleDto dto,
-    CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateRole(string id, [FromBody] UpdateRoleDto dto,
+        CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
@@ -158,19 +156,8 @@ namespace Website.Areas.Admin.Controllers
                 });
             }
 
-            var currentUserId = _currentUserService.UserId;
-
-            if (string.IsNullOrWhiteSpace(currentUserId))
-                return Unauthorized();
-
-            var currentUserLevel = await _userService.GetUserLevelAsync(
-                currentUserId,
-                cancellationToken);
-
             var result = await _roleService.UpdateAsync(
-                dto,
-                currentUserLevel,
-                cancellationToken);
+                dto, cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -217,7 +204,6 @@ namespace Website.Areas.Admin.Controllers
 
             var result = await _roleService.DeleteAsync(
                 id,
-                currentUserLevel,
                 cancellationToken);
 
             if (!result.Succeeded)
@@ -315,7 +301,6 @@ namespace Website.Areas.Admin.Controllers
 
             var result = await _roleService.UpdatePermissionsAsync(
                 dto,
-                currentUserLevel,
                 assignedById,
                 cancellationToken);
 
@@ -468,7 +453,6 @@ namespace Website.Areas.Admin.Controllers
 
             var result = await _roleService.AssignMembersAsync(
                 dto,
-                currentUserLevel,
                 cancellationToken);
 
             if (!result.Succeeded)
@@ -526,7 +510,6 @@ namespace Website.Areas.Admin.Controllers
             var result = await _roleService.RemoveMemberAsync(
                 roleId,
                 userId,
-                currentUserLevel,
                 cancellationToken);
 
             if (!result.Succeeded)

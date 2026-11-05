@@ -30,6 +30,8 @@
         DeleteAccount,
         SuspendAccount,
         UnsuspendAccount,
+        DisabledAccount,
+        EnabledAccount,
 
         AssignRole,
         AssignPermission,

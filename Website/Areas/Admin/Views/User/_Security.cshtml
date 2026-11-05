@@ -100,7 +100,7 @@
 <div class="card mb-6" data-page="security">
     <h5 class="card-header" data-i18n="Change Password">Change Password</h5>
     <div class="card-body">
-        <form id="formChangePassword" method="POST" action="@Url.Action("ResetPassword", "User", new { area = "Admin", userId = Model.Id })">
+        <form id="formChangePassword" method="POST" autocomplete="off" action="@Url.Action("ResetPassword", "User", new { area = "Admin", userId = Model.Id })">
             @Html.AntiForgeryToken()
             <div class="alert alert-warning alert-dismissible" role="alert">
                 <h5 class="alert-heading mb-1">Ensure that these requirements are met</h5>
@@ -120,7 +120,7 @@
                         <input class="form-control"
                                type="password"
                                id="newPassword"
-                               name="newPassword"
+                               name="newPassword" autocomplete="new-password"
                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                         <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
@@ -134,7 +134,7 @@
                         <input class="form-control"
                                type="password"
                                name="confirmPassword"
-                               id="confirmPassword"
+                               id="confirmPassword" autocomplete="new-password"
                                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
                         <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                     </div>
@@ -231,7 +231,7 @@
 <!--/ Recent Devices -->
 
 <!-- Deactivate -->
-<div class="card mb-12">
+<div class="card mb-6">
     <div class="card-header">
 
         <h5 class="card-header">Delete Account</h5>
@@ -405,6 +405,13 @@
             </div>
 
             <div class="modal-footer p-2">
+                <button type="button"
+                        class="btn btn-outline-danger"
+                        id="btnRevokeAllSessions"
+                        disabled>
+                    <i class="ti ti-logout me-1"></i>
+                    Đăng xuất tất cả thiết bị
+                </button>
                 <button type="button"
                         class="btn btn-label-secondary"
                         data-bs-dismiss="modal">

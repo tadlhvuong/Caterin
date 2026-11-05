@@ -46,5 +46,6 @@ namespace Shared.Services.Log
 
             await _pipeline.EnqueueAsync(log);
         }
+
     }
 }

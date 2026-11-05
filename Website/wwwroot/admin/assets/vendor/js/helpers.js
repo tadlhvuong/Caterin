@@ -11,6 +11,7 @@ const INLINE_STYLES = `
 }
 .content-wrapper {
   padding-bottom: {footerHeight}px !important;
+  min-width: 440px;
 }`
 
 // Guard

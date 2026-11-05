@@ -33,25 +33,27 @@ namespace Shared.Configurations.JWT
 
         public override async Task TokenValidated(TokenValidatedContext context)
         {
-            var path = context.HttpContext.Request.Path;
+            var isAdmin = context.Request.Path.StartsWithSegments(
+                "/admin",
+                StringComparison.OrdinalIgnoreCase);
 
-            var isAdmin = context.HttpContext.Request.Path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase);
+            var userId = context.Principal?
+                .FindFirst(ClaimConstants.UserId)?.Value;
 
-            var userId = context.Principal?.FindFirst(ClaimConstants.UserId)?.Value;
-          
             if (string.IsNullOrWhiteSpace(userId))
             {
                 context.Fail("UserId claim missing.");
-                _logger.LogInformation("UserId claim missing.");
                 return;
             }
+
             if (context.Principal?.Identity?.IsAuthenticated != true)
             {
                 context.Fail("Unauthenticated");
-                _logger.LogInformation("Unauthenticated");
                 return;
             }
-            var userValidationService = context.HttpContext.RequestServices.GetRequiredService<IUserValidationService>();
+
+            var userValidationService = context.HttpContext.RequestServices
+                .GetRequiredService<IUserValidationService>();
 
             var validationContext = new UserValidationContext
             {
@@ -59,33 +61,24 @@ namespace Shared.Configurations.JWT
                 Principal = context.Principal,
                 ValidatePermissions = isAdmin
             };
-            _logger.LogWarning(
-    "Before ValidateAsync: IsAdmin={IsAdmin}, ValidatePermissions={ValidatePermissions}",
-    isAdmin,
-    validationContext.ValidatePermissions);
-            var result = await userValidationService.ValidateAsync(validationContext);
-            _logger.LogWarning(
-    "After ValidateAsync: ValidatePermissions={ValidatePermissions}, SnapshotNull={SnapshotNull}",
-    validationContext.ValidatePermissions,
-    validationContext.PermissionSnapshot == null);
+
+            var result = await userValidationService.ValidateAsync(
+                validationContext,
+                context.HttpContext.RequestAborted);
+
             if (!result.Succeeded)
             {
-                _logger.LogWarning("JWT validation failed. Error={Error}", result.Error);
+                _logger.LogWarning(
+                    "JWT validation failed. Error={Error}, Path={Path}",
+                    result.Error,
+                    context.Request.Path);
 
                 context.Fail(result.Error.ToString());
                 return;
             }
-            context.HttpContext.SetUserValidationContext(validationContext);
-            var storedContext = context.HttpContext.GetUserValidationContext();
 
-            _logger.LogWarning(
-    "JWT Stored Context: Method={Method}, Path={Path}, SameInstance={Same}, ValidatePermissions={ValidatePermissions}, SnapshotNull={SnapshotNull}",
-    context.HttpContext.Request.Method,
-    context.HttpContext.Request.Path,
-    ReferenceEquals(validationContext, storedContext),
-    storedContext?.ValidatePermissions,
-    storedContext?.PermissionSnapshot == null);
-            _logger.LogInformation("Token validated");
+            context.HttpContext.SetUserValidationContext(validationContext);
+
             await base.TokenValidated(context);
         }
 
@@ -100,9 +93,9 @@ namespace Shared.Configurations.JWT
         {
             var request = context.Request;
 
-            _logger.LogDebug("Unauthorized request: {Path}", request.Path);
+            context.Response.Cookies.Delete("access_token");
+            context.Response.Cookies.Delete("refresh_token");
 
-            // Chỉ xử lý request GET tải trang HTML
             var isHtmlRequest =
                 HttpMethods.IsGet(request.Method) &&
                 request.Headers.Accept.Any(x =>
@@ -112,12 +105,7 @@ namespace Shared.Configurations.JWT
             if (!isHtmlRequest)
                 return Task.CompletedTask;
 
-            // Ngăn JWT trả về 401 mặc định
             context.HandleResponse();
-
-            // Xóa hai cookie dùng chung
-            context.Response.Cookies.Delete("access_token");
-            context.Response.Cookies.Delete("refresh_token");
 
             var path = request.Path.Value ?? string.Empty;
 

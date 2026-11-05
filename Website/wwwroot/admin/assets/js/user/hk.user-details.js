@@ -1,5 +1,5 @@
 ﻿/**
- * User View
+ * User Details View
  */
 'use strict';
 
@@ -32,9 +32,7 @@
 
             const $summary = $form.find('[data-valmsg-summary="true"]');
 
-            $summary.empty()
-                .addClass('validation-summary-valid')
-                .removeClass('validation-summary-errors');
+            $summary.empty().addClass('validation-summary-valid').removeClass('validation-summary-errors');
 
             function showValidationErrors(data) {
                 if (data.errors) {
@@ -64,7 +62,6 @@
             }
 
             $form.data('submitting', true);
-
             $.ajax({
                 url: $form.attr('action'),
                 type: 'POST',
@@ -77,44 +74,49 @@
                         );
                 },
 
-                success: function (response) {
+                success: async function (response) {
                     if (!response.success) {
                         showValidationErrors(response);
                         return;
                     }
+                    if (response.noChanges) {
+                        await Swal.fire({
+                            icon: 'info',
+                            title: 'Không có thay đổi',
+                            text: response.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success waves-effect waves-light'
+                            },
+                            buttonsStyling: false
+                        });
+                    } else {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: response.message || 'Cập nhật tài khoản thành công.',
+                            customClass: {
+                                confirmButton: 'btn btn-success waves-effect waves-light'
+                            },
+                            buttonsStyling: false
+                        });
 
-                    // Cập nhật UI từ dữ liệu server trả về.
-                    if (response.phoneNumber !== undefined) {
+                        // Chỉ cập nhật thông tin nếu thực sự có thay đổi
+                        $('#detailDisplayName').text(response.data.displayName || '');
                         $('#detailPhoneNumber').text(
-                            response.phoneNumber || 'Chưa cập nhật'
+                            response.data.phoneNumber || 'Chưa cập nhật'
                         );
-                    }
 
-                    if (response.isActive !== undefined) {
-                        const $statusButton = $('.suspend-user');
-
-                        $statusButton
-                            .attr('data-active', String(response.isActive))
-                            .text(response.isActive ? 'Suspend' : 'Activate')
-                            .toggleClass('btn-label-danger', response.isActive)
-                            .toggleClass('btn-label-success', !response.isActive);
-                    }
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Thành công',
-                        text: response.message || 'Cập nhật tài khoản thành công.',
-                        customClass: {
-                            confirmButton: 'btn btn-success waves-effect waves-light'
-                        },
-                        buttonsStyling: false
-                    }).then(() => {
-                        const modalElement = document.getElementById('editUser');
-
-                        if (modalElement) {
-                            bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+                        if (response.data.isActive !== undefined) {
+                            updateStatusAction(response.data.isActive);
                         }
-                    });
+                    }
+
+                    // Đóng modal sau khi người dùng xác nhận thông báo
+                    const modalElement = document.getElementById('editUser');
+
+                    if (modalElement) {
+                        bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+                    }
                 },
 
                 error: function (xhr) {
@@ -142,6 +144,42 @@
             });
         });
 
+    function updateStatusAction(status) {
+        const button = document.querySelector('.suspend-user');
+
+        if (!button) return;
+
+        status = Number(status);
+        if (status === 1) {
+            // Active -> Suspend
+            button.hidden = false;
+            button.dataset.action = 'suspend';
+            button.textContent = 'Suspend';
+
+            button.classList.remove('btn-label-success');
+            button.classList.add('btn-label-danger');
+        }
+        else if (status === 2) {
+            // Suspended -> Activate
+            button.hidden = false;
+            button.dataset.action = 'activate';
+            button.textContent = 'Activate';
+
+            button.classList.remove('btn-label-danger');
+            button.classList.add('btn-label-success');
+        }
+        else {
+            // Pending (0), Deactivated (3)
+            button.hidden = true;
+        }
+    }
+    // Khởi tạo trạng thái button khi tải trang Details.
+    const userDetails = document.getElementById('userDetails');
+
+    if (userDetails) {
+        const status = Number(userDetails.dataset.status);
+        updateStatusAction(status);
+    }
 
     // ==========================================
     // SUSPEND / ACTIVATE USER
@@ -154,8 +192,14 @@
 
             const button = this;
             const userId = button.dataset.userId;
-            const isActive = button.dataset.active === 'true';
-            const action = isActive ? 'suspend' : 'activate';
+            const action = button.dataset.action;
+
+            if (!['suspend', 'activate'].includes(action)) {
+                return;
+            }
+
+            const isSuspending = action === 'suspend';
+            console.log(isSuspending);
             if (!userId) {
                 Swal.fire({
                     icon: 'error',
@@ -165,18 +209,18 @@
                 return;
             }
             const result = await Swal.fire({
-                title: isActive ? 'Are you sure?' : 'Activate user?',
-                text: isActive
+                title: isSuspending ? 'Are you sure?' : 'Activate user?',
+                text: isSuspending
                     ? 'Bạn có chắc chắn muốn tạm ngưng tài khoản này không?'
                     : 'Bạn có chắc chắn muốn kích hoạt lại tài khoản này không?',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: isActive
+                confirmButtonText: isSuspending
                     ? 'Yes, suspend user!'
                     : 'Yes, activate user!',
                 cancelButtonText: 'Cancel',
                 customClass: {
-                    confirmButton: isActive
+                    confirmButton: isSuspending
                         ? 'btn btn-danger me-2 waves-effect waves-light'
                         : 'btn btn-success me-2 waves-effect waves-light',
                     cancelButton:
@@ -222,19 +266,13 @@
                 if (!response.ok || !data.success) {
                     throw new Error(data.message || 'Không thể thực hiện thao tác.');
                 }
-
+                console.log(data);
                 // Cập nhật UI theo kết quả server.
-                const newIsActive = data.isActive;
-
-                button.dataset.active = String(newIsActive);
-                button.textContent = newIsActive ? 'Suspend' : 'Activate';
-
-                button.classList.toggle('btn-label-danger', newIsActive);
-                button.classList.toggle('btn-label-success', !newIsActive);
+                updateStatusAction(data.status);
 
                 await Swal.fire({
                     icon: 'success',
-                    title: isActive ? 'Suspended!' : 'Activated!',
+                    title: isSuspending ? 'Suspended!' : 'Activated!',
                     text: data.message,
                     customClass: {
                         confirmButton: 'btn btn-success waves-effect waves-light'
@@ -255,6 +293,67 @@
             }
         });
 
+    $(document).on('click', '#btnResendConfirmEmail', async function () {
+        const button = $(this);
+
+        if (button.prop('disabled')) return;
+
+        const url = button.data('url');
+        const token = $('input[name="__RequestVerificationToken"]').val();
+
+        const confirm = await Swal.fire({
+            icon: 'question',
+            title: 'Gửi lại email xác minh?',
+            text: 'Một email xác minh mới sẽ được gửi đến địa chỉ email của tài khoản này.',
+            showCancelButton: true,
+            confirmButtonText: 'Gửi email',
+            cancelButtonText: 'Hủy',
+            reverseButtons: true
+        });
+
+        if (!confirm.isConfirmed) return;
+
+        const originalHtml = button.html();
+
+        button.prop('disabled', true)
+            .html('<span class="spinner-border spinner-border-sm me-1"></span> Đang gửi...');
+
+        try {
+            const response = await $.ajax({
+                url: url,
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            });
+
+            if (response.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: response.message,
+                    confirmButtonText: 'Đóng'
+                });
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Không thể gửi email',
+                    text: response.message || 'Vui lòng thử lại sau.'
+                });
+            }
+        } catch (xhr) {
+            const message = xhr.responseJSON?.message
+                || 'Không thể gửi email xác minh. Vui lòng thử lại sau.';
+
+            await Swal.fire({
+                icon: 'error',
+                title: 'Có lỗi xảy ra',
+                text: message
+            });
+        } finally {
+            button.prop('disabled', false).html(originalHtml);
+        }
+    });
 
     // ==========================================
     // UPLOAD AVATAR

@@ -104,7 +104,6 @@
         });
     }
 
-
     // ============================================
     // USER SECURITY - DEVICE SESSIONS
     // ============================================
@@ -134,7 +133,7 @@
         const allDevicesModal = container.querySelector('#allDevicesModal');
         const allDevicesList = container.querySelector('#allDevicesList');
         const allDevicesCount = container.querySelector('#allDevicesCount');
-
+        const revokeAllButton = container.querySelector('#btnRevokeAllSessions');
         if (!userId || !recentList || !allDevicesList) {
             return;
         }
@@ -152,11 +151,7 @@
 
         function escapeHtml(value) {
             return String(value ?? '').replace(/[&<>"']/g, char => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
             })[char]);
         }
 
@@ -337,9 +332,10 @@
             loading = true;
 
             recentList.innerHTML = `
-                <div class="text-muted p-3">
-                    Đang tải thiết bị...
-                </div>`;
+        <div class="text-muted p-3">
+            Đang tải thiết bị...
+        </div>`;
+
             try {
                 const response = await fetch(sessionsUrl, {
                     method: 'GET',
@@ -348,13 +344,28 @@
                         'Accept': 'application/json'
                     }
                 });
-                if (!response.ok) {
-                    throw new Error('Không thể tải danh sách thiết bị.');
+
+                const result = await response.json().catch(() => null);
+
+                if (!response.ok || !result) {
+                    throw new Error(
+                        result?.message || 'Không thể tải danh sách thiết bị.'
+                    );
                 }
 
-                const data = await response.json();
+                // Hỗ trợ cả mảng trực tiếp và response có data/sessions.
+                const data = Array.isArray(result)
+                    ? result
+                    : Array.isArray(result.data)
+                        ? result.data
+                        : Array.isArray(result.sessions)
+                            ? result.sessions
+                            : Array.isArray(result.data?.sessions)
+                                ? result.data.sessions
+                                : null;
 
-                if (!Array.isArray(data)) {
+                if (!data) {
+                    console.error('Invalid sessions response:', result);
                     throw new Error('Dữ liệu thiết bị không hợp lệ.');
                 }
 
@@ -363,17 +374,28 @@
                 renderRecentDevices();
                 renderAllDevices();
 
+                if (revokeAllButton) {
+                    revokeAllButton.disabled = sessions.length === 0;
+                }
+
             } catch (error) {
+                sessions = [];
+
                 recentList.innerHTML = `
-                    <div class="text-danger p-3">
-                        Không thể tải thiết bị.
-                    </div>`;
+            <div class="text-danger p-3">
+                Không thể tải thiết bị.
+            </div>`;
 
                 allDevicesList.innerHTML = `
-                    <div class="text-danger p-3">
-                        Không thể tải danh sách thiết bị.
-                    </div>`;
+            <div class="text-danger p-3">
+                Không thể tải danh sách thiết bị.
+            </div>`;
 
+                if (revokeAllButton) {
+                    revokeAllButton.disabled = true;
+                }
+
+                console.error('Load sessions failed:', error);
                 Toast.error(error.message || 'Có lỗi xảy ra.');
 
             } finally {
@@ -459,7 +481,80 @@
             }
         }
 
+        async function revokeAllSessions() {
+            if (!sessions.length) {
+                Toast.warning('Không có thiết bị nào cần đăng xuất.');
+                return;
+            }
 
+            const confirmed = await Swal.fire({
+                title: 'Đăng xuất tất cả thiết bị?',
+                text: 'Tất cả thiết bị đang đăng nhập tài khoản này sẽ phải đăng nhập lại.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đăng xuất tất cả',
+                cancelButtonText: 'Hủy',
+                confirmButtonColor: '#d33',
+                reverseButtons: true,
+                focusCancel: true
+            });
+
+            if (!confirmed.isConfirmed) return;
+
+            const originalContent = revokeAllButton?.innerHTML;
+
+            if (revokeAllButton) {
+                revokeAllButton.disabled = true;
+                revokeAllButton.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Đang xử lý...`;
+            }
+
+            try {
+                const response = await fetch(
+                    `${sessionsUrl}/revoke-all`,
+                    {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            ...(token
+                                ? { 'RequestVerificationToken': token }
+                                : {})
+                        }
+                    }
+                );
+
+                const result = await response.json().catch(() => null);
+
+                if (!response.ok || result?.success === false) {
+                    throw new Error(
+                        result?.message || 'Không thể đăng xuất tất cả thiết bị.'
+                    );
+                }
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: result?.message || 'Đã đăng xuất tất cả thiết bị.',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+
+                await loadSessions();
+
+            } catch (error) {
+                Toast.error(
+                    error.message || 'Có lỗi khi đăng xuất tất cả thiết bị.'
+                );
+            } finally {
+                if (revokeAllButton) {
+                    revokeAllButton.innerHTML = originalContent;
+                    revokeAllButton.disabled = sessions.length === 0;
+                }
+            }
+        }
         // --------------------------------------------
         // Events
         // --------------------------------------------
@@ -473,6 +568,10 @@
 
             revokeSession(button.dataset.sessionId);
         });
+
+        if (revokeAllButton) {
+            revokeAllButton.addEventListener('click', revokeAllSessions);
+        }
 
         if (allDevicesModal && viewAllButton) {
             allDevicesModal.addEventListener('show.bs.modal', () => {
@@ -495,7 +594,14 @@
         if (!form || form.dataset.initialized === 'true') return;
 
         const $form = $(form);
+        const passwordInput = form.querySelector('#newPassword');
+        const confirmInput = form.querySelector('#confirmPassword');
 
+        passwordInput.setAttribute('autocomplete', 'new-password');
+        confirmInput.setAttribute('autocomplete', 'new-password');
+
+        passwordInput.value = '';
+        confirmInput.value = '';
         // Khởi tạo validation một lần.
         $form.validate({
             validClass: 'is-valid',

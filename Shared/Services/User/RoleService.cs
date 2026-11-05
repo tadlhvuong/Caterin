@@ -1,13 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
 using Shared.DTOs.RolePermisison;
 using Shared.Enums;
+using Shared.Interfaces.Log;
 using Shared.Interfaces.User;
 using Shared.Responses;
+using Shared.UserValidation.Interface;
+using Shared.UserValidation.Sevices;
 using System.Security;
 
 
@@ -17,11 +21,22 @@ namespace Shared.Services.User
     {
         private readonly AppDbContext _dbContext;
         private readonly RoleManager<AppRole> _roleManager;
+        private readonly ILevelAuthorizationService _levelService;
 
-        public RoleService(AppDbContext dbContext, RoleManager<AppRole> roleManager)
+
+        private readonly ILogSafetyService _logSafetyService;
+        private readonly ILogger<RoleService> _logger;
+        public RoleService(AppDbContext dbContext, RoleManager<AppRole> roleManager,
+            ILevelAuthorizationService levelService,
+    ILogSafetyService logSafetyService,
+    ILogger<RoleService> logger)
         {
             _dbContext = dbContext;
             _roleManager = roleManager;
+            _levelService = levelService;
+
+            _logSafetyService = logSafetyService;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<RoleCardDto>> GetRoleCardsAsync(CancellationToken cancellationToken = default)
@@ -49,16 +64,34 @@ namespace Shared.Services.User
             return roles;
         }
 
-        public async Task<AppRole?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<AppRole?> GetByIdAsync(
+    string id,
+    CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return null;
 
-            return await _dbContext.Roles
+            var role = await _dbContext.Roles
                 .AsNoTracking()
                 .FirstOrDefaultAsync(
-                    role => role.Id == id,
+                    x => x.Id == id,
                     cancellationToken);
+
+            if (role == null)
+                return null;
+
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return null;
+            }
+
+            return role;
         }
 
         public async Task<ServiceResult> CreateAsync(CreateRoleDto dto, CancellationToken cancellationToken = default)
@@ -120,9 +153,24 @@ namespace Shared.Services.User
                 .Select(x => (int?)x.Level)
                 .MaxAsync(cancellationToken);
 
-            var newLevel = Math.Max(
-                (maxLevel ?? adminLevel.Value) + 1,
-                adminLevel.Value + 1);
+            var newLevel = Math.Max((maxLevel ?? adminLevel.Value) + 1, adminLevel.Value + 1);
+            try
+            {
+                await _levelService.EnsureCanCreateRoleAsync(newLevel, cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.RoleDenied,
+    false,
+    $"Role creation denied. Requested role: {roleName}, requested level: {newLevel}.");
+
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "InsufficientRoleLevel",
+                    Message = "You do not have permission to modify this role or assign the specified level."
+                });
+            }
 
             var role = new AppRole
             {
@@ -148,13 +196,19 @@ namespace Shared.Services.User
                         Message = error.Description
                     }));
             }
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.CreateData,
+    "Role",
+    role.Id,
+    $"Created role '{role.Name}' with level {role.Level}.");
 
             return ServiceResult.SuccessMessage("Role created successfully.");
         }
 
-        public async Task<ServiceResult> UpdateAsync(UpdateRoleDto dto, int? currentUserLevel, CancellationToken cancellationToken = default)
+        public async Task<ServiceResult> UpdateAsync(UpdateRoleDto dto, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(dto.Id) || string.IsNullOrWhiteSpace(dto.Name))
+            if (string.IsNullOrWhiteSpace(dto.Id) ||
+                string.IsNullOrWhiteSpace(dto.Name))
             {
                 return ServiceResult.Fail(new ServiceError
                 {
@@ -197,32 +251,29 @@ namespace Shared.Services.User
                 });
             }
 
-            if (!currentUserLevel.HasValue)
+            try
             {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "UserRoleNotFound",
-                    Message = "The current user has no assigned role."
-                });
-            }
+                // Kiểm tra quyền quản lý Role hiện tại.
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
 
-            // Level nhỏ hơn nghĩa là có quyền cao hơn.
-            if (currentUserLevel.Value >= role.Level)
+                // Kiểm tra Level mới không được cao hơn hoặc bằng người thao tác.
+                await _levelService.EnsureCanManageRoleLevelAsync(
+                    dto.Level,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
             {
+                await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.RoleDenied,
+    false,
+    $"Role update denied. RoleId: {role.Id}, role: {role.Name}.");
+
                 return ServiceResult.Fail(new ServiceError
                 {
                     Code = "InsufficientRoleLevel",
-                    Message = "You cannot edit a role with an equal or higher privilege level."
-                });
-            }
-
-            if (dto.Level <= currentUserLevel.Value)
-            {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "InvalidRoleLevel",
-                    Field = nameof(dto.Level),
-                    Message = "The new role level must be lower in privilege than your own."
+                    Message = "You do not have permission to modify this role or assign the specified level."
                 });
             }
 
@@ -239,7 +290,8 @@ namespace Shared.Services.User
                     Message = "A role with this name already exists."
                 });
             }
-
+            var oldName = role.Name;
+            var oldLevel = role.Level;
             role.Name = roleName;
             role.Level = dto.Level;
             role.Description = string.IsNullOrWhiteSpace(dto.Description)
@@ -259,13 +311,16 @@ namespace Shared.Services.User
                         Message = error.Description
                     }));
             }
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.UpdateData,
+    "Role",
+    role.Id,
+    $"Updated role '{oldName}' to '{role.Name}'. Level: {oldLevel} -> {role.Level}.");
 
             return ServiceResult.SuccessMessage("Role updated successfully.");
         }
-        public async Task<ServiceResult> DeleteAsync(
-    string id,
-    int? currentUserLevel,
-    CancellationToken cancellationToken = default)
+
+        public async Task<ServiceResult> DeleteAsync(string id, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -288,25 +343,6 @@ namespace Shared.Services.User
                     Message = "Role was not found."
                 });
             }
-
-            if (!currentUserLevel.HasValue)
-            {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "UserRoleNotFound",
-                    Message = "The current user has no assigned role."
-                });
-            }
-
-            if (currentUserLevel.Value >= role.Level)
-            {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "InsufficientRoleLevel",
-                    Message = "You cannot delete a role with an equal or higher privilege level."
-                });
-            }
-
             if (role.IsSystem ||
                 string.Equals(role.Name, "Root", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(role.Name, "System", StringComparison.OrdinalIgnoreCase) ||
@@ -316,6 +352,25 @@ namespace Shared.Services.User
                 {
                     Code = "ProtectedRole",
                     Message = "This role cannot be deleted."
+                });
+            }
+
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.RoleDenied,
+    false,
+    $"Role deletion denied. RoleId: {role.Id}, role: {role.Name}.");
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "InsufficientRoleLevel",
+                    Message = "You do not have permission to delete this role."
                 });
             }
 
@@ -339,7 +394,12 @@ namespace Shared.Services.User
             _dbContext.Roles.Remove(role);
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.DeleteAccount,
+    "Role",
+    role.Id,
+    $"Deleted role '{role.Name}'.");
+           
             return ServiceResult.SuccessMessage("Role deleted successfully.");
         }
 
@@ -359,16 +419,37 @@ namespace Shared.Services.User
                 });
             }
 
-            var roleExists = await _dbContext.Roles
-                .AsNoTracking()
-                .AnyAsync(x => x.Id == roleId, cancellationToken);
+            var role = await _dbContext.Roles
+    .AsNoTracking()
+    .Where(x => x.Id == roleId)
+    .Select(x => new
+    {
+        x.Id,
+        x.Name
+    })
+    .FirstOrDefaultAsync(cancellationToken);
 
-            if (!roleExists)
+            if (role == null)
             {
                 return ServiceResult<object>.Fail(new ServiceError
                 {
                     Code = "RoleNotFound",
                     Message = "Role was not found."
+                });
+            }
+
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return ServiceResult<object>.Fail(new ServiceError
+                {
+                    Code = "Forbidden",
+                    Message = "You do not have permission to view permissions of this role."
                 });
             }
 
@@ -439,13 +520,9 @@ namespace Shared.Services.User
 
         public async Task<ServiceResult<int>> UpdatePermissionsAsync(
     UpdateRolePermissionsDto dto,
-    int? currentUserLevel,
     string? assignedById,
     CancellationToken cancellationToken = default)
         {
-            //const string adminAccessCode = "system.admin.access";
-            //const string adminAccessAction = "Access";
-
             if (string.IsNullOrWhiteSpace(dto.RoleId))
             {
                 return ServiceResult<int>.Fail(new ServiceError
@@ -470,17 +547,47 @@ namespace Shared.Services.User
                     Message = "Role was not found."
                 });
             }
-
-            if (!currentUserLevel.HasValue ||
-                currentUserLevel.Value >= role.Level)
+            // Bảo vệ các Role hệ thống.
+            if (role.IsSystem ||
+                string.Equals(role.Name, "Root", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role.Name, "System", StringComparison.OrdinalIgnoreCase))
             {
                 return ServiceResult<int>.Fail(new ServiceError
                 {
-                    Code = "InsufficientRoleLevel",
-                    Message = "You cannot modify permissions for this role."
+                    Code = "SystemRoleProtected",
+                    Message = "System roles cannot have their permissions modified."
                 });
             }
-          
+
+            // Không cho phép thay đổi quyền của Admin.
+            if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<int>.Fail(new ServiceError
+                {
+                    Code = "ProtectedRole",
+                    Message = "The Admin role permissions cannot be modified."
+                });
+            }
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.PermissionDenied,
+                    false,
+                    $"Permission update denied. RoleId: {role.Id}, role: {role.Name}.");
+
+                return ServiceResult<int>.Fail(new ServiceError
+                {
+                    Code = "InsufficientRoleLevel",
+                    Message = "You do not have permission to modify permissions of this role."
+                });
+            }
+
             // Chuẩn hóa lựa chọn và phân biệt action Access đặc biệt.
             var selected = new HashSet<(int ModuleId, string Action)>();
 
@@ -565,7 +672,7 @@ namespace Shared.Services.User
                     x.Code,
                     PermissionCodes.AdminAccess,
                     StringComparison.OrdinalIgnoreCase));
-            
+
             var selectedAccess = selected
                 .Where(x => string.Equals(
                     x.Action,
@@ -720,14 +827,21 @@ namespace Shared.Services.User
                         x => x.PermissionVersion,
                         x => x.PermissionVersion + 1),
                     cancellationToken);
-
-            await transaction.CommitAsync(cancellationToken);
-
             var permissionCount = await _dbContext.RolePermissions
-                .CountAsync(
-                    x => x.RoleId == dto.RoleId,
-                    cancellationToken);
-
+              .CountAsync(
+                  x => x.RoleId == dto.RoleId,
+                  cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.PermissionChanged,
+    true,
+    $"Permissions updated for role '{role.Name}' (RoleId: {role.Id}).");
+          
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.UpdateData,
+    "Role",
+    role.Id,
+    $"Updated permissions for role '{role.Name}'. Permission count: {permissionCount}.");
             return ServiceResult<int>.Success(
                 permissionCount,
                 "Permissions updated successfully.");
@@ -747,16 +861,31 @@ namespace Shared.Services.User
                 });
             }
 
-            var roleExists = await _dbContext.Roles
-                .AsNoTracking()
-                .AnyAsync(x => x.Id == id, cancellationToken);
+            var role = await _dbContext.Roles
+    .AsNoTracking()
+    .Where(x => x.Id == id)
+    .Select(x => new { x.Id, x.Name })
+    .FirstOrDefaultAsync(cancellationToken);
 
-            if (!roleExists)
+            if (role == null)
             {
                 return ServiceResult<RoleMembersDto>.Fail(new ServiceError
                 {
                     Code = "RoleNotFound",
                     Message = "Role was not found."
+                });
+            }
+
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(role.Name!, cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return ServiceResult<RoleMembersDto>.Fail(new ServiceError
+                {
+                    Code = "Forbidden",
+                    Message = "You do not have permission to view members of this role."
                 });
             }
 
@@ -801,17 +930,35 @@ namespace Shared.Services.User
                     });
             }
 
-            var roleExists = await _dbContext.Roles
-                .AsNoTracking()
-                .AnyAsync(x => x.Id == id, cancellationToken);
+            var role = await _dbContext.Roles
+    .AsNoTracking()
+    .Where(x => x.Id == id)
+    .Select(x => new { x.Id, x.Name })
+    .FirstOrDefaultAsync(cancellationToken);
 
-            if (!roleExists)
+            if (role == null)
             {
                 return ServiceResult<IReadOnlyList<AvailableRoleMemberDto>>.Fail(
                     new ServiceError
                     {
                         Code = "RoleNotFound",
                         Message = "Role was not found."
+                    });
+            }
+
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return ServiceResult<IReadOnlyList<AvailableRoleMemberDto>>.Fail(
+                    new ServiceError
+                    {
+                        Code = "Forbidden",
+                        Message = "You do not have permission to view available members for this role."
                     });
             }
 
@@ -850,7 +997,6 @@ namespace Shared.Services.User
 
         public async Task<ServiceResult<int>> AssignMembersAsync(
     AssignRoleMembersDto dto,
-    int? currentUserLevel,
     CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(dto.RoleId))
@@ -879,7 +1025,6 @@ namespace Shared.Services.User
             }
 
             var role = await _dbContext.Roles.FirstOrDefaultAsync(x => x.Id == dto.RoleId, cancellationToken);
-
             if (role == null)
             {
                 return ServiceResult<int>.Fail(new ServiceError
@@ -888,16 +1033,46 @@ namespace Shared.Services.User
                     Message = "Role was not found."
                 });
             }
-
-            if (!currentUserLevel.HasValue ||
-                currentUserLevel.Value >= role.Level)
+            // Bảo vệ các Role hệ thống.
+            if (role.IsSystem == null ||
+                string.Equals(role.Name, "Root", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role.Name, "System", StringComparison.OrdinalIgnoreCase))
             {
                 return ServiceResult<int>.Fail(new ServiceError
                 {
-                    Code = "InsufficientRoleLevel",
-                    Message = "You cannot assign members to this role."
+                    Code = "SystemRoleProtected",
+                    Message = "Members cannot be assigned to a system role."
                 });
             }
+
+            // Không cho phép thay đổi thành viên của Admin.
+            if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult<int>.Fail(new ServiceError
+                {
+                    Code = "ProtectedRole",
+                    Message = "Members cannot be assigned to the Admin role."
+                });
+            }
+            try
+            {
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.RoleDenied,
+    false,
+    $"Role member assignment denied. RoleId: {role.Id}, role: {role.Name}.");
+                return ServiceResult<int>.Fail(new ServiceError
+                {
+                    Code = "InsufficientRoleLevel",
+                    Message = "You do not have permission to assign members to this role."
+                });
+            }
+
             if (role.IsSystem)
             {
                 return ServiceResult<int>.Fail(new ServiceError
@@ -910,7 +1085,6 @@ namespace Shared.Services.User
                 .Where(u => userIds.Contains(u.Id) && !u.IsDeleted)
                 .Select(u => u.Id)
                 .ToListAsync(cancellationToken);
-
             if (validUserIds.Count != userIds.Count)
             {
                 return ServiceResult<int>.Fail(new ServiceError
@@ -920,6 +1094,29 @@ namespace Shared.Services.User
                     Message = "Some accounts do not exist or have been deleted."
                 });
             }
+            foreach (var userId in validUserIds)
+            {
+                try
+                {
+                    await _levelService.EnsureCanManageUserAsync(
+                        userId,
+                        allowSelf: false,
+                        cancellationToken);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.RoleDenied,
+            false,
+            $"Role member assignment denied. RoleId: {role.Id}, UserId: {userId}.");
+                    return ServiceResult<int>.Fail(new ServiceError
+                    {
+                        Code = "InsufficientRoleLevel",
+                        Message = "You do not have permission to assign this role to one or more selected users."
+                    });
+                }
+            }
+           
             await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
             var existingUserIds = await _dbContext.UserRoles
@@ -950,11 +1147,24 @@ namespace Shared.Services.User
                 user.PermissionVersion++;
                 assignedCount++;
             }
-
+            if (assignedCount == 0)
+            {
+                return ServiceResult<int>.Success(
+                    0,
+                    "All selected accounts are already assigned to this role.");
+            }
             await _dbContext.SaveChangesAsync(cancellationToken);
 
             await transaction.CommitAsync(cancellationToken);
-
+            await _logSafetyService.TryLogSecurityAsync(
+    SecurityActionType.RoleAssigned,
+    true,
+    $"Assigned {assignedCount} member(s) to role '{role.Name}' (RoleId: {role.Id}).");
+            await _logSafetyService.TryLogActivityAsync(
+    ActivityType.UpdateData,
+    "Role",
+    role.Id,
+    $"Assigned {assignedCount} member(s) to role '{role.Name}'.");
             return ServiceResult<int>.Success(
                 assignedCount,
                 "Accounts assigned successfully.");
@@ -963,7 +1173,6 @@ namespace Shared.Services.User
         public async Task<ServiceResult> RemoveMemberAsync(
     string roleId,
     string userId,
-    int? currentUserLevel,
     CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(roleId))
@@ -996,7 +1205,27 @@ namespace Shared.Services.User
                     Message = "Role not found."
                 });
             }
+            // Bảo vệ các Role hệ thống.
+            if (role.IsSystem ||
+                string.Equals(role.Name, "Root", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role.Name, "System", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "SystemRoleProtected",
+                    Message = "Members cannot be removed from a system role."
+                });
+            }
 
+            // Không cho phép thay đổi thành viên của Admin.
+            if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return ServiceResult.Fail(new ServiceError
+                {
+                    Code = "ProtectedRole",
+                    Message = "Members cannot be removed from the Admin role."
+                });
+            }
             var user = await _dbContext.Users
                 .FirstOrDefaultAsync(
                     x => x.Id == userId && !x.IsDeleted,
@@ -1011,35 +1240,42 @@ namespace Shared.Services.User
                 });
             }
 
-            // Không được quản lý role ngang cấp hoặc cao hơn.
-            if (!currentUserLevel.HasValue ||
-                currentUserLevel.Value >= role.Level)
+            var userRole = await _dbContext.UserRoles
+                .FirstOrDefaultAsync(
+                    x => x.RoleId == roleId && x.UserId == userId,
+                    cancellationToken);
+
+            if (userRole == null)
             {
                 return ServiceResult.Fail(new ServiceError
                 {
-                    Code = "InsufficientRoleLevel",
-                    Message = "You cannot manage a role at this level."
+                    Code = "UserRoleNotFound",
+                    Message = "User is not a member of this role."
                 });
             }
 
-            // Lấy Level cao nhất của người dùng mục tiêu
-            // (Level nhỏ nhất trong các role mà người đó sở hữu).
-            var targetUserLevel = await (
-                from ur in _dbContext.UserRoles.AsNoTracking()
-                join r in _dbContext.Roles.AsNoTracking()
-                    on ur.RoleId equals r.Id
-                where ur.UserId == userId
-                select (int?)r.Level
-            ).MinAsync(cancellationToken);
-
-            // Không được gỡ thành viên ngang cấp hoặc cao hơn.
-            if (!targetUserLevel.HasValue ||
-                currentUserLevel.Value >= targetUserLevel.Value)
+            // Không được quản lý role ngang cấp hoặc cao hơn.
+            try
             {
+                await _levelService.EnsureCanManageUserAsync(
+                    userId,
+                    allowSelf: false,
+                    cancellationToken);
+
+                await _levelService.EnsureCanManageRoleAsync(
+                    role.Name!,
+                    cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                await _logSafetyService.TryLogSecurityAsync(SecurityActionType.RoleDenied,
+                    false,
+                    $"Role member removal denied. RoleId: {role.Id}, UserId: {userId}.");
+
                 return ServiceResult.Fail(new ServiceError
                 {
                     Code = "InsufficientRoleLevel",
-                    Message = "You cannot manage a user at this level."
+                    Message = "You do not have permission to remove this user from the role."
                 });
             }
 
@@ -1073,27 +1309,20 @@ namespace Shared.Services.User
                 }
             }
 
-            var userRole = await _dbContext.UserRoles
-                .FirstOrDefaultAsync(
-                    x => x.RoleId == roleId && x.UserId == userId,
-                    cancellationToken);
-
-            if (userRole == null)
-            {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "UserRoleNotFound",
-                    Message = "User is not a member of this role."
-                });
-            }
-
             _dbContext.UserRoles.Remove(userRole);
 
             // Đánh dấu quyền của người dùng đã thay đổi.
             user.PermissionVersion++;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
+            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.RoleRemoved, true,
+                $"Removed user '{userId}' from role '{role.Name}' (RoleId: {role.Id}).");
 
+            await _logSafetyService.TryLogActivityAsync(
+                ActivityType.UpdateData,
+                "UserRole",
+                userId,
+                $"Removed user '{userId}' from role '{role.Name}'.");
             return ServiceResult.SuccessMessage(
                 "Xóa thành viên thành công.");
         }

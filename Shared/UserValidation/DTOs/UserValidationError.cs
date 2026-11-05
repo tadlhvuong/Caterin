@@ -35,5 +35,9 @@
         SecurityStampMissed,
         SecurityStampChanged,
         SessionInvalid,
+
+        UserSuspended,
+        UserDeactivated,
+
     }
 }

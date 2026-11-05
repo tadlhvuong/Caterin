@@ -41,7 +41,67 @@
                 ${message}
             </div>`;
     }
+    const tabScripts = {
+        personal: [
+            '/admin/assets/js/customize/flatpickr-init.js',
+            '/admin/assets/js/customize/address-picker.js',
+            '/admin/assets/js/customize/social-link-input.js',
+            '/admin/assets/js/user/hk.user-personal.js'
+        ],
+        security: [
+            '/admin/assets/js/user/hk.user-security.js'
+        ],
+        billing: '/admin/assets/js/userer/tabs/user-billing.js',
+        notification: '/admin/assets/js/user/user-notification.js',
+        connection: '/admin/assets/js/user/user-connection.js'
+    };
 
+    const loadedScripts = new Map();
+
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+
+            script.src = src;
+            script.onload = resolve;
+
+            script.onerror = () => {
+                script.remove();
+                reject(new Error(`Không thể tải script: ${src}`));
+            };
+
+            document.head.appendChild(script);
+        });
+    }
+
+    function loadTabScript(tab) {
+        const scripts = tabScripts[tab];
+
+        if (!scripts) {
+            return Promise.reject(
+                new Error(`Không tìm thấy script cho tab ${tab}`)
+            );
+        }
+
+        if (loadedScripts.has(tab)) {
+            return loadedScripts.get(tab);
+        }
+
+        const scriptList = Array.isArray(scripts) ? scripts : [scripts];
+
+        const promise = scriptList.reduce(
+            (chain, src) => chain.then(() => loadScript(src)),
+            Promise.resolve()
+        );
+
+        loadedScripts.set(tab, promise);
+
+        promise.catch(() => {
+            loadedScripts.delete(tab);
+        });
+
+        return promise;
+    }
     async function loadTab(tab, options = {}) {
         const {
             updateHistory = false
@@ -121,16 +181,41 @@
             if (currentRequestId !== requestId) return;
 
             tabContent.innerHTML = html;
-            if (tab === 'personal') {
-                window.initAddressPicker?.(tabContent);
-                window.initFlatpickr?.(tabContent);
-                window.initSocialLinks?.(tabContent);
-                window.initUserPersonal?.(tabContent);
+
+            // Lazy load JS của tab hiện tại.
+            await loadTabScript(tab);
+
+            // Kiểm tra request vẫn còn hợp lệ.
+            if (currentRequestId !== requestId) return;
+
+            // Khởi tạo chức năng của tab.
+            switch (tab) {
+                case 'personal':
+                    window.initAddressPicker?.(tabContent);
+                    window.initFlatpickr?.(tabContent);
+                    window.initSocialLinks?.(tabContent);
+                    window.initUserPersonal?.(tabContent);
+                    break;
+
+                case 'security':
+                    window.initUserSecurity?.(tabContent);
+                    window.initAccountDeactivation?.(tabContent);
+                    break;
+
+                case 'billing':
+                    window.initUserBilling?.(tabContent);
+                    break;
+
+                case 'notification':
+                    window.initUserNotification?.(tabContent);
+                    break;
+
+                case 'connection':
+                    window.initUserConnection?.(tabContent);
+                    break;
             }
-            if (tab === 'security') {
-                window.initUserSecurity?.(tabContent);
-                window.initAccountDeactivation?.(tabContent);
-            }
+
+            setActiveTab(tab);
 
             setActiveTab(tab);
 

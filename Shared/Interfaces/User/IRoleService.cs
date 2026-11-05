@@ -15,11 +15,10 @@ namespace Shared.Interfaces.User
 
         Task<ServiceResult> CreateAsync(CreateRoleDto dto, CancellationToken cancellationToken = default);
 
-        Task<ServiceResult> UpdateAsync(UpdateRoleDto dto, int? currentUserLevel, CancellationToken cancellationToken = default);
+        Task<ServiceResult> UpdateAsync(UpdateRoleDto dto, CancellationToken cancellationToken = default);
 
         Task<ServiceResult> DeleteAsync(
     string roleId,
-    int? currentUserLevel,
     CancellationToken cancellationToken = default);
 
         Task<ServiceResult<object>> GetPermissionOptionsAsync(
@@ -28,7 +27,6 @@ namespace Shared.Interfaces.User
 
         Task<ServiceResult<int>> UpdatePermissionsAsync(
     UpdateRolePermissionsDto dto,
-    int? currentUserLevel,
     string? assignedById,
     CancellationToken cancellationToken = default);
 
@@ -43,13 +41,11 @@ namespace Shared.Interfaces.User
 
         Task<ServiceResult<int>> AssignMembersAsync(
     AssignRoleMembersDto dto,
-    int? currentUserLevel,
     CancellationToken cancellationToken = default);
 
         Task<ServiceResult> RemoveMemberAsync(
     string roleId,
     string userId,
-    int? currentUserLevel,
     CancellationToken cancellationToken = default);
     }
 }

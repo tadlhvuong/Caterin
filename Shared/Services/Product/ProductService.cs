@@ -35,16 +35,16 @@ namespace Shared.Services.Product
         private readonly IMediaService _mediaService;
 
         private readonly ILogger<ProductService> _logger;
-        private readonly IActivityLogger _activityLogger;
+        private readonly ILogSafetyService _logSafetyService;
         public ProductService(AppDbContext dbContext, IOptions<MediaStorageOptions> mediaStorage, IMediaService mediaService,
-            ILogger<ProductService> logger, IActivityLogger activityLogger)
+            ILogger<ProductService> logger, ILogSafetyService logSafetyService)
         {
             _dbContext = dbContext;
             _mediaService = mediaService;
             _mediaStorage = mediaStorage.Value;
 
             _logger = logger;
-            _activityLogger = activityLogger;
+            _logSafetyService = logSafetyService;
         }
 
         public async Task<PagedResult<ProductListResult>> GetProductsAsync(ProductDataTableRequest request)
@@ -301,7 +301,7 @@ namespace Shared.Services.Product
                 }
 
                 await transaction.CommitAsync(cancellationToken);
-                await _activityLogger.LogAsync(ActivityType.ProductCreated, "Product", product.Id.ToString(), $"Tạo sản phẩm '{product.Name}'");
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductCreated, "Product", product.Id.ToString(), $"Tạo sản phẩm '{product.Name}'");
                 return ServiceResult<int>.Success(product.Id);
             }
             catch (DbUpdateException ex)
@@ -654,7 +654,7 @@ namespace Shared.Services.Product
 
                 await transaction.CommitAsync(cancellationToken);
 
-                await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
                     $"Cập nhật sản phẩm '{product.Name}'");
                 foreach (var mediaFile in filesToDelete)
                 {
@@ -1709,7 +1709,7 @@ namespace Shared.Services.Product
             product.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync(cancellationToken);
-            await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(), 
+            await _logSafetyService.TryLogActivityAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(), 
                 $"Chuyển sản phẩm '{product.Name}' về bản nháp");
             return ServiceResult.Success();
         }
@@ -1729,7 +1729,7 @@ namespace Shared.Services.Product
                     product.UpdatedAt = DateTime.UtcNow;
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
-                    await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                    await _logSafetyService.TryLogActivityAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
                         $"Tạm ngưng sản phẩm '{product.Name}'");
                     return new ServiceResult<ProductStatus>
                     {
@@ -1745,7 +1745,7 @@ namespace Shared.Services.Product
                     product.UpdatedAt = DateTime.UtcNow;
 
                     await _dbContext.SaveChangesAsync(cancellationToken);
-                    await _activityLogger.LogAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
+                    await _logSafetyService.TryLogActivityAsync(ActivityType.ProductUpdated, "Product", product.Id.ToString(),
                         $"Kích hoạt lại sản phẩm '{product.Name}'");
                     return new ServiceResult<ProductStatus>
                     {
@@ -2063,7 +2063,7 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                await _activityLogger.LogAsync(ActivityType.ProductCategoryCreated, "ProductCategory",
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductCategoryCreated, "ProductCategory",
                     category.Id.ToString(), $"Tạo danh mục sản phẩm '{category.Name}'");
                 return ServiceResult<int>.Success(category.Id);
             }
@@ -2101,7 +2101,7 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                await _activityLogger.LogAsync(ActivityType.ProductCategoryUpdated, "ProductCategory",
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductCategoryUpdated, "ProductCategory",
                     category.Id.ToString(), $"Cập nhật danh mục sản phẩm '{category.Name}'");
                 return ServiceResult<int>.Success(category.Id);
             }
@@ -2143,7 +2143,7 @@ namespace Shared.Services.Product
             category.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
-            await _activityLogger.LogAsync(ActivityType.ProductCategoryDeleted, "ProductCategory",
+            await _logSafetyService.TryLogActivityAsync(ActivityType.ProductCategoryDeleted, "ProductCategory",
                 category.Id.ToString(), $"Xóa danh mục sản phẩm '{category.Name}'");
             return ServiceResult<int>.Success(category.Id);
         }
@@ -2231,7 +2231,7 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                await _activityLogger.LogAsync(ActivityType.ProductAttributeCreated, "Attribute",
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductAttributeCreated, "Attribute",
                     attribute.Id.ToString(), $"Tạo thuộc tính '{attribute.Name}'");
                 return ServiceResult<int>.Success(attribute.Id);
             }
@@ -2266,7 +2266,7 @@ namespace Shared.Services.Product
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
                 await transaction.CommitAsync(cancellationToken);
-                await _activityLogger.LogAsync(ActivityType.ProductAttributeUpdated, "Attribute",
+                await _logSafetyService.TryLogActivityAsync(ActivityType.ProductAttributeUpdated, "Attribute",
                     attribute.Id.ToString(), $"Cập nhật thuộc tính '{attribute.Name}'");
                 return ServiceResult<int>.Success(attribute.Id);
             }
@@ -2301,7 +2301,7 @@ namespace Shared.Services.Product
             attribute.UpdatedAt = DateTime.UtcNow;
 
             await _dbContext.SaveChangesAsync();
-            await _activityLogger.LogAsync(ActivityType.ProductAttributeDeleted, "Attribute",
+            await _logSafetyService.TryLogActivityAsync(ActivityType.ProductAttributeDeleted, "Attribute",
                 attribute.Id.ToString(), $"Xóa thuộc tính '{attribute.Name}'");
             return ServiceResult<int>.Success(attribute.Id);
         }

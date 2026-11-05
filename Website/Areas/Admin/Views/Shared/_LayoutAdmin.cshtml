@@ -149,12 +149,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
     <!-- Main JS -->
+
+    <script src="~/admin/assets/js/core/ajax-handler.js" asp-append-version="true"></script>
     <script src="~/admin/assets/js/config.js"></script>
     <script src="~/admin/assets/js/main.js"></script>
-    <script>
-        htmx.config.historyCacheSize = 10;
-
-    </script>
     <!-- Page JS -->
     @RenderSection("Scripts", false)
 </body>

@@ -41,5 +41,10 @@
         UnLock,
         Enable,
         Disable,
+        Suspend,
+        Unsuspend,
+        Deactivate,
+
+        RevokeSession
     }
 }

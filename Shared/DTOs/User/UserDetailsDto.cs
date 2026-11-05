@@ -1,4 +1,6 @@
-﻿namespace Shared.DTOs.User
+﻿using Shared.Enums;
+
+namespace Shared.DTOs.User
 {
     public class UserDetailsDto
     {
@@ -6,6 +8,7 @@
         public string? AvatarStoragePath { get; set; }
 
         public string UserName { get; set; } = string.Empty;
+        public string DisplayName {  get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public bool EmailConfirmed { get; set; }
 
@@ -16,7 +19,8 @@
 
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLogin { get; set; }
-
+        public EntityStatus Status { get; set; }
         public bool IsActive { get; set; }
+        public bool IsIdentityLocked { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace Shared.Services.User
                 {
                     Id = role.Id,
                     Name = role.Name ?? string.Empty,
+                    Icon = role.Icon,
                     Description = role.Description,
                     Level = role.Level,
                     IsSystem = role.IsSystem,
@@ -242,14 +243,14 @@ namespace Shared.Services.User
             }
 
             // Không cho phép chỉnh sửa role Admin.
-            if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
-            {
-                return ServiceResult.Fail(new ServiceError
-                {
-                    Code = "ProtectedRole",
-                    Message = "The Admin role cannot be modified."
-                });
-            }
+            //if (string.Equals(role.Name, "Admin", StringComparison.OrdinalIgnoreCase))
+            //{
+            //    return ServiceResult.Fail(new ServiceError
+            //    {
+            //        Code = "ProtectedRole",
+            //        Message = "The Admin role cannot be modified."
+            //    });
+            //}
 
             try
             {
@@ -294,9 +295,8 @@ namespace Shared.Services.User
             var oldLevel = role.Level;
             role.Name = roleName;
             role.Level = dto.Level;
-            role.Description = string.IsNullOrWhiteSpace(dto.Description)
-                ? null
-                : dto.Description.Trim();
+            role.Icon = string.IsNullOrWhiteSpace(dto.Icon) ? null : dto.Icon.Trim();
+            role.Description = string.IsNullOrWhiteSpace(dto.Description) ? null : dto.Description.Trim();
             role.UpdatedAt = DateTime.UtcNow;
 
             var identityResult = await _roleManager.UpdateAsync(role);
@@ -311,11 +311,8 @@ namespace Shared.Services.User
                         Message = error.Description
                     }));
             }
-            await _logSafetyService.TryLogActivityAsync(
-    ActivityType.UpdateData,
-    "Role",
-    role.Id,
-    $"Updated role '{oldName}' to '{role.Name}'. Level: {oldLevel} -> {role.Level}.");
+            await _logSafetyService.TryLogActivityAsync(ActivityType.UpdateData, "Role",
+                role.Id, $"Updated role '{oldName}' to '{role.Name}'. Level: {oldLevel} -> {role.Level}.");
 
             return ServiceResult.SuccessMessage("Role updated successfully.");
         }

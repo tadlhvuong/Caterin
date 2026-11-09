@@ -94,6 +94,10 @@ namespace Shared.Interfaces.AuthServices
 
         Task<int?> GetUserLevelAsync(string userId, CancellationToken cancellationToken = default);
         Task<ServiceResult> ResendConfirmEmailForAdminAsync(string userId, CancellationToken cancellationToken = default);
+
+        Task CheckUserLevelAsync(
+    string userId,
+    CancellationToken cancellationToken = default);
         #endregion
 
         #region Permission

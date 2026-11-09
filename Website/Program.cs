@@ -37,6 +37,7 @@ using Shared.Services.Product;
 using Shared.Services.User;
 using Shared.UserValidation.Interface;
 using Shared.UserValidation.Sevices;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -193,6 +194,35 @@ services.AddControllersWithViews().AddViewLocalization()
         options.DataAnnotationLocalizerProvider = (type, factory) =>
             factory.Create(typeof(SharedResource));
     }); ;
+services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    // Login, Register, External Login
+    options.AddPolicy("auth", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+
+    // Forgot Password, Reset Password, Change Password
+    options.AddPolicy("password", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -224,7 +254,6 @@ options.KnownNetworks.Clear();
 options.KnownProxies.Clear();
 
 app.UseForwardedHeaders(options);
-app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();  
 app.UseStaticFiles();
 app.UseRouting();
@@ -234,9 +263,8 @@ app.UseSecurityHeaders();
 app.UseMiddleware<RefreshTokenMiddleware>();
 
 app.UseAuthentication();
-
-
-//app.UseMiddleware<UserValidationMiddleware>();
+// Rate Limiting
+app.UseRateLimiter();
 
 app.UseMiddleware<AdminAccessMiddleware>();
 

@@ -88,7 +88,6 @@ namespace Website.Areas.Admin.Controllers
             {
                 "personal",
                 "security",
-                "billing",
                 "notification",
                 "connection"
             };
@@ -292,16 +291,6 @@ namespace Website.Areas.Admin.Controllers
             {
                 Id = id
             });
-        }
-
-        [HttpGet("details-billing")]
-        [PermissionAction(ActionType.View)]
-        public IActionResult DetailsBilling(Guid id)
-        {
-            if (Request.Headers.ContainsKey("HX-Request"))
-                return PartialView("_Billing");
-
-            return RedirectToAction(nameof(Index), new { id = id, tab = "billing" });
         }
 
         [HttpGet("details-notification")]
@@ -818,6 +807,49 @@ namespace Website.Areas.Admin.Controllers
                 });
             }
         }
+        [HttpPost("user-disable/{id}")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> DisableUser(
+    string id,
+    CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "ID tài khoản không hợp lệ."
+                });
+
+            await _userService.DisableAsync(id, cancellationToken);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Đã vô hiệu hóa tài khoản thành công."
+            });
+        }
+
+        [HttpPost("user-enable/{id}")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> EnableUser(
+            string id,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "ID tài khoản không hợp lệ."
+                });
+
+            await _userService.EnableAsync(id, cancellationToken);
+
+            return Ok(new
+            {
+                success = true,
+                message = "Đã kích hoạt tài khoản thành công."
+            });
+        }
 
         [HttpGet("roles")]
         [PermissionAction(ActionType.View)]
@@ -958,7 +990,23 @@ namespace Website.Areas.Admin.Controllers
 
             return Json(statistics);
         }
+        [HttpGet("check-user-level/{id}")]
+        [PermissionAction(ActionType.Edit)]
+        public async Task<IActionResult> CheckUserLevel(
+    string id,
+    CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "ID tài khoản không hợp lệ."
+                });
 
+            await _userService.CheckUserLevelAsync(id, cancellationToken);
+
+            return Ok(new { success = true });
+        }
         private Dictionary<string, string[]> GetModelErrors()
         {
             return ModelState.Where(x => x.Value?.Errors.Count > 0)

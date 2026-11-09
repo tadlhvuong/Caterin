@@ -682,6 +682,10 @@ namespace Shared.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<string>("Icon")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<bool>("IsSystem")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -748,8 +752,8 @@ namespace Shared.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -835,8 +839,8 @@ namespace Shared.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("WardCode")
                         .HasMaxLength(20)

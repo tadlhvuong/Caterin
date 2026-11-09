@@ -23,7 +23,8 @@ namespace Shared.Data.Entities.Identity
         public bool IsActive { get; set; } = true;
         public long PermissionVersion { get; set; } = 1;
         public int TokenVersion { get; set; } = 1;
-        public string DisplayName { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+
         [Display(Name = "Ngày sinh")]
         public DateTime? DateOfBirth { get; set; }
 
@@ -80,7 +81,7 @@ namespace Shared.Data.Entities.Identity
         public ICollection<UserSocialLink> SocialLinks { get; set; } = [];
 
         public virtual MediaFile? AvatarMediaFile { get; set; }
-        //public string SecurityStamp { get; set; } = Guid.NewGuid().ToString("N");
+        
         //[NotMapped]
         //public virtual ICollection<UserLoginInfo> ExtLogins { get; set; }
 

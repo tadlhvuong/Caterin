@@ -13,6 +13,7 @@
     const roleNameInput = document.getElementById('modalRoleName')
     const roleLevelGroup = document.getElementById('roleLevelGroup');
     const roleLevelInput = document.getElementById('modalRoleLevel');
+    const roleIconInput = document.getElementById('modalRoleIcon');
     const roleDescriptionInput = document.getElementById('modalRoleDescription');
     const saveButton = document.getElementById('saveRoleBtn');
 
@@ -132,19 +133,19 @@
 
         const isSystem = role.isSystem === true;
         const isSystemRole = role.name === 'System';
-
+        const iconRole = role?.icon?.trim() || 'ti ti-shield';
         setText(card.querySelector('.role-name'), role.name);
         setText(card.querySelector('.role-level'), `Level ${role.level}`);
+        const roleIconElement = card.querySelector('.role-icon');
 
+        if (roleIconElement) {
+            roleIconElement.className = `${iconRole} ti-md role-icon`;
+        }
         const typeBadge = card.querySelector('.role-type');
         typeBadge.textContent = isSystem ? 'System' : 'Custom';
-        typeBadge.classList.add(
-            isSystem ? 'bg-label-warning' : 'bg-label-secondary'
-        );
+        typeBadge.classList.add(isSystem ? 'bg-label-warning' : 'bg-label-secondary');
 
-        setText(
-            card.querySelector('.role-description'),
-            role.description || 'Chưa có mô tả cho vai trò này.'
+        setText(card.querySelector('.role-description'), role.description || 'Chưa có mô tả cho vai trò này.'
         );
 
         setText(card.querySelector('.role-member-count'), role.memberCount);
@@ -154,6 +155,7 @@
         editButton.dataset.roleId = role.id;
         editButton.dataset.roleName = role.name ?? '';
         editButton.dataset.roleLevel = role.level ?? 0;
+        editButton.dataset.roleIcon = role.icon ?? '';
         editButton.dataset.roleDescription = role.description ?? '';
 
         const permissionsButton = card.querySelector('.role-permissions-btn');
@@ -183,7 +185,6 @@
 
     async function loadRoles() {
         try {
-            console.log(rolesUrl);
             const response = await fetch(rolesUrl, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
@@ -233,11 +234,17 @@
 
     function resetForm() {
         form.reset();
+
         roleIdInput.value = '';
         roleLevelInput.value = '';
+        roleIconInput.value = '';
+
         form.dataset.mode = 'create';
+
         title.textContent = 'Thêm vai trò mới';
         saveButton.textContent = 'Tạo mới';
+
+        window.roleIconPicker?.setValue('');
     }
 
     // Mở modal tạo role mới.
@@ -254,13 +261,13 @@
     // Mở modal sửa role.
     document.addEventListener('click', function (event) {
         const editButton = event.target.closest('.role-edit-modal');
-
         if (!editButton) return;
 
         event.preventDefault();
         const roleId = editButton.dataset.roleId;
         const roleName = editButton.dataset.roleName;
         const roleLevel = editButton.dataset.roleLevel;
+        const roleIcon = editButton.dataset.roleIcon || '';
         const roleDescription = editButton.dataset.roleDescription || '';
 
         if (!roleId) {
@@ -279,11 +286,13 @@
         roleIdInput.value = roleId;
         roleNameInput.value = roleName || '';
         roleLevelInput.value = roleLevel ?? 0;
+        roleIconInput.value = roleIcon;
         roleDescriptionInput.value = roleDescription;
 
         title.textContent = 'Chỉnh sửa';
         saveButton.textContent = 'Xác nhận';
 
+        window.roleIconPicker.setValue(roleIcon);
         modal.show();
     });
 
@@ -294,24 +303,19 @@
         if (!form.reportValidity()) return;
 
         const isEdit = form.dataset.mode === 'edit';
-
         const payload = {
             name: roleNameInput.value.trim(),
+            icon: roleIconInput.value.trim(),
             description: roleDescriptionInput.value.trim() || null
         };
         if (!payload.name) {
             roleNameInput.focus();
             return;
         }
-        console.log(isEdit);
         if (isEdit) {
             const levelValue = roleLevelInput.value.trim();
 
-            if (
-                levelValue === '' ||
-                !Number.isInteger(Number(levelValue)) ||
-                Number(levelValue) < 0
-            ) {
+            if (levelValue === '' || !Number.isInteger(Number(levelValue)) || Number(levelValue) < 0) {
                 roleLevelInput.focus();
                 return;
             }
@@ -321,7 +325,6 @@
         } 
 
         const url = isEdit ? `${baseUrl}/update/${encodeURIComponent(roleIdInput.value)}` : `${baseUrl}/create`;
-
         saveButton.disabled = true;
         try {
             const response = await fetch(url, {
@@ -1301,7 +1304,6 @@
             const result = await response.json().catch(() => null);
 
             if (!response.ok) {
-                console.log(result);
                 throw new Error(result?.message || 'Không thể gán tài khoản.');
             }
 
@@ -1315,8 +1317,7 @@
                 `.role-card-item[data-role-id="${CSS.escape(assigningRoleId)}"]`
             );
 
-            const countElement =
-                roleCard?.querySelector('.role-member-count');
+            const countElement = roleCard?.querySelector('.role-member-count');
 
             if (countElement) {
                 const currentCount = Number(countElement.textContent) || 0;

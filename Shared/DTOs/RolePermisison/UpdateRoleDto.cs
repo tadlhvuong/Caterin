@@ -19,7 +19,10 @@ namespace Shared.DTOs.RolePermisison
         [Required]
         public int Level { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(100)]
+        public string? Icon { get; set; }
+
+        [StringLength(500)]
         public string? Description { get; set; }
     }
 }

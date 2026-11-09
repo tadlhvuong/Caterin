@@ -30,8 +30,6 @@ namespace Shared.Responses.Datatables
         public string? RoleId { get; set; }
 
         public int? UserStatus { get; set; }
-
-        public string? UserRole { get; set; }
     }
     public class ProductDataTableRequest : DataTableRequest
     {

@@ -1068,6 +1068,7 @@ namespace Shared.Services.Authentication
                 "User account enabled successfully. UserId: {UserId}",
                 userId);
         }
+
         public async Task SuspendAsync(string userId, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -1108,11 +1109,9 @@ namespace Shared.Services.Authentication
                 user.UpdatedAt = DateTime.UtcNow;
                 user.TokenVersion++;
 
-                await IncreasePermissionVersionInternalAsync(
-                    user);
+                await IncreasePermissionVersionInternalAsync(user);
 
-                await _refreshTokenService.RevokeAllUserTokensAsync(
-                    userId, TokenRevocationReasons.AccountSuspended,
+                await _refreshTokenService.RevokeAllUserTokensAsync(userId, TokenRevocationReasons.AccountSuspended,
                     cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
@@ -2206,7 +2205,14 @@ namespace Shared.Services.Authentication
                 select (int?)role.Level
             ).MinAsync(cancellationToken);
         }
-
+        public async Task CheckUserLevelAsync(
+    string targetUserId,
+    CancellationToken cancellationToken = default)
+        {
+            await _levelService.EnsureCanManageUserAsync(
+                targetUserId, false,
+                cancellationToken);
+        }
         #endregion END-ROLE
 
         #region PERMISSION

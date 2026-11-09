@@ -18,7 +18,7 @@ namespace Shared.Configurations
 
             builder.Property(x => x.Email).HasMaxLength(256);
 
-            builder.Property(x => x.UserName).HasMaxLength(200);
+            builder.Property(x => x.DisplayName).HasMaxLength(100).IsRequired(false);
 
             builder.Property(x => x.AddressDetail).HasMaxLength(500);
 

@@ -16,6 +16,8 @@ namespace Shared.Configurations
 
             builder.Property(x => x.Level).IsRequired();
 
+            builder.Property(x => x.Icon).HasMaxLength(100).IsRequired(false);
+
             builder.Property(x => x.IsSystem).HasDefaultValue(false);
 
             builder.Property(x => x.Description).HasMaxLength(500);

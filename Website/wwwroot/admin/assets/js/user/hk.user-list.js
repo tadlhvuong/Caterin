@@ -56,7 +56,7 @@ $(function () {
                         sortColumn: orderBy ? res.columns[orderBy.column].data : null,
                         sortDirection: orderBy ? orderBy.dir : null,
                         userStatus: $('#FilterUsersStatus').val() ? parseInt($('#FilterUsersStatus').val(), 10) : null,
-                        userRole: $('#FilterUsersRole').val() || null
+                        roleId: $('#FilterUsersRole').val() || null
                     });
                 },
 
@@ -177,11 +177,11 @@ $(function () {
 
                         return data.map(function (role) {
                             return `
-        <div class="d-flex align-items-center">
-          ${roleBadgeObj[role] ?? '<i class="ti ti-user ti-md text-secondary me-2"></i>'}
-          <span class="text-heading">${role}</span>
-        </div>
-      `;
+                                <div class="d-flex align-items-center">
+                                  ${roleBadgeObj[role] ?? '<i class="ti ti-user ti-md text-secondary me-2"></i>'}
+                                  <span class="text-heading">${role}</span>
+                                </div>
+                              `;
                         }).join('');
                     }
                 },
@@ -214,36 +214,48 @@ $(function () {
 
                         const statusAction = full.status === 2
                             ? `<button type="button"
-               class="dropdown-item suspend-user"
-               data-id="${id}">
-           <i class="ti ti-user-off me-2"></i>Đình chỉ tài khoản
-       </button>`
-                            : full.status === 3
-                                ? `<button type="button"
-                   class="dropdown-item activate-user"
-                   data-id="${id}">
-               <i class="ti ti-user-check me-2"></i>Gỡ đình chỉ
-           </button>`
+                                       class="dropdown-item suspend-user user-details-link"
+                                       data-id="${id}">
+                                   <i class="ti ti-user-off me-2"></i>Đình chỉ tài khoản
+                               </button>`
+                                                    : full.status === 3
+                                                        ? `<button type="button"
+                                           class="dropdown-item activate-user user-details-link"
+                                           data-id="${id}">
+                                       <i class="ti ti-user-check me-2"></i>Gỡ đình chỉ
+                                   </button>`
                                 : '';
 
                         const unlockAction = full.isIdentityLocked
                             ? `<button type="button"
-               class="dropdown-item unlock-identity-user"
-               data-id="${id}">
-           <i class="ti ti-lock-open me-2"></i>Mở khóa đăng nhập
-       </button>`
+                                       class="dropdown-item unlock-identity-user user-details-link"
+                                       data-id="${id}">
+                                   <i class="ti ti-lock-open me-2"></i>Mở khóa đăng nhập
+                               </button>`
                             : '';
+                        const isActive = full.isActive
+                        ? `<button class="dropdown-item toggle-user-active"
+                                   data-id="${id}"
+                                   data-active="true">
+                               <i class="ti ti-user-off me-2"></i>Disable Account
+                           </button>`
+                        : `<button class="dropdown-item toggle-user-active"
+                                   data-id="${id}"
+                                   data-active="false">
+                               <i class="ti ti-user-check me-2"></i>Enable Account
+                           </button>`
+                        ;
 
                         return `
             <div class="d-flex align-items-center">
-                <a href="${detailsUrl}"
-                   class="btn btn-icon btn-text-secondary rounded-pill"
+                <a href="${detailsUrl}" data-id="${id}"
+                   class="user-details-link btn btn-icon btn-text-secondary rounded-pill"
                    title="Xem chi tiết">
                     <i class="ti ti-eye ti-md"></i>
                 </a>
 
-                <a href="${editUrl}"
-                   class="btn btn-icon btn-text-secondary rounded-pill"
+                <a href="${editUrl}" data-id="${id}"
+                   class="user-details-link btn btn-icon btn-text-secondary rounded-pill"
                    title="Chỉnh sửa">
                     <i class="ti ti-edit ti-md"></i>
                 </a>
@@ -260,9 +272,11 @@ $(function () {
                     <div class="dropdown-menu dropdown-menu-end m-0">
                         ${statusAction}
                         ${unlockAction}
+                        ${isActive}
                         <button type="button"
-                                class="dropdown-item reset-password-user"
-                                data-id="${id}">
+                                class="dropdown-item reset-password-user user-details-link"
+                                data-id="${id}"
+                                data-url="${detailsUrl}?tab=security">
                             <i class="ti ti-key me-2"></i>Đặt lại mật khẩu
                         </button>
                     </div>
@@ -479,16 +493,6 @@ $(function () {
 
         return '<span class="badge bg-label-success">Hoạt động</span>';
     }
-    function formatProductPrice(row) {
-        const minPrice = Number(row.minPrice || 0);
-        const maxPrice = Number(row.maxPrice || 0);
-
-        if (minPrice === maxPrice) {
-            return minPrice.toLocaleString("vi-VN");
-        }
-
-        return `${minPrice.toLocaleString("vi-VN")} - ${maxPrice.toLocaleString("vi-VN")}`;
-    }
     function updateSelectAllState() {
         const $checkboxes =
             $('.datatables-users tbody .dt-checkboxes');
@@ -697,7 +701,55 @@ $(function () {
             });
         });
     }
+    // Mở User Details / Edit nhưng vẫn giữ trang hiện tại nếu bị chặn Level.
+    $(document).on('click', 'a.user-details-link', function (e) {
+        // Giữ hành vi mặc định khi mở tab mới hoặc cửa sổ mới.
+        if (e.ctrlKey || e.metaKey || e.shiftKey || e.which !== 1) {
+            return;
+        }
 
+        e.preventDefault();
+
+        const url = this.href;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'html',
+
+            success: function (html) {
+                // Request hợp lệ: hiển thị trang Details nhận được.
+                //document.open();
+                //document.write(html);
+                //document.close();
+                window.location.href = url;
+            },
+
+            error: function (xhr) {
+                const message =
+                    xhr.responseJSON?.message ||
+                    'Không thể truy cập thông tin tài khoản.';
+
+                if (xhr.status === 403) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Không đủ quyền',
+                        text: message,
+                        confirmButtonText: 'Đóng'
+                    });
+
+                    return;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Có lỗi xảy ra',
+                    text: message,
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    });
     $(document).on('submit', '#createUserForm', function (e) {
         e.preventDefault();
 
@@ -792,37 +844,121 @@ $(function () {
             'Bạn muốn gỡ đình chỉ tài khoản này?'
         );
     });
-
+    function checkUserLevel(id) {
+        return $.ajax({
+            url: `/admin/user/check-user-level/${encodeURIComponent(id)}`,
+            type: 'GET',
+            dataType: 'json'
+        });
+    }
     // Mở khóa đăng nhập Identity.
     $(document).on('click', '.unlock-identity-user', function (e) {
         e.preventDefault();
 
-        postUserAction(
-            $(this).data('id'),
-            'unlock',
-            'Bạn muốn gỡ trạng thái khóa đăng nhập của tài khoản này?'
-        );
-    });
+        const id = $(this).data('id');
+        if (!id) return;
 
+        checkUserLevel(id)
+            .done(function () {
+                // Gọi lại hàm AJAX unlock hiện tại của bạn tại đây.
+                unlockIdentityUser(id);
+            })
+            .fail(function (xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: xhr.status === 403 ? 'Không đủ quyền' : 'Có lỗi xảy ra',
+                    text: xhr.responseJSON?.message || 'Bạn không đủ cấp bậc để thực hiện thao tác này.',
+                    confirmButtonText: 'Đóng'
+                });
+            });
+    });
+    $(document).on('click', '.toggle-user-active', function (e) {
+        e.preventDefault();
+
+        const id = $(this).data('id');
+        const isActive = $(this).data('active') === true ||
+            $(this).data('active') === 'true';
+
+        if (!id) return;
+
+        checkUserLevel(id)
+            .done(function () {
+                Swal.fire({
+                    icon: 'warning',
+                    title: isActive ? 'Disable tài khoản?' : 'Enable tài khoản?',
+                    text: isActive
+                        ? 'Tài khoản sẽ không thể đăng nhập.'
+                        : 'Tài khoản sẽ được kích hoạt trở lại.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then(function (result) {
+                    if (!result.isConfirmed) return;
+
+                    $.ajax({
+                        url: `/admin/user/${isActive ? 'user-disable' : 'user-enable'}/${encodeURIComponent(id)}`,
+                        type: 'POST',
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function (response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(function () {
+                                dt_user_table.DataTable().ajax.reload(null, false);
+                            });
+                        },
+                        error: function (xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: xhr.status === 403 ? 'Không đủ quyền' : 'Có lỗi xảy ra',
+                                text: xhr.responseJSON?.message || 'Không thể cập nhật trạng thái tài khoản.'
+                            });
+                        }
+                    });
+                });
+            })
+            .fail(function (xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: xhr.status === 403 ? 'Không đủ quyền' : 'Có lỗi xảy ra',
+                    text: xhr.responseJSON?.message || 'Bạn không đủ cấp bậc để thực hiện thao tác này.'
+                });
+            });
+    });
 
     // Chuyển đến tab Security để đặt lại mật khẩu.
     $(document).on('click', '.reset-password-user', function (e) {
         e.preventDefault();
 
-        const userId = $(this).data('id');
+        const url = $(this).data('url');
 
-        if (!userId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Có lỗi xảy ra',
-                text: 'Không tìm thấy tài khoản.'
-            });
-            return;
-        }
+        if (!url) return;
 
-        window.location.href =
-            `/admin/user/user-details/${encodeURIComponent(userId)}?tab=security`;
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'html',
+            success: function (html) {
+                document.open();
+                document.write(html);
+                document.close();
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: xhr.status === 403 ? 'Không đủ quyền' : 'Có lỗi xảy ra',
+                    text: xhr.responseJSON?.message ||
+                        'Không thể truy cập thông tin tài khoản.'
+                });
+            }
+        });
     });
+
     function updateStatisticChange(selector, value) {
         const element = $(selector);
         const percent = Number(value) || 0;

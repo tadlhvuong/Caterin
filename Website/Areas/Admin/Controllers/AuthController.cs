@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Shared.Data.Context;
@@ -22,7 +23,6 @@ namespace Website.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Route("[area]/auth")]
-    [AllowAnonymous]
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
@@ -48,12 +48,14 @@ namespace Website.Areas.Admin.Controllers
             _logger = logger;
             _logSafetyService = logSafetyService;
         }
+        [AllowAnonymous]
         public ActionResult Index()
         {
             return RedirectToAction("login", "auth");
         }
 
         #region login
+        [AllowAnonymous]
         [HttpGet("login")]
         public IActionResult Login(string? returnUrl = null)
         {
@@ -69,8 +71,10 @@ namespace Website.Areas.Admin.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Login(LoginViewModel model, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
@@ -105,15 +109,18 @@ namespace Website.Areas.Admin.Controllers
 
         #region regsiter
 
+        [AllowAnonymous]
         [HttpGet("register")]
         public IActionResult Register()
         {
             _logger.LogInformation("Page: Register Admin");
             return View();
-        }   
+        }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             _logger.LogInformation("Register Admin");
@@ -142,6 +149,7 @@ namespace Website.Areas.Admin.Controllers
             return RedirectToAction(nameof(ConfirmEmail));
         }
 
+        [AllowAnonymous]
         [HttpGet("confirm-email")]
         public ActionResult ConfirmEmail()
         {
@@ -160,8 +168,10 @@ namespace Website.Areas.Admin.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("resend-confirm-email")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> ResendConfirmEmail(ResendConfirmEmailViewModel model, CancellationToken cancellationToken = default)
         {
             if (!ModelState.IsValid)
@@ -185,6 +195,7 @@ namespace Website.Areas.Admin.Controllers
         #endregion register
 
         #region forgot password
+        [AllowAnonymous]
         [HttpGet("forgot-password")]
         public ActionResult ForgotPassword()
         {
@@ -192,8 +203,10 @@ namespace Website.Areas.Admin.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (ModelState.IsValid)
@@ -232,6 +245,7 @@ namespace Website.Areas.Admin.Controllers
             return View(model);
         }
 
+        [AllowAnonymous]
         [HttpGet("confirm-forgot-password")]
         public ActionResult ForgotPasswordConfirmation()
         {
@@ -251,6 +265,7 @@ namespace Website.Areas.Admin.Controllers
         #endregion forgot password
 
         #region reset password
+        [AllowAnonymous]
         [HttpGet("reset-password")]
         public IActionResult ResetPassword([FromQuery] string? key)
         {
@@ -266,8 +281,10 @@ namespace Website.Areas.Admin.Controllers
             });
         }
 
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("password")]
         public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
         {
             _logger.LogInformation("Reset password");
@@ -301,6 +318,7 @@ namespace Website.Areas.Admin.Controllers
             return RedirectToAction(nameof(ResetPasswordConfirmation));
         }
 
+        [AllowAnonymous]
         [HttpGet("reset-password-confirm")]
         public ActionResult ResetPasswordConfirmation()
         {
@@ -319,13 +337,16 @@ namespace Website.Areas.Admin.Controllers
 
         #region Change password
 
+        [AllowAnonymous]
         [HttpGet("change-password")]
         public IActionResult ChangePassword()
         {
             return View();
         }
+        [AllowAnonymous]
         [HttpPost("change-password")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("password")]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (!ModelState.IsValid)
@@ -351,6 +372,8 @@ namespace Website.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(ChangePasswordConfirmation));
         }
+
+        [AllowAnonymous]
         [HttpGet("change-password-confirm")]
         public IActionResult ChangePasswordConfirmation()
         {
@@ -365,6 +388,7 @@ namespace Website.Areas.Admin.Controllers
 
         #region Logout
 
+        [Authorize]
         [HttpPost("logout")]
         [ValidateAntiForgeryToken]
         [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
@@ -420,6 +444,7 @@ namespace Website.Areas.Admin.Controllers
 
         #endregion Logout
 
+        [AllowAnonymous]
         [HttpGet("e/{key}")]
         public async Task<IActionResult> EmailAction(string key, CancellationToken cancellationToken)
         {
@@ -471,6 +496,7 @@ namespace Website.Areas.Admin.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("access-denied")]
         public IActionResult AccessDenied()
         {
@@ -484,30 +510,31 @@ namespace Website.Areas.Admin.Controllers
             });
         }
 
-        [HttpPost("save-permission")]
-        public async Task<IActionResult> SavePermission(string roleId, List<int> permissionIds)
-        {
-            var old = _dbContext.RolePermissions.Where(x => x.RoleId == roleId);
+        //[HttpPost("save-permission")]
+        //public async Task<IActionResult> SavePermission(string roleId, List<int> permissionIds)
+        //{
+        //    var old = _dbContext.RolePermissions.Where(x => x.RoleId == roleId);
 
-            _dbContext.RolePermissions.RemoveRange(old);
+        //    _dbContext.RolePermissions.RemoveRange(old);
 
-            _dbContext.RolePermissions.AddRange(permissionIds.Select(id => new RolePermission
-                {
-                    RoleId = roleId,
-                    PermissionId = id
-                }));
+        //    _dbContext.RolePermissions.AddRange(permissionIds.Select(id => new RolePermission
+        //        {
+        //            RoleId = roleId,
+        //            PermissionId = id
+        //        }));
 
-            await _dbContext.SaveChangesAsync();
+        //    await _dbContext.SaveChangesAsync();
 
-            _cache.Remove($"perm:role:{roleId}");
+        //    _cache.Remove($"perm:role:{roleId}");
 
-            return View();
-        }
+        //    return View();
+        //}
 
         #region LoginEx
 
         [HttpPost("external-login")]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public IActionResult ExternalLogin(LoginExViewModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Provider))

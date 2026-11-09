@@ -51,7 +51,6 @@
         security: [
             '/admin/assets/js/user/hk.user-security.js'
         ],
-        billing: '/admin/assets/js/userer/tabs/user-billing.js',
         notification: '/admin/assets/js/user/user-notification.js',
         connection: '/admin/assets/js/user/user-connection.js'
     };

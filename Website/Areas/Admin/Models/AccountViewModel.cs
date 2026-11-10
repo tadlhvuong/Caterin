@@ -5,17 +5,19 @@ namespace Website.Areas.Admin.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "{0} not null")]
-        [StringLength(32, ErrorMessage = "{0} Length minimum {2} characters", MinimumLength = 3)]
+        [Required(ErrorMessage = "{0} không được để trống.")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
+        [StringLength(256, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         [Display(Name = "Email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "{0} đang trống")]
+        [Required(ErrorMessage = "{0} không được để trống.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; }
+        [StringLength(128, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
+        [Display(Name = "Mật khẩu")]
+        public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "RememberMe")]
+        [Display(Name = "Ghi nhớ đăng nhập")]
         public bool RememberMe { get; set; }
 
         public string? ReturnUrl { get; set; }
@@ -57,6 +59,28 @@ namespace Website.Areas.Admin.Models
         [Range(typeof(bool), "true", "true", ErrorMessage = "Bạn phải đồng ý với Điều khoản sử dụng.")]
         public bool AcceptTerms { get; set; }
     }
+
+    public sealed class ExternalRegisterViewModel
+    {
+        [Required(ErrorMessage = "{0} not null")]
+        [StringLength(50, MinimumLength = 3)]
+        [Display(Name = "UserName")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Range(typeof(bool), "true", "true",
+            ErrorMessage = "Bạn phải đồng ý với Điều khoản sử dụng.")]
+        public bool AcceptTerms { get; set; }
+
+        [Range(typeof(bool), "true", "true",
+            ErrorMessage = "Bạn phải đồng ý với Chính sách bảo mật.")]
+        public bool AcceptPrivacy { get; set; }
+
+        // Chỉ dùng để hiển thị, không dùng làm dữ liệu tin cậy khi POST.
+        public string? Email { get; set; }
+
+        public string? Provider { get; set; }
+        public string? ReturnUrl { get; set; }
+    }
     public class ResendConfirmEmailViewModel
     {
         public string Email { get; set; } = default!;
@@ -64,26 +88,33 @@ namespace Website.Areas.Admin.Models
     }
     public class ForgotPasswordViewModel
     {
-        [Required(ErrorMessage = "{0} not null")]
-        [EmailAddress]
+        [Required(ErrorMessage = "Vui lòng nhập email.")]
+        [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
+        [StringLength(256, ErrorMessage = "Email không được vượt quá 256 ký tự.")]
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
     public class ResetPasswordViewModel
     {
-        [Required(ErrorMessage = "{0} not null")]
-        [StringLength(100, ErrorMessage = "{0} must be at least {2} characters", MinimumLength = 6)]
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu mới.")]
+        [StringLength(
+            100,
+            MinimumLength = 12,
+            ErrorMessage = "Mật khẩu phải có từ {2} đến {1} ký tự.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; }
+        [Display(Name = "Mật khẩu mới")]
+        public string Password { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "{0} not null")]
+        [Required(ErrorMessage = "Vui lòng nhập lại mật khẩu.")]
         [DataType(DataType.Password)]
-        [Display(Name = "ConfirmPassword")]
-        [Compare("Password", ErrorMessage = "Mật khẩu không giống nhau")]
-        public string ConfirmPassword { get; set; }
+        [Display(Name = "Xác nhận mật khẩu")]
+        [Compare(
+            nameof(Password),
+            ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
 
-        public string Key { get; set; }
+        [Required(ErrorMessage = "Liên kết đặt lại mật khẩu không hợp lệ.")]
+        public string Key { get; set; } = string.Empty;
     }
 
     public sealed class ChangePasswordViewModel
@@ -101,7 +132,11 @@ namespace Website.Areas.Admin.Models
         [Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
-
+    public class ConfirmEmailActionViewModel
+    {
+        [Required]
+        public string Key { get; set; } = string.Empty;
+    }
     public class ExternalLoginListViewModel
     {
         public string? ReturnUrl { get; set; }

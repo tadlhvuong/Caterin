@@ -121,16 +121,21 @@
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link"
-               href="javascript:void(0);"
-              
-               data-tab="connection"
-               data-i18n="Connection">
-                <i class="ti ti-link"></i>
-                <span>Connections</span>
-            </a>
-        </li>
+       <li class="nav-item">
+    <a class="nav-link"
+       href="@Url.Action("Details", "User", new {
+           area = "Admin",
+           id = Model.Id,
+           tab = "connection"
+       })"
+       data-tab="connection"
+       data-ajax-tab="true"
+       data-tab-url="@Url.Content($"~/Admin/User/details-connection/{Model.Id}")">
+
+        <i class="ti ti-link"></i>
+        <span>Connections</span>
+    </a>
+</li>
 
     </ul>
 </div>

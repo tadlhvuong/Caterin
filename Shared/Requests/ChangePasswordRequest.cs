@@ -2,16 +2,20 @@
 
 namespace Shared.Requests
 {
+    using System.ComponentModel.DataAnnotations;
+
     public sealed class ChangePasswordRequest
     {
-        [Required]
-        public string CurrentPassword { get; set; } = string.Empty;
+        public string? CurrentPassword { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Vui lòng nhập mật khẩu mới.")]
+        [MinLength(12, ErrorMessage = "Mật khẩu phải có ít nhất 12 ký tự.")]
         public string NewPassword { get; set; } = string.Empty;
 
-        [Required]
-        [Compare(nameof(NewPassword))]
+        [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu.")]
+        [Compare(
+            nameof(NewPassword),
+            ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

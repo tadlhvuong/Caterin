@@ -1,8 +1,6 @@
-﻿@using Website.Areas.Admin.Models
+﻿@using Website.Models.Account
+
 @model LoginViewModel
-@{
-    ViewData["Title"] = "Login";
-}
 @section Styles {
     <style>
         .btn-oauth {
@@ -34,6 +32,22 @@
                 transform: translateY(-2px);
                 box-shadow: 0 10px 25px rgba(0,0,0,.08);
             }
+
+
+        .toggle-password {
+            border: 0;
+            background: transparent;
+            color: #6B7280;
+            padding: 4px;
+        }
+
+            .toggle-password:hover {
+                color: var(--main-600);
+            }
+
+            .toggle-password i {
+                font-size: 20px;
+            }
     </style>
 }
 
@@ -57,47 +71,96 @@
 <section class="account py-80">
     <div class="container">
         <div class="row g-4">
+
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto">
-                <form asp-controller="Account" asp-action="Login" method="post" autocomplete="on">
-                    @Html.AntiForgeryToken()
-                    <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40 h-full">
-                        <span class="text-main-600 text-sm font-[600] mb-12 block">
-                            Kính chào quý khách 👋
-                        </span>
-                        <h3 class="mb-12">
-                            Đăng nhập tài khoản
-                        </h3>
-                        <p class="text-gray-500 mb-40">
-                            Đăng nhập để theo dõi đơn hàng, quản lý địa chỉ giao hàng và nhận ưu đãi thành viên.
-                        </p>
-                        <div class="mb-24">
-                            
-                            <label asp-for="Email" class="text-neutral-900 text-lg mb-8 font-[500]">
-                                Email <span class="text-danger-600">*</span>
-                            </label> 
-                            <input class="common-input" asp-for="Email" title="Nhập email đăng nhập" placeholder="Email ....">
+                <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40 h-full">
+
+                    <span class="text-main-600 text-sm font-[600] mb-12 block">
+                        Kính chào quý khách 👋
+                    </span>
+
+                    <h3 class="mb-12">Đăng nhập tài khoản</h3>
+
+                    <p class="text-gray-500 mb-40">
+                        Đăng nhập để theo dõi đơn hàng, quản lý địa chỉ giao hàng và nhận ưu đãi thành viên.
+                    </p>
+
+                    @* LOGIN FORM *@
+                    <form asp-controller="Account"
+                          asp-action="Login"
+                          method="post"
+                          autocomplete="on">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" asp-for="ReturnUrl" />
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger-600 mb-24">
                         </div>
+
+                        <div class="mb-24">
+                            <label asp-for="Email"
+                                   class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Email <span class="text-danger-600">*</span>
+                            </label>
+
+                            <input asp-for="Email"
+                                   class="common-input"
+                                   type="email"
+                                   autocomplete="username"
+                                   placeholder="Nhập địa chỉ email" />
+
+                            <span asp-validation-for="Email"
+                                  class="text-danger-600 text-sm">
+                            </span>
+                        </div>
+
                         <div class="mb-24">
                             <label asp-for="Password"
-                                   class="text-neutral-900 text-lg mb-8 font-[500]">Password</label>
+                                   class="text-neutral-900 text-lg mb-8 font-[500]">
+                                Mật khẩu <span class="text-danger-600">*</span>
+                            </label>
+
                             <div class="relative">
-                                <input type="password" class="common-input" asp-for="Password" placeholder="Enter Password" value="password">
-                                    <span class="toggle-password absolute top-[50%] right-0 me-16 translate-y-[-50%] cursor-pointer ph ph-eye-slash"
-                                                                                            id="#password"></span>
+                                <input asp-for="Password"
+                                       class="common-input"
+                                       type="password"
+                                       autocomplete="current-password"
+                                       placeholder="Nhập mật khẩu" />
+
+                                <button type="button"
+                                        class="toggle-password absolute top-[50%] right-0 me-16 translate-y-[-50%] cursor-pointer"
+                                        data-target="#Password"
+                                        aria-label="Hiện mật khẩu"
+                                        aria-pressed="false">
+                                    <i class="ph ph-eye-slash"></i>
+                                </button>
                             </div>
+
+                            <span asp-validation-for="Password"
+                                  class="text-danger-600 text-sm">
+                            </span>
                         </div>
-                        <div asp-validation-summary="All" class="text-danger-600"></div>
-                        <div class="mb-24 mt-48">
+
+                        <div class="mb-24 mt-32">
                             <div class="flex items-center flex-wrap gap-24">
-                                <button type="submit" class="btn btn-main py-18 px-40">
+
+                                <button type="submit"
+                                        class="btn btn-main py-18 px-40">
                                     Đăng nhập
                                 </button>
+
                                 <div class="form-check common-check">
-                                    <input class="form-check-input" type="checkbox" value="" asp-for="RememberMe" />
-                                    <label class="form-check-label flex-grow" asp-for="RememberMe">
-                                        Ghi nhớ mật khẩu
+                                    <input asp-for="RememberMe"
+                                           class="form-check-input" />
+
+                                    <label asp-for="RememberMe"
+                                           class="form-check-label flex-grow">
+                                        Ghi nhớ đăng nhập
                                     </label>
                                 </div>
+
                                 <div class="ms-auto">
                                     <a asp-controller="Account"
                                        asp-action="ForgotPassword"
@@ -108,53 +171,69 @@
 
                             </div>
                         </div>
-                        <div class="text-center mt-32">
-                            <span class="text-gray-500">
-                                Chưa có tài khoản?
-                            </span>
-                            <a asp-controller="Account" asp-action="Register"
-                               class="text-main-600 font-[600] ms-4">
-                                Đăng ký ngay
-                            </a>
-                        </div>
-                        <div class="hr-or">
-                            <span class="text-center">Đăng nhập chỉ 1 giây</span>
-                        </div>
-                        <div class="row g-3 mt-8">
-                            <div class="col-md-6">
-                                <form asp-controller="Account" asp-action="ExternalLogin" method="post">
-                                    <button type="submit"
-                                            name="provider"
-                                            value="Google"
-                                            class="btn btn-oauth oauth-google w-100">
 
-                                        <img src="~/images/Default/icon/icon-google.png"
-                                             alt="Google">
-                                        <span class="text-gray-600">Tiếp tục với Google</span>
+                    </form>
 
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="text-center mt-32">
+                        <span class="text-gray-500">
+                            Chưa có tài khoản?
+                        </span>
 
-                            <div class="col-md-6">
-                                <form asp-controller="Account" asp-action="ExternalLogin" method="post">
-                                    <button type="submit"
-                                            name="provider"
-                                            value="Facebook"
-                                            class="btn btn-oauth oauth-facebook w-100">
-
-                                        <img src="~/images/Default/icon/icon-fb.png"
-                                             alt="Facebook">
-
-                                        <span class="text-gray-600">Tiếp tục với Facebook</span>
-
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                        <a asp-controller="Account"
+                           asp-action="Register"
+                           class="text-main-600 font-[600] ms-4">
+                            Đăng ký ngay
+                        </a>
                     </div>
-                </form>
-             </div>
+
+                    <div class="hr-or">
+                        <span class="text-center">Hoặc đăng nhập bằng</span>
+                    </div>
+
+                    @* GOOGLE FORM *@
+                    <form asp-controller="Account" asp-action="ExternalLogin"
+                          method="post"
+                          class="mt-16">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="provider" value="Google" />
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
+                        <button type="submit"
+                                class="btn btn-oauth oauth-google w-100">
+
+                            <img src="~/images/Default/icon/icon-google.png"
+                                 alt="Google" />
+
+                            <span class="text-neutral-900 text-lg">Tiếp tục với Google</span>
+                        </button>
+                    </form>
+
+                    @* FACEBOOK FORM *@
+                    <form asp-controller="Account"
+                          asp-action="ExternalLogin"
+                          method="post"
+                          class="mt-16">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="provider" value="Facebook" />
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
+                        <button type="submit"
+                                class="btn btn-oauth oauth-facebook w-100">
+
+                            <img src="~/images/Default/icon/icon-fb.png"
+                                 alt="Facebook" />
+
+                            <span class="text-neutral-900 text-lg">Tiếp tục với Facebook</span>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto"
                  data-aos="fade-up" data-aos-duration="600">
                 <div class="p-16 border border-gray-100 hover-border-main-600 rounded-16 relative transition-2">
@@ -337,6 +416,37 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </section>
+
+                        @section Scripts {
+    <script>
+        document.addEventListener("click", function (e) {
+            const button = e.target.closest(".toggle-password");
+
+            if (!button) return;
+
+            const target = document.querySelector(button.dataset.target);
+
+            if (!target) return;
+
+            const isPassword = target.type === "password";
+
+            target.type = isPassword ? "text" : "password";
+
+            button.setAttribute("aria-pressed", String(isPassword));
+            button.setAttribute(
+                "aria-label",
+                isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+            );
+
+            const icon = button.querySelector("i");
+
+            if (icon) {
+                icon.classList.toggle("ph-eye", isPassword);
+                icon.classList.toggle("ph-eye-slash", !isPassword);
+            }
+        });</script>
+                        }

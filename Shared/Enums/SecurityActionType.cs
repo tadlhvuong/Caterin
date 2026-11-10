@@ -45,6 +45,8 @@
         Unsuspend,
         Deactivate,
 
-        RevokeSession
+        RevokeSession,
+        ExternalAccountLinked,
+        ExternalAccountUnlinked
     }
 }

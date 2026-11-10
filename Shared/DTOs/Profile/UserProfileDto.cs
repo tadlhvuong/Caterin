@@ -1,22 +1,27 @@
 ﻿using Shared.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Shared.DTOs.Profile
 {
+
     public class UserProfileDto
     {
-        public string? Id { get; set; } = null!;
+        [Required(ErrorMessage = "Vui lòng nhập họ và tên.")]
+        [StringLength(100, ErrorMessage = "Họ và tên không được vượt quá 100 ký tự.")]
+        public string DisplayName { get; set; } = string.Empty;
 
-        public string? UserName { get; set; }
         public string? Email { get; set; }
+
+        [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string? PhoneNumber { get; set; }
-        public string? Avatar { get; set; }
 
-        public bool IsActive { get; set; }
-        public bool IsDeleted { get; set; }
-        public EntityStatus Status { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }
 
-        public DateTime? CreatedAt { get; set; }
-        public DateTime? LastLogin { get; set; }
-        public bool SavedSuccessfully { get; set; } = false;
+        public Gender? Gender { get; set; }
+
+        public string? AvatarUrl { get; set; }
+
+        public bool SavedSuccessfully { get; set; }
     }
 }

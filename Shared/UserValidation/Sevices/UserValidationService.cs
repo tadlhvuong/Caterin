@@ -69,6 +69,23 @@ namespace Shared.UserValidation.Sevices
                     return UserValidationResult.Fail(UserValidationError.SessionInvalid);
             }
 
+            // Refresh Token Security Stamp
+            if (context.Scenario == UserValidationScenario.RefreshToken)
+            {
+                var sessionStamp = context.RefreshTokenEntity?
+                    .Session?.SecurityStamp;
+
+                if (string.IsNullOrWhiteSpace(sessionStamp) ||
+                    !string.Equals(
+                        sessionStamp,
+                        user.SecurityStamp,
+                        StringComparison.Ordinal))
+                {
+                    return UserValidationResult.Fail(
+                        UserValidationError.SecurityStampChanged);
+                }
+            }
+
             // Security Stamp
             result = await _securityStampValidator.ValidateAsync(context, user, cancellationToken);
 
@@ -171,39 +188,43 @@ namespace Shared.UserValidation.Sevices
         {
             switch (context.Scenario)
             {
-                // Login
-                case UserValidationScenario.Login:
-                    return await _userManager.FindByIdAsync(context.UserId!);
-
                 // Access Token
                 case UserValidationScenario.AccessToken:
+                    {
+                        if (context.Principal == null)
+                            return null;
 
-                    var id = _userManager.GetUserId(context.Principal!);
+                        var id = _userManager.GetUserId(context.Principal);
 
-                    if (string.IsNullOrWhiteSpace(id))
-                        return null;
+                        if (string.IsNullOrWhiteSpace(id))
+                            return null;
 
-                    return await _userManager.FindByIdAsync(id);
+                        return await _userManager.FindByIdAsync(id);
+                    }
 
-                // Refresh Token
+                case UserValidationScenario.Login:
                 case UserValidationScenario.RefreshToken:
-                    return await _userManager.FindByIdAsync(context.UserId!);
+                    {
+                        if (string.IsNullOrWhiteSpace(context.UserId))
+                            return null;
+
+                        return await _userManager.FindByIdAsync(context.UserId);
+                    }
 
                 default:
                     return null;
             }
         }
-        
-        #region Permission Check
-        public async Task<bool> HasPermissionAsync(UserValidationContext context, string permissionCode)
-        {
-            var permissionId = await _permissionService.GetPermissionIdAsync(permissionCode);
 
-            if (permissionId == null)
-            {
-                _logger.LogWarning("Permission code not found: {PermissionCode}", permissionCode);
+        #region Permission Check
+        public async Task<bool> HasPermissionAsync(
+     UserValidationContext context,
+     string permissionCode)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+
+            if (string.IsNullOrWhiteSpace(permissionCode))
                 return false;
-            }
 
             var snapshot = context.PermissionSnapshot;
 
@@ -212,6 +233,18 @@ namespace Shared.UserValidation.Sevices
 
             if (snapshot.IsRoot)
                 return true;
+
+            var permissionId =
+                await _permissionService.GetPermissionIdAsync(permissionCode);
+
+            if (permissionId == null)
+            {
+                _logger.LogWarning(
+                    "Permission code not found: {PermissionCode}",
+                    permissionCode);
+
+                return false;
+            }
 
             return snapshot.PermissionIds.Contains(permissionId.Value);
         }

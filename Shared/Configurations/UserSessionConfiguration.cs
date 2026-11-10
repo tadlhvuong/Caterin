@@ -12,6 +12,10 @@ namespace Shared.Configurations
 
             builder.HasKey(x => x.Id);
 
+            builder.Property(x => x.SecurityStamp).IsRequired().HasMaxLength(256);
+
+            builder.Property(x => x.DeviceId).HasMaxLength(32).IsRequired(false);
+
             builder.Property(x => x.DeviceName)
                 .HasMaxLength(256);
 
@@ -39,6 +43,8 @@ namespace Shared.Configurations
             builder.HasIndex(x => x.UserId);
 
             builder.HasIndex(x => new { x.UserId, x.RevokedAt });
+
+            builder.HasIndex(x => new { x.UserId, x.DeviceId }).HasDatabaseName("IX_UserSessions_UserId_DeviceId");
 
             builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
 

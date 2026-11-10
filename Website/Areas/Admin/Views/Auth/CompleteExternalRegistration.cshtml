@@ -1,0 +1,86 @@
+﻿@using Website.Areas.Admin.Models
+@model ExternalRegisterViewModel
+
+@{
+    ViewData["Title"] = "Hoàn tất đăng ký";
+}
+
+<div class="container">
+    <h3>Hoàn tất đăng ký Caterin</h3>
+
+    <p>
+        Bạn đang đăng ký bằng
+        <strong>@Model.Provider</strong>.
+    </p>
+
+    <form asp-action="CompleteExternalRegistration"
+          asp-controller="Auth"
+          asp-area="Admin"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="ReturnUrl" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger">
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input value="@Model.Email"
+                   class="form-control"
+                   readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="UserName"></label>
+
+            <input asp-for="UserName"
+                   class="form-control"
+                   autocomplete="username" />
+
+            <span asp-validation-for="UserName"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <div class="form-check mb-2">
+            <input asp-for="AcceptTerms"
+                   class="form-check-input" required/>
+
+            <label asp-for="AcceptTerms"
+                   class="form-check-label">
+                Tôi đồng ý với
+                <a href="/terms" target="_blank">
+                    Điều khoản sử dụng
+                </a>.
+            </label>
+
+            <span asp-validation-for="AcceptTerms"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <div class="form-check mb-3">
+            <input asp-for="AcceptPrivacy"
+                   class="form-check-input" required/>
+
+            <label asp-for="AcceptPrivacy"
+                   class="form-check-label">
+                Tôi đồng ý với
+                <a href="/privacy" target="_blank">
+                    Chính sách bảo mật
+                </a>.
+            </label>
+
+            <span asp-validation-for="AcceptPrivacy"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Hoàn tất đăng ký
+        </button>
+    </form>
+</div>

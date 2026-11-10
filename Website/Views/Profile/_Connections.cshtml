@@ -1,0 +1,52 @@
+﻿@using Shared.DTOs.Profile
+@model ConnectionsViewModel
+
+<div class="space-y-24">
+    <div>
+        <h4 class="text-xl font-semibold mb-8">Kết nối tài khoản</h4>
+        <p class="text-gray-500">
+            Quản lý các tài khoản bên ngoài được liên kết với tài khoản Caterin.
+        </p>
+    </div>
+
+    @foreach (var connection in Model.Connections)
+    {
+        <div class="flex items-center justify-between border border-gray-100 rounded-12 p-20">
+            <div class="flex items-center gap-12">
+                <i class="@connection.Icon text-2xl"></i>
+
+                <div>
+                    <h6 class="font-semibold">@connection.DisplayName</h6>
+
+                    <span class="text-sm @(connection.IsConnected ? "text-success-600" : "text-gray-500")">
+                        @(connection.IsConnected ? "Đã kết nối" : "Chưa kết nối")
+                    </span>
+                </div>
+            </div>
+
+            @if (connection.IsConnected)
+            {
+                <form method="post"
+                      action="/profile/connections/@connection.Provider/disconnect">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn bg-danger-50 text-danger-600 hover-bg-danger-100">
+                        Ngắt kết nối
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form method="post"
+                      action="/profile/connections/@connection.Provider/connect">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn bg-success-600 text-white hover-bg-success-700">
+                        Kết nối
+                    </button>
+                </form>
+            }
+        </div>
+    }
+</div>

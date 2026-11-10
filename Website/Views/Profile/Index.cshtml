@@ -1,16 +1,19 @@
 ﻿@{
     ViewData["Title"] = "Thông tin tài khoản";
 
-    var url = ViewBag.Tab switch
+    var tab = ViewBag.Tab as string ?? "personal";
+
+    var url = tab switch
     {
         "orders" => "orders",
         "addresses" => "addresses",
         "password" => "change-password",
+        "connections" => "connections",
         _ => "personal-info"
     };
 }
 
-@section Styles{
+@section Styles {
     <style>
         .account-menu {
             display: flex;
@@ -37,73 +40,94 @@
                 font-size: 20px;
                 width: 22px;
             }
+
+        #profile-content[aria-busy="true"] {
+            opacity: .6;
+            pointer-events: none;
+            transition: opacity .15s;
+        }
     </style>
 }
+
 <section class="account py-80">
     <div class="container container-lg">
         <div class="row g-4">
             <partial name="_ProfileSidebar" />
+
             <div id="profile-content"
-                 hx-get="/profile/@url" hx-trigger="load" 
+                 data-initial-tab="@tab"
+                 data-initial-url="/profile/@url"
                  class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
             </div>
         </div>
-
     </div>
-
 </section>
 
 @section Scripts {
+    <script src="~/js/profile/profile-tabs.js" asp-append-version="true"></script>
+
     <script>
-            document.body.addEventListener("htmx:afterRequest", function (e) {
-            const url = new URL(window.location.href);
-            const currentTab = url.searchParams.get("tab") || "personal";
-
-            document.querySelectorAll("[data-tab]").forEach(el => {
-                el.classList.toggle("active", el.dataset.tab === currentTab);
-            });
-        });
-
-        //     document.querySelector('#logout-form')?.addEventListener('submit', async function (e) {
-        //     e.preventDefault();
-        //     const form = this;
-        //     const response = await fetch(form.action, {
-        //         method: 'POST',
-        //         body: new FormData(form)
-        //     });
-        //     if (!response.ok) {
-        //         return;
-        //     }
-        //     const result = await response.json();
-        //     if (result.success) {
-        //         resetGuestChatSession();
-
-        //         window.location.href = result.redirectUrl;
-        //     }
-        // });
-
-        //    function resetGuestChatSession() {
-        //     localStorage.removeItem('caterin_chat_contact_id');
-        //     localStorage.removeItem('caterin_chat_conversation_id');
-        //     localStorage.removeItem('caterin_chat_guest_token');
-        // }
-
         document.querySelector('#logout-form')?.addEventListener('submit', async function (e) {
             e.preventDefault();
+
             const form = this;
-            const response  = await fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            });
-            if (response .status == 200) {
-                window.dispatchEvent(
-                    new CustomEvent(
-                        "caterin:customer-logout"
-                    )
-                );
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    credentials: 'same-origin',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Không thể đăng xuất. Vui lòng thử lại.');
+                }
+
                 const result = await response.json();
-                window.location.href = result.returnUrl;
+
+                if (result.success) {
+                    window.dispatchEvent(new CustomEvent('caterin:customer-logout'));
+                    window.location.href = result.returnUrl;
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thông báo',
+                    text: error.message || 'Đã xảy ra lỗi khi đăng xuất.',
+                    confirmButtonText: 'Đóng'
+                });
             }
         });
+
+        @if (TempData["Success"] != null)
+        {
+                <text>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Success"])),
+                            confirmButtonText: 'Đóng'
+                        });
+                    });
+                </text>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+                <text>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Thông báo',
+                            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"])),
+                            confirmButtonText: 'Đóng'
+                        });
+                    });
+                </text>
+        }
     </script>
 }

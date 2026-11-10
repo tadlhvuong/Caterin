@@ -302,14 +302,74 @@ namespace Website.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index), new { id = id, tab = "notification" });
         }
-        [HttpGet("details-connection")]
+        [HttpGet("details-connection/{id}")]
         [PermissionAction(ActionType.View)]
-        public IActionResult DetailsConnection(Guid id)
+        public async Task<IActionResult> DetailsConnection(string id)
         {
-            if (Request.Headers.ContainsKey("HX-Request"))
-                return PartialView("_Connection");
+            if (string.IsNullOrWhiteSpace(id))
+                return NotFound();
 
-            return RedirectToAction(nameof(Index), new { id = id, tab = "connection" });
+            var userExists = await _dbContext.Users
+                .AsNoTracking()
+                .AnyAsync(x => x.Id == id && !x.IsDeleted);
+
+            if (!userExists)
+                return NotFound();
+
+            var linkedProviders = await _dbContext.UserLogins
+                .AsNoTracking()
+                .Where(x => x.UserId == id)
+                .Select(x => x.LoginProvider)
+                .Distinct()
+                .ToListAsync();
+
+            var linkedProviderSet = new HashSet<string>(
+                linkedProviders,
+                StringComparer.OrdinalIgnoreCase);
+
+            var providers = new List<ExternalLoginProviderViewModel>
+    {
+        new()
+        {
+            Provider = "Google",
+            DisplayName = "Google",
+            Icon = "ti ti-brand-google",
+            IsConnected = linkedProviderSet.Contains("Google")
+        },
+        new()
+        {
+            Provider = "Facebook",
+            DisplayName = "Facebook",
+            Icon = "ti ti-brand-facebook",
+            IsConnected = linkedProviderSet.Contains("Facebook")
+        }
+    };
+
+            // Giữ lại provider khác nếu sau này có thêm provider
+            // hoặc tài khoản đã liên kết từ phiên bản trước.
+            var knownProviders = new HashSet<string>(
+                providers.Select(x => x.Provider),
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (var provider in linkedProviders.Where(
+                x => !knownProviders.Contains(x)))
+            {
+                providers.Add(new ExternalLoginProviderViewModel
+                {
+                    Provider = provider,
+                    DisplayName = provider,
+                    Icon = "ti ti-plug-connected",
+                    IsConnected = true
+                });
+            }
+
+            var model = new UserConnectionViewModel
+            {
+                UserId = id,
+                Providers = providers
+            };
+
+            return PartialView("_Connection", model);
         }
 
         [HttpGet("user-create")]

@@ -6,44 +6,35 @@ namespace Shared.UserValidation.Sevices
 {
     public sealed class RefreshTokenValidator : IRefreshTokenValidator
     {
-
-        public async Task<UserValidationResult> ValidateAsync(UserValidationContext context,
-    AppUser user,
-    CancellationToken cancellationToken = default)
+        public Task<UserValidationResult> ValidateAsync(
+            UserValidationContext context,
+            AppUser user,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (context.Scenario != UserValidationScenario.RefreshToken)
-                return UserValidationResult.Success();
+                return Task.FromResult(UserValidationResult.Success());
 
             var refreshToken = context.RefreshTokenEntity;
 
             if (refreshToken is null)
-                return UserValidationResult.Fail(
-                    UserValidationError.RefreshTokenNotFound);
+                return Task.FromResult(
+                    UserValidationResult.Fail(UserValidationError.RefreshTokenNotFound));
 
             if (refreshToken.UserId != user.Id)
-                return UserValidationResult.Fail(
-                    UserValidationError.InvalidRefreshToken);
+                return Task.FromResult(
+                    UserValidationResult.Fail(UserValidationError.InvalidRefreshToken));
 
             if (refreshToken.IsRevoked)
-                return UserValidationResult.Fail(
-                    UserValidationError.RefreshTokenRevoked);
+                return Task.FromResult(
+                    UserValidationResult.Fail(UserValidationError.RefreshTokenRevoked));
 
             if (refreshToken.ExpiredAt <= DateTime.UtcNow)
-                return UserValidationResult.Fail(
-                    UserValidationError.RefreshTokenExpired);
+                return Task.FromResult(
+                    UserValidationResult.Fail(UserValidationError.RefreshTokenExpired));
 
-            // Kiểm tra Session thuộc đúng User và còn hiệu lực
-            if (refreshToken.Session == null ||
-                refreshToken.Session.UserId != user.Id ||
-                refreshToken.Session.RevokedAt != null ||
-                refreshToken.Session.ExpiresAt <= DateTime.UtcNow)
-            {
-                return UserValidationResult.Fail(
-                    UserValidationError.SessionInvalid);
-            }
-
-            return UserValidationResult.Success();
+            return Task.FromResult(UserValidationResult.Success());
         }
-
     }
 }

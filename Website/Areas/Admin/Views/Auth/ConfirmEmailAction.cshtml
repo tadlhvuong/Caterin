@@ -1,0 +1,29 @@
+﻿@using Website.Areas.Admin.Models
+@model ConfirmEmailActionViewModel
+
+@{
+    ViewData["Title"] = "Xác nhận email";
+}
+
+<h3 class="text-primary">
+    <i class="fas fa-envelope"></i>
+    <b>Xác nhận email</b>
+</h3>
+
+<p>
+    Vui lòng nhấn nút bên dưới để xác nhận địa chỉ email
+    và kích hoạt tài khoản Caterin.
+</p>
+
+<form asp-area="Admin"
+      asp-controller="Auth"
+      asp-action="ConfirmEmailAction"
+      method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Key" />
+
+    <button type="submit" class="btn btn-primary w-100">
+        Xác nhận email
+    </button>
+</form>

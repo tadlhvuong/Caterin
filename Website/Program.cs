@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,7 @@ using Shared.Services.Product;
 using Shared.Services.User;
 using Shared.UserValidation.Interface;
 using Shared.UserValidation.Sevices;
+using System.Security.Claims;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +50,13 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 var services = builder.Services;
 var configuration = builder.Configuration;
-services.AddDataProtection().SetApplicationName("Caterin");
+
+//Windows: thường sử dụng thư mục profile người dùng.
+//Linux: thường sử dụng thư mục trong $HOME/.aspnet/DataProtection-Keys.
+//Docker/container: phụ thuộc môi trường và cấu hình container.
+services.AddDataProtection().SetApplicationName("Caterin").PersistKeysToFileSystem(
+        new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys")));
+
 // Add services to the container.
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 var connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -104,22 +112,35 @@ services.AddIdentity<AppUser, AppRole>(options =>
 }).AddEntityFrameworkStores<AppDbContext>()
     .AddTokenProvider<EmailConfirmationTokenProvider<AppUser>>("EmailConfirmation")
     .AddDefaultTokenProviders();
+services.Configure<CookieAuthenticationOptions>(
+    IdentityConstants.ExternalScheme,
+    options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+        options.SlidingExpiration = false;
 
+        options.Cookie.Name = "Caterin.External";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    });
 services.AddAuthentication()
     .AddGoogle(options =>
     {
         options.ClientId = configuration["Authentication:Google:ClientId"]!;
         options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
-        options.SaveTokens = true;
-
+        //options.SaveTokens = true;
         options.ClaimActions.MapJsonKey("picture", "picture");
+        options.ClaimActions.MapJsonKey("email_verified", "verified_email");
+        options.ClaimActions.MapJsonKey("google_hd", "hd");
     })
     .AddFacebook(options =>
     {
         options.AppId = configuration["Authentication:Facebook:AppId"]!;
         options.AppSecret = configuration["Authentication:Facebook:AppSecret"]!;
 
-        options.SaveTokens = true;
+        //options.SaveTokens = true;
     });
 //setup timelife confirm email: 24h
 services.Configure<EmailConfirmationTokenProviderOptions>(options =>
@@ -221,9 +242,38 @@ services.AddRateLimiter(options =>
                 QueueLimit = 0,
                 AutoReplenishment = true
             }));
+
+    // Connect / Disconnect external accounts
+    options.AddPolicy("account-linking", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            context.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? context.Connection.RemoteIpAddress?.ToString()
+                ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
+                AutoReplenishment = true
+            }));
 });
 
 var app = builder.Build();
+
+var options = new ForwardedHeadersOptions
+{
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
+};
+
+//options.KnownNetworks.Clear();
+
+//// Chỉ thêm IP Nginx thực tế nếu biết địa chỉ proxy.
+// Ví dụ Nginx và ASP.NET Core cùng máy:
+options.KnownProxies.Clear(); //options.KnownProxies.Add(IPAddress.Parse("127.0.0.1")); thay bằng proxi nginx
+
+app.UseForwardedHeaders(options);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -239,21 +289,13 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseExceptionHandler("/StatusCode/500");
 app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
-var options = new ForwardedHeadersOptions
-{
-    ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor |
-        ForwardedHeaders.XForwardedProto
-};
 
-options.KnownNetworks.Clear();
-options.KnownProxies.Clear();
-
-app.UseForwardedHeaders(options);
 app.UseHttpsRedirection();  
 app.UseStaticFiles();
 app.UseRouting();

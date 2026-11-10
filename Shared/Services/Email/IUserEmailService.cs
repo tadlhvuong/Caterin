@@ -12,7 +12,7 @@ namespace Shared.Services.Email
     public interface IUserEmailService
     {
         Task<ServiceResult> SendConfirmEmailAsync(AppUser user, CancellationToken cancellationToken = default);
-        Task SendWelcomeEmailAsync(AppUser user);
+        Task SendWelcomeEmailAsync(AppUser user, CancellationToken cancellationToken = default);
         Task<ServiceResult> SendForgotPasswordEmailAsync(AppUser usertionToken, CancellationToken cancellationToken = default);
     }
 }

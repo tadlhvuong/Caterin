@@ -16,7 +16,7 @@ public class JwtService : IJwtService
 {
     private readonly JwtSetting _jwtSettings;
 
-    public JwtService(IOptions<JwtSetting> jwtSettings, UserManager<AppUser> userManager)
+    public JwtService(IOptions<JwtSetting> jwtSettings)
     {
         _jwtSettings = jwtSettings.Value;
     }

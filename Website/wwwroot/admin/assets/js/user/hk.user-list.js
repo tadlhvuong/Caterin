@@ -79,7 +79,6 @@ $(function () {
                 { data: 'id' },
                 { data: 'userName' },
                 { data: 'roles' },
-                { data: 'billing' },
                 { data: 'status' },
                 { data: '' }
             ],
@@ -110,7 +109,7 @@ $(function () {
                 {
                     // User full name and email
                     targets: 2,
-                    responsivePriority: 4,
+                    responsivePriority: 3,
                     render: function (data, type, full) {
                         const name = full.userName || '';
                         const email = full.email || '';
@@ -160,6 +159,7 @@ $(function () {
                 },
                 {
                     targets: 3,
+                    responsivePriority: 4,
                     render: function (data, type, full) {
 
                         const roleBadgeObj = {
@@ -186,17 +186,9 @@ $(function () {
                     }
                 },
                 {
-                    // Plans
-                    targets: 4,
-                    render: function (data, type, full, meta) {
-                        var $plan = full['billing'];
-
-                        return '<span class="text-heading">' + $plan + '</span>';
-                    }
-                },
-                {
                     // User Status
-                    targets: 5,
+                    targets: 4,
+                    responsivePriority: 2,
                     render: function (data, type, full, meta) {
                         return renderUserStatus(full);
                     }
@@ -204,6 +196,7 @@ $(function () {
 
                 {
                     targets: -1,
+                    responsivePriority: 1,
                     title: 'Thao tác',
                     searchable: false,
                     orderable: false,

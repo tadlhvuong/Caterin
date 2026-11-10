@@ -1,4 +1,5 @@
-﻿using Shared.Data.Entities.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Shared.Data.Entities.Identity;
 using Shared.DTOs;
 using Shared.DTOs.Auth;
 
@@ -43,7 +44,11 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<int> RevokeAllUserTokensAsync(string userId, string? reason, CancellationToken cancellationToken = default);
-
+        Task<int> RevokeAllUserSessionsInTransactionAsync(
+    string userId,
+    string reason,
+    string? revokedById = null,
+    CancellationToken cancellationToken = default);
         Task<int> RevokeSessionAsync(
     string userId,
     Guid sessionId,
@@ -56,5 +61,7 @@ namespace Shared.Interfaces.AuthServices
             string reason,
             string? revokedById = null,
             CancellationToken cancellationToken = default);
+
+        string GetOrCreateDeviceId(HttpContext context);
     }
 }

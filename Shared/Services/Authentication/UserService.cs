@@ -1562,20 +1562,14 @@ namespace Shared.Services.Authentication
                         $"Đổi mật khẩu lỗi: {errors}");
                 }
 
-                // Tăng PermissionVersion và ghi SecurityLog.
-                await IncreasePermissionVersionInternalAsync(
-                    user);
-
-                // Thu hồi refresh token trên tất cả thiết bị.
-                await _refreshTokenService.RevokeAllUserTokensAsync(
-                    userId, TokenRevocationReasons.ResetPassword,
-                    cancellationToken);
+                await _refreshTokenService.RevokeAllUserSessionsInTransactionAsync(userId,
+                    TokenRevocationReasons.ResetPassword, _currentUserService.UserId, cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
                 await _logSafetyService.TryLogSecurityAsync(
         SecurityActionType.ResetPassword,
         true,
-        $"Permission version updated for user '{user.Id}'.");
+        $"Admin reset password for user '{user.Id}'.");
             }
             catch (Exception ex)
             {
@@ -2315,10 +2309,7 @@ namespace Shared.Services.Authentication
             }
         }
 
-        public async Task<int> RevokeUserSessionAsync(
-    string userId,
-    Guid sessionId,
-    CancellationToken cancellationToken = default)
+        public async Task<int> RevokeUserSessionAsync(string userId, Guid sessionId, CancellationToken cancellationToken = default)
         {
             var userExists = await _dbContext.Users
                 .AnyAsync(
@@ -2331,7 +2322,7 @@ namespace Shared.Services.Authentication
             {
                 await _levelService.EnsureCanManageUserAsync(
     userId,
-    allowSelf: false,
+    allowSelf: true,
     cancellationToken);
             }
             catch (UnauthorizedAccessException)
@@ -2363,9 +2354,8 @@ namespace Shared.Services.Authentication
                     $"Admin revoked session. UserId: {userId}, SessionId: {sessionId}");
             return revokedTokens;
         }
-        public async Task<int> RevokeAllUserSessionsAsync(
-    string userId,
-    CancellationToken cancellationToken = default)
+        
+        public async Task<int> RevokeAllUserSessionsAsync(string userId, CancellationToken cancellationToken = default)
         {
             var userExists = await _dbContext.Users
                 .AnyAsync(
@@ -2380,7 +2370,7 @@ namespace Shared.Services.Authentication
             {
                 await _levelService.EnsureCanManageUserAsync(
                 userId,
-                allowSelf: false,
+                allowSelf: true,
                 cancellationToken);
             }
             catch (UnauthorizedAccessException)

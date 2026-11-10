@@ -14,6 +14,7 @@ using Shared.Helpers;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Log;
 using Shared.Requests;
+using Shared.Requests.Auth;
 using Shared.Responses;
 using Shared.Services.Email;
 using System.Security.Claims;
@@ -26,13 +27,13 @@ namespace Website.Areas.Admin.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
-        SignInManager<AppUser> _signInManager;
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly AppDbContext _dbContext;
         private readonly JwtSetting _jwtSettings;
         private readonly IMemoryCache _cache;
         private readonly IEmailActionService _emailActionService;
 
-        private readonly ILogger _logger;
+        private readonly ILogger<AuthController> _logger;
         private readonly ILogSafetyService _logSafetyService;
 
         public AuthController(IAuthService authService, SignInManager<AppUser> signInManager,
@@ -57,6 +58,7 @@ namespace Website.Areas.Admin.Controllers
         #region login
         [AllowAnonymous]
         [HttpGet("login")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Login(string? returnUrl = null)
         {
             _logger.LogInformation("Page: Login");
@@ -95,14 +97,19 @@ namespace Website.Areas.Admin.Controllers
 
             await SetAuthCookiesAsync(result);
 
-            if (!string.IsNullOrWhiteSpace(model.ReturnUrl))
+            if (Url.IsLocalUrl(model.ReturnUrl))
             {
-                return LocalRedirect(model.ReturnUrl);
+                return LocalRedirect(model.ReturnUrl!);
             }
 
-            _logger.LogInformation(result.UserName + ": login success");
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.Login, true, "Login success");
-            return RedirectToAction("Index", "Home", new { area = "Admin" });
+            _logger.LogInformation(
+                "User {UserName} logged in successfully.",
+                result.UserName);
+
+            return RedirectToAction(
+                "Index",
+                "Home",
+                new { area = "Admin" });
         }
 
         #endregion login
@@ -144,7 +151,6 @@ namespace Website.Areas.Admin.Controllers
                 return View(model);
             }
 
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.Login, true, "Login success");
             TempData["Email"] = model.Email;
             return RedirectToAction(nameof(ConfirmEmail));
         }
@@ -197,6 +203,7 @@ namespace Website.Areas.Admin.Controllers
         #region forgot password
         [AllowAnonymous]
         [HttpGet("forgot-password")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public ActionResult ForgotPassword()
         {
             _logger.LogInformation("Page: Forgot password");
@@ -207,46 +214,54 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("forgot-password")]
         [ValidateAntiForgeryToken]
         [EnableRateLimiting("auth")]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ForgotPassword(
+    ForgotPasswordViewModel model,
+    CancellationToken cancellationToken)
         {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var result = await _authService.ForgotPasswordAsync(
-                        new ForgotPasswordRequest
-                        {
-                            Email = model.Email
-                        });
+            if (!ModelState.IsValid)
+                return View(model);
 
-                    if (!result.Succeeded)
-                    {
-                        AddErrors(result);
-                        return View(model);
-                    }
-                    TempData["Feedback"] = true;
-                    return RedirectToAction("ForgotPasswordConfirmation");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Error forgot password: {0}", ex);
-                    return View("Feedback", new FeedbackViewModel
-                    {
-                        Type = FeedbackType.Danger,
-                        Title = "Đã xảy ra lỗi",
-                        Message = "Không thể xử lý yêu cầu của bạn. Vui lòng thử lại sau."
-                    });
-                }
-            }
-            else
+            try
             {
-                _logger.LogWarning("Email: this field is required");
+                var result = await _authService.ForgotPasswordAsync(
+                    new ForgotPasswordRequest
+                    {
+                        Email = model.Email
+                    },
+                    cancellationToken);
+
+                if (!result.Succeeded)
+                {
+                    AddErrors(result);
+                    return View(model);
+                }
+
+                TempData["Feedback"] = true;
+
+                return RedirectToAction(
+                    nameof(ForgotPasswordConfirmation));
             }
-            return View(model);
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Forgot password request failed.");
+
+                return View("Feedback", new FeedbackViewModel
+                {
+                    Type = FeedbackType.Danger,
+                    Title = "Đã xảy ra lỗi",
+                    Message = "Không thể xử lý yêu cầu của bạn. Vui lòng thử lại sau."
+                });
+            }
         }
 
         [AllowAnonymous]
         [HttpGet("confirm-forgot-password")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public ActionResult ForgotPasswordConfirmation()
         {
             if (TempData["Feedback"] is not true)
@@ -267,11 +282,25 @@ namespace Website.Areas.Admin.Controllers
         #region reset password
         [AllowAnonymous]
         [HttpGet("reset-password")]
-        public IActionResult ResetPassword([FromQuery] string? key)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ResetPassword(
+    [FromQuery] string? key,
+    CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Page: Reset password");
             if (string.IsNullOrWhiteSpace(key))
+                return RedirectToAction(nameof(Login));
+
+            var actionResult = await _emailActionService.GetValidAsync(
+                key,
+                EmailActionType.ResetPassword,
+                cancellationToken);
+
+            if (!actionResult.Succeeded || actionResult.Data == null)
             {
+                TempData["Error"] =
+                    actionResult.Errors.FirstOrDefault()?.Message
+                    ?? "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.";
+
                 return RedirectToAction(nameof(Login));
             }
 
@@ -285,41 +314,50 @@ namespace Website.Areas.Admin.Controllers
         [HttpPost("reset-password")]
         [ValidateAntiForgeryToken]
         [EnableRateLimiting("password")]
-        public async Task<ActionResult> ResetPassword(ResetPasswordViewModel model)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ResetPassword(
+    ResetPasswordViewModel model,
+    CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Reset password");
             if (!ModelState.IsValid)
+                return View(model);
+
+            if (string.IsNullOrWhiteSpace(model.Key))
             {
-                _logger.LogError("Đổi mật khẩu lỗi");
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Liên kết đặt lại mật khẩu không hợp lệ.");
+
                 return View(model);
             }
 
-            if (model.Key == null)
+            var request = new ResetPasswordRequest
             {
-                _logger.LogError("Liên kết đặt lại mật khẩu không hợp lệ.");
-                ModelState.AddModelError(string.Empty, "Liên kết đặt lại mật khẩu không hợp lệ.");
-                return View(model);
-            }
-
-            var request = new ResetPasswordRequest {
-                Key = model.Key,
                 NewPassword = model.Password
             };
 
-            var result = await _authService.ResetPasswordByTokenAsync(request);
+            var result = await _authService.ResetPasswordByTokenAsync(
+                model.Key,
+                request,
+                cancellationToken);
+
             if (!result.Succeeded)
             {
                 AddErrors(result);
                 return View(model);
             }
+
             await _signInManager.SignOutAsync();
             ClearAuthCookies();
+
             TempData["ResetPasswordSuccess"] = true;
+
             return RedirectToAction(nameof(ResetPasswordConfirmation));
         }
 
         [AllowAnonymous]
         [HttpGet("reset-password-confirm")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
         public ActionResult ResetPasswordConfirmation()
         {
             if (TempData["ResetPasswordSuccess"] is not true)
@@ -337,17 +375,20 @@ namespace Website.Areas.Admin.Controllers
 
         #region Change password
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpGet("change-password")]
         public IActionResult ChangePassword()
         {
             return View();
         }
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost("change-password")]
         [ValidateAntiForgeryToken]
         [EnableRateLimiting("password")]
-        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ChangePassword(
+    ChangePasswordViewModel model,
+    CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -359,7 +400,9 @@ namespace Website.Areas.Admin.Controllers
                 ConfirmPassword = model.ConfirmPassword
             };
 
-            var result = await _authService.ChangePasswordAsync(request);
+            var result = await _authService.ChangePasswordAsync(
+                request,
+                cancellationToken);
 
             if (!result.Succeeded)
             {
@@ -367,7 +410,9 @@ namespace Website.Areas.Admin.Controllers
                 return View(model);
             }
 
-            await _signInManager.SignOutAsync();
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ApplicationScheme);
+
             ClearAuthCookies();
 
             return RedirectToAction(nameof(ChangePasswordConfirmation));
@@ -446,56 +491,98 @@ namespace Website.Areas.Admin.Controllers
 
         [AllowAnonymous]
         [HttpGet("e/{key}")]
-        public async Task<IActionResult> EmailAction(string key, CancellationToken cancellationToken)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> EmailAction(
+    string key,
+    CancellationToken cancellationToken)
         {
-            var checkValid = await _emailActionService.GetValidAsync(key, cancellationToken);
-            if (!checkValid.Succeeded)
+            var actionResult = await _emailActionService.GetValidAsync(
+                key,
+                cancellationToken);
+
+            if (!actionResult.Succeeded || actionResult.Data == null)
+            {
+                TempData["Error"] =
+                    "Liên kết không hợp lệ hoặc đã hết hạn.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var emailAction = actionResult.Data;
+
+            switch (emailAction.Type)
+            {
+                case EmailActionType.ConfirmEmail:
+                    return View("ConfirmEmailAction", new ConfirmEmailActionViewModel
+                    {
+                        Key = key
+                    });
+
+                case EmailActionType.ResetPassword:
+                    return RedirectToAction(
+                        nameof(ResetPassword),
+                        new { key });
+
+                default:
+                    return RedirectToAction(nameof(Login));
+            }
+        }
+        [AllowAnonymous]
+        [HttpPost("confirm-email-action")]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ConfirmEmailAction(
+    ConfirmEmailActionViewModel model,
+    CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid ||
+                string.IsNullOrWhiteSpace(model.Key))
             {
                 return View("Feedback", new FeedbackViewModel
                 {
                     Type = FeedbackType.Danger,
-                    Title = "Liên kết không hợp lệ",
-                    Message = string.Join("<br/>", checkValid.Errors[0].Message)
+                    Title = "Xác thực email thất bại",
+                    Message = "Liên kết không hợp lệ."
                 });
             }
 
-            var emailAction = checkValid.Data!;
-            switch (emailAction.Type)
+            var actionResult = await _emailActionService.GetValidAsync(
+                model.Key,
+                EmailActionType.ConfirmEmail,
+                cancellationToken);
+
+            if (!actionResult.Succeeded || actionResult.Data == null)
             {
-                case EmailActionType.ConfirmEmail:
-                    {
-                        var result = await _authService.ConfirmEmailAsync(emailAction);
-
-                        if (!result.Succeeded)
-                        {
-                            return View("Feedback", new FeedbackViewModel
-                            {
-                                Type = FeedbackType.Danger,
-                                Title = "Xác thực email thất bại",
-                                Message = string.Join("<br/>", result.Errors)
-                            });
-                        }
-
-                        return View("Feedback", new FeedbackViewModel
-                        {
-                            Title = "Xác thực email",
-                            Message = "Bạn đã xác thực email thành công."
-                        });
-                    }
-                case EmailActionType.ResetPassword:
-                    {
-                        return RedirectToAction(nameof(ResetPassword), new { key });
-                    }
-                default:
-                    return View("Feedback", new FeedbackViewModel
-                    {
-                        Type = FeedbackType.Danger,
-                        Title = "Liên kết không hợp lệ",
-                        Message = "Loại liên kết không được hỗ trợ."
-                    });
+                return View("Feedback", new FeedbackViewModel
+                {
+                    Type = FeedbackType.Danger,
+                    Title = "Xác thực email thất bại",
+                    Message = "Liên kết không hợp lệ hoặc đã hết hạn."
+                });
             }
-        }
 
+            var result = await _authService.ConfirmEmailAsync(
+                actionResult.Data,
+                cancellationToken);
+
+            if (!result.Succeeded)
+            {
+                return View("Feedback", new FeedbackViewModel
+                {
+                    Type = FeedbackType.Danger,
+                    Title = "Xác thực email thất bại",
+                    Message = "Không thể xác thực email. Vui lòng thử lại."
+                });
+            }
+
+            return View("Feedback", new FeedbackViewModel
+            {
+                Type = FeedbackType.Success,
+                Title = "Xác thực email",
+                Message = "Bạn đã xác thực email thành công."
+            });
+        }
         [AllowAnonymous]
         [HttpGet("access-denied")]
         public IActionResult AccessDenied()
@@ -531,77 +618,341 @@ namespace Website.Areas.Admin.Controllers
         //}
 
         #region LoginEx
-
+        [AllowAnonymous]
         [HttpPost("external-login")]
         [ValidateAntiForgeryToken]
         [EnableRateLimiting("auth")]
         public IActionResult ExternalLogin(LoginExViewModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Provider))
+            var provider = model.Provider.Trim();
+
+            provider = provider.Equals(
+                "google",
+                StringComparison.OrdinalIgnoreCase)
+                    ? "Google"
+                    : provider.Equals(
+                        "facebook",
+                        StringComparison.OrdinalIgnoreCase)
+                            ? "Facebook"
+                            : string.Empty;
+            if (string.IsNullOrWhiteSpace(provider))
             {
+                TempData["Error"] = "Phương thức đăng nhập không hợp lệ.";
                 return RedirectToAction(nameof(Login));
             }
-            var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Auth",
-                new { area = "Admin", returnUrl = model.ReturnUrl });
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(
-                model.Provider, redirectUrl);
-            properties.IsPersistent = model.RememberMe;
-           
-            return Challenge(properties, model.Provider);
-        }
 
+            var redirectUrl = Url.Action(
+                nameof(ExternalLoginCallback),
+                "Auth",
+                new { area = "Admin", returnUrl = model.ReturnUrl });
+
+            var properties = _signInManager
+                .ConfigureExternalAuthenticationProperties(
+                    provider,
+                    redirectUrl);
+
+            properties.IsPersistent = false;
+
+            properties.Items["RememberMe"] = model.RememberMe.ToString();
+
+            return Challenge(properties, provider);
+        }
+        [AllowAnonymous]
         [HttpGet("external-login-callback")]
-        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl, string? remoteError = null, CancellationToken cancellationToken = default)
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> ExternalLoginCallback(
+    string? returnUrl,
+    string? remoteError = null,
+    CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrEmpty(remoteError))
             {
                 _logger.LogWarning("External login failed: {Error}", remoteError);
 
-                TempData["Error"] = "Đăng nhập bằng Google/Facebook thất bại. Vui lòng thử lại.";
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] =
+                    "Đăng nhập bằng Google/Facebook thất bại. Vui lòng thử lại.";
 
                 return RedirectToAction(nameof(Login));
             }
 
             var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
-            bool rememberMe = loginInfo?.AuthenticationProperties?.IsPersistent ?? false;
+
             if (loginInfo == null)
             {
                 _logger.LogWarning("ExternalLoginInfo not found.");
 
-                TempData["Error"] = "Không lấy được thông tin đăng nhập.";
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] =
+                    "Không lấy được thông tin đăng nhập hoặc phiên đăng nhập đã hết hạn.";
 
                 return RedirectToAction(nameof(Login));
             }
+
+            var rememberMe = false;
+
+            if (loginInfo.AuthenticationProperties?.Items.TryGetValue(
+                    "RememberMe",
+                    out var rememberMeValue) == true)
+            {
+                bool.TryParse(rememberMeValue, out rememberMe);
+            }
+            var avatarUrl = loginInfo.Principal
+    .FindFirst("picture")?.Value;
+            _logger.LogInformation(
+    "Google avatar claim exists: {HasAvatar}",
+    !string.IsNullOrWhiteSpace(avatarUrl));
             var request = new ExternalLoginRequest
             {
                 Provider = loginInfo.LoginProvider,
                 ProviderKey = loginInfo.ProviderKey,
                 Email = loginInfo.Principal.FindFirstValue(ClaimTypes.Email),
                 Name = loginInfo.Principal.FindFirstValue(ClaimTypes.Name),
+                AvatarUrl = avatarUrl,
                 Claims = loginInfo.Principal.Claims,
-                RememberMe = rememberMe,
-                AccessToken = loginInfo.AuthenticationTokens?.FirstOrDefault(x => x.Name == "access_token")?.Value,
-                RefreshToken = loginInfo.AuthenticationTokens?.FirstOrDefault(x => x.Name == "refresh_token")?.Value
+                RememberMe = rememberMe
             };
 
-            var result = await _authService.ExternalLoginAsync(request, cancellationToken);
+            var result = await _authService.ExternalLoginAsync(
+                request,
+                cancellationToken);
 
-            if (!result.Success)
+            switch (result.Status)
             {
-                TempData["Error"] = result.Message;
+                case ExternalLoginStatus.Authenticated:
+                    {
+                        if (result.AuthResponse == null ||
+                            !result.AuthResponse.Success)
+                        {
+                            TempData["Error"] =
+                                "Không thể hoàn tất đăng nhập.";
 
-                return RedirectToAction(nameof(Login));
-            }
-            if (string.IsNullOrWhiteSpace(request.Email))
-            {
-                TempData["Error"] = "Không thể lấy địa chỉ email từ tài khoản Google/Facebook.";
-                return RedirectToAction(nameof(Login));
-            }
+                            await HttpContext.SignOutAsync(
+                                IdentityConstants.ExternalScheme);
 
-            await SetAuthCookiesAsync(result);
-            return Redirect(returnUrl ?? "/");
+                            return RedirectToAction(nameof(Login));
+                        }
+
+                        await SetAuthCookiesAsync(result.AuthResponse);
+
+                        await HttpContext.SignOutAsync(
+                            IdentityConstants.ExternalScheme);
+
+                        var redirectUrl = Url.IsLocalUrl(returnUrl)
+                            ? returnUrl!
+                            : Url.Content("~/");
+
+                        return Redirect(redirectUrl);
+                    }
+
+                case ExternalLoginStatus.EmailAlreadyExists:
+                    {
+                        TempData["Error"] = result.Message;
+
+                        await HttpContext.SignOutAsync(
+                            IdentityConstants.ExternalScheme);
+
+                        return RedirectToAction(nameof(Login));
+                    }
+
+                case ExternalLoginStatus.RegistrationRequired:
+                    {
+                        // Không tạo auth cookie Caterin tại đây.
+                        // Giữ External Cookie để trang hoàn tất đăng ký đọc lại loginInfo.
+                        return RedirectToAction(
+                            nameof(CompleteExternalRegistration),
+                            new { returnUrl });
+                    }
+
+                default:
+                    {
+                        TempData["Error"] =
+                            result.Message ??
+                            "Đăng nhập bằng tài khoản ngoài thất bại.";
+
+                        await HttpContext.SignOutAsync(
+                            IdentityConstants.ExternalScheme);
+
+                        return RedirectToAction(nameof(Login));
+                    }
+            }
         }
 
+        [AllowAnonymous]
+        [HttpGet("complete-external-registration")]
+        [ResponseCache(
+    Location = ResponseCacheLocation.None,
+    NoStore = true)]
+        public async Task<IActionResult> CompleteExternalRegistration(
+    string? returnUrl)
+        {
+            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (loginInfo == null)
+            {
+                TempData["Error"] =
+                    "Phiên đăng ký đã hết hạn. Vui lòng đăng nhập lại.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var supportedProviders = new[] { "Google", "Facebook" };
+
+            if (!supportedProviders.Contains(
+                    loginInfo.LoginProvider,
+                    StringComparer.Ordinal))
+            {
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] = "Nhà cung cấp đăng nhập không hợp lệ.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var email = loginInfo.Principal.FindFirstValue(
+                ClaimTypes.Email);
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] =
+                    "Không lấy được email từ tài khoản Google/Facebook.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var model = new ExternalRegisterViewModel
+            {
+                Email = email,
+                Provider = loginInfo.LoginProvider,
+                UserName = string.Empty,
+                AcceptTerms = false,
+                AcceptPrivacy = false
+            };
+
+            model.ReturnUrl = Url.IsLocalUrl(returnUrl)
+                ? returnUrl
+                : null;
+
+            return View(model);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("complete-external-registration")]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
+        [ResponseCache(
+    Location = ResponseCacheLocation.None,
+    NoStore = true)]
+        public async Task<IActionResult> CompleteExternalRegistration(
+    ExternalRegisterViewModel model,
+    CancellationToken cancellationToken)
+        {
+            var loginInfo = await _signInManager.GetExternalLoginInfoAsync();
+
+            if (loginInfo == null)
+            {
+                TempData["Error"] =
+                    "Phiên đăng ký đã hết hạn. Vui lòng đăng nhập lại.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Không nhận Provider, ProviderKey và Email từ form.
+            // Luôn lấy dữ liệu xác thực từ External Cookie.
+            var supportedProviders = new[] { "Google", "Facebook" };
+
+            if (!supportedProviders.Contains(
+                    loginInfo.LoginProvider,
+                    StringComparer.Ordinal))
+            {
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] = "Nhà cung cấp đăng nhập không hợp lệ.";
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            var email = loginInfo.Principal.FindFirstValue(
+                ClaimTypes.Email);
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                await HttpContext.SignOutAsync(
+                    IdentityConstants.ExternalScheme);
+
+                TempData["Error"] = "Không lấy được email từ tài khoản ngoài.";
+
+                return RedirectToAction(nameof(Login));
+            }
+            ModelState.Remove(nameof(model.Email));
+            ModelState.Remove(nameof(model.Provider));
+            // Chỉ nhận lại các trường hiển thị từ cookie.
+            model.Email = email;
+            model.Provider = loginInfo.LoginProvider;
+
+            model.ReturnUrl = Url.IsLocalUrl(model.ReturnUrl)
+                ? model.ReturnUrl
+                : null;
+            if (!model.AcceptTerms || !model.AcceptPrivacy)
+            {
+                ModelState.AddModelError(
+                    nameof(model.AcceptTerms),
+                    "Bạn phải đồng ý với Điều khoản sử dụng và Chính sách bảo mật.");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var request = new ExternalRegistrationRequest
+            {
+                Provider = loginInfo.LoginProvider,
+                ProviderKey = loginInfo.ProviderKey,
+                Email = email,
+                UserName = model.UserName,
+                Name = loginInfo.Principal.FindFirstValue(
+                    ClaimTypes.Name),
+                AvatarUrl = loginInfo.Principal.FindFirstValue("picture"),
+                AcceptTerms = model.AcceptTerms,
+                AcceptPrivacy = model.AcceptPrivacy
+            };
+
+            var result = await _authService.RegisterExternalAsync(
+                request,
+                cancellationToken);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.IsNullOrWhiteSpace(error.Field)
+                            ? string.Empty
+                            : error.Field,
+                        error.Message);
+                }
+
+                return View(model);
+            }
+
+            // Đăng ký đã hoàn tất, không cần giữ External Cookie nữa.
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ExternalScheme);
+
+            TempData["Email"] = email;
+            TempData["Success"] = result.Message;
+
+            return RedirectToAction(nameof(ConfirmEmail));
+        }
         #endregion
 
         #region Helpers
@@ -633,12 +984,18 @@ namespace Website.Areas.Admin.Controllers
             Response.Cookies.Delete("refresh_token");
         }
 
-        private IActionResult RedirectToLocal(string returnUrl)
+        private IActionResult RedirectToLocal(string? returnUrl)
         {
-            if (string.IsNullOrEmpty(returnUrl))
-                return RedirectToAction(nameof(HomeController.Index), "Home", new { area = "Admin" });
+            if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                Url.IsLocalUrl(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
 
-            return Redirect(returnUrl);
+            return RedirectToAction(
+                "Index",
+                "Home",
+                new { area = "Admin" });
         }
 
         #endregion Helpers

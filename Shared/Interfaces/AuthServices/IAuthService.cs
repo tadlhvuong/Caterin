@@ -1,5 +1,6 @@
 ﻿using Shared.Data.Entities.Identity.Core;
 using Shared.Requests;
+using Shared.Requests.Auth;
 using Shared.Responses;
 
 namespace Shared.Interfaces.AuthServices
@@ -16,12 +17,9 @@ namespace Shared.Interfaces.AuthServices
         Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Đăng nhập: Facebook / Google ...
+        /// Đăng nhập bằng tài khoản ngoài: Google / Facebook.
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<AuthResponse> ExternalLoginAsync(ExternalLoginRequest request, CancellationToken cancellationToken = default);
+        Task<ExternalLoginResult> ExternalLoginAsync(ExternalLoginRequest request, CancellationToken cancellationToken = default);
         /// <summary>
         /// Đăng ký tài khoản mới
         /// </summary>
@@ -29,6 +27,11 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
+
+        Task<ServiceResult> RegisterExternalAsync(
+    ExternalRegistrationRequest request,
+    CancellationToken cancellationToken = default);
+
         /// <summary>
         /// Xác thực email
         /// </summary>
@@ -81,7 +84,7 @@ namespace Shared.Interfaces.AuthServices
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ServiceResult> ResetPasswordByTokenAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default);
+        Task<ServiceResult> ResetPasswordByTokenAsync(string key, ResetPasswordRequest request, CancellationToken cancellationToken = default);
         /// <summary>
         /// Đổi mật khẩu khi đã đăng nhập
         /// </summary>

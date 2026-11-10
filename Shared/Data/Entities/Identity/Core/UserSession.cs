@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,10 @@ namespace Shared.Data.Entities.Identity.Core
         public Guid Id { get; set; }
 
         public string UserId { get; set; } = null!;
-
+        [Required]
+        [MaxLength(256)]
+        public string SecurityStamp { get; set; } = string.Empty;
+        public string? DeviceId { get; set; }
         public string? DeviceName { get; set; }
 
         public string? UserAgent { get; set; }

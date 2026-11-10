@@ -2,6 +2,6 @@
 {
     public interface IEmailTemplateService
     {
-        Task<string> RenderAsync<T>(string templateName, T model);
+        Task<string> RenderAsync<T>(string templateName, T model, CancellationToken cancellation=default);
     }
 }

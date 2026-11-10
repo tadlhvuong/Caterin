@@ -1377,6 +1377,10 @@ namespace Shared.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("DeviceId")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
                     b.Property<string>("DeviceName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -1402,6 +1406,11 @@ namespace Shared.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<string>("SecurityStamp")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<string>("UserAgent")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -1413,6 +1422,9 @@ namespace Shared.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId", "DeviceId")
+                        .HasDatabaseName("IX_UserSessions_UserId_DeviceId");
 
                     b.HasIndex("UserId", "RevokedAt");
 

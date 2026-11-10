@@ -16,11 +16,11 @@ namespace Shared.Requests
 
         public IEnumerable<Claim> Claims { get; set; } = Enumerable.Empty<Claim>();
 
-        public string? AccessToken { get; set; }
+        //public string? AccessToken { get; set; }
 
-        public string? RefreshToken { get; set; }
+        //public string? RefreshToken { get; set; }
 
-        public DateTimeOffset? ExpiresAt { get; set; }
+        //public DateTimeOffset? ExpiresAt { get; set; }
 
         public bool RememberMe { get; set; } = false;
     }

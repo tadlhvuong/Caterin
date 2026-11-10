@@ -1,133 +1,131 @@
 ﻿@using Shared.DTOs.Profile
+@using Shared.Enums
 @model UserProfileDto
+
 @{
     Layout = null;
 }
 
 <div class="border border-gray-100 rounded-16 px-32 py-40">
     <div class="mb-40">
-        <h4 class="mb-8">
-            Thông tin cá nhân
-        </h4>
+        <h4 class="mb-8">Thông tin cá nhân</h4>
         <p class="text-gray-500">
             Cập nhật thông tin tài khoản của bạn.
         </p>
-
     </div>
 
-    <form hx-post="/profile/personal-info"
-          hx-target="#profile-content"
-          hx-swap="innerHTML">
+    <form method="post" action="/profile/personal-info">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-16">
+        </div>
 
         <div class="row">
-
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
-
-                <label class="text-neutral-900 text-lg mb-8 font-[500]">
+                <label asp-for="DisplayName"
+                       class="text-neutral-900 text-lg mb-8 font-[500]">
                     Họ và tên
                 </label>
 
-                <input class="common-input" asp-for="UserName">
-                <span asp-validation-for="UserName"></span>
+                <input class="common-input" asp-for="DisplayName">
+                <span asp-validation-for="DisplayName"
+                      class="text-danger"></span>
             </div>
 
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
-
-                <label class="text-neutral-900 text-lg mb-8 font-[500]">
+                <label asp-for="Email"
+                       class="text-neutral-900 text-lg mb-8 font-[500]">
                     Email
                 </label>
 
-                <input class="common-input" readonly asp-for="Email">
-
+                <input class="common-input" asp-for="Email" readonly>
             </div>
 
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
-
-                <label class="text-neutral-900 text-lg mb-8 font-[500]">
+                <label asp-for="PhoneNumber"
+                       class="text-neutral-900 text-lg mb-8 font-[500]">
                     Số điện thoại
                 </label>
 
                 <input class="common-input" asp-for="PhoneNumber">
-                <span asp-validation-for="PhoneNumber"></span>
+                <span asp-validation-for="PhoneNumber"
+                      class="text-danger"></span>
             </div>
 
             <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
-
-                <label class="text-neutral-900 text-lg mb-8 font-[500]">
-
+                <label asp-for="DateOfBirth"
+                       class="text-neutral-900 text-lg mb-8 font-[500]">
                     Ngày sinh
-
                 </label>
 
-                <input type="date" class="common-input">
-
+                <input type="date"
+                       class="common-input"
+                       asp-for="DateOfBirth">
+                <span asp-validation-for="DateOfBirth"
+                      class="text-danger"></span>
             </div>
 
             <div class="w-full mb-24">
-
                 <label class="text-neutral-900 text-lg mb-8 font-[500]">
                     Giới tính
                 </label>
 
                 <div class="flex gap-32">
-
                     <div class="form-check common-check common-radio">
-
                         <input class="form-check-input"
-                               checked
                                type="radio"
-                               name="gender">
+                               asp-for="Gender"
+                               value="@Gender.Male"
+                               id="genderMale">
 
-                        <label class="form-check-label">
+                        <label class="form-check-label" for="genderMale">
                             Nam
                         </label>
-
                     </div>
 
                     <div class="form-check common-check common-radio">
-
                         <input class="form-check-input"
                                type="radio"
-                               name="gender">
+                               asp-for="Gender"
+                               value="@Gender.Female"
+                               id="genderFemale">
 
-                        <label class="form-check-label">
-
+                        <label class="form-check-label" for="genderFemale">
                             Nữ
-
                         </label>
-
                     </div>
 
                     <div class="form-check common-check common-radio">
-
                         <input class="form-check-input"
                                type="radio"
-                               name="gender">
+                               asp-for="Gender"
+                               value="@Gender.Other"
+                               id="genderOther">
 
-                        <label class="form-check-label">
-
+                        <label class="form-check-label" for="genderOther">
                             Khác
-
                         </label>
-
                     </div>
-
                 </div>
 
+                <span asp-validation-for="Gender"
+                      class="text-danger"></span>
             </div>
 
             <div class="w-full">
                 <button class="btn btn-main py-18 px-48" type="submit">
-                    Lưu  đổi thay
+                    Lưu thay đổi
                 </button>
             </div>
+
             @if (Model.SavedSuccessfully)
             {
-                <div class="alert alert-success">
-                    Cập nhật thành công.
+                <div class="alert alert-success mt-16">
+                    Cập nhật thông tin thành công.
                 </div>
             }
         </div>
     </form>
-
 </div>

@@ -51,8 +51,7 @@
         security: [
             '/admin/assets/js/user/hk.user-security.js'
         ],
-        notification: '/admin/assets/js/user/user-notification.js',
-        connection: '/admin/assets/js/user/user-connection.js'
+        notification: '/admin/assets/js/user/user-notification.js'
     };
 
     const loadedScripts = new Map();
@@ -76,11 +75,12 @@
     function loadTabScript(tab) {
         const scripts = tabScripts[tab];
 
-        if (!scripts) {
-            return Promise.reject(
-                new Error(`Không tìm thấy script cho tab ${tab}`)
-            );
-        }
+        //if (!scripts) {
+        //    return Promise.reject(
+        //        new Error(`Không tìm thấy script cho tab ${tab}`)
+        //    );
+        //}
+        if (!scripts) return;
 
         if (loadedScripts.has(tab)) {
             return loadedScripts.get(tab);
@@ -201,16 +201,8 @@
                     window.initAccountDeactivation?.(tabContent);
                     break;
 
-                case 'billing':
-                    window.initUserBilling?.(tabContent);
-                    break;
-
                 case 'notification':
                     window.initUserNotification?.(tabContent);
-                    break;
-
-                case 'connection':
-                    window.initUserConnection?.(tabContent);
                     break;
             }
 

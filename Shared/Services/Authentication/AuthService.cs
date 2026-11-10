@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Serilog;
 using Shared.Common;
 using Shared.Constants.Core;
 using Shared.Data.Context;
@@ -18,13 +19,12 @@ using Shared.Interfaces.Caches;
 using Shared.Interfaces.IdentityServices;
 using Shared.Interfaces.Log;
 using Shared.Requests;
+using Shared.Requests.Auth;
 using Shared.Responses;
 using Shared.Services.Email;
-using Shared.Services.Email.EmailModels;
 using Shared.UserValidation.DTOs;
 using Shared.UserValidation.Interface;
 using System.Data;
-using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -267,29 +267,31 @@ public class AuthService : IAuthService
             CreatedIP = CommonHelper.GET_IP()
         };
 
-        var result = await _userManager.CreateAsync(user, request.Password);
-
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(
-                ", ",
-                result.Errors.Select(x => x.Description));
-
-            await _logSafetyService.TryLogSecurityAsync(
-                SecurityActionType.Register,
-                false,
-                $"Registration failed. UserId: {user.Id}. Errors: {errors}");
-
-            return new AuthResponse
-            {
-                Success = false,
-                Message = errors
-            };
-        }
-
-        // Gán role mặc định.
+        await using var transaction =
+           await _dbContext.Database.BeginTransactionAsync(
+               cancellationToken);
         try
         {
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(
+                    ", ",
+                    result.Errors.Select(x => x.Description));
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.Register,
+                    false,
+                    $"Registration failed. UserId: {user.Id}. Errors: {errors}");
+
+                return new AuthResponse
+                {
+                    Success = false,
+                    Message = errors
+                };
+            }
+            // Gán role mặc định.
             var roleResult = await _userService.AssignDefaultRoleAsync(
                 user.Id,
                 cancellationToken);
@@ -307,6 +309,12 @@ public class AuthService : IAuthService
                     Message = "Tài khoản đã được tạo nhưng chưa thể hoàn tất phân quyền. Vui lòng liên hệ quản trị viên."
                 };
             }
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
         }
         catch (Exception ex)
         {
@@ -352,65 +360,339 @@ public class AuthService : IAuthService
             Message = "Đăng ký thành công. Vui lòng kiểm tra email để kích hoạt tài khoản."
         };
     }
-    public async Task<ServiceResult> ConfirmEmailAsync(EmailAction emailAction, CancellationToken cancellationToken = default)
+
+    public async Task<ServiceResult> RegisterExternalAsync(
+    ExternalRegistrationRequest request,
+    CancellationToken cancellationToken = default)
     {
-        //Tìm user theo id
-        var user = await _userManager.FindByIdAsync(emailAction.UserId);
+        ArgumentNullException.ThrowIfNull(request);
 
-        if (user == null)
-            return ServiceResult.Fail("Không tìm thấy tài khoản hợp lệ.");
+        cancellationToken.ThrowIfCancellationRequested();
 
-        var token = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailAction.Token));
-        //Xác thực email
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        //Check xác thực email đã thành công chưa
-        if (!result.Succeeded)
+        // 1. Validate request.
+        if (!request.AcceptTerms || !request.AcceptPrivacy)
         {
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ConfirmEmail, false,
-                $"{user.UserName} xác thực email lỗi: {string.Join(", ", result.Errors.Select(x => x.Description))}");
-
-            return ServiceResult.Fail(result.Errors.Select(x => x.Description));
+            return ServiceResult.Fail(
+                "Bạn phải đồng ý với Điều khoản sử dụng và Chính sách bảo mật.");
         }
 
+        if (string.IsNullOrWhiteSpace(request.Provider) ||
+            string.IsNullOrWhiteSpace(request.ProviderKey) ||
+            string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.UserName))
+        {
+            return ServiceResult.Fail(
+                "Thông tin đăng ký không hợp lệ.");
+        }
 
+        var provider = request.Provider.Trim();
+
+        if (!provider.Equals("Google", StringComparison.OrdinalIgnoreCase) &&
+            !provider.Equals("Facebook", StringComparison.OrdinalIgnoreCase))
+        {
+            return ServiceResult.Fail(
+                "Nhà cung cấp đăng nhập không được hỗ trợ.");
+        }
+
+        provider = provider.Equals("Google", StringComparison.OrdinalIgnoreCase)
+            ? "Google"
+            : "Facebook";
+
+        var email = request.Email.Trim().ToLowerInvariant();
+        var username = request.UserName.Trim();
+
+        // 2. Kiểm tra provider đã được liên kết chưa.
+        var existingLogin = await _userManager.FindByLoginAsync(
+            provider,
+            request.ProviderKey);
+
+        if (existingLogin != null)
+        {
+            return ServiceResult.Fail(
+                "Tài khoản Google/Facebook này đã được liên kết.");
+        }
+
+        // 3. Kiểm tra email và username.
+        if (await _userManager.FindByEmailAsync(email) != null)
+        {
+            return ServiceResult.Fail(
+                "Email đã được sử dụng. Vui lòng đăng nhập bằng tài khoản Caterin hiện có.");
+        }
+
+        if (await _userManager.FindByNameAsync(username) != null)
+        {
+            return ServiceResult.Fail(
+                "Tên tài khoản đã tồn tại.");
+        }
+
+        var user = new AppUser
+        {
+            Email = email,
+            UserName = username,
+            DisplayName = string.IsNullOrWhiteSpace(request.Name)
+                ? username
+                : request.Name.Trim(),
+
+            EmailConfirmed = false,
+            IsActive = true,
+            IsDeleted = false,
+            Status = EntityStatus.Pending,
+
+            CreatedAt = DateTime.UtcNow,
+            CreatedIP = CommonHelper.GET_IP()
+        };
+
+        await using var transaction =
+            await _dbContext.Database.BeginTransactionAsync(
+                cancellationToken);
+
+        try
+        {
+            // 4. Tạo tài khoản không có password.
+            var createResult = await _userManager.CreateAsync(user);
+
+            if (!createResult.Succeeded)
+            {
+                var errors = createResult.Errors
+                    .Select(x => x.Description)
+                    .ToList();
+
+                await transaction.RollbackAsync(cancellationToken);
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.Register,
+                    false,
+                    "External registration failed during user creation.");
+
+                return ServiceResult.Fail(errors);
+            }
+
+            // 5. Gán Default Role.
+            var roleResult = await _userService.AssignDefaultRoleAsync(
+                user.Id,
+                cancellationToken);
+
+            if (!roleResult.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                _logger.LogError(
+                    "Failed to assign default role during external registration. UserId: {UserId}",
+                    user.Id);
+
+                return ServiceResult.Fail(
+                    roleResult.Message ??
+                    "Không thể phân quyền cho tài khoản.");
+            }
+
+            // 6. Liên kết Google/Facebook.
+            var loginResult = await _userManager.AddLoginAsync(
+                user,
+                new UserLoginInfo(
+                    provider,
+                    request.ProviderKey,
+                    request.Provider));
+
+            if (!loginResult.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+
+                var errors = loginResult.Errors
+                    .Select(x => x.Description)
+                    .ToList();
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.Register,
+                    false,
+                    "External registration failed during provider linking.");
+
+                return ServiceResult.Fail(errors);
+            }
+
+            // 7. Commit tạo user + role + external login.
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+
+            _logger.LogError(
+                ex,
+                "External registration failed. UserId: {UserId}",
+                user.Id);
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.Register,
+                false,
+                "External registration failed unexpectedly.");
+
+            return ServiceResult.Fail(
+                "Không thể hoàn tất đăng ký. Vui lòng thử lại.");
+        }
+
+        // 8. Ghi nhận đăng ký thành công.
+        await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.Register,
+            true,
+            $"External user registered successfully. UserId: {user.Id}");
+
+        // 9. Gửi email xác nhận sau khi transaction đã commit.
+        var emailResult = await _userEmailService.SendConfirmEmailAsync(
+            user,
+            cancellationToken);
+
+        if (!emailResult.Succeeded)
+        {
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ResendConfirmEmail,
+                false,
+                $"External registration confirmation email failed. UserId: {user.Id}");
+
+            return ServiceResult.SuccessMessage(
+                "Tài khoản đã được tạo và liên kết thành công, nhưng email xác nhận chưa gửi được. Vui lòng gửi lại email xác nhận.");
+        }
+
+        return ServiceResult.SuccessMessage(
+            "Đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản.");
+    }
+
+    public async Task<ServiceResult> ConfirmEmailAsync(
+    EmailAction emailAction,
+    CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(emailAction);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var user = await _userManager.FindByIdAsync(emailAction.UserId);
+
+        if (user == null || user.IsDeleted)
+            return ServiceResult.Fail("Không tìm thấy tài khoản hợp lệ.");
+        var wasEmailConfirmed = user.EmailConfirmed;
+        if (user.EmailConfirmed && user.Status == EntityStatus.Active)
+            return ServiceResult.Fail("Email đã được xác thực trước đó.");
+
+        string token;
+
+        try
+        {
+            token = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(emailAction.Token));
+        }
+        catch (FormatException)
+        {
+            return ServiceResult.Fail("Liên kết xác thực không hợp lệ hoặc đã hết hạn.");
+        }
+
+        var isValid = await _userManager.VerifyUserTokenAsync(
+            user,
+            _userManager.Options.Tokens.EmailConfirmationTokenProvider,
+            UserManager<AppUser>.ConfirmEmailTokenPurpose,
+            token);
+
+        if (!isValid)
+        {
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ConfirmEmail,
+                false,
+                $"Email confirmation token invalid. UserId={user.Id}");
+
+            return ServiceResult.Fail(
+                "Liên kết xác thực không hợp lệ hoặc đã hết hạn.");
+        }
+
+        // Không tự động kích hoạt tài khoản đã bị khóa trạng thái
+        // bởi quản trị viên.
         if (user.Status == EntityStatus.Pending)
         {
-            user.Status = EntityStatus.Active;
+            user.EmailConfirmed = true;
 
+            if (user.Status == EntityStatus.Pending && user.IsActive)
+            {
+                user.Status = EntityStatus.Active;
+            }
+        }
+        else
+        {
+            // Với tài khoản không còn Pending, chỉ xác nhận email.
+            user.EmailConfirmed = true;
+        }
+
+        await using var transaction =
+    await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            // Cập nhật EmailConfirmed và Status.
             var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
-                _logger.LogError(
-                    "Failed to activate user after email confirmation. UserId: {UserId}. Errors: {Errors}",
-                    user.Id,
-                    string.Join(", ", updateResult.Errors.Select(x => x.Description)));
+                await transaction.RollbackAsync(cancellationToken);
 
                 return ServiceResult.Fail(
-                    "Email đã được xác thực nhưng không thể cập nhật trạng thái tài khoản.");
+                    updateResult.Errors.Select(x => x.Description));
+            }
+
+            // Đánh dấu action đã sử dụng.
+            var markResult = await _emailActionService.MarkUsedAsync(
+                emailAction.Id,
+                user.Id,
+                EmailActionType.ConfirmEmail,
+                cancellationToken);
+
+            if (!markResult.Succeeded)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return markResult;
+            }
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+
+        if (!wasEmailConfirmed)
+        {
+            try
+            {
+                await _userEmailService.SendWelcomeEmailAsync(
+                    user,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Send welcome email failed. UserId: {UserId}",
+                    user.Id);
             }
         }
-        //Check mail xác thực còn tồn tại không
-        var markResult = await _emailActionService.MarkUsedAsync(emailAction.Id, cancellationToken);
 
-        if (!markResult.Succeeded)
-        {
-            _logger.LogWarning("Cannot mark EmailAction {EmailActionId} as used.", emailAction.Id);
-        }
-        try
-        {
-            //Gửi mail báo xác thực thành công
-            await _userEmailService.SendWelcomeEmailAsync(user);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Send welcome email failed. UserId: {UserId}", user.Id);
-        }
-        await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ConfirmEmail, true, $"{user.UserName} xác thực email thành công");
+        await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.ConfirmEmail,
+            true,
+            $"User {user.UserName} confirmed email successfully.");
 
         return ServiceResult.Success();
     }
-    
+
     public async Task<ServiceResult> ResendConfirmEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
@@ -419,7 +701,11 @@ public class AuthService : IAuthService
         //Tìm user theo email user
         var user = await _userManager.FindByEmailAsync(email);
 
-        if (user == null || user.EmailConfirmed)
+        if (user == null ||
+    user.IsDeleted ||
+    !user.IsActive ||
+    user.Status != EntityStatus.Pending ||
+    user.EmailConfirmed)
         {
             await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ResendConfirmEmail, true, "Resend confirm email ignored.");
 
@@ -549,31 +835,141 @@ public class AuthService : IAuthService
     #endregion
 
     #region External Login
-    public async Task<AuthResponse> ExternalLoginAsync(ExternalLoginRequest request,
-    CancellationToken cancellationToken = default)
+    public async Task<ExternalLoginResult> ExternalLoginAsync(
+     ExternalLoginRequest request,
+     CancellationToken cancellationToken = default)
     {
         try
         {
-            //Tìm/Tạo user liên kết
-            var user = await FindOrCreateExternalUserAsync(request, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.Provider) ||
+                string.IsNullOrWhiteSpace(request.ProviderKey))
+            {
+                return ExternalLoginResult.Failed(
+                    "Thông tin đăng nhập không hợp lệ.");
+            }
+
+            var provider = request.Provider.Trim();
+
+            if (!provider.Equals("Google", StringComparison.OrdinalIgnoreCase) &&
+                !provider.Equals("Facebook", StringComparison.OrdinalIgnoreCase))
+            {
+                return ExternalLoginResult.Failed(
+                    "Nhà cung cấp đăng nhập không được hỗ trợ.");
+            }
+
+            provider = provider.Equals("Google", StringComparison.OrdinalIgnoreCase)
+                ? "Google"
+                : "Facebook";
+
+            var normalizedRequest = new ExternalLoginRequest
+            {
+                Provider = provider,
+                ProviderKey = request.ProviderKey.Trim(),
+                Email = request.Email?.Trim().ToLowerInvariant(),
+                Name = request.Name,
+                AvatarUrl = request.AvatarUrl,
+                Claims = request.Claims,
+                RememberMe = request.RememberMe
+            };
+
+            var resolution = await ResolveExternalLoginAsync(
+                normalizedRequest,
+                cancellationToken);
+
+            switch (resolution.Status)
+            {
+                case ExternalLoginResolutionStatus.EmailAlreadyExists:
+                    return ExternalLoginResult.EmailAlreadyExists(
+                        "Email này đã được sử dụng cho tài khoản Caterin. " +
+                        "Vui lòng đăng nhập bằng tài khoản hiện có, sau đó liên kết Google/Facebook trong mục Connections.");
+
+                case ExternalLoginResolutionStatus.RegistrationRequired:
+                    return ExternalLoginResult.RegistrationRequired();
+
+                case ExternalLoginResolutionStatus.LinkedUser:
+                    break;
+
+                default:
+                    return ExternalLoginResult.Failed(
+                        "Không thể xử lý thông tin đăng nhập ngoài.");
+            }
+
+            var user = resolution.User;
 
             if (user == null)
             {
-                return AuthResponse.Fail("Không thể tạo hoặc liên kết tài khoản.");
+                return ExternalLoginResult.Failed(
+                    "Không thể tìm thấy tài khoản liên kết.");
             }
-            await SaveExternalTokensAsync(user, request);
-            
+
+            // Kiểm tra trạng thái tài khoản trước khi tạo session.
+            var validationResult = await _userValidationService.ValidateAsync(
+                new UserValidationContext
+                {
+                    Scenario = UserValidationScenario.Login,
+                    UserId = user.Id,
+                    User = user,
+                    HttpContext = _httpContextAccessor.HttpContext
+                },
+                cancellationToken);
+
+            if (!validationResult.Succeeded)
+            {
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ExternalLogin,
+                    false,
+                    $"External login rejected. UserId={user.Id}, Error={validationResult.Error}");
+
+                return ExternalLoginResult.Failed(
+                    "Tài khoản không đủ điều kiện đăng nhập.");
+            }
+            await UpdateExternalAvatarAsync(
+    user,
+    request,
+    cancellationToken);
+
             var roles = await _userService.GetRolesAsync(user.Id);
-            var lifeTime = request.RememberMe ? TimeSpan.FromDays(_jwtSettings.RefreshTokenRememberExpirationDays) : TimeSpan.FromDays(_jwtSettings.RefreshTokenExpirationDays);
-            
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ExternalLogin, true, $"{user.UserName} external login success");
-            return await GenerateAuthResponseAsync(user, roles, lifeTime, cancellationToken);
+
+            var lifeTime = request.RememberMe
+                ? TimeSpan.FromDays(
+                    _jwtSettings.RefreshTokenRememberExpirationDays)
+                : TimeSpan.FromDays(
+                    _jwtSettings.RefreshTokenExpirationDays);
+
+            var authResponse = await GenerateAuthResponseAsync(
+                user,
+                roles,
+                lifeTime,
+                cancellationToken,
+                SecurityActionType.ExternalLogin);
+
+            if (!authResponse.Success)
+            {
+                return ExternalLoginResult.Failed(
+                    authResponse.Message ??
+                    "Đăng nhập bằng tài khoản ngoài thất bại.");
+            }
+
+            return ExternalLoginResult.Authenticated(authResponse);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "External login failed.");
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ExternalLogin, false, ex.Message);
-            return AuthResponse.Fail("Đăng nhập bằng tài khoản ngoài thất bại.");
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ExternalLogin,
+                false,
+                ex.Message);
+
+            return ExternalLoginResult.Failed(
+                "Đăng nhập bằng tài khoản ngoài thất bại.");
         }
     }
     #endregion
@@ -641,128 +1037,364 @@ public class AuthService : IAuthService
     #endregion LOGOUT
 
     #region Change Password
-    public async Task<ServiceResult> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
+    public async Task<ServiceResult> ForgotPasswordAsync(
+       ForgotPasswordRequest request,
+       CancellationToken cancellationToken = default)
     {
-        var user = await _userService.FindByEmailAsync($"{request.Email}");
+        ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
-        {
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ForgotPassword, false, "Forgot password requested for unknown email");
-            return ServiceResult.Fail("Nếu email tồn tại và đủ điều kiện, chúng tôi đã gửi hướng dẫn.");
-        }
+        const string responseMessage =
+            "Nếu email tồn tại và đủ điều kiện, chúng tôi đã gửi hướng dẫn.";
 
-        //Gửi email quên mật khẩu
-        var emailResult = await _userEmailService.SendForgotPasswordEmailAsync(user, cancellationToken);
-        if (!emailResult.Succeeded)
-        {
-            try
-            {
-                await _logSafetyService.TryLogSecurityAsync(
-                 SecurityActionType.ForgotPassword,
-                 false,
-                 "Failed to send password reset email.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Failed to log forgot password security event. UserId: {UserId}",
-                    user.Id);
-            }
-            return ServiceResult.Fail("Không thể gửi email đặt lại mật khẩu. Vui lòng thử lại sau.");
-        }
-        try
+        var email = request.Email?.Trim();
+
+        if (string.IsNullOrWhiteSpace(email))
+            return ServiceResult.Fail("Vui lòng nhập email hợp lệ.");
+
+        var user = await _userService.FindByEmailAsync(email);
+
+        if (user == null ||
+            user.IsDeleted ||
+            !user.IsActive ||
+            user.Status != EntityStatus.Active ||
+            !await _userManager.IsEmailConfirmedAsync(user))
         {
             await _logSafetyService.TryLogSecurityAsync(
                 SecurityActionType.ForgotPassword,
-                true,
-                "Password reset email sent successfully.");
+                false,
+                "Forgot password requested for unknown or ineligible account.");
+
+            return ServiceResult.Success(responseMessage);
         }
-        catch (Exception ex)
+
+        var emailResult = await _userEmailService.SendForgotPasswordEmailAsync(
+            user,
+            cancellationToken);
+
+        if (!emailResult.Succeeded)
         {
             _logger.LogWarning(
-                ex,
-                "Failed to log forgot password security event. UserId: {UserId}",
+                "Failed to send password reset email. UserId={UserId}",
                 user.Id);
-        };
-        return ServiceResult.Success();
-    }
-    
-    public async Task<ServiceResult> ResetPasswordByTokenAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
-    {
-        var actionResult = await _emailActionService.GetValidAsync(request.Key, cancellationToken);
 
-        if (!actionResult.Succeeded)
-        {
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ResetPassword, false, "Invalid reset password token");
-            return ServiceResult.Fail(actionResult.Errors);
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ForgotPassword,
+                false,
+                "Failed to send password reset email.");
+
+            return ServiceResult.Success(responseMessage);
         }
 
-        var emailAction = actionResult.Data!;
+        await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.ForgotPassword,
+            true,
+            "Password reset email sent successfully.");
+
+        return ServiceResult.Success(responseMessage);
+    }
+    public async Task<ServiceResult> ResetPasswordByTokenAsync(
+     string key,
+     ResetPasswordRequest request,
+     CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(key))
+            return ServiceResult.Fail("Liên kết đặt lại mật khẩu không hợp lệ.");
+
+        var actionResult = await _emailActionService.GetValidAsync(
+            key,
+            EmailActionType.ResetPassword,
+            cancellationToken);
+
+        if (!actionResult.Succeeded || actionResult.Data == null)
+            return ServiceResult.Fail(
+                "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
+
+        var emailAction = actionResult.Data;
 
         var user = await _userService.FindByIdAsync(emailAction.UserId);
 
-        if (user == null)
-            return ServiceResult.Fail("Tài khoản không tồn tại.");
-        
-        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(emailAction.Token));
-        //Reset password
-        var result = await _userManager.ResetPasswordAsync(user, decodedToken, request.NewPassword);
-
-        if (!result.Succeeded)
+        if (user == null ||
+            user.IsDeleted ||
+            !user.IsActive ||
+            user.Status != EntityStatus.Active ||
+            !user.EmailConfirmed)
         {
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ResetPassword, false, "Reset password failed");
-            return ServiceResult.Fail(result.Errors.Select(x => x.Description));
+            return ServiceResult.Fail(
+                "Tài khoản không tồn tại hoặc không đủ điều kiện đặt lại mật khẩu.");
         }
-        //Kiểm tra hành động reset pass còn tồn tại không
-        var markResult = await _emailActionService.MarkUsedAsync(emailAction.Id, cancellationToken);
-        if (!markResult.Succeeded)
-        {
-            _logger.LogWarning("Cannot mark EmailAction ResetPassword {EmailActionId} as used.", emailAction.Id);
-        }
-        //Vô hiệu hóa các phiên đăng nhập/cookie Identity cũ
-        await _userManager.UpdateSecurityStampAsync(user);
-        //Vô hiệu hóa quyền hạn cũ của user
-        await _userService.IncreasePermissionVersionAsync(user.Id, cancellationToken);
-        //Revoke toàn bộ token của user hiện tại
-        await _refreshTokenService.RevokeAllUserTokensAsync(user.Id, TokenRevocationReasons.ResetPassword, cancellationToken);
 
-        await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ResetPassword, true, "Password reset.");
+        string decodedToken;
+
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(emailAction.Token));
+        }
+        catch (FormatException)
+        {
+            return ServiceResult.Fail(
+                "Token đặt lại mật khẩu không hợp lệ.");
+        }
+
+        var tokenValid = await _userManager.VerifyUserTokenAsync(
+            user,
+            _userManager.Options.Tokens.PasswordResetTokenProvider,
+            UserManager<AppUser>.ResetPasswordTokenPurpose,
+            decodedToken);
+
+        if (!tokenValid)
+        {
+            return ServiceResult.Fail(
+                "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.");
+        }
+
+        IEnumerable<string>? resetErrors = null;
+
+        await using var transaction =
+            await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            // Giành quyền sử dụng EmailAction.
+            var markResult = await _emailActionService.MarkUsedAsync(
+                emailAction.Id,
+                user.Id,
+                EmailActionType.ResetPassword,
+                cancellationToken);
+
+            if (!markResult.Succeeded)
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                return markResult;
+            }
+
+            // Reset password.
+            var resetResult = await _userManager.ResetPasswordAsync(
+                user,
+                decodedToken,
+                request.NewPassword);
+
+            if (!resetResult.Succeeded)
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+
+                resetErrors = resetResult.Errors
+                    .Select(x => x.Description)
+                    .ToArray();
+            }
+            else
+            {
+                // Thu hồi toàn bộ session và refresh token.
+                await _refreshTokenService.RevokeAllUserSessionsInTransactionAsync(
+                    user.Id,
+                    TokenRevocationReasons.ResetPassword,
+                    user.Id,
+                    cancellationToken);
+
+                await transaction.CommitAsync(cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+
+            _logger.LogError(
+                ex,
+                "Password reset failed. UserId: {UserId}",
+                user.Id);
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ResetPassword,
+                false,
+                $"Password reset failed unexpectedly. UserId={user.Id}");
+
+            return ServiceResult.Fail(
+                "Không thể đặt lại mật khẩu. Vui lòng thử lại.");
+        }
+
+        // Ghi log sau khi transaction đã kết thúc.
+        if (resetErrors != null)
+        {
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ResetPassword,
+                false,
+                $"Password reset failed. UserId={user.Id}");
+
+            return ServiceResult.Fail(resetErrors);
+        }
+
+        await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.ResetPassword,
+            true,
+            $"Password reset successfully. UserId={user.Id}");
 
         return ServiceResult.Success();
     }
-    
-    public async Task<ServiceResult> ChangePasswordAsync(ChangePasswordRequest request, CancellationToken cancellationToken = default)
+
+    public async Task<ServiceResult> ChangePasswordAsync(
+     ChangePasswordRequest request,
+     CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+        cancellationToken.ThrowIfCancellationRequested();
+
         var userId = _currentUserService.UserId;
 
         if (string.IsNullOrWhiteSpace(userId))
             return ServiceResult.Fail("Bạn chưa đăng nhập.");
 
-        var user = await _userService.FindByIdAsync(userId);
-
-        if (user == null)
-            return ServiceResult.Fail("Không tìm thấy tài khoản.");
-        //Đổi mật khẩu
-        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-
-        if (!result.Succeeded)
+        if (string.IsNullOrWhiteSpace(request.NewPassword))
         {
-            await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ChangePassword, false, "Change password failed");
-            return ServiceResult.Fail(result.Errors.Select(x => x.Description));
+            return ServiceResult.Fail(new ServiceError
+            {
+                Code = "PasswordRequired",
+                Field = nameof(request.NewPassword),
+                Message = "Vui lòng nhập mật khẩu mới."
+            });
         }
 
-        //Vô hiệu hóa các phiên đăng nhập/cookie Identity cũ
-        await _userManager.UpdateSecurityStampAsync(user);
-        //Vô hiệu hóa quyền hạn cũ của user
-        await _userService.IncreasePermissionVersionAsync(user.Id, cancellationToken);
-        //Revoke toàn bộ token của user hiện tại
-        await _refreshTokenService.RevokeAllUserTokensAsync(user.Id, TokenRevocationReasons.PasswordChanged ,cancellationToken);
+        if (request.NewPassword != request.ConfirmPassword)
+        {
+            return ServiceResult.Fail(new ServiceError
+            {
+                Code = "PasswordMismatchConfirmation",
+                Field = nameof(request.ConfirmPassword),
+                Message = "Mật khẩu xác nhận không khớp."
+            });
+        }
 
-        await _logSafetyService.TryLogSecurityAsync(SecurityActionType.ChangePassword, true, "Password changed.");
+        var user = await _userService.FindByIdAsync(userId);
+
+        if (user == null ||
+            user.IsDeleted ||
+            !user.IsActive ||
+            user.Status != EntityStatus.Active)
+        {
+            return ServiceResult.Fail(
+                "Tài khoản không tồn tại hoặc không đủ điều kiện thiết lập mật khẩu.");
+        }
+
+        var hasPassword = await _userManager.HasPasswordAsync(user);
+
+        if (hasPassword && string.IsNullOrWhiteSpace(request.CurrentPassword))
+        {
+            return ServiceResult.Fail(new ServiceError
+            {
+                Code = "CurrentPasswordRequired",
+                Field = nameof(request.CurrentPassword),
+                Message = "Vui lòng nhập mật khẩu hiện tại."
+            });
+        }
+
+        await using var transaction =
+            await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var result = hasPassword
+                ? await _userManager.ChangePasswordAsync(
+                    user,
+                    request.CurrentPassword!,
+                    request.NewPassword)
+                : await _userManager.AddPasswordAsync(
+                    user,
+                    request.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+
+                var errors = result.Errors.Select(error => new ServiceError
+                {
+                    Code = error.Code,
+                    Field = GetPasswordErrorField(error.Code, hasPassword),
+                    Message = error.Description
+                }).ToList();
+
+                await _logSafetyService.TryLogSecurityAsync(
+                    SecurityActionType.ChangePassword,
+                    false,
+                    hasPassword
+                        ? "Change password failed."
+                        : "Create password failed.");
+
+                return ServiceResult.Fail(errors);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await _refreshTokenService.RevokeAllUserSessionsInTransactionAsync(
+                user.Id,
+                TokenRevocationReasons.PasswordChanged,
+                user.Id,
+                cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync(CancellationToken.None);
+
+            _logger.LogError(
+                ex,
+                "Password operation failed. UserId={UserId}",
+                user.Id);
+
+            await _logSafetyService.TryLogSecurityAsync(
+                SecurityActionType.ChangePassword,
+                false,
+                "Password operation failed due to an unexpected error.");
+
+            return ServiceResult.Fail(
+                "Không thể thiết lập mật khẩu. Vui lòng thử lại.");
+        }
+
+        await _logSafetyService.TryLogSecurityAsync(
+            SecurityActionType.ChangePassword,
+            true,
+            hasPassword
+                ? "Password changed."
+                : "Password created.");
+
         return ServiceResult.Success();
     }
-    
+
+    private static string? GetPasswordErrorField(
+        string errorCode,
+        bool hasPassword)
+    {
+        if (hasPassword && errorCode == "PasswordMismatch")
+            return nameof(ChangePasswordRequest.CurrentPassword);
+
+        return errorCode switch
+        {
+            "PasswordTooShort" or
+            "PasswordRequiresNonAlphanumeric" or
+            "PasswordRequiresDigit" or
+            "PasswordRequiresLower" or
+            "PasswordRequiresUpper" or
+            "PasswordRequiresUniqueChars"
+                => nameof(ChangePasswordRequest.NewPassword),
+
+            _ => null
+        };
+    }
     #endregion Change Password
 
     #region Validate Exists
@@ -782,16 +1414,22 @@ public class AuthService : IAuthService
      AppUser user,
      IReadOnlyList<string> roles,
      TimeSpan lifeTime,
-     CancellationToken cancellationToken = default)
+     CancellationToken cancellationToken = default,
+      SecurityActionType actionType = SecurityActionType.Login)
     {
         var http = _httpContextAccessor.HttpContext;
         var now = DateTime.UtcNow;
         var userAgent = http?.Request.Headers.UserAgent.ToString();
-
+        if (http == null)
+            throw new InvalidOperationException(
+                "HttpContext is unavailable when creating DeviceId.");
+        var deviceId = _refreshTokenService.GetOrCreateDeviceId(http);
         var session = new UserSession
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
+            SecurityStamp = user.SecurityStamp!,
+            DeviceId = deviceId,
             DeviceName = CommonHelper.DeviceNameHelper.GetDeviceName(userAgent),
             UserAgent = userAgent,
             IpAddress = CommonHelper.GetClientIp(http),
@@ -805,6 +1443,37 @@ public class AuthService : IAuthService
 
         try
         {
+            //Thu hồi Session cũ
+            var oldSessions = await _dbContext.UserSessions
+            .Where(x =>
+                x.UserId == user.Id &&
+                x.DeviceId == deviceId &&
+                x.RevokedAt == null)
+            .ToListAsync(cancellationToken);
+
+            foreach (var oldSession in oldSessions)
+            {
+                oldSession.RevokedAt = now;
+                oldSession.RevokedReason = "ReplacedByNewLogin";
+                oldSession.RevokedById = null;
+            }
+            //Thu hồi RefreshToken cũ
+            var oldSessionIds = oldSessions
+    .Select(x => x.Id)
+    .ToList();
+
+            if (oldSessionIds.Count > 0)
+            {
+                await _dbContext.RefreshTokens
+                    .Where(x =>
+                        oldSessionIds.Contains(x.SessionId) &&
+                        !x.IsRevoked)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.IsRevoked, true)
+                        .SetProperty(x => x.RevokedAt, now)
+                        .SetProperty(x => x.RevokedReason, "ReplacedByNewLogin"),
+                        cancellationToken);
+            }
             // 1. Tạo Session
             _dbContext.UserSessions.Add(session);
 
@@ -826,7 +1495,7 @@ public class AuthService : IAuthService
 
             // 5. Ghi Security Log (không ảnh hưởng kết quả login)
             await _logSafetyService.TryLogSecurityAsync(
-                SecurityActionType.Login,
+                actionType,
                 true,
                 $"{user.UserName} login success");
 
@@ -865,96 +1534,79 @@ public class AuthService : IAuthService
         }
     }
 
-   
-    private async Task<AppUser?> FindOrCreateExternalUserAsync(ExternalLoginRequest request, CancellationToken cancellationToken = default)
+    private async Task<ExternalLoginResolution> ResolveExternalLoginAsync(
+    ExternalLoginRequest request,
+    CancellationToken cancellationToken = default)
     {
-        // Tìm theo Provider
-        var user = await _userManager.FindByLoginAsync(request.Provider, request.ProviderKey);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        if (string.IsNullOrWhiteSpace(request.Provider) ||
+            string.IsNullOrWhiteSpace(request.ProviderKey))
+        {
+            throw new ArgumentException(
+                "External provider information is invalid.",
+                nameof(request));
+        }
+
+        var supportedProviders = new[] { "Google", "Facebook" };
+
+        if (!supportedProviders.Contains(
+                request.Provider,
+                StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "External provider is not supported.");
+        }
+
+        // 1. Ưu tiên tìm theo Provider + ProviderKey.
+        // Nếu đã liên kết thì email không còn là điều kiện đăng nhập.
+        var user = await _userManager.FindByLoginAsync(
+            request.Provider,
+            request.ProviderKey);
 
         if (user != null)
-            return user;
-        //Tìm theo Email
+        {
+            return ExternalLoginResolution.Linked(user);
+        }
+
+        // 2. Provider chưa liên kết.
+        // Email không được dùng để tự động liên kết tài khoản.
         if (!string.IsNullOrWhiteSpace(request.Email))
         {
-            user = await _userManager.FindByEmailAsync(request.Email);
-        }
+            var normalizedEmail = request.Email.Trim();
 
+            user = await _userManager.FindByEmailAsync(normalizedEmail);
 
-        bool isNewUser = false;
-        //Chưa có User
-        if (user == null)
-        {
-            string? avatar = null;
-            if (request.Provider == "Facebook")
+            if (user != null)
             {
-                avatar = $"https://graph.facebook.com/{request.ProviderKey}/picture?type=large";
+                return ExternalLoginResolution.ExistingEmail();
             }
-            else
-            {
-                avatar = request.Claims.FirstOrDefault(c => c.Type == "picture")?.Value;
-            }
-            user = new AppUser
-            {
-                Avatar = avatar,
-                UserName = await GenerateUserNameAsync(request.Name ?? request.Email!),
-                Email = request.Email,
-                EmailConfirmed = !string.IsNullOrWhiteSpace(request.Email),
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                Status = EntityStatus.Active
-
-            };
-            var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded)
-            {
-                _logger.LogWarning("Create external user failed: {Errors}", string.Join(", ", createResult.Errors.Select(x => x.Description)));
-                return null;
-            }
-            await _userManager.AddToRoleAsync(user, "User");
-            isNewUser = true;
         }
 
-        //Đã có user
-        var result = await _userManager.AddLoginAsync(user, new UserLoginInfo(
-                    request.Provider, request.ProviderKey, request.Provider));
-
-        if (!result.Succeeded)
-        {
-            // Có thể request khác vừa liên kết xong
-            var existing = await _userManager.FindByLoginAsync(request.Provider, request.ProviderKey);
-
-            if (existing != null)
-                return existing;
-
-            _logger.LogWarning("Create external user failed: {Errors}", string.Join(", ", result.Errors.Select(x => x.Description)));
-            return null;
-        }
-        if (isNewUser)
-        {
-            await _userEmailService.SendWelcomeEmailAsync(user);
-        }
-        return user;
+        // 3. Chưa có tài khoản Caterin.
+        // Chuyển sang quy trình hoàn tất đăng ký riêng.
+        return ExternalLoginResolution.RegistrationRequired();
     }
-    private async Task SaveExternalTokensAsync(AppUser user, ExternalLoginRequest request)
-    {
-        if (!string.IsNullOrEmpty(request.AccessToken))
-        {
-            await _userManager.SetAuthenticationTokenAsync(
-                user, request.Provider, "access_token", request.AccessToken);
-        }
+    //private async Task SaveExternalTokensAsync(AppUser user, ExternalLoginRequest request)
+    //{
+    //    if (!string.IsNullOrEmpty(request.AccessToken))
+    //    {
+    //        await _userManager.SetAuthenticationTokenAsync(
+    //            user, request.Provider, "access_token", request.AccessToken);
+    //    }
 
-        if (!string.IsNullOrEmpty(request.RefreshToken))
-        {
-            await _userManager.SetAuthenticationTokenAsync(
-                user, request.Provider, "refresh_token", request.RefreshToken);
-        }
+    //    if (!string.IsNullOrEmpty(request.RefreshToken))
+    //    {
+    //        await _userManager.SetAuthenticationTokenAsync(
+    //            user, request.Provider, "refresh_token", request.RefreshToken);
+    //    }
 
-        if (request.ExpiresAt.HasValue)
-        {
-            await _userManager.SetAuthenticationTokenAsync(
-                user, request.Provider, "expires_at", request.ExpiresAt.Value.ToUnixTimeSeconds().ToString());
-        }
-    }
+    //    if (request.ExpiresAt.HasValue)
+    //    {
+    //        await _userManager.SetAuthenticationTokenAsync(
+    //            user, request.Provider, "expires_at", request.ExpiresAt.Value.ToUnixTimeSeconds().ToString());
+    //    }
+    //}
 
     private async Task<string> GenerateUserNameAsync(string source)
     {
@@ -1008,6 +1660,100 @@ public class AuthService : IAuthService
             // không thuộc nhóm lỗi rotation cụ thể.
             _ => RotateTokenError.TokenRevoked
         };
+    }
+
+    private static string? ResolveExternalAvatarUrl(
+    ExternalLoginRequest request)
+    {
+        if (string.Equals(
+            request.Provider,
+            "Facebook",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(request.ProviderKey))
+                return null;
+
+            // Tạo URL từ ProviderKey đã được xác thực bởi OAuth.
+            return $"https://graph.facebook.com/{Uri.EscapeDataString(request.ProviderKey)}/picture?type=large";
+        }
+
+        if (string.Equals(
+            request.Provider,
+            "Google",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            var avatarUrl = request.AvatarUrl?.Trim();
+
+            if (string.IsNullOrWhiteSpace(avatarUrl))
+                return null;
+
+            if (!Uri.TryCreate(
+                avatarUrl,
+                UriKind.Absolute,
+                out var uri))
+            {
+                return null;
+            }
+
+            if (uri.Scheme != Uri.UriSchemeHttps)
+                return null;
+
+            // Google avatar thường được lưu trên googleusercontent.com.
+            var host = uri.Host;
+
+            var isGoogleImage =
+                host.Equals(
+                    "googleusercontent.com",
+                    StringComparison.OrdinalIgnoreCase)
+                || host.EndsWith(
+                    ".googleusercontent.com",
+                    StringComparison.OrdinalIgnoreCase);
+
+            return isGoogleImage ? avatarUrl : null;
+        }
+
+        return null;
+    }
+
+    private async Task UpdateExternalAvatarAsync(
+    AppUser user,
+    ExternalLoginRequest request,
+    CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        // Avatar do người dùng upload lên Caterin luôn được ưu tiên.
+        if (user.AvatarMediaFileId.HasValue)
+            return;
+
+        var avatarUrl = ResolveExternalAvatarUrl(request);
+
+        if (string.IsNullOrWhiteSpace(avatarUrl))
+            return;
+
+        if (string.Equals(
+            user.Avatar,
+            avatarUrl,
+            StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var oldAvatar = user.Avatar;
+        user.Avatar = avatarUrl;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            // Khôi phục giá trị trong entity đang được tracking.
+            user.Avatar = oldAvatar;
+
+            _logger.LogWarning(
+                "Failed to update external avatar. UserId={UserId}, Errors={Errors}",
+                user.Id,
+                string.Join("; ", result.Errors.Select(x => x.Code)));
+        }
     }
     #endregion Helper Account
 }

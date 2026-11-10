@@ -23,17 +23,23 @@ namespace Shared.Services.Authentication
         private readonly IJwtService _jwtService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IDataProtector _refreshTokenProtector;
+        private readonly IDataProtector _deviceProtector;
         private readonly ILogger<RefreshToken> _logger;
         private readonly ILogSafetyService _logSafetyService;
         private readonly JwtSetting _jwtSettings;
 
-        public RefreshTokenService(AppDbContext dbcontext, IDataProtectionProvider dataProtectionProvider, IJwtService jwtService, IHttpContextAccessor httpContextAccessor,
-            ILogger<RefreshToken> logger, ILogSafetyService logSafetyService, IOptions<JwtSetting> jwtOptions)
+        public RefreshTokenService(AppDbContext dbcontext, IDataProtectionProvider dataProtectionProvider,
+    IJwtService jwtService, IHttpContextAccessor httpContextAccessor,
+    ILogger<RefreshToken> logger, ILogSafetyService logSafetyService, IOptions<JwtSetting> jwtOptions)
         {
             _dbcontext = dbcontext;
             _jwtService = jwtService;
             _httpContextAccessor = httpContextAccessor;
+
             _refreshTokenProtector = dataProtectionProvider.CreateProtector(DataProtectionPurposes.RefreshTokenRotation);
+
+            _deviceProtector = dataProtectionProvider.CreateProtector(DataProtectionPurposes.DeviceIdentity);
+
             _logger = logger;
             _logSafetyService = logSafetyService;
             _jwtSettings = jwtOptions.Value;
@@ -41,6 +47,16 @@ namespace Shared.Services.Authentication
 
         public async Task<RefreshTokenResult> CreateAsync(string userId, Guid sessionId, TimeSpan lifeTime, CancellationToken cancellationToken = default)
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+
+            if (sessionId == Guid.Empty)
+                throw new ArgumentException("SessionId không hợp lệ.", nameof(sessionId));
+
+            if (lifeTime <= TimeSpan.Zero)
+                throw new ArgumentOutOfRangeException(nameof(lifeTime));
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             var refreshToken = _jwtService.GenerateRefreshToken();
             var http = _httpContextAccessor.HttpContext;
             var now = DateTime.UtcNow;
@@ -431,25 +447,19 @@ namespace Shared.Services.Authentication
      string? reason = null,
      CancellationToken cancellationToken = default)
         {
-            var tokens = await _dbcontext.RefreshTokens
-                .Where(x => x.UserId == userId && !x.IsRevoked)
-                .ToListAsync(cancellationToken);
-
-            if (tokens.Count == 0)
+            if (string.IsNullOrWhiteSpace(userId))
                 return 0;
 
             var revokedAt = DateTime.UtcNow;
 
-            foreach (var token in tokens)
-            {
-                token.IsRevoked = true;
-                token.RevokedAt = revokedAt;
-                token.RevokedReason = reason;
-            }
-
-            await _dbcontext.SaveChangesAsync(cancellationToken);
-
-            return tokens.Count;
+            return await _dbcontext.RefreshTokens
+                .Where(x => x.UserId == userId && !x.IsRevoked)
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(x => x.IsRevoked, true)
+                        .SetProperty(x => x.RevokedAt, revokedAt)
+                        .SetProperty(x => x.RevokedReason, reason),
+                    cancellationToken);
         }
 
         public async Task<int> RevokeSessionAsync(string userId,
@@ -523,43 +533,38 @@ namespace Shared.Services.Authentication
     string? revokedById = null,
     CancellationToken cancellationToken = default)
         {
-            var now = DateTime.UtcNow;
+            if (string.IsNullOrWhiteSpace(userId))
+                return 0;
 
             await using var transaction =
                 await _dbcontext.Database.BeginTransactionAsync(cancellationToken);
 
             try
             {
-                // Thu hồi tất cả Session chưa bị thu hồi
-                await _dbcontext.UserSessions
-                    .Where(x => x.UserId == userId && x.RevokedAt == null)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.RevokedAt, now)
-                        .SetProperty(x => x.RevokedReason, reason)
-                        .SetProperty(x => x.RevokedById, revokedById),
-                        cancellationToken);
-
-                // Thu hồi toàn bộ Refresh Token còn hiệu lực
-                var revokedTokens = await _dbcontext.RefreshTokens
-                    .Where(x => x.UserId == userId && !x.IsRevoked)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(x => x.IsRevoked, true)
-                        .SetProperty(x => x.RevokedAt, now)
-                        .SetProperty(x => x.RevokedReason, reason)
-                        .SetProperty(x => x.RevokedById, revokedById),
-                        cancellationToken);
+                var revokedTokens = await RevokeAllUserSessionsInTransactionAsync(
+                    userId,
+                    reason,
+                    revokedById,
+                    cancellationToken);
 
                 await transaction.CommitAsync(cancellationToken);
 
                 _logger.LogInformation(
                     "All user sessions revoked. UserId={UserId}, Reason={Reason}, RevokedTokens={Count}",
-                    userId, reason, revokedTokens);
+                    userId,
+                    reason,
+                    revokedTokens);
 
                 return revokedTokens;
             }
+            catch (OperationCanceledException)
+            {
+                await transaction.RollbackAsync(CancellationToken.None);
+                throw;
+            }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync(cancellationToken);
+                await transaction.RollbackAsync(CancellationToken.None);
 
                 _logger.LogError(
                     ex,
@@ -568,6 +573,43 @@ namespace Shared.Services.Authentication
 
                 throw;
             }
+        }
+
+        public async Task<int> RevokeAllUserSessionsInTransactionAsync(
+            string userId,
+            string reason,
+            string? revokedById = null,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+            ArgumentException.ThrowIfNullOrWhiteSpace(reason);
+
+            var now = DateTime.UtcNow;
+
+            // 1. Thu hồi toàn bộ session chưa bị thu hồi.
+            await _dbcontext.UserSessions
+                .Where(x =>
+                    x.UserId == userId &&
+                    x.RevokedAt == null)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.RevokedAt, now)
+                    .SetProperty(x => x.RevokedReason, reason)
+                    .SetProperty(x => x.RevokedById, revokedById),
+                    cancellationToken);
+
+            // 2. Thu hồi toàn bộ refresh token chưa bị thu hồi.
+            var revokedTokens = await _dbcontext.RefreshTokens
+                .Where(x =>
+                    x.UserId == userId &&
+                    !x.IsRevoked)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(x => x.IsRevoked, true)
+                    .SetProperty(x => x.RevokedAt, now)
+                    .SetProperty(x => x.RevokedReason, reason)
+                    .SetProperty(x => x.RevokedById, revokedById),
+                    cancellationToken);
+
+            return revokedTokens;
         }
 
         private async Task<(string Token, RefreshToken Entity)?> GetRotatedTokenAsync(
@@ -736,6 +778,47 @@ namespace Shared.Services.Authentication
                     cancellationToken);
 
             await _dbcontext.SaveChangesAsync(cancellationToken);
+        }
+
+        private const string DeviceCookieName = "device_id";
+
+        public string GetOrCreateDeviceId(HttpContext context)
+        {
+            if (context.Request.Cookies.TryGetValue(
+                DeviceCookieName, out var protectedValue))
+            {
+                try
+                {
+                    var deviceId = _deviceProtector.Unprotect(protectedValue);
+
+                    if (Guid.TryParseExact(deviceId, "N", out var parsed) &&
+                        parsed != Guid.Empty)
+                    {
+                        return deviceId;
+                    }
+                }
+                catch (CryptographicException)
+                {
+                    // Cookie không hợp lệ hoặc không thể giải mã.
+                }
+            }
+
+            var newDeviceId = Guid.NewGuid().ToString("N");
+
+            context.Response.Cookies.Append(
+                DeviceCookieName,
+                _deviceProtector.Protect(newDeviceId),
+                new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = context.Request.IsHttps,
+                    SameSite = SameSiteMode.Lax,
+                    IsEssential = true,
+                    MaxAge = TimeSpan.FromDays(365),
+                    Path = "/"
+                });
+
+            return newDeviceId;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿$(function () {
+﻿
+'use strict';
+$(function () {
     let borderColor, bodyBg, headingColor;
 
     if (isDarkStyle) {

@@ -15,9 +15,11 @@
         var seoRobots = ViewData["SeoRobots"] as string
         ?? "index, follow";
     }
+
     <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@seoTitle</title>
     <meta name="description" content="@seoDescription" />
     <meta name="robots" content="@seoRobots" />
@@ -43,612 +45,637 @@
     <meta name="twitter:title" content="@seoTitle" />
     <meta name="twitter:description" content="@seoDescription" />
     <meta name="twitter:image" content="@seoImage" />
-    <link rel="shortcut icon" href="~/favicon.ico">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2/src/regular/style.css">
 
-    <link rel="stylesheet" href="~/admin/assets/vendor/js/sweetalert2.min.js" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <link href="~/css/app.min.css" rel="stylesheet" asp-append-version="true">
+    <link rel="icon" type="image/x-icon"
+          href="@Url.Content("~/favicon.ico")" />
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2/src/regular/style.css" />
 
-    <link href="~/css/chat.css" rel="stylesheet" asp-append-version="true">
+    <link rel="stylesheet"
+          href="~/admin/assets/vendor/css/sweetalert2.css" />
 
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
+   @*  <link rel="stylesheet"
+          href="~/css/app.min.css"
+          asp-append-version="true" /> *@
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
+
+    <link rel="stylesheet"
+          href="~/css/chat.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body>
-    <div class="preloader fixed inset-0 z-[9999] flex justify-center items-center bg-white">
-        <img src="~/images/Demos/preloader.gif" alt="Image">
+
+    <!-- Preloader -->
+    <div class="preloader fixed inset-0 z-[12000] flex items-center justify-center bg-white opacity-100 visible transition-[opacity,visibility] duration-500 ease-in-out [&.is-hidden]:invisible [&.is-hidden]:opacity-0">
+        <img src="~/images/Demos/preloader.gif"
+             alt="Đang tải trang..."
+             class="h-auto max-w-[150px] object-contain">
     </div>
+
+    <!-- Overlay -->
     <div class="overlay"></div>
     <div class="side-overlay"></div>
-    <div class="progress-wrap fixed right-[36px] bottom-[36px] h-[46px] w-[46px] leading-[46px] cursor-pointer block rounded-[50px] shadow-inset z-[10000] opacity-0 invisible translate-y-[15px] transition-all duration-200 ease-linear bg-transparent max-lg:right-[24px] max-lg:bottom-[24px] max-lg:h-[40px] max-lg:w-[40px] max-lg:leading-[40px] hover:scale-[1.06] after:absolute after:font-[900] after:text-center after:w-[46px] after:h-[46px] after:leading-[46px] after:text-[18px] after:left-0 after:top-0 after:cursor-pointer after:block after:content-['\e08e'] after:font-phospor after:z-[1] after:transition-all after:duration-200 after:ease-linear after:text-main max-lg:after:h-[40px] max-lg:after:w-[40px] max-lg:after:leading-[40px]">
-        <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
-            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
-        </svg>
-    </div>
+
     <partial name="_Partial_Header-mb" />
-    <div class="header-top bg-main-600 flex-between">
-        <div class="container container-lg">
-            <div class="flex-between flex-wrap gap-8">
-                <ul class="flex items-center flex-wrap hidden lg:flex">
-                    <li class="border-right-item">
+
+    @* Caterin storefront header — Tailwind CSS v4
+   Giữ nguyên các Razor Tag Helper/route hiện có; không cần CSS riêng.
+   Các icon sử dụng Phosphor Icons như layout hiện tại.
+*@
+
+    <header class="w-full bg-white">
+        @* TOP BAR *@
+        <div class="hidden lg:block bg-[#249e63] text-white">
+            <div class="mx-auto flex min-h-[46px] max-w-[1440px] items-center justify-between gap-4 px-4 xl:px-5">
+                <ul class="hidden items-center divide-x divide-white/30 lg:flex">
+                    <li class="pr-3">
                         <a asp-area="Admin" asp-controller="Home" asp-action="Dashboard"
-                           class="text-white text-sm hover-text-decoration-underline">Kênh bán hàng</a>
+                           class="text-sm transition hover:underline">
+                            Kênh bán hàng
+                        </a>
                     </li>
-                    <li class="border-right-item">
+                    <li class="px-3">
                         <a asp-controller="Home" asp-action="PartnerCenter"
-                           class="text-white text-sm hover-text-decoration-underline">Đồng hàng cùng Caterin</a>
+                           class="text-sm transition hover:underline">
+                            Đồng hành cùng Caterin
+                        </a>
                     </li>
-                    <li class="border-right-item">
-                          <span class="text-white text-sm mr-1">kết nối: </span>
-                        <a class="text-white text-sm hover-text-decoration-underline mx-2 cursor-pointer"><span class="text-sm flex"><img width="16" src="~/images/Default/icon/icon-fb.png" alt="Fanpage Caterin" title="Fanpage Caterin" /></span></a>
-                        <a class="text-white text-sm hover-text-decoration-underline mx-2 cursor-pointer"><span class="text-sm flex"><img width="16" src="~/images/Default/icon/icon-shopee.webp" alt="Shopee Caterin" title="Shopee Caterin" /></span></a>
-                              
+                    <li class="flex items-center gap-2 pl-3">
+                        <span class="text-sm">Kết nối:</span>
+                        <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer"
+                           aria-label="Fanpage Caterin" class="rounded-sm transition hover:opacity-80">
+                            <img width="18" height="18" src="@Url.Content("~/images/Default/icon/icon-fb.png")"
+                                 alt="Facebook Caterin" title="Fanpage Caterin" class="block size-[18px] object-contain" />
+                        </a>
+                        <a href="https://shopee.vn/" target="_blank" rel="noopener noreferrer"
+                           aria-label="Shopee Caterin" class="rounded-sm transition hover:opacity-80">
+                            <img width="18" height="18" src="@Url.Content("~/images/Default/icon/icon-shopee.webp")"
+                                 alt="Shopee Caterin" title="Shopee Caterin" class="block size-[18px] object-contain" />
+                        </a>
                     </li>
                 </ul>
-                <ul class="header-top__right flex items-center flex-wrap">
-                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
-                        <a href="javascript:void(0)" class="text-white text-sm py-8">Help Center</a>
-                        <ul class="on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
-                            <li class="nav-submenu__item">
-                                <a href="index.html"
-                                   class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <span class="text-sm flex"><i class="ph ph-headset"></i></span> Call Center
+
+                <ul class="ml-auto flex items-center gap-0 text-sm">
+                    <li class="group relative border-r border-white/30 px-3 first:pl-0">
+                        <a href="javascript:void(0)" class="inline-flex items-center gap-1 py-3 transition hover:text-white/80">
+                            Help Center <i class="ph ph-caret-down text-xs"></i>
+                        </a>
+                        <ul class="invisible absolute right-0 top-full z-50 min-w-40 translate-y-1 rounded-lg border border-slate-100 bg-white py-2 text-slate-600 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                            <li>
+                                <a asp-controller="Home" asp-action="Contact"
+                                   class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50 hover:text-[#249e63]">
+                                    <i class="ph ph-headset text-base"></i> Call Center
                                 </a>
                             </li>
-                            <li class="nav-submenu__item">
-                                <a href="index.html"
-                                   class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <span class="text-sm flex"><i class="ph ph-chat-circle-dots"></i></span> Live Chat
+                            <li>
+                                <a href="javascript:void(0)"
+                                   class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50 hover:text-[#249e63]">
+                                    <i class="ph ph-chat-circle-dots text-base"></i> Live Chat
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
-                        <a href="javascript:void(0)" class="selected-text text-white text-sm py-8">Eng</a>
-                        <ul class="selectable-text-list on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag1.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> English
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag2.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> Japan
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag3.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> French
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag4.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> Germany
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag6.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> Bangladesh
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag5.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> South Korea
-                                </a>
-                            </li>
+
+                    <li class="group relative border-r border-white/30 px-3">
+                        <a href="javascript:void(0)" class="inline-flex items-center gap-1 py-3 hover:text-white/80">
+                            Eng <i class="ph ph-caret-down text-xs"></i>
+                        </a>
+                        <ul class="invisible absolute z-[20000] right-0 top-full z-50 min-w-40 translate-y-1 rounded-lg border border-slate-100 bg-white py-2 text-slate-600 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag1.png")" alt="English" class="h-3 w-4 rounded-sm object-cover" /> English</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag2.png")" alt="Japan" class="h-3 w-4 rounded-sm object-cover" /> Japan</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag3.png")" alt="French" class="h-3 w-4 rounded-sm object-cover" /> French</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag4.png")" alt="Germany" class="h-3 w-4 rounded-sm object-cover" /> Germany</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag6.png")" alt="Bangladesh" class="h-3 w-4 rounded-sm object-cover" /> Bangladesh</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag5.png")" alt="South Korea" class="h-3 w-4 rounded-sm object-cover" /> South Korea</a></li>
                         </ul>
                     </li>
-                    <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
-                        <a href="javascript:void(0)" class="selected-text text-white text-sm py-8">USD</a>
-                        <ul class="selectable-text-list on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag1.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> USD
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag2.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> Yen
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag3.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> Franc
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag4.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> EURO
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag6.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> BDT
-                                </a>
-                            </li>
-                            <li>
-                                <a href="javascript:void(0)"
-                                   class="hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex items-center gap-8 rounded-none">
-                                    <img src="~/images/Demos/flag5.png" alt="Image"
-                                         class="w-16 h-12 rounded-4 border border-gray-100"> WON
-                                </a>
-                            </li>
+
+                    <li class="group relative border-r border-white/30 px-3">
+                        <a href="javascript:void(0)" class="inline-flex items-center gap-1 py-3 hover:text-white/80">
+                            USD <i class="ph ph-caret-down text-xs"></i>
+                        </a>
+                        <ul class="invisible absolute z-[20000] right-0 top-full z-50 min-w-36 translate-y-1 rounded-lg border border-slate-100 bg-white py-2 text-slate-600 opacity-0 shadow-xl transition duration-150 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag1.png")" alt="USD" class="h-3 w-4 rounded-sm object-cover" /> USD</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag2.png")" alt="Yen" class="h-3 w-4 rounded-sm object-cover" /> Yen</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag3.png")" alt="Franc" class="h-3 w-4 rounded-sm object-cover" /> Franc</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag4.png")" alt="Euro" class="h-3 w-4 rounded-sm object-cover" /> EURO</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag6.png")" alt="BDT" class="h-3 w-4 rounded-sm object-cover" /> BDT</a></li>
+                            <li><a href="javascript:void(0)" class="flex items-center gap-2 px-4 py-2 hover:bg-slate-50"><img src="@Url.Content("~/images/Demos/flag5.png")" alt="Won" class="h-3 w-4 rounded-sm object-cover" /> WON</a></li>
                         </ul>
                     </li>
-                    <li class="border-right-item">
+
+                    <li class="pl-3">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <a asp-controller="Profile"
-                               asp-action="Index"
-                               class="text-white text-sm py-8 flex items-center gap-6">
-                                <span class="icon text-md flex">
-                                    <i class="ph ph-user-circle"></i>
-                                </span>
-                                <span class="hover-text-decoration-underline">My Profile</span>
+                            <a asp-controller="Profile" asp-action="Index"
+                               class="inline-flex items-center gap-1.5 py-3 transition hover:text-white/80">
+                                <i class="ph ph-user-circle text-base"></i>
+                                <span>My Profile</span>
                             </a>
                         }
                         else
                         {
-                            <a asp-controller="Account"
-                               asp-action="Login"
-                               class="text-white text-sm py-8 flex items-center gap-6">
-                                <span class="icon text-md flex">
-                                    <i class="ph ph-user-circle"></i>
-                                </span>
-                                <span class="hover-text-decoration-underline">My Account</span>
+                            <a asp-controller="Account" asp-action="Login"
+                               class="inline-flex items-center gap-1.5 py-3 transition hover:text-white/80">
+                                <i class="ph ph-user-circle text-base"></i>
+                                <span>My Account</span>
                             </a>
                         }
                     </li>
                 </ul>
             </div>
         </div>
-    </div>
-    <header class="header-middle bg-color-one border-b border-gray-100">
-        <div class="container container-lg">
-            <nav class="header-inner flex-between">
-                <div class="logo">
-                    <a asp-controller="Home" asp-action=""><img src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin"></a>
-                </div>
-                <form action="#" class="flex items-center flex-wrap form-location-wrapper">
-                    <div class="search-category flex h-48 select-border-r-0 radius-end-0 search-form ">
-                        <select class="js-example-basic-single border border-gray-200 border-r-0 hidden md:flex" name="state">
-                            <option value="1" selected="selected" disabled="disabled">Tất cả</option>
-                            <option value="1">Nước rửa tay</option>
-                            <option value="2">Nước rửa chén</option>
-                            <option value="3">Nước lau sàn</option>
-                            <option value="4">Nước lau kính</option>
-                            <option value="5">Tẩy rửa tác động sâu</option>
-                        </select>
-                        <div class="search-form__wrapper relative">
-                            <input class="search-form__input common-input py-13 ps-16 pe-18 !rounded-tr-[50rem] !rounded-br-[50rem] pe-44"
-                                   placeholder="Search for a product or brand"> <button type="submit"
-                                                                                        class="w-32 h-32 bg-main-600 rounded-[50%] flex items-center justify-center text-xl text-white absolute top-[50%] translate-y-[-50%] right-0 me-8">
-                                <i class="ph ph-magnifying-glass"></i>
-                            </button>
-                        </div>
-                    </div>
-                    @* <div class="location-box bg-white flex items-center gap-8 py-6 px-16 rounded-[50rem] border border-gray-100">
-                        <span class="text-gray-900 text-xl sm:flex hidden"><i class="ph ph-map-pin"></i></span>
-                        <div class="line-height-1">
-                            <span class="text-gray-600 text-xs">Your Location</span>
-                            <div class="line-height-1">
-                                <select class="js-example-basic-single border border-gray-200 border-r-0" name="state">
-                                    <option value="1">Alabama</option>
-                                    <option value="1">Alaska</option>
-                                    <option value="1">Arizona</option>
-                                    <option value="1">Delaware</option>
-                                    <option value="1">Florida</option>
-                                    <option value="1">Georgia</option>
-                                    <option value="1">Hawaii</option>
-                                    <option value="1">Indiana</option>
-                                    <option value="1">Marzland</option>
-                                    <option value="1">Nevada</option>
-                                    <option value="1">New Jersey</option>
-                                    <option value="1">New Mexico</option>
-                                    <option value="1">New York</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div> *@
-                </form>
-                @* <form action="#" class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center">
 
-                    <!-- Search -->
-                    <div class="search-category flex h-12">
-                        <select class="js-example-basic-single border border-gray-200 border-r-0">
-                            <option selected disabled>Tất cả</option>
-                            <option>Nước rửa tay</option>
-                            <option>Nước rửa chén</option>
-                            <option>Nước lau sàn</option>
-                            <option>Nước lau kính</option>
-                            <option>Tẩy rửa tác động sâu</option>
-                        </select>
+        @* BRAND + SEARCH + CUSTOMER SHORTCUTS *@
+        <div class="border-b border-slate-200 bg-[#f4f8f2]">
+            <div class="mx-auto grid min-h-[110px] max-w-[1440px] grid-cols-[minmax(150px,200px)_minmax(260px,1fr)_auto] items-center justify-items-center gap-4 px-4 xl:gap-5 xl:px-5">
+                <a asp-controller="Home" asp-action="Index" class="inline-flex w-fit items-center" aria-label="Caterin - Trang chủ">
+                    <img src="@Url.Content("~/images/Default/logo-caterin.png")"
+                         alt="Logo thương hiệu Caterin" class="h-auto w-[150px] max-w-full object-contain sm:w-[150px]" />
+                </a>
 
-                        <div class="search-form__wrapper relative flex-1">
-                            <input class="search-form__input common-input py-3 ps-4 pe-12 w-full rounded-r-full"
-                                   placeholder="Search for a product or brand">
+                <form method="get" asp-controller="Product" asp-action="Index"
+                      role="search"
+                      class="flex h-[58px] min-w-0 w-full items-stretch rounded-full border border-slate-200 bg-white shadow-sm transition focus-within:border-[#249e63] focus-within:shadow-[0_0_0_3px_rgba(36,158,99,0.08)]">
 
-                            <button type="submit"
-                                    class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-main-600 text-white flex items-center justify-center">
-                                <i class="ph ph-magnifying-glass"></i>
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Custom category dropdown -->
+                    <div class="relative hidden w-[180px] shrink-0 md:block"
+                         id="headerCategoryDropdown">
 
-                    <!-- Badge -->
-                    <div class="flex justify-center items-center gap-2 text-main-700 font-medium">
-                        <i class="ph ph-seal-check text-xl"></i>
-                        <span>Chính hãng</span>
-                    </div>
+                        <input type="hidden" name="categoryId" id="headerCategoryValue" value="" />
 
-                    <!-- Badge -->
-                    <div class="flex justify-center items-center gap-2 text-main-two-700 font-medium">
-                        <i class="ph ph-truck text-xl"></i>
-                        <span>Giao toàn quốc</span>
-                    </div>
-
-                </form> *@
-                <div class="header-right items-center xl:block hidden">
-                    <div class="flex items-center flex-wrap gap-12">
-                        @* <button type="button"
-                                class="search-icon flex items-center xl:hidden flex gap-4 item-hover">
-                            <span class="text-2xl text-gray-700 flex relative item-hover__text">
-                                <i class="ph ph-magnifying-glass"></i>
-                            </span>
-                        </button> *@ 
-                        <a asp-controller="Wishlist" asp-action="Index"
-                                     class="flex items-center gap-4 item-hover">
-                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
-                                <i class="ph ph-heart"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
-                            </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Wishlist</span>
-                        </a>
-                        <a asp-controller="Cart" asp-action="Index" class="flex items-center gap-4 item-hover">
-                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
-                                <i class="ph ph-shopping-cart-simple"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
-                            </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Cart</span>
-                        </a>
-                        @* <a asp-controller="Profile" asp-action="Index" class="flex items-center gap-4 item-hover !block">
-                            <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
-                                <i class="ph ph-user"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
-                            </span><span class="text-md text-gray-500 item-hover__text xl:block hidden">Tài khoản</span>
-                        </a> *@
-                    </div>
-                </div>
-            </nav>
-        </div>
-    </header>
-    <header class="header bg-white border-b border-gray-100">
-        <div class="w-full">
-            <nav class="header-inner flex justify-between gap-8">
-                <div class="flex items-center menu-category-wrapper">
-                    <div class="category on-hover-item">
                         <button type="button"
-                                class="category__button flex items-center gap-8 font-[500] p-16 border-r border-l border-gray-100 text-heading">
-                            <span class="icon text-2xl sm:flex hidden"><i class="ph ph-dots-nine"></i></span> <span class="md:flex hidden">All</span> Categories <span class="arrow-icon text-xl flex">
-                                <i class="ph ph-caret-down"></i>
-                            </span>
-                        </button>
-                        <div class="responsive-dropdown on-hover-dropdown common-dropdown nav-submenu p-0 submenus-submenu-wrapper">
-                            <button type="button"
-                                    class="close-responsive-dropdown rounded-[50%] text-xl absolute right-0 inset-block-start-0 mt-4 me-8 xl:hidden flex">
-                                <i class="ph ph-x"></i>
-                            </button>
-                            <div class="logo px-16 xl:hidden block">
-                                <a asp-controller="Home" asp-action="Index" class="link text-center">
+                                id="headerCategoryButton"
+                                aria-haspopup="listbox"
+                                aria-expanded="false"
+                                aria-controls="headerCategoryMenu"
+                                class="group flex h-full w-full items-center gap-2.5 rounded-l-full px-4 text-left outline-none transition hover:bg-[#f5faf5] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#249e63]">
 
-                                   <img width="150px" src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin">
-                                </a>
+                            <span class="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#edf7ef] text-[#249e63] transition group-hover:bg-[#e2f2e6]">
+                                <i class="ph ph-squares-four text-xl"></i>
+                            </span>
+
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                                    Danh mục
+                                </span>
+                                <span id="headerCategoryLabel"
+                                      class="block truncate text-[13px] font-semibold text-slate-700">
+                                    Tất cả
+                                </span>
+                            </span>
+
+                            <i id="headerCategoryArrow"
+                               class="ph ph-caret-down shrink-0 text-sm text-slate-400 transition-transform duration-200 group-hover:text-[#249e63]"></i>
+                        </button>
+
+                        <!-- Dropdown menu -->
+                        <div id="headerCategoryMenu"
+                             role="listbox"
+                             aria-label="Chọn danh mục sản phẩm"
+                             class="invisible absolute left-0 top-[calc(100%+12px)] z-50 w-[290px] translate-y-2 rounded-2xl border border-slate-100 bg-white p-2 opacity-0 shadow-[0_16px_50px_rgba(15,23,42,0.14)] transition-all duration-200">
+
+                            <div class="px-3 pb-2 pt-2">
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                    Khám phá danh mục
+                                </p>
                             </div>
-                            <ul class="scroll-sm p-0 py-8 w-300 max-h-400 overflow-y-auto">
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-carrot"></i></span> <span>
-                                            Hot Deals
-                                            &amp; Combo
-                                        </span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Hot Deals &amp; Combo</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a asp-controller="Product" asp-action="Filter" asp-route-key="hotdeal">Hot Deals</a></li>
-                                            <li><a asp-controller="Product" asp-action="Filter" asp-route-key="combo">Combo</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span>
-                                        <span>Nước rửa tay</span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước rửa tay</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a href="shop.html">Nước rửa tay hương sen</a></li>
-                                            <li><a href="shop.html">Nước rửa tay hương táo-kiwi</a></li>
-                                            <li><a href="shop.html">Nước rửa tay hương gạo</a></li>
-                                            <li><a href="shop.html">Nước rửa tay chai 450g</a></li>
-                                            <li><a href="shop.html">Nước rửa tay can 2kg</a></li>
-                                            <li><a href="shop.html">Nước rửa tay can 5kg</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
-                                            Nước rửa chén
-                                        </span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước rửa chén</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a href="shop.html">Nước rửa chén hương cam quế</a></li>
-                                            <li><a href="shop.html">Nước rửa chén hương gạo</a></li>
-                                            <li><a href="shop.html">Nước rửa chén hương sả chanh</a></li>
-                                            <li><a href="shop.html">Nước rửa chén chai 950g</a></li>
-                                            <li><a href="shop.html">Nước rửa chén can 2kg</a></li>
-                                            <li><a href="shop.html">Nước rửa chén can 5kg</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
-                                            Nước lau sàn
-                                        </span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước lau sàn</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a href="shop.html">Nước lau sàn hương lavender</a></li>
-                                            <li><a href="shop.html">Nước lau sàn hương ylang</a></li>
-                                            <li><a href="shop.html">Nước lau sàn hương hoa hạ</a></li>
-                                            <li><a href="shop.html">Nước lau sàn chai 950g</a></li>
-                                            <li><a href="shop.html">Nước lau sàn can 5kg</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
-                                            Nước lau kính
-                                        </span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Nước lau kính</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a href="shop.html">Nước lau kính chai 700g</a></li>
-                                            <li><a href="shop.html">Nước lau kính can 5kg</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                                <li class="has-submenus-submenu">
-                                    <a href="javascript:void(0)"
-                                       class="text-gray-500 text-15 py-12 px-16 flex items-center gap-8 rounded-none">
-                                        <span class="text-xl flex"><i class="ph ph-brandy"></i></span> <span>
-                                            Chất tẩy rửa tác động sâu
-                                        </span> <span class="icon text-md flex ms-auto">
-                                            <i class="ph ph-caret-right"></i>
-                                        </span>
-                                    </a>
-                                    <div class="submenus-submenu py-16">
-                                        <h6 class="text-lg px-16 submenus-submenu__title">Chất tẩy rửa tác động sâu</h6>
-                                        <ul class="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
-                                            <li><a href="shop.html">Chất tẩy rửa tác động sâu chai 900g</a></li>
-                                            <li><a href="shop.html">Chất tẩy rửa tác động sâu can 5kg</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                            </ul>
+
+                            <button  type="button" role="option" aria-selected="true"
+                                    data-value=""
+                                    data-label="Tất cả"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl bg-[#edf7ef] px-3 py-2.5 text-left transition hover:bg-[#edf7ef]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#249e63] shadow-sm">
+                                    <i class="ph ph-squares-four text-xl"></i>
+                                </span>
+
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-semibold text-slate-800">Tất cả danh mục</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Khám phá toàn bộ sản phẩm</span>
+                                </span>
+
+                                <i class="category-check ph ph-check-circle-fill text-lg text-[#249e63]"></i>
+                            </button>
+
+                            <div class="my-1.5 border-t border-slate-100"></div>
+
+                            <button type="button" role="option" aria-selected="false"
+                                    data-value="1" data-label="Nước rửa tay"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f3f8f3]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f7f1] text-[#249e63]">
+                                    <i class="ph ph-hand-heart text-xl"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-slate-700">Nước rửa tay</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Chăm sóc và làm sạch đôi tay</span>
+                                </span>
+                                <i class="category-check ph ph-check-circle-fill hidden text-lg text-[#249e63]"></i>
+                            </button>
+
+                            <button type="button" role="option" aria-selected="false"
+                                    data-value="2" data-label="Nước rửa chén"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f3f8f3]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f7f1] text-[#249e63]">
+                                    <i class="ph ph-bowl-food text-xl"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-slate-700">Nước rửa chén</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Sạch dầu mỡ, thơm mát</span>
+                                </span>
+                                <i class="category-check ph ph-check-circle-fill hidden text-lg text-[#249e63]"></i>
+                            </button>
+
+                            <button type="button" role="option" aria-selected="false"
+                                    data-value="3" data-label="Nước lau sàn"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f3f8f3]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f7f1] text-[#249e63]">
+                                    <i class="ph ph-spray-bottle text-xl"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-slate-700">Nước lau sàn</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Hương thơm cho không gian sống</span>
+                                </span>
+                                <i class="category-check ph ph-check-circle-fill hidden text-lg text-[#249e63]"></i>
+                            </button>
+
+                            <button type="button" role="option" aria-selected="false"
+                                    data-value="4" data-label="Nước lau kính"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f3f8f3]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f7f1] text-[#249e63]">
+                                    <i class="ph ph-sparkle text-xl"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-slate-700">Nước lau kính</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Sạch bóng, không để lại vệt</span>
+                                </span>
+                                <i class="category-check ph ph-check-circle-fill hidden text-lg text-[#249e63]"></i>
+                            </button>
+
+                            <button type="button" role="option" aria-selected="false"
+                                    data-value="5" data-label="Tẩy rửa chuyên sâu"
+                                    class="category-option flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-[#f3f8f3]">
+
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f0f7f1] text-[#249e63]">
+                                    <i class="ph ph-drop-half-bottom text-xl"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-slate-700">Tẩy rửa chuyên sâu</span>
+                                    <span class="mt-0.5 block text-xs text-slate-400">Xử lý vết bẩn cứng đầu</span>
+                                </span>
+                                <i class="category-check ph ph-check-circle-fill hidden text-lg text-[#249e63]"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="header-menu xl:block hidden text-heading">
-                        <ul class="nav-menu flex items-center">
-                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Index" class="nav-menu__link">Trang chủ</a></li>
-                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Index" class="nav-menu__link">Đăng ký đại lý</a></li>
-                            <li class="on-hover-item nav-menu__item has-submenu">
-                                <a href="javascript:void(0)"
-                                   class="nav-menu__link">Sản phẩm</a>
-                                <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Product" asp-action="Index"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Tất cả</a>
-                                    </li>
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nrt"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                            Nước rửa tay
-                                        </a>
-                                    </li>
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nrc"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                            Nước rửa chén
-                                        </a>
-                                    </li>
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nls"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                            Nước lau sàn
-                                        </a>
-                                    </li>
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Product" asp-action="Details" asp-route-key="nlk"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                            Nước lau kính
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="on-hover-item nav-menu__item has-submenu">
-                                <a href="javascript:void(0)"
-                                   class="nav-menu__link">Tin tức & Sự kiện</a>
-                                <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Blog" asp-action="Index"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Tin tức</a>
-                                    </li>
-                                    <li class="common-dropdown__item nav-submenu__item">
-                                        <a asp-controller="Blog" asp-action="News"
-                                           class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                            Sự kiện
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-menu__item"><a asp-controller="Home" asp-action="Contact" class="nav-menu__link">Liên hệ</a></li>
+                    <!-- Search input -->
+                    <div class="relative z-[10000] min-w-0 flex-1">
+                        <label class="sr-only" for="header-keyword">
+                            Tìm kiếm sản phẩm hoặc thương hiệu
+                        </label>
+
+                        <input id="header-keyword"
+                               type="search"
+                               name="keyword"
+                               placeholder="Tìm kiếm sản phẩm hoặc thương hiệu..."
+                               autocomplete="off"
+                               class="h-full w-full rounded-full border-0 bg-transparent py-3 pl-5 pr-16 text-[15px] text-slate-700 outline-none placeholder:text-slate-400 md:rounded-l-none" />
+
+                        <button type="submit"
+                                aria-label="Tìm kiếm"
+                                class="absolute right-2 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-[#249e63] text-xl text-white shadow-sm transition duration-200 hover:bg-[#18834f] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#249e63]">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="relative z-[10000] hidden shrink-0 items-center gap-7 lg:flex">
+                    <a asp-controller="Wishlist" asp-action="Index"
+                       class="group relative inline-flex items-center gap-2 text-slate-500 transition hover:text-[#249e63]">
+                        <span class="relative inline-flex text-[27px] leading-none text-slate-700 transition group-hover:text-[#249e63]">
+                            <i class="ph ph-heart"></i>
+                            <span class="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-[#249e63] text-[11px] font-semibold text-white">2</span>
+                        </span>
+                        <span class="text-base">Wishlist</span>
+                    </a>
+
+                    <a asp-controller="Cart" asp-action="Index"
+                       class="group relative inline-flex items-center gap-2 text-slate-500 transition hover:text-[#249e63]">
+                        <span class="relative inline-flex text-[27px] leading-none text-slate-700 transition group-hover:text-[#249e63]">
+                            <i class="ph ph-shopping-cart-simple"></i>
+                            <span class="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-[#249e63] text-[11px] font-semibold text-white">2</span>
+                        </span>
+                        <span class="text-base">Cart</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- MOBILE SEARCH POPUP -->
+        <div id="mobileSearchPopup"
+             class="invisible pointer-events-none fixed inset-0 z-[10020] flex items-start justify-center bg-slate-950/50 px-4 pt-24 opacity-0 transition-[opacity,visibility] duration-200 [&.active]:visible [&.active]:pointer-events-auto [&.active]:opacity-100"
+             aria-hidden="true">
+
+            <div class="w-full max-w-[420px] -translate-y-3 rounded-2xl bg-white p-4 shadow-2xl transition-transform duration-200 [&.active]:translate-y-0">
+
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800">Tìm kiếm sản phẩm</h3>
+                        <p class="mt-0.5 text-xs text-slate-400">
+                            Bạn đang tìm sản phẩm nào?
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            id="mobileSearchClose"
+                            aria-label="Đóng tìm kiếm"
+                            class="flex size-9 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200">
+                        <i class="ph ph-x text-xl"></i>
+                    </button>
+                </div>
+
+                <form method="get"
+                      asp-controller="Product"
+                      asp-action="Index"
+                      role="search"
+                      class="flex h-12 items-center rounded-full border border-slate-200 bg-white pl-4 pr-1.5 transition focus-within:border-[#249e63] focus-within:ring-2 focus-within:ring-[#249e63]/10">
+
+                    <label for="mobileSearchKeyword" class="sr-only">
+                        Tìm kiếm sản phẩm
+                    </label>
+
+                    <input id="mobileSearchKeyword"
+                           type="search"
+                           name="keyword"
+                           placeholder="Tên sản phẩm, thương hiệu..."
+                           autocomplete="off"
+                           class="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400" />
+
+                    <button type="submit"
+                            aria-label="Tìm kiếm"
+                            class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#249e63] text-lg text-white transition hover:bg-[#18834f]">
+                        <i class="ph ph-magnifying-glass"></i>
+                    </button>
+                </form>
+
+                <p class="mt-3 text-center text-xs text-slate-400">
+                    Caterin – An toàn cho mọi nhà
+                </p>
+            </div>
+        </div>
+
+        @* PRIMARY NAVIGATION *@
+        <div class="relative z-[9000] border-b border-slate-200 bg-white">
+            <nav aria-label="Điều hướng chính" class="mx-auto flex min-h-[70px] max-w-[1440px] items-stretch justify-between gap-4 px-4 xl:px-0">
+                <div class="group/category relative flex shrink-0 items-stretch">
+                    <button type="button"
+                            class="inline-flex items-center gap-3 border-x border-slate-200 px-5 text-[17px] font-medium text-slate-900 transition hover:text-[#249e63] focus-visible:outline-2 focus-visible:outline-[#249e63]">
+                        <i class="ph ph-dots-nine text-[25px]"></i>
+                        <span>All Categories</span>
+                        <i class="ph ph-caret-down text-base"></i>
+                    </button>
+
+                    <div class="invisible absolute left-0 top-full z-50 w-[310px] translate-y-2 rounded-b-xl border border-slate-100 bg-white py-2 opacity-0 shadow-xl transition duration-150 group-hover/category:visible group-hover/category:translate-y-0 group-hover/category:opacity-100 group-focus-within/category:visible group-focus-within/category:translate-y-0 group-focus-within/category:opacity-100">
+                        <ul class="max-h-[440px] overflow-y-auto">
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-keyword="hot-deal" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-tag text-lg"></i> Hot Deals &amp; Combo</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-rua-tay" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-hand-soap text-lg"></i> Nước rửa tay</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-rua-chen" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-drop text-lg"></i> Nước rửa chén</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-lau-san" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-spray-bottle text-lg"></i> Nước lau sàn</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-lau-kinh" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-sparkle text-lg"></i> Nước lau kính</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-tay-rua" class="flex items-center gap-3 px-5 py-3 text-sm text-slate-600 hover:bg-emerald-50 hover:text-[#249e63]"><i class="ph ph-broom text-lg"></i> Chất tẩy rửa tác động sâu</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="header-right flex items-center">
-                    <a href="tel:0931424207"
-                       class="bg-main-600 text-white p-12 h-full hover-bg-main-800 flex items-center gap-8 text-lg xl:flex hidden">
-                        <div class="flex text-32"><i class="ph ph-phone-call"></i></div>+84 - 931 424 207
+
+                <ul class="hidden min-w-0 flex-1 items-center gap-7 text-[15px] text-slate-500 lg:flex xl:gap-8">
+                    <li class="shrink-0">
+                        <a asp-controller="Home" asp-action="Index" class="whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">Trang chủ</a>
+                    </li>
+                    <li class="shrink-0">
+                        <a asp-controller="Home" asp-action="PartnerCenter" class="whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">Đăng ký đại lý</a>
+                    </li>
+                     <li class="shrink-0">
+                        <a asp-controller="Home" asp-action="About" class="whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">Giới thiệu</a>
+                    </li>
+                    <li class="group/products relative flex h-[70px] shrink-0 items-center">
+                        <a asp-controller="Shop" asp-action="Index" class="inline-flex items-center gap-1 font-semibold text-slate-700 whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">
+                            Sản phẩm <i class="ph ph-caret-down text-sm"></i>
+                        </a>
+                        <ul class="invisible absolute left-0 top-full z-50 min-w-[205px] translate-y-2 rounded-b-lg border border-slate-100 bg-white py-2 text-sm text-slate-600 opacity-0 shadow-xl transition duration-150 group-hover/products:visible group-hover/products:translate-y-0 group-hover/products:opacity-100 group-focus-within/products:visible group-focus-within/products:translate-y-0 group-focus-within/products:opacity-100">
+                            <li><a asp-controller="Shop" asp-action="Index" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Tất cả</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-rua-tay" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Nước rửa tay</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-rua-chen" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Nước rửa chén</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-lau-san" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Nước lau sàn</a></li>
+                            <li><a asp-controller="Shop" asp-action="Index" asp-route-category="nuoc-lau-kinh" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Nước lau kính</a></li>
+                        </ul>
+                    </li>
+                      <li class="shrink-0">
+                        <a asp-controller="Blog" asp-action="Index" class="whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">Tin tức &amp; Sự kiện</a>
+                    </li>
+                    @* <li class="group/news relative flex h-[70px] shrink-0 items-center">
+                        <a href="javascript:void(0)" class="inline-flex items-center gap-1 font-semibold text-slate-700 whitespace-nowrap transition hover:text-[#249e63]">
+                            Tin tức &amp; Sự kiện <i class="ph ph-caret-down text-sm"></i>
+                        </a>
+                        <ul class="invisible absolute left-0 top-full z-50 min-w-[170px] translate-y-2 rounded-b-lg border border-slate-100 bg-white py-2 text-sm text-slate-600 opacity-0 shadow-xl transition duration-150 group-hover/news:visible group-hover/news:translate-y-0 group-hover/news:opacity-100 group-focus-within/news:visible group-focus-within/news:translate-y-0 group-focus-within/news:opacity-100">
+                            <li><a asp-controller="Blog" asp-action="Index" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Tin tức</a></li>
+                            <li><a asp-controller="Blog" asp-action="News" class="block px-4 py-2.5 hover:bg-emerald-50 hover:text-[#249e63]">Sự kiện</a></li>
+                        </ul>
+                    </li> *@
+                    <li class="shrink-0">
+                        <a asp-controller="Home" asp-action="Contact" class="whitespace-nowrap font-semibold text-slate-700 transition hover:text-[#249e63]">Liên hệ</a>
+                    </li>
+                </ul>
+                <div class="relative z-[9001] ml-auto hidden shrink-0 items-center bg-[#249e63] px-5 text-white transition hover:bg-[#18834f] pointer-events-auto lg:flex">
+                    <a href="tel:+84931424207"
+                       class="relative z-[9001] pointer-events-auto inline-flex items-center gap-3 whitespace-nowrap text-[20px] font-semibold">
+                        <i class="ph ph-phone-call text-[30px]"></i>
+                        <span>+84 - 931 424 207</span>
                     </a>
-                    <div class="me-16 xl:hidden block">
-                        <div class="flex items-center flex-wrap gap-12">
-                            <a href="cart.html"
-                                         class="flex items-center gap-4 item-hover">
-                                <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
-                                    <i class="ph ph-heart"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
-                                </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Wishlist</span>
-                            </a><a href="cart.html" class="flex items-center gap-4 item-hover">
-                                <span class="text-2xl text-gray-700 flex relative me-6 mt-6 item-hover__text">
-                                    <i class="ph ph-shopping-cart-simple"></i> <span class="w-16 h-16 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-xs absolute top-n6 end-n4">2</span>
-                                </span><span class="text-md text-gray-500 item-hover__text hidden xl:flex">Cart</span>
-                            </a>
-                        </div>
-                    </div><button type="button" class="toggle-mobileMenu xl:hidden ms-3n text-gray-800 text-4xl flex">
-                        <i class="ph ph-list"></i>
+                </div>
+                <div class="ml-auto flex items-center gap-4 lg:hidden">
+                    <!-- Wishlist -->
+                    <a asp-controller="Wishlist"
+                       asp-action="Index"
+                       aria-label="Wishlist"
+                       class="relative z-[9001] pointer-events-auto inline-flex size-11 shrink-0 items-center justify-center text-2xl text-slate-700 transition hover:text-[#249e63]">
+                        <i class="ph ph-heart"></i>
+                        <span data-wishlist-count
+                              class="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1F9345] px-1 text-[10px] font-bold text-white">
+                            0
+                        </span>
+                    </a>
+
+                    <!-- Cart -->
+                    <a asp-controller="Cart"
+                       asp-action="Index"
+                       aria-label="Cart"
+                       class="relative z-[9001] pointer-events-auto inline-flex size-11 shrink-0 items-center justify-center text-2xl text-slate-700 transition hover:text-[#249e63]">
+                        <i class="ph ph-shopping-cart-simple"></i>
+                        <span data-cart-count
+                              class="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#1F9345] px-1 text-[10px] font-bold text-white">
+                            0
+                        </span>
+                    </a>
+
+                    <!-- Hamburger -->
+                    <button type="button"
+                            class="mobile-menu-toggle relative z-[9001] inline-flex size-11 items-center justify-center rounded-lg text-gray-800 transition hover:bg-gray-100"
+                            aria-label="Mở menu"
+                            aria-controls="mobileMenu"
+                            aria-expanded="false">
+                        <i class="ph ph-list text-2xl"></i>
                     </button>
                 </div>
             </nav>
         </div>
     </header>
 
-    <div class="container py-40">
-        <main role="main" class="pb-3">
+    <div class="mx-auto w-full max-w-[1440px] px-4 py-8 xl:px-5 relative z-[1000]">
+        <main role="main" class="min-h-[400px] pb-3">
             @RenderBody()
         </main>
     </div>
 
     <partial name="_Footer" />
 
-    <div class="bottom-footer bg-main-600 text-light-600 py-8">
-        <div class="container container-lg">
-            <div class="bottom-footer__inner flex-between flex-wrap gap-16 py-16">
-                <p class="bottom-footer__text wow fadeInLeftBig">
-                    Caterin - An toàn cho mọi nhà &copy; 2026. All Rights Reserved
+
+    <div class="bg-[#249e63] text-white">
+        <div class="mx-auto max-w-[1440px] px-5">
+            <div class="flex flex-col items-center justify-between gap-4 py-5 text-center sm:flex-row sm:text-left">
+
+                <p class="text-sm text-white/90">
+                    Caterin - An toàn cho mọi nhà
+                    &copy; @DateTime.Now.Year. All Rights Reserved
                 </p>
-                <div class="flex items-center gap-8 flex-wrap wow fadeInRightBig">
-                    <span class="text-sm">
+
+                <div class="flex flex-wrap items-center justify-center gap-3">
+                    <span class="text-xs text-white/80">
                         Chúng tôi chấp nhận
-                    </span> <img src="~/images/Demos/payment-method.png" alt="Image">
+                    </span>
+
+                    <img src="@Url.Content("~/images/Demos/payment-method.png")"
+                         alt="Các phương thức thanh toán"
+                         class="h-auto max-h-8 w-auto max-w-[200px] object-contain" />
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Overlay -->
-
-        <div class="promo-popup">
-
-            <button class="popup-close" id="closePopup">
-                <i class="ph ph-x"></i>
+    <!-- PROMOTION POPUP -->
+    <div id="promoPopup"
+         class="popup-overlay fixed inset-0 z-[11000] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm [&:not(.show)]:!hidden">
+        <div class="relative grid w-full max-w-[850px] grid-cols-1 overflow-hidden rounded-2xl bg-white shadow-2xl md:grid-cols-2">
+            <!-- Close button -->
+            <button type="button"
+                    id="closePopup"
+                    aria-label="Đóng popup"
+                    class="absolute right-3 top-3 z-20 flex size-9 items-center justify-center rounded-full bg-white/90 text-slate-500 shadow-sm transition hover:bg-red-50 hover:text-red-500">
+                <i class="ph ph-x text-xl"></i>
             </button>
 
-            <div class="promo-left">
-                <img src="/images/Default/popup-products.png" alt="Caterin">
+            <!-- Product image -->
+            <div class="relative flex min-h-[220px] items-center justify-center overflow-hidden bg-[#eaf5eb] p-6 sm:min-h-[300px] md:min-h-[430px]">
+                <div class="absolute -left-16 -top-16 size-64 rounded-full bg-[#249e63]/10"></div>
+                <div class="absolute -bottom-20 -right-12 size-64 rounded-full bg-[#249e63]/10"></div>
+
+                <img src="@Url.Content("~/images/Default/popup-products.png")"
+                     alt="Sản phẩm Caterin"
+                     class="relative z-10 max-h-[280px] w-full object-contain sm:max-h-[340px] md:max-h-[380px]" />
+
+                <div class="absolute bottom-5 left-0 right-0 text-center">
+                    <span class="text-sm font-semibold tracking-wide text-[#249e63]">
+                        CATERIN - AN TOÀN CHO MỌI NHÀ
+                    </span>
+                </div>
             </div>
 
-            <div class="promo-right">
+            <!-- Promotion content -->
+            <div class="flex flex-col justify-center px-6 py-9 sm:px-9 md:px-10">
 
-                <span class="promo-tag">
+                <span class="mb-5 inline-flex w-fit items-center gap-2 rounded-full bg-[#eaf5eb] px-4 py-2 text-xs font-semibold text-[#249e63]">
                     🎉 Chào mừng bạn đến với Caterin
                 </span>
 
-                <h2>
-                    Nhận ngay Voucher
-                    <span>30.000đ</span>
+                <h2 class="mb-4 text-3xl font-bold leading-tight text-slate-800 sm:text-4xl">
+                    Nhận ngay
+                    <span class="block text-[#249e63]">Voucher</span>
+                    <span class="mt-2 block text-[42px] font-extrabold leading-none text-[#f59e0b] sm:text-5xl">
+                        30.000đ
+                    </span>
                 </h2>
 
-                <p>
-                    Áp dụng cho đơn hàng từ <b>299.000đ</b>.
+                <div class="mb-7 h-1 w-16 rounded-full bg-[#249e63]"></div>
+
+                <p class="mb-8 text-sm leading-7 text-slate-600 sm:text-base">
+                    Áp dụng cho đơn hàng từ
+                    <b class="font-bold text-slate-800">299.000đ</b>.
                     Khám phá ngay các sản phẩm chăm sóc gia đình
                     an toàn và chất lượng.
                 </p>
 
-                <div class="promo-buttons">
-                    <a href="/shop" class="btn-main">
+                <!-- Buttons -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="/shop"
+                       class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-[#249e63] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#249e63]/20 transition hover:-translate-y-0.5 hover:bg-[#18834f]">
                         Mua ngay
+                        <i class="ph ph-arrow-right text-lg"></i>
                     </a>
 
-                    <button class="btn-secondary" id="laterBtn">
+                    <button type="button"
+                            id="laterBtn"
+                            class="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700">
                         Để sau
                     </button>
                 </div>
 
-                <label class="popup-checkbox">
-                    <input type="checkbox" id="hideToday">
-                    Không hiển thị lại hôm nay
+                <!-- Hide today -->
+                <label class="mt-6 flex cursor-pointer items-center gap-2.5 text-xs text-slate-500">
+                    <input type="checkbox"
+                           id="hideToday"
+                           class="size-4 cursor-pointer rounded border-slate-300 accent-[#249e63] focus:ring-[#249e63]" />
+                    <span>Không hiển thị lại hôm nay</span>
                 </label>
 
             </div>
-
         </div>
     </div>
 
-    <!-- NOTIFICATION BROWSER -->
+
+    <!-- BROWSER NOTIFICATION PROMPT -->
     <div id="chatNotificationPrompt"
-         class="chat-notification-prompt"
+         class="fixed bottom-5 right-5 z-[9998] w-[calc(100%-40px)] max-w-[370px] rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_10px_40px_rgba(0,0,0,0.15)] [hidden]:!hidden"
          hidden>
 
-        <div class="chat-notification-prompt__content">
+        <!-- Content -->
+        <div class="flex items-start gap-3">
 
-            <div class="chat-notification-prompt__icon">
-                🔔
+            <!-- Icon -->
+            <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#eaf5eb] text-[#249e63]">
+                <i class="ph-fill ph-bell-ringing text-2xl"></i>
             </div>
 
-            <div>
-                <strong>Nhận thông báo tin nhắn</strong>
+            <!-- Text -->
+            <div class="min-w-0 flex-1">
+                <strong class="block text-sm font-bold text-slate-800">
+                    Nhận thông báo tin nhắn
+                </strong>
 
-                <p>
+                <p class="mt-1.5 text-xs leading-6 text-slate-500">
                     Cho phép Caterin thông báo khi bạn nhận được
                     tin nhắn mới.
                 </p>
@@ -656,15 +683,19 @@
 
         </div>
 
-        <div class="chat-notification-prompt__actions">
+        <!-- Actions -->
+        <div class="mt-5 flex items-center justify-end gap-2">
 
             <button type="button"
-                    id="chatNotificationLater">
+                    id="chatNotificationLater"
+                    class="rounded-full px-4 py-2.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100">
                 Để sau
             </button>
 
             <button type="button"
-                    id="chatNotificationAllow">
+                    id="chatNotificationAllow"
+                    class="inline-flex items-center gap-2 rounded-full bg-[#249e63] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#18834f]">
+                <i class="ph ph-bell-ringing text-base"></i>
                 Cho phép
             </button>
 
@@ -672,192 +703,268 @@
 
     </div>
 
+    <!-- Back to top -->
+    <!-- Back to top -->
+    <button type="button"
+            id="scrollTop"
+            aria-label="Cuộn lên đầu trang"
+            title="Lên đầu trang"
+            aria-hidden="true"
+            class="invisible fixed bottom-24 right-6 z-[9999] flex size-11 translate-y-4 items-center justify-center rounded-full bg-white opacity-0 shadow-[0_2px_12px_rgba(0,0,0,0.12)] transition-all duration-300 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F9345] focus-visible:ring-offset-2 sm:bottom-28 sm:right-6 sm:size-[46px]">
+        <svg class="pointer-events-none absolute inset-0 size-full -rotate-90"
+             viewBox="0 0 100 100"
+             aria-hidden="true">
+
+            <circle cx="50" cy="50" r="48"
+                    fill="none"
+                    stroke="#E5EDE2"
+                    stroke-width="3" />
+
+            <circle id="scrollProgress"
+                    cx="50" cy="50" r="48"
+                    fill="none"
+                    stroke="#249e63"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-dasharray="301.59"
+                    stroke-dashoffset="301.59" />
+        </svg>
+
+        <i class="ph ph-arrow-up relative z-10 text-xl text-[#1F9345]"></i>
+    </button>
+
     @* CHATBOBX *@
 
-    <!-- =========================================
-         CATERIN CHATBOX
-    ========================================= -->
-
     <div class="caterin-chat">
-        <!-- Floating Button -->
-        <button class="chat-toggle" id="chatToggle" aria-label="Mở chat" data-inbox-id="1">
-            <span class="chat-icon">
-                <svg viewBox="0 0 24 24" fill="green">
+        <!-- FLOATING BUTTON -->
+        <button type="button"
+                id="chatToggle"
+                aria-label="Mở chat"
+                data-inbox-id="1"
+                class="chat-toggle fixed bottom-6 right-6 z-[9000] flex size-14 items-center justify-center rounded-full bg-[#249e63] text-white shadow-lg shadow-emerald-900/20 transition hover:scale-105 hover:bg-[#18834f]">
+
+            <span class="chat-icon flex size-8 items-center justify-center">
+                <svg viewBox="0 0 24 24" fill="none" class="size-8">
                     <path d="M20 11.5C20 16.194 16.194 20 11.5 20C9.84 20 8.3 19.525 7 18.7L3.5 20L4.8 16.7C3.98 15.4 3.5 13.86 3.5 12.2C3.5 7.506 7.306 3.7 12 3.7C16.694 3.7 20 6.806 20 11.5Z"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                          stroke-linecap="round"
-                          stroke-linejoin="round" />
+                          stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round" stroke-linejoin="round" />
                     <path d="M8 11.5H8.01M12 11.5H12.01M16 11.5H16.01"
-                          stroke="currentColor"
-                          stroke-width="2.2"
+                          stroke="currentColor" stroke-width="2.2"
                           stroke-linecap="round" />
                 </svg>
             </span>
 
-            <span class="chat-badge" id="chatBadge" hidden>0</span>
+            <span id="chatBadge"
+                  hidden
+                  class="chat-badge absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+                0
+            </span>
         </button>
 
 
-        <!-- Chat Window -->
 
-        <div class="caterin-chat">
-            <div class="chat-window"
-                 id="chatWindow"
+    </div>
+
+    <!-- CHAT WINDOW CONTAINER -->
+    <div id="chatWindowContainer" class="pointer-events-none fixed inset-0">
+        <div class="pointer-events-auto absolute bottom-24 right-6 w-[calc(100%-32px)] max-w-[390px]">
+            <div id="chatWindow"
                  data-inbox-id="1"
                  data-authenticated="@User.Identity?.IsAuthenticated.ToString().ToLower()"
                  data-name=""
                  data-email=""
                  data-phone=""
-                 aria-label="Trò chuyện với Caterin">
-                <!-- Header -->
-                <header class="chat-header">
-                    <div class="chat-header-left">
-                        <div class="agent-avatar" aria-hidden="true">
-                            <span>C</span>
-                            <i id="chatAdminStatusDot" class="online-dot"></i>
+                 aria-label="Trò chuyện với Caterin"
+                 class="chat-window flex h-[min(650px,calc(100dvh-130px))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+
+                <!-- HEADER -->
+                <header class="chat-header flex shrink-0 items-center justify-between bg-[#249e63] px-4 py-3.5 text-white">
+
+                    <div class="chat-header-left flex min-w-0 items-center gap-3">
+
+                        <div class="agent-avatar relative flex size-11 shrink-0 items-center justify-center rounded-full bg-white/20 text-lg font-bold">
+                            C
+
+                            <i id="chatAdminStatusDot"
+                               class="online-dot absolute bottom-0 right-0 size-3 rounded-full border-2 border-[#249e63] bg-green-300">
+                            </i>
                         </div>
 
-                        <div class="agent-info">
-                            <div class="agent-name">Caterin</div>
+                        <div class="agent-info min-w-0">
+                            <div class="agent-name text-base font-bold">
+                                Caterin
+                            </div>
 
-                            <div id="chatStatusText" class="admin-status">
-                                <span aria-hidden="true"></span>
+                            <div id="chatStatusText"
+                                 class="admin-status flex items-center gap-1.5 text-xs text-white/85">
+                                <span class="size-1.5 rounded-full bg-green-300"></span>
                                 <span class="status-label">Đang trực tuyến</span>
                             </div>
                         </div>
                     </div>
 
-                    <button type="button"
-                            class="chat-close"
-                            id="chatClose"
-                            aria-label="Đóng chat">
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M6 6L18 18M18 6L6 18"
-                                  stroke="currentColor"
-                                  stroke-width="1.8"
-                                  stroke-linecap="round" />
-                        </svg>
-                    </button>
+                    <div class="flex shrink-0 items-center gap-2">
+
+                        <!-- Trạng thái hội thoại -->
+                        <span id="chatStatusBadge"
+                              class="chat-status-badge"
+                              data-status="open"
+                              hidden>
+                        </span>
+
+                        <button type="button"
+                                id="chatClose"
+                                aria-label="Đóng chat"
+                                class="chat-close flex size-9 shrink-0 items-center justify-center rounded-full text-white transition hover:bg-white/15">
+
+                            <svg viewBox="0 0 24 24" fill="none" class="size-5">
+                                <path d="M6 6L18 18M18 6L6 18"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round" />
+                            </svg>
+
+                        </button>
+                    </div>
                 </header>
 
-                <!-- Previous conversation -->
-                <div id="chatHistoryLoader" class="hidden">
-                    <button type="button" id="loadPreviousConversationBtn">
-                        <i class="ph ph-clock-counter-clockwise" aria-hidden="true"></i>
+                <!-- PREVIOUS CONVERSATION -->
+                <div id="chatHistoryLoader" hidden class="shrink-0 border-b border-slate-100 px-4 py-2 [hidden]:!hidden">
+                    <button type="button"
+                            id="loadPreviousConversationBtn"
+                            class="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-[#249e63] transition hover:bg-emerald-100">
+                        <i class="ph ph-clock-counter-clockwise"></i>
                         <span>Xem cuộc trò chuyện trước</span>
                     </button>
                 </div>
 
-                <!-- Quick replies and welcome message -->
-                <section class="quick-replies" hidden aria-label="Gợi ý tin nhắn">
-                    <div class="welcome-message">
-                        <div class="welcome-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M12 3L19 6V11.5C19 16 16.1 19.5 12 21C7.9 19.5 5 16 5 11.5V6L12 3Z"
-                                      stroke="currentColor"
-                                      stroke-width="1.6"
-                                      stroke-linejoin="round" />
-                                <path d="M9 12L11 14L15 10"
-                                      stroke="currentColor"
-                                      stroke-width="1.6"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round" />
-                            </svg>
+
+                <!-- QUICK REPLIES -->
+                <section class="quick-replies shrink-0 border-b border-slate-100 px-4 py-4 [hidden]:!hidden"
+                         aria-label="Gợi ý tin nhắn">
+
+                    <div class="welcome-message mb-4 flex items-start gap-3 rounded-xl bg-emerald-50 p-3">
+
+                        <div class="welcome-icon flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-[#249e63]">
+                            <i class="ph ph-shield-check text-xl"></i>
                         </div>
 
-                        <div class="welcome-message-content">
-                            <strong>Xin chào 👋</strong>
-                            <p>
+                        <div class="welcome-message-content min-w-0">
+                            <strong class="text-sm font-bold text-slate-800">
+                                Xin chào 👋
+                            </strong>
+                            <p class="mt-1 text-xs leading-5 text-slate-600">
                                 Caterin rất vui được hỗ trợ bạn.
                                 Bạn cần tư vấn sản phẩm hay đơn hàng?
                             </p>
                         </div>
                     </div>
 
-                    <div class="quick-replies-options">
-                        <button type="button" data-message="Tư vấn sản phẩm">
+                    <div class="quick-replies-options flex flex-wrap gap-2">
+                        <button type="button" data-message="Tư vấn sản phẩm"
+                                class="rounded-full border border-emerald-200 px-3 py-2 text-xs text-[#249e63] transition hover:bg-emerald-50">
                             🧴 Tư vấn sản phẩm
                         </button>
-                        <button type="button" data-message="Kiểm tra đơn hàng">
+                        <button type="button" data-message="Kiểm tra đơn hàng"
+                                class="rounded-full border border-emerald-200 px-3 py-2 text-xs text-[#249e63] transition hover:bg-emerald-50">
                             📦 Kiểm tra đơn hàng
                         </button>
-                        <button type="button" data-message="Tư vấn combo">
+                        <button type="button" data-message="Tư vấn combo"
+                                class="rounded-full border border-emerald-200 px-3 py-2 text-xs text-[#249e63] transition hover:bg-emerald-50">
                             🏠 Tư vấn combo
                         </button>
-                        <button type="button" data-message="Chính sách giao hàng">
+                        <button type="button" data-message="Chính sách giao hàng"
+                                class="rounded-full border border-emerald-200 px-3 py-2 text-xs text-[#249e63] transition hover:bg-emerald-50">
                             🚚 Chính sách giao hàng
                         </button>
                     </div>
                 </section>
 
-                <!-- Messages: rendered and managed by ClientJS -->
-                <div class="chat-body"
-                     id="chatBody"
+
+                <!-- CHAT HISTORY -->
+                <div id="chatBody"
+                     class="chat-body min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f8faf9] px-3 py-4"
                      role="log"
                      aria-live="polite"
                      aria-relevant="additions text"
-                     aria-label="Tin nhắn"></div>
+                     aria-label="Tin nhắn">
+                </div>
 
-                <!-- Invalid session -->
+                <!-- INVALID SESSION -->
                 <section id="chatSessionReset"
-                         class="chat-session-reset"
+                         class="chat-session-reset shrink-0 border-t border-red-100 bg-red-50 p-3 [hidden]:!hidden"
                          hidden
                          aria-live="polite">
-                    <div class="chat-session-reset-content">
-                        <div class="chat-session-reset-icon" aria-hidden="true">
-                            <i class="ph ph-warning-circle"></i>
+
+                    <div class="chat-session-reset-content flex items-center gap-3">
+
+                        <div class="chat-session-reset-icon flex size-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500">
+                            <i class="ph ph-warning-circle text-xl"></i>
                         </div>
 
-                        <div class="chat-session-reset-text">
-                            <strong>Phiên trò chuyện không hợp lệ</strong>
-                            <span class="chat-session-reset-description">
+                        <div class="chat-session-reset-text min-w-0 flex-1">
+                            <strong class="block text-xs font-bold text-slate-800">
+                                Phiên trò chuyện không hợp lệ
+                            </strong>
+                            <span class="chat-session-reset-description mt-1 block text-xs leading-5 text-slate-600">
                                 Phiên trò chuyện hiện tại không còn hợp lệ.
                                 Vui lòng bắt đầu lại để tiếp tục.
                             </span>
                         </div>
 
-                        <button type="button" id="resetChatBox">
+                        <button type="button"
+                                id="resetChatBox"
+                                class="shrink-0 rounded-lg bg-[#249e63] px-3 py-2 text-xs font-semibold text-white hover:bg-[#18834f]">
                             Bắt đầu lại
                         </button>
                     </div>
                 </section>
 
-                <!-- Typing indicator -->
-                <div class="typing" id="typing" hidden aria-live="polite">
-                    <div class="typing-avatar" aria-hidden="true">C</div>
-                    <div class="typing-bubble" aria-hidden="true">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                <!-- TYPING INDICATOR -->
+                <div id="typing"
+                     class="typing shrink-0 items-center gap-2 px-4 py-2 [hidden]:!hidden"
+                     hidden
+                     aria-live="polite">
+
+                    <div class="typing-avatar flex size-7 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-[#249e63]">
+                        C
                     </div>
-                    <span class="typing-text">Đang nhập</span>
+
+                    <div class="typing-bubble flex items-center gap-1 rounded-full bg-white px-3 py-2 shadow-sm">
+                        <span class="size-1.5 rounded-full bg-slate-400"></span>
+                        <span class="size-1.5 rounded-full bg-slate-400"></span>
+                        <span class="size-1.5 rounded-full bg-slate-400"></span>
+                    </div>
+
+                    <span class="typing-text text-[11px] text-slate-400">
+                        Đang nhập
+                    </span>
                 </div>
 
-                <!-- Composer -->
-                <footer class="chat-footer">
+                <!-- COMPOSER -->
+                <footer class="chat-footer shrink-0 border-t border-slate-100 bg-white p-3">
+
                     <div class="chat-footer-content">
-                        <!-- Selected attachment previews -->
-                        <div class="chat-attachment-preview"
-                             id="chatAttachmentPreview"
+
+                        <!-- ATTACHMENT PREVIEW -->
+                        <div id="chatAttachmentPreview"
+                             class="chat-attachment-preview mb-2 [hidden]:!hidden"
                              hidden>
-                            <div class="chat-attachment-list"
-                                 id="chatAttachmentList"></div>
+                            <div id="chatAttachmentList"
+                                 class="chat-attachment-list flex flex-wrap gap-2">
+                            </div>
                         </div>
 
-                        <div class="chat-input-row">
-                            <div class="chat-input-wrapper">
+                        <!-- INPUT ROW -->
+                        <div class="chat-input-row flex items-center gap-2">
+
+                            <div class="chat-input-wrapper flex min-w-0 flex-1 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3">
+
                                 <button type="button"
-                                        class="input-action"
                                         id="attachmentBtn"
-                                        aria-label="Đính kèm tệp">
-                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                        <path d="M21 11.5L12.5 20C10 22.5 6 22.5 3.5 20C1 17.5 1 13.5 3.5 11L12.5 2C14.5 0 17.5 0 19.5 2C21.5 4 21.5 7 19.5 9L11 17.5C9.5 19 7 19 5.5 17.5C4 16 4 13.5 5.5 12L13.5 4"
-                                              stroke="currentColor"
-                                              stroke-width="1.7"
-                                              stroke-linecap="round"
-                                              stroke-linejoin="round" />
-                                    </svg>
+                                        aria-label="Đính kèm tệp"
+                                        class="input-action flex size-8 shrink-0 items-center justify-center text-slate-500 transition hover:text-[#249e63]">
+                                    <i class="ph ph-paperclip text-xl"></i>
                                 </button>
 
                                 <input type="file"
@@ -870,50 +977,44 @@
                                        id="chatInput"
                                        placeholder="Nhập tin nhắn..."
                                        autocomplete="off"
-                                       aria-label="Nhập tin nhắn" />
+                                       aria-label="Nhập tin nhắn"
+                                       class="chat-input min-w-0 flex-1 bg-transparent py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400" />
 
                                 <button type="button"
-                                        class="emoji-btn"
                                         id="emojiBtn"
-                                        aria-label="Chọn biểu tượng cảm xúc">
+                                        aria-label="Chọn biểu tượng cảm xúc"
+                                        class="emoji-btn flex size-8 shrink-0 items-center justify-center text-lg">
                                     😊
                                 </button>
                             </div>
 
                             <button type="button"
-                                    class="send-btn"
                                     id="sendBtn"
-                                    aria-label="Gửi tin nhắn">
-                                <svg viewBox="0 0 24 24" fill="green" aria-hidden="true">
-                                    <path d="M21 3L10.5 13.5"
-                                          stroke="currentColor"
-                                          stroke-width="1.8"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round" />
-                                    <path d="M21 3L14.3 21L10.5 13.5L3 9.7L21 3Z"
-                                          stroke="currentColor"
-                                          stroke-width="1.8"
-                                          stroke-linejoin="round" />
-                                </svg>
+                                    aria-label="Gửi tin nhắn"
+                                    class="send-btn flex size-11 shrink-0 items-center justify-center rounded-full bg-[#249e63] text-white transition hover:bg-[#18834f]">
+                                <i class="ph ph-paper-plane-tilt text-xl"></i>
                             </button>
+
                         </div>
                     </div>
                 </footer>
 
-                <div class="chat-powered">
+
+                <!-- POWERED -->
+                <div class="chat-powered flex shrink-0 items-center justify-center gap-1 border-t border-slate-100 bg-white py-2 text-[10px] text-slate-400">
                     <span>Được hỗ trợ bởi</span>
-                    <strong>Caterin Việt nam</strong>
+                    <strong class="font-semibold text-[#249e63]">
+                        Caterin Việt nam
+                    </strong>
                 </div>
+
             </div>
         </div>
-
     </div>
 
-    <script>
-    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@phosphor-icons/web@2.1.2"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
 
 
@@ -921,8 +1022,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@@11"></script>
     <script src="~/admin/assets/js/customize/toast-setting.js"></script>
 
-    <script src="~/js/chat.js"></script>
-    <script defer="defer" src="~/js/app.bundle.js" asp-append-version="true"></script>
+
+    <script src="~/js/common/cart.js" asp-append-version="true"></script>
+
+    <script src="~/js/common/wishlist.js" asp-append-version="true"></script>
+
+    <script src="~/js/common/product-actions.js" asp-append-version="true"></script>
+
+    <script src="~/js/core/chat.js"></script>
+    <script src="~/js/core/site.js"></script>
+    @* <script defer="defer" src="~/js/app.bundle.js" asp-append-version="true"></script> *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

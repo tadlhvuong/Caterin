@@ -1,0 +1,207 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+
+
+@{
+    var blogPosts = new[]
+    {
+        new
+        {
+            Id = 1,
+            Category = "Chăm sóc nhà cửa",
+            Title = "6 khu vực trong nhà cần vệ sinh thường xuyên để bảo vệ sức khỏe",
+            Description = "Tay nắm cửa, công tắc điện, bàn ăn hay phòng tắm là những nơi dễ tích tụ vi khuẩn. Vệ sinh định kỳ giúp không gian sống luôn sạch sẽ và an toàn cho cả gia đình.",
+            Image = "~/images/Demos/blog-img1.png",
+            PublishedAt = new DateTime(2026, 7, 8),
+            ReadTime = 5
+        },
+        new
+        {
+            Id = 2,
+            Category = "Mẹo vệ sinh",
+            Title = "7 mẹo giữ căn bếp luôn sạch sẽ và thơm mát mỗi ngày",
+            Description = "Chỉ với vài thói quen đơn giản cùng nước rửa chén và nước lau bếp phù hợp, bạn có thể loại bỏ dầu mỡ, khử mùi hiệu quả và giữ không gian bếp luôn sạch sẽ.",
+            Image = "~/images/Demos/blog-img1.png",
+            PublishedAt = new DateTime(2026, 7, 6),
+            ReadTime = 6
+        },
+        new
+        {
+            Id = 3,
+            Category = "Sức khỏe",
+            Title = "Rửa tay đúng cách – Thói quen nhỏ giúp bảo vệ cả gia đình",
+            Description = "Chỉ mất khoảng 30 giây để rửa tay đúng cách nhưng có thể giảm đáng kể nguy cơ lây lan vi khuẩn và virus trong sinh hoạt hằng ngày.",
+            Image = "~/images/Demos/blog-img1.png",
+            PublishedAt = new DateTime(2026, 7, 4),
+            ReadTime = 4
+        },
+        new
+        {
+            Id = 4,
+            Category = "Sống xanh",
+            Title = "Bí quyết sử dụng sản phẩm vệ sinh tiết kiệm và thân thiện môi trường",
+            Description = "Sử dụng đúng liều lượng, tái sử dụng chai đựng và lựa chọn sản phẩm phù hợp là những cách đơn giản giúp giảm rác thải và bảo vệ môi trường.",
+            Image = "~/images/Demos/blog-img1.png",
+            PublishedAt = new DateTime(2026, 7, 2),
+            ReadTime = 7
+        },
+        new
+        {
+            Id = 5,
+            Category = "Kiến thức",
+            Title = "Vì sao nên chọn sản phẩm vệ sinh dịu nhẹ cho da tay?",
+            Description = "Tiếp xúc với chất tẩy rửa mỗi ngày có thể ảnh hưởng đến làn da nếu sử dụng sản phẩm không phù hợp. Hãy ưu tiên những sản phẩm dịu nhẹ.",
+            Image = "~/images/Demos/blog-img1.png",
+            PublishedAt = new DateTime(2026, 6, 30),
+            ReadTime = 5
+        }
+    };
+}
+
+<section id="homeBlog"
+         class="mx-4 overflow-hidden rounded-3xl bg-[#F5F9F2] py-12 sm:mx-6 sm:py-16 lg:mx-8 lg:py-20">
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
+
+        <!-- Heading -->
+        <div class="mb-7 flex items-end justify-between gap-4 sm:mb-9">
+
+            <div>
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#1F9345]">
+                    Caterin Journal
+                </span>
+
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    Bài viết mới nhất
+                </h2>
+
+                <p class="mt-2 hidden max-w-xl text-sm leading-relaxed text-gray-500 sm:block">
+                    Những mẹo hữu ích giúp chăm sóc nhà cửa và xây dựng không gian sống sạch, an toàn.
+                </p>
+            </div>
+
+            <div class="flex shrink-0 items-center gap-2">
+
+                <!-- View all -->
+                <a asp-controller="Blog"
+                   asp-action="Index"
+                   class="hidden items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:text-[#18783A] sm:inline-flex">
+                    Xem tất cả
+                    <i class="ph ph-arrow-up-right text-lg"></i>
+                </a>
+
+                <!-- Navigation -->
+                <div class="flex items-center gap-2">
+                    <button type="button"
+                            class="home-blog-prev flex size-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-[#1F9345] hover:bg-[#1F9345] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Bài viết trước">
+                        <i class="ph ph-arrow-left text-lg"></i>
+                    </button>
+
+                    <button type="button"
+                            class="home-blog-next flex size-10 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 transition hover:border-[#1F9345] hover:bg-[#1F9345] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                            aria-label="Bài viết tiếp theo">
+                        <i class="ph ph-arrow-right text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="relative overflow-hidden"
+             data-blog-slider
+             aria-label="Bài viết mới nhất">
+
+            <div class="home-blog-track flex items-stretch"
+                 data-blog-track>
+
+                @for (var i = 0; i < blogPosts.Length; i++)
+                {
+                    var post = blogPosts[i];
+
+                    <div class="home-blog-slide shrink-0 px-2 pb-3"
+                         data-blog-slide>
+
+                        <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5EDE2] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#C9DDC3] hover:shadow-lg hover:shadow-[#1F9345]/10">
+
+                            <!-- Image -->
+                            <a asp-controller="Blog"
+                               asp-action="Details"
+                               asp-route-id="@post.Id"
+                               class="relative block aspect-[16/10] overflow-hidden bg-[#F5F9F2]">
+
+                                <img src="@Url.Content(post.Image)"
+                                     alt="@post.Title"
+                                     loading="lazy"
+                                     class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+
+                                <span class="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-[#1F9345] shadow-sm backdrop-blur">
+                                    @post.Category
+                                </span>
+                            </a>
+
+                            <!-- Content -->
+                            <div class="flex flex-1 flex-col p-5 sm:p-6">
+
+                                <!-- Meta -->
+                                <div class="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-400">
+
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <i class="ph ph-calendar-dots text-base text-[#1F9345]"></i>
+                                        @post.PublishedAt.ToString("dd/MM/yyyy")
+                                    </span>
+
+                                    <span class="inline-flex items-center gap-1.5">
+                                        <i class="ph ph-clock text-base text-[#1F9345]"></i>
+                                        @post.ReadTime phút đọc
+                                    </span>
+                                </div>
+
+                                <!-- Title -->
+                                <h3 class="line-clamp-2 text-lg font-bold leading-snug text-[#183B2A] transition-colors group-hover:text-[#1F9345] sm:text-xl">
+                                    <a asp-controller="Blog"
+                                       asp-action="Details"
+                                       asp-route-id="@post.Id">
+                                        @post.Title
+                                    </a>
+                                </h3>
+
+                                <!-- Description -->
+                                <p class="mt-3 line-clamp-3 text-sm leading-6 text-gray-500">
+                                    @post.Description
+                                </p>
+
+                                <!-- Read more -->
+                                <div class="mt-auto border-t border-gray-100 pt-4">
+                                    <a asp-controller="Blog"
+                                       asp-action="Details"
+                                       asp-route-id="@post.Id"
+                                       class="inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:gap-3">
+                                        Đọc bài viết
+                                        <i class="ph ph-arrow-right text-base"></i>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </article>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <!-- Mobile view all -->
+        <div class="mt-5 text-center sm:hidden">
+            <a asp-controller="Blog"
+               asp-action="Index"
+               class="inline-flex items-center gap-2 rounded-full border border-[#1F9345] px-6 py-2.5 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+                Xem tất cả bài viết
+                <i class="ph ph-arrow-right"></i>
+            </a>
+        </div>
+
+    </div>
+</section>

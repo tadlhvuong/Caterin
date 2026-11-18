@@ -1,0 +1,378 @@
+﻿@using Website.Models.Order
+@model OrderDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Chi tiết đơn hàng {Model.OrderCode} | Caterin";
+    var paymentStatusStyle = Model.PaymentStatus switch
+    {
+        "Paid" => "bg-green-50 text-green-700 ring-green-200",
+        "Pending" => "bg-amber-50 text-amber-700 ring-amber-200",
+        "Failed" => "bg-red-50 text-red-700 ring-red-200",
+        _ => "bg-gray-100 text-gray-700 ring-gray-200"
+    };
+
+    var canRetryPayment =
+     Model.PaymentMethod == "VNPay" &&
+     (Model.PaymentStatus == "Unpaid" ||
+      Model.PaymentStatus == "Failed") &&
+     Model.Status != "Cancelled";
+}
+
+<div class="min-h-screen bg-[#f8faf8] text-slate-700">
+
+    <section class="border-b border-gray-100 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="/" class="text-gray-500 hover:text-[#1F9345]">Trang chủ</a>
+                <i class="ph ph-caret-right text-xs text-gray-400"></i>
+                <a asp-controller="Order"
+                   asp-action="Index"
+                   class="text-gray-500 transition hover:text-[#1F9345]">
+                    Đơn hàng của tôi
+                </a>
+                <i class="ph ph-caret-right text-xs text-gray-400"></i>
+                <span class="font-medium text-[#1F9345]">Chi tiết đơn hàng</span>
+            </nav>
+        </div>
+    </section>
+
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        @Html.AntiForgeryToken()
+        <div class="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <a asp-controller="Order"
+                   asp-action="Index"
+                   class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 transition hover:text-[#1F9345]">
+                    <i class="ph ph-arrow-left"></i>
+                    Quay lại đơn hàng
+                </a>
+                <h1 class="mt-3 text-2xl font-bold text-gray-900 sm:text-3xl">
+                    Chi tiết đơn hàng
+                </h1>
+                <p class="mt-2 text-sm text-gray-500">
+                    Mã đơn: <span class="font-semibold text-[#1F9345]">@Model.OrderCode</span>
+                    <span class="mx-2">·</span>
+                    @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </p>
+            </div>
+            @{
+                var statusClass = Model.StatusColor switch
+                {
+                    "success" => "bg-green-50 text-green-700",
+                    "warning" => "bg-amber-50 text-amber-700",
+                    "info" => "bg-blue-50 text-blue-700",
+                    "danger" => "bg-red-50 text-red-700",
+                    _ => "bg-gray-100 text-gray-700"
+                };
+            }
+
+            <span class="inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold @statusClass">
+                <span class="size-2 rounded-full bg-current"></span>
+                @Model.StatusLabel
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+            <div class="space-y-6 lg:col-span-2">
+                @await Html.PartialAsync("Partials/_OrderStatusTimeline", Model)
+                @if (Model.ReturnRequest != null)
+                {
+                    <partial name="Partials/_ReturnRequestStatus"
+                             model="Model.ReturnRequest" />
+                }
+                @await Html.PartialAsync("Partials/_OrderItems", Model)
+                @await Html.PartialAsync("Partials/_OrderShippingInfo", Model)
+
+                @if (!string.IsNullOrWhiteSpace(Model.CustomerNote))
+                {
+                    <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                        <h2 class="flex items-center gap-2 font-bold text-gray-900">
+                            <i class="ph ph-note-pencil text-xl text-[#1F9345]"></i>
+                            Ghi chú đơn hàng
+                        </h2>
+                        <p class="mt-3 text-sm leading-6 text-gray-600">
+                            @Model.CustomerNote
+                        </p>
+                    </div>
+                }
+
+                @* ORDER ACTIONS *@
+                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="font-bold text-gray-900">Thao tác đơn hàng</h2>
+
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <a asp-controller="Order"
+                           asp-action="Track"
+                           asp-route-orderCode="@Model.OrderCode"
+                           class="inline-flex items-center gap-2 rounded-xl bg-[#1F9345] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#187b39]">
+                            <i class="ph ph-truck text-lg"></i>
+                            Theo dõi đơn hàng
+                        </a>
+                        @if (Model.Status != "Cancelled")
+                        {
+                            <a asp-controller="Order"
+                               asp-action="Invoice"
+                               asp-route-orderCode="@Model.OrderCode"
+                               class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                <i class="ph ph-receipt text-lg"></i>
+                                Xem hóa đơn
+                            </a>
+                        }
+                        @if (canRetryPayment)
+                        {
+                            <a asp-controller="Payment"
+                               asp-action="Retry"
+                               asp-route-orderCode="@Model.OrderCode"
+                               class="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-600">
+                                <i class="ph ph-arrow-clockwise text-lg"></i>
+                                Thanh toán lại
+                            </a>
+                        }
+                        @if (Model.CanCancel)
+                        {
+                            <button type="button"
+                                    class="js-cancel-order inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                                    data-order-code="@Model.OrderCode">
+                                <i class="ph ph-x-circle text-lg"></i>
+                                Hủy đơn hàng
+                            </button>
+                        }
+
+
+
+                        @if (Model.CanReview)
+                        {
+                            <a asp-controller="Order"
+                               asp-action="Review"
+                               asp-route-orderCode="@Model.OrderCode"
+                               class="inline-flex items-center justify-center gap-2 rounded-full bg-[#1F9345] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#187a39]">
+                                <i class="ph ph-star text-lg"></i>
+                                Đánh giá sản phẩm
+                            </a>
+                        }
+
+
+                        @if (Model.CanRequestReturn && Model.ReturnRequest == null)
+                        {
+                            <a asp-controller="Order"
+                               asp-action="ReturnRequest"
+                               asp-route-orderCode="@Model.OrderCode"
+                               class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                <i class="ph ph-arrow-counter-clockwise text-lg"></i>
+                                Yêu cầu đổi trả
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <aside class="space-y-6">
+                @await Html.PartialAsync("Partials/_OrderSummary", Model)
+                @await Html.PartialAsync("Partials/_OrderPaymentInfo", Model)
+
+                <div class="rounded-2xl border border-[#dcefd8] bg-gradient-to-br from-[#f2faef] to-white p-5">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1F9345] shadow-sm">
+                            <i class="ph ph-headset text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-900">Cần hỗ trợ?</h3>
+                            <p class="mt-1 text-xs text-gray-500">Caterin luôn sẵn sàng hỗ trợ</p>
+                        </div>
+                    </div>
+                    <a href="/contact"
+                       class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#1F9345]/20 bg-white px-4 py-3 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+                        Liên hệ Caterin
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("click", async function (event) {
+            if (!(event.target instanceof Element)) return;
+
+            const button = event.target.closest(".js-cancel-order");
+            if (!button || button.disabled) return;
+
+            const orderCode = button.dataset.orderCode;
+            const token = document.querySelector(
+                'input[name="__RequestVerificationToken"]'
+            )?.value;
+
+            if (!orderCode || !token) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Không thể thực hiện",
+                    text: "Không tìm thấy thông tin xác thực yêu cầu."
+                });
+                return;
+            }
+
+            const reasons = [
+                { value: "change-product", label: "Muốn thay đổi sản phẩm", icon: "ph-package" },
+                { value: "change-address", label: "Muốn thay đổi địa chỉ giao hàng", icon: "ph-map-pin" },
+                { value: "change-payment", label: "Muốn thay đổi phương thức thanh toán", icon: "ph-credit-card" },
+                { value: "better-option", label: "Tìm được sản phẩm phù hợp hơn", icon: "ph-magnifying-glass" },
+                { value: "no-longer-needed", label: "Không còn nhu cầu mua hàng", icon: "ph-x-circle" },
+                { value: "other", label: "Lý do khác", icon: "ph-chat-circle-text" }
+            ];
+
+            const reasonHtml = reasons.map((item, index) => `
+                <label class="group flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 text-left transition
+                              hover:border-[#8CC63F] hover:bg-green-50
+                              has-[:checked]:border-[#1F9345] has-[:checked]:bg-green-50">
+                    <input type="radio"
+                           name="cancelReason"
+                           value="${item.value}"
+                           ${index === 0 ? "checked" : ""}
+                           class="peer sr-only">
+
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-500 transition
+                                 group-has-[:checked]:bg-[#e2f3df] group-has-[:checked]:text-[#1F9345]">
+                        <i class="ph ${item.icon} text-xl"></i>
+                    </span>
+
+                    <span class="flex-1 text-sm font-medium text-gray-700">
+                        ${item.label}
+                    </span>
+
+                    <i class="ph ph-check-circle-fill text-xl text-[#1F9345] opacity-0 transition
+                              group-has-[:checked]:opacity-100"></i>
+                </label>
+            `).join("");
+
+            const reasonResult = await Swal.fire({
+                title: "Lý do hủy đơn hàng",
+                html: `
+                    <div class="mt-4 flex flex-col gap-2.5">
+                        ${reasonHtml}
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: "Tiếp tục",
+                cancelButtonText: "Quay lại",
+                confirmButtonColor: "#1F9345",
+                reverseButtons: true,
+                focusConfirm: false,
+                width: "480px",
+                preConfirm: () => {
+                    const selected = Swal.getPopup().querySelector(
+                        'input[name="cancelReason"]:checked'
+                    );
+
+                    if (!selected) {
+                        Swal.showValidationMessage("Vui lòng chọn lý do hủy đơn.");
+                        return false;
+                    }
+
+                    return selected.value;
+                }
+            });
+
+            if (!reasonResult.isConfirmed) return;
+
+            const reasonMap = {
+                "change-product": "Muốn thay đổi sản phẩm",
+                "change-address": "Muốn thay đổi địa chỉ giao hàng",
+                "change-payment": "Muốn thay đổi phương thức thanh toán",
+                "better-option": "Tìm được sản phẩm phù hợp hơn",
+                "no-longer-needed": "Không còn nhu cầu mua hàng",
+                "other": "Lý do khác"
+            };
+
+            const reason = reasonMap[reasonResult.value];
+            if (!reason) return;
+
+            let otherReason = "";
+
+            if (reasonResult.value === "other") {
+                const otherResult = await Swal.fire({
+                    title: "Lý do hủy đơn",
+                    input: "textarea",
+                    inputPlaceholder: "Nhập lý do bạn muốn hủy đơn...",
+                    inputAttributes: {
+                        maxlength: 500
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Xác nhận hủy",
+                    cancelButtonText: "Quay lại",
+                    confirmButtonColor: "#dc2626",
+                    reverseButtons: true,
+                    inputValidator: value => {
+                        if (!value?.trim()) {
+                            return "Vui lòng nhập lý do hủy đơn.";
+                        }
+                    }
+                });
+
+                if (!otherResult.isConfirmed) return;
+
+                otherReason = otherResult.value.trim();
+            } else {
+                const confirmResult = await Swal.fire({
+                    title: "Xác nhận hủy đơn?",
+                    text: "Sau khi hủy, bạn sẽ không thể khôi phục đơn hàng này.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Xác nhận hủy",
+                    cancelButtonText: "Quay lại",
+                    confirmButtonColor: "#dc2626",
+                    reverseButtons: true
+                });
+
+                if (!confirmResult.isConfirmed) return;
+            }
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch(
+                    `/order/${encodeURIComponent(orderCode)}/cancel`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "RequestVerificationToken": token
+                        },
+                        body: JSON.stringify({
+                            reason: reason,
+                            otherReason: otherReason
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(
+                        data.message || "Không thể hủy đơn hàng."
+                    );
+                }
+
+                await Swal.fire({
+                    icon: "success",
+                    title: "Đã hủy đơn hàng",
+                    text: data.message || "Đơn hàng đã được hủy thành công.",
+                    confirmButtonText: "Đồng ý",
+                    confirmButtonColor: "#1F9345"
+                });
+
+                window.location.reload();
+            } catch (error) {
+                await Swal.fire({
+                    icon: "error",
+                    title: "Không thể hủy đơn",
+                    text: error.message || "Đã xảy ra lỗi. Vui lòng thử lại."
+                });
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+}

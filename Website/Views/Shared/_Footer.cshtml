@@ -1,171 +1,282 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@* Caterin Footer - Tailwind CSS v4 *@
+<footer class="relative z-[9000] isolate overflow-hidden bg-[#f4f8f2]">
+    @* Background *@
+    <img src="@Url.Content("~/images/Default/footer-bg.webp")"
+         alt=""
+         aria-hidden="true"
+         class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-30" />
 
-<footer class="footer bg-color-one py-80">
-    <img src="~/images/Default/footer-bg.webp" alt="BG" class="body-bottom-bg">
-    <div class="container">
-        <div class="footer-item-wrapper flex items-start flex-wrap pb-16">
-            <div class="footer-item" data-aos="fade-up" data-aos-duration="200">
-                <div class="footer-item__logo">
-                    <a asp-controller="Home" asp-action=""><img src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin"></a>
-                </div>
-                <p class="mb-24">Caterin shop - An toàn cho mọi nhà.</p>
-                <div class="flex items-center gap-16 mb-16">
-                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
-                        <i class="ph-fill ph-map-pin"></i>
-                    </span> <span class="text-md text-gray-900">
-                        36 Vân Côi, P. Tân Sơn Nhất, Tp. Hồ Chí Minh
-                    </span>
-                </div>
-                <div class="flex items-center gap-16 mb-16">
-                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
-                        <i class="ph-fill ph-phone-call"></i>
-                    </span>
-                    <div class="flex items-center gap-16 flex-wrap">
-                        <a href="tel:0931424207"
-                           class="text-md text-gray-900 hover-text-main-600">+84 931 424 207</a>
+    <div class="mx-auto max-w-[1440px] px-5 py-16 lg:py-20">
+
+        @* Main footer *@
+        <div class="grid grid-cols-1 gap-12 border-b border-slate-200/80 pb-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.8fr_0.9fr_1.2fr] lg:gap-10">
+
+            @* Column 1: Brand and contact *@
+            <div class="min-w-0">
+                <a asp-controller="Home" asp-action="Index"
+                   class="mb-5 inline-flex items-center">
+                    <img src="@Url.Content("~/images/Default/logo-caterin.png")"
+                         alt="Logo thương hiệu Caterin"
+                         class="h-auto w-[175px] object-contain" />
+                </a>
+
+                <p class="mb-7 text-[15px] leading-7 text-slate-600">
+                    Caterin shop - An toàn cho mọi nhà.
+                    Công nghệ tẩy rửa mới an toàn cho mọi gia đình.
+                </p>
+
+                <div class="flex flex-col gap-5">
+
+                    @* Address *@
+                    <div class="flex items-start gap-3">
+                        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#249e63] text-lg text-white">
+                            <i class="ph-fill ph-map-pin"></i>
+                        </span>
+                        <div class="pt-1">
+                            <p class="mb-1 text-sm font-semibold text-slate-800">Địa chỉ</p>
+                            <p class="text-sm leading-6 text-slate-600">
+                                36 Vân Côi, P. Tân Sơn Nhất, TP. Hồ Chí Minh
+                            </p>
+                        </div>
+                    </div>
+
+                    @* Phone *@
+                    <div class="flex items-start gap-3">
+                        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#249e63] text-lg text-white">
+                            <i class="ph-fill ph-phone-call"></i>
+                        </span>
+                        <div class="pt-1">
+                            <p class="mb-1 text-sm font-semibold text-slate-800">Hotline</p>
+                            <a href="tel:+84931424207"
+                               class="text-sm text-slate-600 transition hover:text-[#249e63]">
+                                +84 931 424 207
+                            </a>
+                        </div>
+                    </div>
+
+                    @* Email *@
+                    <div class="flex items-start gap-3">
+                        <span class="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#249e63] text-lg text-white">
+                            <i class="ph-fill ph-envelope"></i>
+                        </span>
+                        <div class="pt-1">
+                            <p class="mb-1 text-sm font-semibold text-slate-800">Email</p>
+                            <a href="mailto:anphapharm@gmail.com"
+                               class="break-all text-sm text-slate-600 transition hover:text-[#249e63]">
+                                anphapharm@gmail.com
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="flex items-center gap-16 mb-16">
-                    <span class="w-32 h-32 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-md flex-shrink-0">
-                        <i class="ph-fill ph-envelope"></i>
-                    </span> <a href="mailto:anphapharm@gmail.com"
-                               class="text-md text-gray-900 hover-text-main-600">anphapharm@gmail.com</a>
-                </div>
             </div>
-            <div class="footer-item" data-aos="fade-up" data-aos-duration="400">
-                <h6 class="footer-item__title">Thông tin</h6>
-                <ul class="footer-menu">
-                    <li class="mb-16">
-                        <a asp-controller="Home" asp-action="Contact" class="text-gray-600 hover-text-main-600">
+
+            @* Column 2: Information *@
+            <div>
+                <h3 class="mb-6 text-base font-bold text-slate-900">
+                    Thông tin
+                </h3>
+
+                <ul class="flex flex-col gap-4">
+                    <li>
+                        <a asp-controller="Home" asp-action="Contact"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Liên hệ
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a asp-controller="Home" asp-action="ShippingPolicy" class="text-gray-600 hover-text-main-600">
-                           Chính sách giao hàng
+                    <li>
+                        <a asp-controller="Home" asp-action="ShippingPolicy"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
+                            Chính sách giao hàng
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a asp-controller="Home" asp-action="ReturnRefundPolicy" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Home" asp-action="ReturnRefundPolicy"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Chính sách đổi trả
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a asp-controller="Home" asp-action="Terms" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Home" asp-action="Terms"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Điều khoản sử dụng
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a asp-controller="Home" asp-action="FAQ" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Home" asp-action="FAQ"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Câu hỏi thường gặp
                         </a>
                     </li>
                 </ul>
             </div>
-            <div class="footer-item" data-aos="fade-up" data-aos-duration="1000">
-                <h6 class="footer-item__title">Danh mục</h6>
-                <ul class="footer-menu">
-                    <li class="mb-16">
-                        <a href="shop.html" class="text-gray-600 hover-text-main-600">Nước rửa tay</a>
+
+            @* Column 3: Categories *@
+            <div>
+                <h3 class="mb-6 text-base font-bold text-slate-900">
+                    Danh mục sản phẩm
+                </h3>
+
+                <ul class="flex flex-col gap-4">
+                    <li>
+                        <a asp-controller="Product" asp-action="Details"
+                           asp-route-key="nrt"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
+                            Nước rửa tay
+                        </a>
                     </li>
-                    <li class="mb-16">
-                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Product" asp-action="Details"
+                           asp-route-key="nrc"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Nước rửa chén
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Product" asp-action="Details"
+                           asp-route-key="nls"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Nước lau sàn
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Product" asp-action="Details"
+                           asp-route-key="nlk"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Nước lau kính
                         </a>
                     </li>
-                    <li class="mb-16">
-                        <a href="shop.html" class="text-gray-600 hover-text-main-600">
+                    <li>
+                        <a asp-controller="Product" asp-action="Index"
+                           class="text-sm text-slate-600 transition hover:text-[#249e63]">
                             Chất tẩy rửa tác động sâu
                         </a>
                     </li>
                 </ul>
             </div>
-            <div class="footer-item" data-aos="fade-up" data-aos-duration="1200">
-                <h6 class="">Mua sắm mọi lúc mọi nơi</h6>
-                <ul class="flex items-center gap-16">
+
+            @* Column 4: Social and newsletter *@
+            <div class="min-w-0">
+                <h3 class="mb-6 text-base font-bold text-slate-900">
+                    Mua sắm mọi lúc mọi nơi
+                </h3>
+
+                <p class="mb-5 text-sm leading-6 text-slate-600">
+                    Kết nối với Caterin để cập nhật sản phẩm và ưu đãi mới nhất.
+                </p>
+
+                <ul class="mb-9 flex flex-wrap items-center gap-3">
                     <li>
                         <a href="https://www.facebook.com"
-                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
-                            <img width="44" src="~/images/Default/icon/icon-fb-white.png" />
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="Facebook Caterin"
+                           class="flex size-11 items-center justify-center rounded-full bg-[#249e63]/10 transition hover:bg-[#249e63]">
+                            <img width="28" height="28"
+                                 src="@Url.Content("~/images/Default/icon/icon-fb-white.png")"
+                                 alt="Facebook"
+                                 class="size-7 object-contain" />
                         </a>
                     </li>
                     <li>
                         <a href="https://www.shopee.com/caterin_vietnam"
-                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
-                            <img width="44" src="~/images/Default/icon/icon-shopee-white.webp" />
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="Shopee Caterin"
+                           class="flex size-11 items-center justify-center rounded-full bg-[#249e63]/10 transition hover:bg-[#249e63]">
+                            <img width="28" height="28"
+                                 src="@Url.Content("~/images/Default/icon/icon-shopee-white.webp")"
+                                 alt="Shopee"
+                                 class="size-7 object-contain" />
                         </a>
                     </li>
                     <li>
                         <a href="https://www.tiktok.com"
-                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
-                            <img width="44" src="~/images/Default/icon/icon-tiktok-white.webp" />
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="TikTok Caterin"
+                           class="flex size-11 items-center justify-center rounded-full bg-[#249e63]/10 transition hover:bg-[#249e63]">
+                            <img width="28" height="28"
+                                 src="@Url.Content("~/images/Default/icon/icon-tiktok-white.webp")"
+                                 alt="TikTok"
+                                 class="size-7 object-contain" />
                         </a>
                     </li>
                     <li>
                         <a href="https://www.linkedin.com"
-                           class="w-44 h-44 flex items-center justify-center bg-main-100 text-main-600 text-xl rounded-[50%] hover-bg-main-600 hover-text-white">
-                            <img width="44" src="~/images/Default/icon/icon-in-white.png" />
+                           target="_blank" rel="noopener noreferrer"
+                           aria-label="LinkedIn Caterin"
+                           class="flex size-11 items-center justify-center rounded-full bg-[#249e63]/10 transition hover:bg-[#249e63]">
+                            <img width="28" height="28"
+                                 src="@Url.Content("~/images/Default/icon/icon-in-white.png")"
+                                 alt="LinkedIn"
+                                 class="size-7 object-contain" />
                         </a>
                     </li>
                 </ul>
-                <form action="#" class="relative mt-40 wow fadeInUp">
-                    <input class="form-control block w-full p-[0.375rem_0.75rem] text-base leading-6 placeholder:text-[#495057] bg-white bg-clip-padding border border-[#ced4da] transition-all duration-150 ease-in-out focus:text-[#495057] focus:bg-white focus:border-main focus:outline-0 focus:shadow-none common-input !rounded-[50rem] text-white py-22 px-16 pe-144"
-                           placeholder="Email của bạn..."> <button type="submit"
-                                                                        class="btn btn-main-two !rounded-[50rem] !absolute top-[50%] translate-y-[-50%] right-0 mr-[10px]">
+
+                <h3 class="mb-3 text-base font-bold text-slate-900">
+                    Đăng ký nhận tin
+                </h3>
+
+                <form action="#" method="post"
+                      class="relative flex w-full items-center">
+                    <label for="footer-email" class="sr-only">
+                        Email của bạn
+                    </label>
+
+                    <input id="footer-email"
+                           type="email"
+                           name="email"
+                           required
+                           placeholder="Email của bạn..."
+                           class="h-12 w-full min-w-0 rounded-full border border-slate-300 bg-white px-4 pr-28 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#249e63] focus:ring-2 focus:ring-[#249e63]/10" />
+
+                    <button type="submit"
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-full bg-[#249e63] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#18834f]">
                         Theo dõi
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="footer-bottom-wrapper flex justify-between">
+        @* Company information and certificates *@
+        <div class="flex flex-col gap-8 pt-10 lg:flex-row lg:items-center lg:justify-between">
 
-            <div class="footer-company">
-                <h6>CÔNG TY CỔ PHẦN TNHH ANPHAPHARM</h6>
+            <div class="max-w-3xl">
+                <h3 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-900">
+                    CÔNG TY CỔ PHẦN TNHH ANPHAPHARM
+                </h3>
 
-                <p>
-                    Giấy chứng nhận đăng ký doanh nghiệp số
-                    <strong>0309.......</strong> do Sở KH&ĐT TP. Hồ Chí Minh cấp.
-                </p>
+                <div class="space-y-2 text-xs leading-6 text-slate-500 sm:text-sm">
+                    <p>
+                        Giấy chứng nhận đăng ký doanh nghiệp số
+                        <strong class="font-semibold text-slate-700">0309.......</strong>
+                        do Sở KH&ĐT TP. Hồ Chí Minh cấp.
+                    </p>
 
-                <p>
-                    Địa chỉ: 36 Vân Côi, P. Tân Sơn Nhất,
-                    TP. Hồ Chí Minh.
-                </p>
+                    <p>
+                        Địa chỉ: 36 Vân Côi, P. Tân Sơn Nhất,
+                        TP. Hồ Chí Minh.
+                    </p>
 
-                <p>
-                    Nhà máy đạt tiêu chuẩn sản xuất mỹ phẩm theo quy định.
-                </p>
+                    <p>
+                        Nhà máy đạt tiêu chuẩn sản xuất mỹ phẩm theo quy định.
+                    </p>
+                </div>
             </div>
 
-            <div class="footer-certificates">
-
-                <a href="#">
-                    <img src="/images/Default/logo-bct.png"
-                         alt="Đã thông báo Bộ Công Thương">
+            <div class="flex shrink-0 items-center gap-4">
+                <a href="#" aria-label="Đã thông báo Bộ Công Thương"
+                   class="flex items-center justify-center rounded-lg bg-white p-2 transition hover:shadow-md">
+                    <img src="@Url.Content("~/images/Default/logo-bct.png")"
+                         alt="Đã thông báo Bộ Công Thương"
+                         class="h-auto max-h-[65px] w-auto max-w-[125px] object-contain" />
                 </a>
 
-                <a href="#">
-                    <img src="/images/Default/logo-dmca.png"
-                         alt="DMCA Protected">
+                <a href="#" aria-label="DMCA Protected"
+                   class="flex items-center justify-center rounded-lg bg-white p-2 transition hover:shadow-md">
+                    <img src="@Url.Content("~/images/Default/logo-dmca.png")"
+                         alt="DMCA Protected"
+                         class="h-auto max-h-[65px] w-auto max-w-[125px] object-contain" />
                 </a>
-
             </div>
-
         </div>
     </div>
 </footer>

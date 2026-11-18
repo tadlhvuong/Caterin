@@ -15,5 +15,8 @@ namespace Website.Areas.Admin.Models.Order
         public int ItemCount { get; init; }
 
         public DateTime CreatedAt { get; init; }
+        public string PaymentMethod { get; set; } = string.Empty;
+
+        public string PaymentStatus { get; set; } = string.Empty;
     }
 }

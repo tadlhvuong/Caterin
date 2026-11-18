@@ -1,0 +1,60 @@
+﻿@using Website.Models.Order
+@model OrderDetailsViewModel
+
+
+<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+    <div class="flex items-center justify-between border-b border-gray-100 px-5 py-5 sm:px-6">
+        <div>
+            <h2 class="font-bold text-gray-900">Sản phẩm trong đơn hàng</h2>
+            <p class="mt-1 text-xs text-gray-500">
+                @Model.Items.Sum(x => x.Quantity) sản phẩm
+            </p>
+        </div>
+    </div>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="p-6 text-center text-sm text-gray-500">
+            Không có sản phẩm trong đơn hàng.
+        </div>
+    }
+    else
+    {
+        <div class="divide-y divide-gray-100 px-5 sm:px-6">
+            @foreach (var item in Model.Items)
+            {
+                <div class="flex gap-4 py-5">
+                    <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gray-50">
+                        <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? Url.Content("~/images/default/default-product.png") : item.ImageUrl)"
+                             alt="@item.ProductName"
+                             loading="lazy"
+                             class="h-full w-full object-contain" />
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-sm font-semibold leading-6 text-gray-900">
+                            @item.ProductName
+                        </h3>
+
+                        @if (!string.IsNullOrWhiteSpace(item.VariantName))
+                        {
+                            <p class="mt-1 text-xs text-gray-500">@item.VariantName</p>
+                        }
+
+                        <p class="mt-2 text-xs text-gray-500">
+                            Đơn giá: @item.UnitPrice.ToString("N0")đ
+                            <span class="mx-1">·</span>
+                            SL: @item.Quantity
+                        </p>
+                    </div>
+
+                    <div class="shrink-0 text-right">
+                        <p class="text-sm font-bold text-gray-900">
+                            @item.TotalPrice.ToString("N0")đ
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

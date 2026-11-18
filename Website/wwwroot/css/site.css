@@ -1,3 +1,12 @@
+﻿:root {
+    --caterin-light: #8cc63f;
+    --caterin-green: #249e63;
+    --chat-bg: #f8faf9;
+    --chat-text: #24372b;
+    --chat-muted: #829087;
+    --chat-border: #e5ece7;
+}
+
 html {
   font-size: 14px;
 }
@@ -17,6 +26,36 @@ html {
   min-height: 100%;
 }
 
-body {
-  margin-bottom: 60px;
+body {;
 }
+.overlay:not(.show),
+.side-overlay:not(.show) {
+    pointer-events: none;
+}
+@layer base {
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]) {
+        cursor: pointer;
+    }
+
+    button:disabled {
+        cursor: not-allowed;
+    }
+}
+
+/* Khung chat chỉ chiếm vùng cần thiết */
+#chatWidget {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9000;
+    width: auto;
+    height: auto;
+    pointer-events: none;
+}
+
+    /* Chỉ phần giao diện chat mới nhận sự kiện */
+    #chatWidget .chat-toggle,
+    #chatWidget .chat-window {
+        pointer-events: auto;
+    }

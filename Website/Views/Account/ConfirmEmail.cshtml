@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Xác nhận email | Caterin";
+
+    var success = ViewBag.Success is bool value && value;
+    var message = ViewBag.Message as string
+                  ?? (success
+                      ? "Email của bạn đã được xác nhận thành công."
+                      : "Liên kết xác nhận không hợp lệ hoặc đã hết hạn.");
+}
+
+<!-- Email Confirmation Result -->
+<section class="flex min-h-[65vh] items-center bg-[#FAFCF9] px-4 py-12 sm:py-16 lg:py-20">
+    <div class="mx-auto w-full max-w-7xl">
+
+        <div class="mx-auto max-w-xl">
+
+            <!-- Result Card -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-5 py-9 text-center shadow-sm sm:px-10 sm:py-12">
+
+                @if (success)
+                {
+                    <!-- Success Icon -->
+                    <div class="mx-auto flex size-20 items-center justify-center rounded-full bg-[#EAF7ED] text-4xl text-[#1F9345]">
+                        <i class="ph ph-check-circle"></i>
+                    </div>
+
+                    <!-- Success Heading -->
+                    <div class="mt-7">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-[#EAF7ED] px-3 py-1 text-xs font-semibold text-[#1F9345]">
+                            <i class="ph ph-check-circle-fill"></i>
+                            Xác nhận thành công
+                        </span>
+
+                        <h1 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                            Xác nhận email thành công
+                        </h1>
+
+                        <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
+                            @message
+                        </p>
+                    </div>
+
+                    <!-- Success Information -->
+                    <div class="mt-7 rounded-xl border border-[#DCEBDD] bg-[#F7FAF6] p-4 text-left sm:p-5">
+                        <div class="flex items-start gap-3">
+                            <i class="ph ph-shield-check mt-0.5 shrink-0 text-xl text-[#1F9345]"></i>
+
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    Tài khoản đã sẵn sàng
+                                </p>
+
+                                <p class="mt-1.5 text-sm leading-6 text-gray-500">
+                                    Bạn đã có thể đăng nhập và sử dụng các tính năng của Caterin.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Login -->
+                    <div class="mt-8">
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20 sm:w-auto sm:min-w-56">
+                            Đăng nhập ngay
+                            <i class="ph ph-arrow-right text-lg"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <!-- Error Icon -->
+                    <div class="mx-auto flex size-20 items-center justify-center rounded-full bg-red-50 text-4xl text-red-500">
+                        <i class="ph ph-warning-circle"></i>
+                    </div>
+
+                    <!-- Error Heading -->
+                    <div class="mt-7">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                            <i class="ph ph-warning-circle"></i>
+                            Xác nhận không thành công
+                        </span>
+
+                        <h1 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                            Không thể xác nhận email
+                        </h1>
+
+                        <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
+                            @message
+                        </p>
+                    </div>
+
+                    <!-- Error Information -->
+                    <div class="mt-7 rounded-xl border border-red-100 bg-red-50/70 p-4 text-left sm:p-5">
+                        <div class="flex items-start gap-3">
+                            <i class="ph ph-info mt-0.5 shrink-0 text-xl text-red-500"></i>
+
+                            <div>
+                                <p class="text-sm font-semibold text-gray-800">
+                                    Bạn có thể thử lại
+                                </p>
+
+                                <p class="mt-1.5 text-sm leading-6 text-gray-500">
+                                    Liên kết có thể đã hết hạn hoặc không còn hợp lệ.
+                                    Hãy yêu cầu gửi email xác nhận mới.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resend Confirmation -->
+                    <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+                        <a asp-controller="Account"
+                           asp-action="ResendConfirmationEmail"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20 sm:w-auto">
+                            <i class="ph ph-paper-plane-tilt text-lg"></i>
+                            Gửi lại email xác nhận
+                        </a>
+
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-100 sm:w-auto">
+                            <i class="ph ph-arrow-left text-lg"></i>
+                            Quay lại đăng nhập
+                        </a>
+                    </div>
+                }
+
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-5 text-center text-xs text-gray-400">
+                Caterin – An toàn cho mọi nhà
+            </p>
+
+        </div>
+    </div>
+</section>

@@ -1,0 +1,164 @@
+﻿
+@model Website.Models.Order.MyOrdersViewModel
+
+@{
+    var currentStatus = Model.StatusFilter ?? "All";
+
+    var firstItem = Model.TotalOrders == 0
+        ? 0
+        : (Model.CurrentPage - 1) * Model.PageSize + 1;
+
+    var lastItem = Math.Min(
+        Model.CurrentPage * Model.PageSize,
+        Model.TotalOrders);
+}
+
+@if (Model.Orders.Any())
+{
+    <div class="space-y-4">
+        @foreach (var order in Model.Orders)
+        {
+            <partial name="Partials/_OrderCard" model="order" />
+        }
+    </div>
+
+    @* ================= PAGINATION ================= *@
+    @if (Model.TotalPages > 1)
+    {
+        <div class="mt-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+
+            <p class="text-sm text-gray-500">
+                Hiển thị
+                <span class="font-semibold text-gray-800">@firstItem</span>
+                -
+                <span class="font-semibold text-gray-800">@lastItem</span>
+                trong tổng số
+                <span class="font-semibold text-gray-800">@Model.TotalOrders</span>
+                đơn hàng
+            </p>
+
+            <div class="flex items-center gap-2">
+
+                @* Previous *@
+                @if (Model.CurrentPage > 1)
+                {
+                    <a href="@Url.Action("Index", "Order", new {
+                            page = Model.CurrentPage - 1,
+                            status = currentStatus,
+                            keyword = Model.Keyword
+                        })"
+                       data-page="@(Model.CurrentPage - 1)"
+                       aria-label="Trang trước"
+                       class="flex size-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                        <i class="ph ph-caret-left"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="flex size-10 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 text-gray-300">
+                        <i class="ph ph-caret-left"></i>
+                    </span>
+                }
+
+                @* Page numbers *@
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    if (i == Model.CurrentPage)
+                    {
+                        <span aria-current="page"
+                              class="flex size-10 items-center justify-center rounded-xl bg-[#1F9345] text-sm font-semibold text-white">
+                            @i
+                        </span>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Order", new {
+                                page = i,
+                                status = currentStatus,
+                                keyword = Model.Keyword
+                            })"
+                           data-page="@i"
+                           aria-label="Trang @i"
+                           class="flex size-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                            @i
+                        </a>
+                    }
+                }
+
+                @* Next *@
+                @if (Model.CurrentPage < Model.TotalPages)
+                {
+                    <a href="@Url.Action("Index", "Order", new {
+                            page = Model.CurrentPage + 1,
+                            status = currentStatus,
+                            keyword = Model.Keyword
+                        })"
+                       data-page="@(Model.CurrentPage + 1)"
+                       aria-label="Trang tiếp theo"
+                       class="flex size-10 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                        <i class="ph ph-caret-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="flex size-10 items-center justify-center rounded-xl border border-gray-100 bg-gray-50 text-gray-300">
+                        <i class="ph ph-caret-right"></i>
+                    </span>
+                }
+
+            </div>
+        </div>
+    }
+}
+else
+{
+    @* ================= EMPTY STATE ================= *@
+    <div class="rounded-2xl border border-gray-100 bg-white px-5 py-16 text-center shadow-sm">
+
+        <div class="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-green-50 text-[#1F9345]">
+            <i class="ph ph-package text-4xl"></i>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword))
+        {
+            <h2 class="text-lg font-bold text-gray-900">
+                Không tìm thấy đơn hàng
+            </h2>
+
+            <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+                Không có đơn hàng nào phù hợp với mã
+                <span class="font-semibold text-gray-700">@Model.Keyword</span>.
+                Vui lòng kiểm tra lại thông tin tìm kiếm.
+            </p>
+        }
+        else if (currentStatus != "All")
+        {
+            <h2 class="text-lg font-bold text-gray-900">
+                Không có đơn hàng phù hợp
+            </h2>
+
+            <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+                Hiện tại bạn chưa có đơn hàng thuộc trạng thái này.
+                Hãy thử chọn trạng thái khác nhé!
+            </p>
+        }
+        else
+        {
+            <h2 class="text-lg font-bold text-gray-900">
+                Bạn chưa có đơn hàng nào
+            </h2>
+
+            <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+                Những đơn hàng bạn đặt tại Caterin sẽ được hiển thị tại đây.
+                Hãy khám phá các sản phẩm chăm sóc nhà cửa của chúng tôi nhé!
+            </p>
+        }
+
+        <a asp-controller="Product"
+           asp-action="Index"
+           class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-[#1F9345] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#187a39]">
+            <i class="ph ph-shopping-cart text-lg"></i>
+            Khám phá sản phẩm
+        </a>
+    </div>
+}

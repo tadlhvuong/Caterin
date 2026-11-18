@@ -1,747 +1,569 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Trở thành Cộng tác viên Caterin";
 }
-<section class="breadcrumb py-80 bg-color-three">
 
-    <div class="container container-lg">
+<div class="overflow-hidden bg-white">
 
-        <div class="row align-items-center">
+    <!-- HERO -->
+    <section class="relative isolate overflow-hidden bg-gradient-to-br from-[#F3FAF1] via-white to-[#EAF7E9]">
+        <div class="pointer-events-none absolute -right-32 -top-32 size-[500px] rounded-full bg-[#8CC63F]/10 blur-3xl"></div>
+        <div class="pointer-events-none absolute -bottom-40 -left-32 size-[400px] rounded-full bg-[#1F9345]/5 blur-3xl"></div>
 
-            <div class="col-lg-7">
+        <div class="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-14 lg:px-8 lg:py-24">
 
-                <span class="text-main-600 text-sm font-[600]">
+            <div class="max-w-2xl">
+                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/80 px-4 py-2 text-xs font-bold tracking-wider text-[#1F9345] shadow-sm">
+                    <span class="size-2 rounded-full bg-[#249e63]"></span>
                     CATERIN PARTNER PROGRAM
                 </span>
 
-                <h2 class="mt-16 mb-24">
+                <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[54px]">
+                    Cùng Caterin
+                    <span class="block text-[#1F9345]">kinh doanh xanh</span>
+                    <span class="block">phát triển bền vững</span>
+                </h1>
 
-                    Trở thành Cộng tác viên Caterin
-
-                </h2>
-
-                <p class="text-gray-600 mb-40">
-
+                <p class="mt-6 max-w-xl text-base leading-8 text-slate-600 sm:text-lg">
                     Đồng hành cùng Caterin để kinh doanh các sản phẩm chăm sóc gia đình
                     chất lượng. Không cần nhập hàng, chiết khấu hấp dẫn và được hỗ trợ
                     xuyên suốt quá trình bán hàng.
-
                 </p>
 
-                <a href="#register"
-                   class="btn btn-main px-48 py-18">
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                    <a href="#register"
+                       class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-700/20 transition hover:-translate-y-1 hover:bg-[#16783B] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20">
+                        Đăng ký trở thành đối tác
+                        <i class="ph ph-arrow-right text-lg"></i>
+                    </a>
 
-                    Đăng ký ngay
+                    <a href="#benefits"
+                       class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-[#1F9345]">
+                        Tìm hiểu quyền lợi
+                        <i class="ph ph-arrow-down text-lg"></i>
+                    </a>
+                </div>
 
-                </a>
-
+                <div class="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
+                    <span class="flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-lg text-[#1F9345]"></i>
+                        Không bắt buộc nhập hàng
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-lg text-[#1F9345]"></i>
+                        Hỗ trợ bán hàng
+                    </span>
+                </div>
             </div>
 
-            <div class="col-lg-5 text-center">
+            <div class="relative mx-auto w-full max-w-xl">
+                <div class="absolute inset-5 rounded-[2rem] bg-[#8CC63F]/15 blur-2xl"></div>
 
-                <img src="/images/seller/hero.png"
-                     class="img-fluid">
+                <div class="relative overflow-hidden rounded-[2rem] border border-white bg-white/70 p-3 shadow-2xl shadow-emerald-900/10 backdrop-blur">
+                    <img src="@Url.Content("~/images/seller/hero.png")"
+                         alt="Chương trình đối tác Caterin"
+                         class="h-auto w-full rounded-[1.5rem] object-contain" />
+                </div>
 
+                <div class="absolute -bottom-5 left-2 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl sm:-left-7 sm:p-5">
+                    <div class="flex items-center gap-3">
+                        <div class="flex size-11 items-center justify-center rounded-xl bg-emerald-50 text-[#1F9345]">
+                            <i class="ph-fill ph-trend-up text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500">Chiết khấu lên đến</p>
+                            <p class="text-xl font-extrabold text-[#1F9345]">15%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute -right-1 top-8 rounded-xl border border-slate-100 bg-white px-4 py-3 shadow-lg sm:-right-5">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-seal-check text-xl text-[#1F9345]"></i>
+                        <span class="text-xs font-bold text-slate-700">Đối tác Caterin</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section id="benefits" class="scroll-mt-24 py-16 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+            <div class="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+                <span class="text-xs font-bold tracking-[0.18em] text-[#1F9345]">WHY CATERIN PARTNER</span>
+                <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Quyền lợi khi tham gia
+                </h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
+                    Cùng phát triển kinh doanh với những chính sách hỗ trợ thiết thực từ Caterin.
+                </p>
             </div>
 
-        </div>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
-    </div>
-
-</section>
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <h2>
-
-                Quyền lợi khi tham gia
-
-            </h2>
-
-        </div>
-
-        <div class="row g-4">
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-money text-main-600 text-5xl mb-20"></i>
-
-                    <h5>
-
-                        Chiết khấu hấp dẫn
-
-                    </h5>
-
-                    <p>
-
+                <div class="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-100 hover:shadow-xl hover:shadow-emerald-900/5 sm:p-7">
+                    <div class="flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-[#1F9345] transition group-hover:bg-[#1F9345] group-hover:text-white">
+                        <i class="ph-fill ph-money text-3xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-lg font-bold text-slate-900">Chiết khấu hấp dẫn</h3>
+                    <p class="mt-3 text-sm leading-7 text-slate-500">
                         Hoa hồng theo doanh số.
-
                     </p>
-
                 </div>
 
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-megaphone text-main-600 text-5xl mb-20"></i>
-
-                    <h5>
-
-                        Hỗ trợ Marketing
-
-                    </h5>
-
-                    <p>
-
+                <div class="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-100 hover:shadow-xl hover:shadow-emerald-900/5 sm:p-7">
+                    <div class="flex size-14 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 transition group-hover:bg-sky-600 group-hover:text-white">
+                        <i class="ph-fill ph-megaphone text-3xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-lg font-bold text-slate-900">Hỗ trợ Marketing</h3>
+                    <p class="mt-3 text-sm leading-7 text-slate-500">
                         Banner, video, hình ảnh.
-
                     </p>
-
                 </div>
 
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-graduation-cap text-main-600 text-5xl mb-20"></i>
-
-                    <h5>
-
-                        Đào tạo
-
-                    </h5>
-
-                    <p>
-
+                <div class="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-100 hover:shadow-xl hover:shadow-emerald-900/5 sm:p-7">
+                    <div class="flex size-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-600 transition group-hover:bg-violet-600 group-hover:text-white">
+                        <i class="ph-fill ph-graduation-cap text-3xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-lg font-bold text-slate-900">Đào tạo</h3>
+                    <p class="mt-3 text-sm leading-7 text-slate-500">
                         Hướng dẫn bán hàng.
-
                     </p>
-
                 </div>
 
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-headset text-main-600 text-5xl mb-20"></i>
-
-                    <h5>
-
-                        Hỗ trợ 24/7
-
-                    </h5>
-
-                    <p>
-
+                <div class="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-100 hover:shadow-xl hover:shadow-emerald-900/5 sm:p-7">
+                    <div class="flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 transition group-hover:bg-amber-500 group-hover:text-white">
+                        <i class="ph-fill ph-headset text-3xl"></i>
+                    </div>
+                    <h3 class="mt-6 text-lg font-bold text-slate-900">Hỗ trợ 24/7</h3>
+                    <p class="mt-3 text-sm leading-7 text-slate-500">
                         Đội ngũ luôn đồng hành.
-
                     </p>
-
                 </div>
 
             </div>
-
         </div>
+    </section>
 
-    </div>
+    <!-- COMMISSION LEVELS -->
+    <section class="relative overflow-hidden bg-[#F5FAF3] py-16 sm:py-20 lg:py-24">
+        <div class="pointer-events-none absolute -right-32 top-0 size-96 rounded-full bg-[#8CC63F]/10 blur-3xl"></div>
 
-</section>
-<section class="py-80 bg-neutral-50">
+        <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-<div class="container container-lg">
+            <div class="mx-auto mb-12 max-w-2xl text-center">
+                <span class="text-xs font-bold tracking-[0.18em] text-[#1F9345]">PARTNER LEVEL</span>
+                <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Chính sách chiết khấu
+                </h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
+                    Mức chiết khấu theo từng cấp độ hợp tác với Caterin.
+                </p>
+            </div>
 
-<div class="row g-4">
+            <div class="grid gap-5 md:grid-cols-3">
 
-<div class="col-md-4">
+                <div class="rounded-2xl border border-white bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-8">
+                    <div class="flex items-center justify-between">
+                        <span class="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">LEVEL 01</span>
+                        <i class="ph-fill ph-user text-2xl text-slate-400"></i>
+                    </div>
+                    <p class="mt-7 text-sm font-medium text-slate-500">Cộng tác viên mới</p>
+                    <div class="mt-2 flex items-baseline gap-1">
+                        <h3 class="text-5xl font-extrabold tracking-tight text-[#1F9345]">5%</h3>
+                        <span class="text-sm font-medium text-slate-400">chiết khấu</span>
+                    </div>
+                    <div class="mt-7 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full w-1/3 rounded-full bg-[#8CC63F]"></div>
+                    </div>
+                </div>
 
-<div class="rounded-16 border p-32">
+                <div class="relative rounded-2xl border border-emerald-200 bg-white p-7 shadow-lg shadow-emerald-900/5 transition hover:-translate-y-1 hover:shadow-xl sm:p-8">
+                    <span class="absolute -top-3 right-6 rounded-full bg-[#1F9345] px-3 py-1.5 text-[10px] font-bold tracking-wider text-white shadow-md">
+                        PHỔ BIẾN
+                    </span>
+                    <div class="flex items-center justify-between">
+                        <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-[#1F9345]">LEVEL 02</span>
+                        <i class="ph-fill ph-storefront text-2xl text-[#1F9345]"></i>
+                    </div>
+                    <p class="mt-7 text-sm font-medium text-slate-500">Đại lý</p>
+                    <div class="mt-2 flex items-baseline gap-1">
+                        <h3 class="text-5xl font-extrabold tracking-tight text-[#1F9345]">10%</h3>
+                        <span class="text-sm font-medium text-slate-400">chiết khấu</span>
+                    </div>
+                    <div class="mt-7 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full w-2/3 rounded-full bg-[#1F9345]"></div>
+                    </div>
+                </div>
 
-<h3 class="text-main-600">
+                <div class="rounded-2xl border border-white bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-lg sm:p-8">
+                    <div class="flex items-center justify-between">
+                        <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">LEVEL 03</span>
+                        <i class="ph-fill ph-crown text-2xl text-amber-500"></i>
+                    </div>
+                    <p class="mt-7 text-sm font-medium text-slate-500">Nhà phân phối</p>
+                    <div class="mt-2 flex items-baseline gap-1">
+                        <h3 class="text-5xl font-extrabold tracking-tight text-[#1F9345]">15%</h3>
+                        <span class="text-sm font-medium text-slate-400">chiết khấu</span>
+                    </div>
+                    <div class="mt-7 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <div class="h-full w-full rounded-full bg-gradient-to-r from-[#1F9345] to-[#8CC63F]"></div>
+                    </div>
+                </div>
 
-5%
+            </div>
 
-</h3>
-
-<h6>
-
-CTV mới
-
-</h6>
-
-</div>
-
-</div>
-
-<div class="col-md-4">
-
-<div class="rounded-16 border p-32">
-
-<h3 class="text-main-600">
-
-10%
-
-</h3>
-
-<h6>
-
-Đại lý
-
-</h6>
-
-</div>
-
-</div>
-
-<div class="col-md-4">
-
-<div class="rounded-16 border p-32">
-
-<h3 class="text-main-600">
-
-15%
-
-</h3>
-
-<h6>
-
-Nhà phân phối
-
-</h6>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</section>
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <h2>
-
-                Bắt đầu chỉ với 4 bước
-
-            </h2>
-
+            <p class="mt-7 text-center text-xs leading-6 text-slate-400">
+                Chính sách chiết khấu được áp dụng theo chương trình hợp tác tương ứng.
+            </p>
         </div>
+    </section>
 
-        <div class="row g-4">
+    <!-- HOW TO START -->
+    <section class="py-16 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-            <div class="col-lg-3">
+            <div class="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
+                <span class="text-xs font-bold tracking-[0.18em] text-[#1F9345]">GETTING STARTED</span>
+                <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Bắt đầu chỉ với 4 bước
+                </h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
+                    Quy trình đăng ký đơn giản để bạn nhanh chóng đồng hành cùng Caterin.
+                </p>
+            </div>
 
-                <div class="border rounded-16 p-24 text-center">
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
-                    <h2 class="text-main-600">
+                <div class="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                    <span class="text-5xl font-extrabold tracking-tight text-emerald-100">01</span>
+                    <div class="mt-5 flex size-12 items-center justify-center rounded-xl bg-emerald-50 text-[#1F9345]">
+                        <i class="ph-fill ph-user-plus text-2xl"></i>
+                    </div>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Đăng ký</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Điền thông tin đăng ký tham gia chương trình.</p>
+                </div>
 
-                        01
+                <div class="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                    <span class="text-5xl font-extrabold tracking-tight text-emerald-100">02</span>
+                    <div class="mt-5 flex size-12 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                        <i class="ph-fill ph-clipboard-text text-2xl"></i>
+                    </div>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Xác nhận</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Đội ngũ Caterin tiếp nhận và xác nhận hồ sơ.</p>
+                </div>
 
-                    </h2>
+                <div class="relative rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                    <span class="text-5xl font-extrabold tracking-tight text-emerald-100">03</span>
+                    <div class="mt-5 flex size-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                        <i class="ph-fill ph-graduation-cap text-2xl"></i>
+                    </div>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Đào tạo</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Được hướng dẫn sản phẩm và kỹ năng bán hàng.</p>
+                </div>
 
-                    <h6>
-
-                        Đăng ký
-
-                    </h6>
-
+                <div class="relative rounded-2xl border border-emerald-100 bg-emerald-50/50 p-6 shadow-sm">
+                    <span class="text-5xl font-extrabold tracking-tight text-emerald-200">04</span>
+                    <div class="mt-5 flex size-12 items-center justify-center rounded-xl bg-[#1F9345] text-white">
+                        <i class="ph-fill ph-rocket-launch text-2xl"></i>
+                    </div>
+                    <h3 class="mt-5 text-lg font-bold text-slate-900">Bắt đầu bán</h3>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">Bắt đầu kinh doanh và phát triển cùng Caterin.</p>
                 </div>
 
             </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <h2>
-
-                        02
-
-                    </h2>
-
-                    <h6>
-
-                        Xác nhận
-
-                    </h6>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <h2>
-
-                        03
-
-                    </h2>
-
-                    <h6>
-
-                        Đào tạo
-
-                    </h6>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <h2>
-
-                        04
-
-                    </h2>
-
-                    <h6>
-
-                        Bắt đầu bán
-
-                    </h6>
-
-                </div>
-
-            </div>
-
         </div>
+    </section>
 
-    </div>
+    <!-- REGISTER FORM -->
+    <section id="register" class="scroll-mt-20 bg-gradient-to-br from-[#F3FAF1] via-[#F8FCF6] to-[#EAF7E9] py-16 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
 
-</section>
-<section id="register" class="py-80 bg-color-three">
+            <div class="overflow-hidden rounded-3xl border border-white bg-white shadow-xl shadow-emerald-900/5">
 
-    <div class="container container-lg">
+                <div class="relative overflow-hidden bg-gradient-to-r from-[#16783B] to-[#249e63] px-6 py-9 text-white sm:px-10 sm:py-11">
+                    <div class="pointer-events-none absolute -right-10 -top-24 size-64 rounded-full border-[35px] border-white/5"></div>
+                    <div class="relative">
+                        <span class="text-xs font-bold tracking-[0.18em] text-white/70">JOIN CATERIN</span>
+                        <h2 class="mt-3 text-2xl font-extrabold sm:text-3xl">Đăng ký Cộng tác viên</h2>
+                        <p class="mt-3 max-w-2xl text-sm leading-7 text-white/80 sm:text-base">
+                            Điền thông tin bên dưới. Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ làm việc.
+                        </p>
+                    </div>
+                </div>
 
-        <div class="row justify-content-center">
+                <div class="p-5 sm:p-8 lg:p-10">
 
-            <div class="col-xl-8">
+                    <div class="mb-7 flex items-center gap-3 border-b border-slate-100 pb-5">
+                        <div class="flex size-10 items-center justify-center rounded-xl bg-emerald-50 text-[#1F9345]">
+                            <i class="ph-fill ph-identification-card text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900">Thông tin cá nhân</h3>
+                            <p class="mt-1 text-xs text-slate-400">Các thông tin cần thiết để liên hệ với bạn</p>
+                        </div>
+                    </div>
 
-                <div class="border rounded-24 bg-white p-48">
+                    <div class="grid gap-x-5 gap-y-5 md:grid-cols-2">
 
-                    <h3 class="mb-16">
-
-                        Đăng ký Cộng tác viên
-
-                    </h3>
-
-                    <p class="text-gray-500 mb-40">
-
-                        Chúng tôi sẽ liên hệ với bạn trong vòng 24 giờ làm việc.
-
-                    </p>
-
-                    <div class="row g-4">
-
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Họ và tên
-
+                        <div>
+                            <label for="partnerName" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Họ và tên <span class="text-rose-500">*</span>
                             </label>
-
-                            <input class="common-input">
-
+                            <input id="partnerName" name="fullName" type="text"
+                                   placeholder="Nhập họ và tên"
+                                   autocomplete="name"
+                                   class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10" />
                         </div>
 
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Số điện thoại
-
+                        <div>
+                            <label for="partnerPhone" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Số điện thoại <span class="text-rose-500">*</span>
                             </label>
-
-                            <input class="common-input">
-
+                            <input id="partnerPhone" name="phone" type="tel"
+                                   placeholder="Nhập số điện thoại"
+                                   autocomplete="tel"
+                                   class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10" />
                         </div>
 
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Email
-
-                            </label>
-
-                            <input class="common-input">
-
+                        <div>
+                            <label for="partnerEmail" class="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+                            <input id="partnerEmail" name="email" type="email"
+                                   placeholder="example@email.com"
+                                   autocomplete="email"
+                                   class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10" />
                         </div>
 
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Tỉnh / Thành phố
-
+                        <div>
+                            <label for="partnerProvince" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Tỉnh / Thành phố <span class="text-rose-500">*</span>
                             </label>
-
-                            <select class="common-input">
-
-                                <option>
-
-                                    Chọn
-
-                                </option>
-
-                            </select>
-
+                            <div class="relative">
+                                <select id="partnerProvince" name="province"
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10">
+                                    <option value="">Chọn tỉnh / thành phố</option>
+                                </select>
+                                <i class="ph ph-caret-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
                         </div>
 
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Nghề nghiệp
-
-                            </label>
-
-                            <input class="common-input">
-
-                        </div>
-                        <select class="common-input">
-                            <option>Chọn chương trình hợp tác</option>
-                            <option>Cộng tác viên</option>
-                            <option>Đại lý</option>
-                            <option>Nhà phân phối</option>
-                        </select>
-                        <div class="col-md-6">
-
-                            <label>
-
-                                Kênh bán hàng
-
-                            </label>
-
-                            <select class="common-input">
-
-                                <option>
-
-                                    Facebook
-
-                                </option>
-
-                                <option>
-
-                                    Shopee
-
-                                </option>
-
-                                <option>
-
-                                    TikTok
-
-                                </option>
-
-                                <option>
-
-                                    Cửa hàng
-
-                                </option>
-
-                            </select>
-
+                        <div>
+                            <label for="partnerJob" class="mb-2 block text-sm font-semibold text-slate-700">Nghề nghiệp</label>
+                            <input id="partnerJob" name="occupation" type="text"
+                                   placeholder="Ví dụ: Nhân viên văn phòng"
+                                   class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10" />
                         </div>
 
-                        <div class="col-12">
+                        <div>
+                            <label for="partnerProgram" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Chương trình hợp tác <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select id="partnerProgram" name="program"
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10">
+                                    <option value="">Chọn chương trình hợp tác</option>
+                                    <option value="Collaborator">Cộng tác viên</option>
+                                    <option value="Agent">Đại lý</option>
+                                    <option value="Distributor">Nhà phân phối</option>
+                                </select>
+                                <i class="ph ph-caret-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                        </div>
 
-                            <label>
+                        <div class="md:col-span-2">
+                            <label for="partnerChannel" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Kênh bán hàng <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select id="partnerChannel" name="salesChannel"
+                                        class="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10">
+                                    <option value="">Chọn kênh bán hàng</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="Shopee">Shopee</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Store">Cửa hàng</option>
+                                </select>
+                                <i class="ph ph-caret-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            </div>
+                        </div>
 
+                        <div class="md:col-span-2">
+                            <label for="partnerIntroduction" class="mb-2 block text-sm font-semibold text-slate-700">
                                 Giới thiệu bản thân
-
                             </label>
-
-<textarea class="common-input"
-          rows="5"></textarea>
-
+                            <textarea id="partnerIntroduction" name="introduction" rows="5"
+                                      placeholder="Chia sẻ thêm về kinh nghiệm, kế hoạch kinh doanh hoặc mong muốn hợp tác của bạn..."
+                                      class="w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#249e63] focus:ring-4 focus:ring-emerald-500/10"></textarea>
                         </div>
 
-                        <div class="col-12">
+                    </div>
 
-                            <button class="btn btn-main py-18 px-56">
+                    <div class="mt-7 border-t border-slate-100 pt-6">
+                        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="flex max-w-md items-start gap-2 text-xs leading-6 text-slate-400">
+                                <i class="ph ph-shield-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                Thông tin của bạn được sử dụng để liên hệ và tư vấn chương trình hợp tác.
+                            </p>
 
+                            <button type="button"
+                                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-7 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-700/15 transition hover:-translate-y-0.5 hover:bg-[#16783B] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/20">
                                 Gửi đăng ký
-
+                                <i class="ph ph-paper-plane-tilt text-lg"></i>
                             </button>
-
                         </div>
-
                     </div>
 
                 </div>
+            </div>
+        </div>
+    </section>
 
+    <!-- FAQ -->
+    <section class="py-16 sm:py-20 lg:py-24">
+        <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+
+            <div class="mb-10 text-center sm:mb-14">
+                <span class="text-xs font-bold tracking-[0.18em] text-[#1F9345]">FREQUENTLY ASKED QUESTIONS</span>
+                <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Câu hỏi thường gặp
+                </h2>
+                <p class="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
+                    Những thông tin bạn cần biết trước khi tham gia chương trình đối tác Caterin.
+                </p>
             </div>
 
-        </div>
+            <div class="space-y-3" id="sellerFaq">
 
-    </div>
-
-</section>
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <h2 class="text-center mb-48">
-
-            Câu hỏi thường gặp
-
-        </h2>
-
-        <div class="accordion" id="sellerFaq">
-
-            <!-- Item 1 -->
-            <div class="accordion-item border rounded-16 mb-16">
-                <h2 class="accordion-header" id="faqOne">
-                    <button class="accordion-button" type="button"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseOne">
-
-                        Tôi có cần nhập hàng để trở thành cộng tác viên không?
-
-                    </button>
-                </h2>
-
-                <div id="collapseOne"
-                     class="accordion-collapse collapse show"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details open class="group rounded-2xl border border-emerald-200 bg-emerald-50/30 p-5 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-xs font-bold text-[#1F9345]">01</span>
+                            Tôi có cần nhập hàng để trở thành cộng tác viên không?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Không bắt buộc. Tùy theo chương trình hợp tác, bạn có thể bán hàng theo hình thức cộng tác viên hoặc đăng ký trở thành đại lý để nhập hàng với mức chiết khấu cao hơn.
-
                     </div>
+                </details>
 
-                </div>
-            </div>
-
-            <!-- Item 2 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseTwo">
-
-                        Tôi sẽ nhận được mức chiết khấu như thế nào?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseTwo"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">02</span>
+                            Tôi sẽ nhận được mức chiết khấu như thế nào?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Chính sách chiết khấu được áp dụng theo từng cấp độ hợp tác và doanh số bán hàng. Đội ngũ Caterin sẽ tư vấn chi tiết sau khi hồ sơ được xét duyệt.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 3 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseThree">
-
-                        Tôi có được hỗ trợ hình ảnh và tài liệu bán hàng không?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseThree"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">03</span>
+                            Tôi có được hỗ trợ hình ảnh và tài liệu bán hàng không?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Có. Caterin cung cấp hình ảnh sản phẩm, video, banner quảng cáo và các tài liệu cần thiết để hỗ trợ hoạt động bán hàng.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 4 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseFour">
-
-                        Sau khi đăng ký bao lâu sẽ có phản hồi?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseFour"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">04</span>
+                            Sau khi đăng ký bao lâu sẽ có phản hồi?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Chúng tôi sẽ liên hệ xác nhận trong vòng 24 giờ làm việc kể từ khi nhận được thông tin đăng ký.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 5 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseFive">
-
-                        Tôi có thể bán hàng trên Facebook, TikTok hoặc Shopee không?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseFive"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">05</span>
+                            Tôi có thể bán hàng trên Facebook, TikTok hoặc Shopee không?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Hoàn toàn được. Bạn có thể kinh doanh trên các nền tảng mạng xã hội, sàn thương mại điện tử hoặc tại cửa hàng của mình theo chính sách hợp tác của Caterin.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 6 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseSix">
-
-                        Caterin có đào tạo kỹ năng bán hàng không?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseSix"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">06</span>
+                            Caterin có đào tạo kỹ năng bán hàng không?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Có. Chúng tôi hỗ trợ hướng dẫn sản phẩm, kỹ năng tư vấn, chương trình khuyến mại và các tài liệu bán hàng để giúp đối tác phát triển hiệu quả.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 7 -->
-            <div class="accordion-item border rounded-16 mb-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseSeven">
-
-                        Tôi ở tỉnh khác có thể đăng ký không?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseSeven"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">07</span>
+                            Tôi ở tỉnh khác có thể đăng ký không?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Có. Caterin hỗ trợ đăng ký đối tác trên toàn quốc và sẽ tư vấn phương thức giao hàng phù hợp với từng khu vực.
-
                     </div>
+                </details>
 
-                </div>
-
-            </div>
-
-            <!-- Item 8 -->
-            <div class="accordion-item border rounded-16">
-
-                <h2 class="accordion-header">
-
-                    <button class="accordion-button collapsed"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#collapseEight">
-
-                        Tôi cần hỗ trợ thêm thì liên hệ ở đâu?
-
-                    </button>
-
-                </h2>
-
-                <div id="collapseEight"
-                     class="accordion-collapse collapse"
-                     data-bs-parent="#sellerFaq">
-
-                    <div class="accordion-body text-gray-600">
-
+                <details class="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-emerald-200 sm:p-6">
+                    <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-bold leading-6 text-slate-900 [&::-webkit-details-marker]:hidden">
+                        <span class="flex items-start gap-3">
+                            <span class="flex size-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500 group-open:bg-emerald-100 group-open:text-[#1F9345]">08</span>
+                            Tôi cần hỗ trợ thêm thì liên hệ ở đâu?
+                        </span>
+                        <i class="ph ph-plus shrink-0 text-lg text-slate-400 transition group-open:rotate-45 group-open:text-[#1F9345]"></i>
+                    </summary>
+                    <div class="pl-10 pt-4 text-sm leading-7 text-slate-600">
                         Bạn có thể liên hệ qua Hotline, Email hoặc Fanpage chính thức của Caterin. Đội ngũ tư vấn sẽ hỗ trợ bạn trong thời gian sớm nhất.
-
                     </div>
-
-                </div>
+                </details>
 
             </div>
 
         </div>
+    </section>
 
-    </div>
+    <!-- BOTTOM CTA -->
+    <section class="px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8">
+        <div class="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-gradient-to-r from-[#16783B] to-[#249e63] px-6 py-10 text-center shadow-xl shadow-emerald-900/10 sm:px-10 sm:py-14">
+            <div class="pointer-events-none absolute -left-20 -top-32 size-72 rounded-full border-[40px] border-white/5"></div>
+            <div class="pointer-events-none absolute -bottom-40 -right-20 size-80 rounded-full bg-white/5 blur-2xl"></div>
 
-</section>
+            <div class="relative mx-auto max-w-2xl">
+                <span class="text-xs font-bold tracking-[0.18em] text-white/70">GROW WITH CATERIN</span>
+                <h2 class="mt-3 text-2xl font-extrabold leading-tight text-white sm:text-4xl">
+                    Sẵn sàng trở thành đối tác Caterin?
+                </h2>
+                <p class="mt-4 text-sm leading-7 text-white/80 sm:text-base">
+                    Bắt đầu hành trình kinh doanh của bạn cùng Caterin ngay hôm nay.
+                </p>
+                <a href="#register"
+                   class="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 py-3 text-sm font-bold text-[#1F9345] shadow-lg transition hover:-translate-y-1 hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-white/30">
+                    Đăng ký ngay
+                    <i class="ph ph-arrow-right text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>

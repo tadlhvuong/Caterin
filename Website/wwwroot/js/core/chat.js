@@ -75,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         laterBtn: document.getElementById("laterBtn"),
 
         chatToggle: document.getElementById("chatToggle"),
+        chatContainer: document.getElementById("chatWindowContainer"),
         chatWindow: document.getElementById("chatWindow"),
         chatClose: document.getElementById("chatClose"),
 
@@ -725,7 +726,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!DOM.chatWindow) {
             return;
         }
-
+        console.log(DOM.chatContainer);
+        DOM.chatContainer.classList.add("z-[10000]")
         DOM.chatWindow.classList.add("open");
         if (state.chatSession.isInvalid) {
             return;
@@ -1139,6 +1141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         stopTyping();
         hideTyping();
 
+        DOM.chatContainer?.classList.remove("z-[10000]");
         DOM.chatWindow?.classList.remove("open");
         DOM.chatToggle?.classList.remove("active");
     }
@@ -2876,11 +2879,30 @@ document.addEventListener("DOMContentLoaded", () => {
     function createDateSeparator(date) {
         const separator = document.createElement("div");
 
-        separator.className = "chat-date";
+        separator.className = [
+            "chat-date",
+            "my-[15px]",
+            "flex",
+            "items-center",
+            "gap-[10px]",
+            "text-[10px]",
+            "text-[#9aa59f]",
+            "before:content-['']",
+            "before:h-px",
+            "before:flex-1",
+            "before:bg-[#e7ece8]",
+            "after:content-['']",
+            "after:h-px",
+            "after:flex-1",
+            "after:bg-[#e7ece8]"
+        ].join(" ");
 
         const label = getDateSeparatorLabel(date);
 
-        separator.innerHTML = `<span>${escapeHtml(label)}</span>`;
+        const text = document.createElement("span");
+        text.textContent = label;
+
+        separator.appendChild(text);
 
         return separator;
     }
@@ -2978,67 +3000,216 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
     function createMessageElement(message) {
-
         if (!message?.id) {
             return null;
         }
 
         const senderType = Number(message.senderType);
-
         const classes = getMessageClasses(message.senderType);
 
-        const rowClass = classes.row;
-
-        if (!rowClass) {
+        if (!classes.row) {
             return null;
         }
 
-        const messageClass = classes.message;
+        const isCustomer =
+            senderType === CONFIG.senderType.contact;
 
-        const isCustomer = senderType === CONFIG.senderType.contact;
+        const isSystemMessage =
+            senderType === CONFIG.senderType.system;
 
-        const statusHtml = isCustomer ? buildMessageStatusHtml(message.status) : "";
+        const isShowContent =
+            escapeHtml(message.content) === "";
 
-        const isSystemMessage = senderType === CONFIG.senderType.system;
+        const statusHtml = isCustomer
+            ? buildMessageStatusHtml(message.status)
+            : "";
 
-        const isShowContent = escapeHtml(message.content) == "" ? "hidden" : "";
-
-        const avatarHtml = isCustomer || isSystemMessage ? "" : buildAdminAvatar();
+        const avatarHtml =
+            isCustomer || isSystemMessage
+                ? ""
+                : buildAdminAvatar();
 
         const row = document.createElement("div");
 
-        row.className = `message-row ${rowClass}`;
+        const alignmentClasses = {
+            admin: "justify-start items-end",
+            bot: "justify-start items-end",
+            contact: "justify-end items-end",
+            system: "justify-center items-end"
+        };
+
+        const alignment =
+            alignmentClasses[classes.row] || "justify-start items-end";
+
+        row.className = [
+            "message-row",
+            "flex",
+            "gap-2",
+            "items-end",
+            "min-w-0",
+            "mb-3",
+            alignment
+        ].join(" ");
+
         row.dataset.messageId = String(message.id);
         row.dataset.createdAt = message.createdAt;
-        row.innerHTML = `${avatarHtml}
-        <div class="message-content">
-            <div class="message ${messageClass} ${isShowContent}"></div>
 
-            <div class="message-meta">
-                <span class="message-time">${formatMessageTime(message.createdAt)}</span>
-                ${statusHtml}
-            </div>
-        </div>
-    `;
-        const messageElement = row.querySelector(".message");
+        const content = document.createElement("div");
 
-        if (messageElement) {
-            messageElement.appendChild(
-                renderMessageText(message.content)
-            );
+        content.className = [
+            "message-content",
+            "flex",
+            "flex-col",
+            "flex-[0_1_auto]",
+            "min-w-0",
+            "max-w-[75%]",
+            "max-[600px]:max-w-[85%]",
+            "max-[380px]:max-w-[88%]"
+        ].join(" ");
+
+        if (classes.row === "contact") {
+            content.classList.add("items-end");
+        } else {
+            content.classList.add("items-start");
         }
-        const messageContent = row.querySelector(".message-content");
-        const attachmentsElement = renderMessageAttachments(message.attachments);
 
-        if (messageContent && attachmentsElement) {
-            const meta = messageContent.querySelector(".message-meta");
-            if (meta) {
-                messageContent.insertBefore(attachmentsElement, meta);
-            } else {
-                messageContent.appendChild(attachmentsElement);
+        const messageElement = document.createElement("div");
+
+        messageElement.className = [
+            "message",
+            "w-fit",
+            "max-w-full",
+            "px-[13px]",
+            "py-[10px]",
+            "rounded-[14px]",
+            "text-[13px]",
+            "leading-[1.5]",
+            "break-words",
+            "wrap-anywhere"
+        ].join(" ");
+
+        if (isShowContent) {
+            messageElement.classList.add("hidden");
+        }
+
+        const messageStyles = {
+            admin: [
+                "border",
+                "border-[#e4ebe6]",
+                "rounded-tl-[4px]",
+                "bg-white",
+                "text-[#35423a]",
+                "shadow-[0_2px_5px_rgba(0,0,0,0.025)]"
+            ],
+            contact: [
+                "rounded-tr-[4px]",
+                "bg-[#f1f8f3]",
+                "text-[#24372b]"
+            ],
+            bot: [
+                "border",
+                "border-[#dcecf8]",
+                "rounded-tl-[4px]",
+                "bg-[#eef7ff]",
+                "text-[#34495e]"
+            ],
+            system: [
+                "max-w-[90%]",
+                "px-3",
+                "py-[7px]",
+                "rounded-full",
+                "bg-[#edf1ee]",
+                "text-[#7b8780]",
+                "text-[10px]",
+                "text-center",
+                "break-words"
+            ]
+        };
+
+        messageElement.classList.add(
+            ...(messageStyles[classes.row] || messageStyles.admin)
+        );
+
+        const meta = document.createElement("div");
+
+        meta.className = [
+            "message-meta",
+            "mt-1",
+            "flex",
+            "items-center",
+            "justify-end",
+            "gap-[5px]",
+            "text-[11px]"
+        ].join(" ");
+
+        const time = document.createElement("span");
+
+        time.className = [
+            "message-time",
+            "text-[9px]",
+            "text-[#a0aaa4]",
+            "opacity-80"
+        ].join(" ");
+
+        time.textContent = formatMessageTime(message.createdAt);
+
+        meta.appendChild(time);
+
+        if (statusHtml) {
+            const statusTemplate = document.createElement("template");
+            statusTemplate.innerHTML = statusHtml.trim();
+
+            if (statusTemplate.content.firstElementChild) {
+                meta.appendChild(
+                    statusTemplate.content.firstElementChild
+                );
             }
         }
+
+        messageElement.appendChild(
+            renderMessageText(message.content)
+        );
+
+        content.append(messageElement, meta);
+
+        const attachmentsElement =
+            renderMessageAttachments(message.attachments);
+
+        if (attachmentsElement) {
+            content.insertBefore(attachmentsElement, meta);
+        }
+
+        row.append(avatarHtml
+            ? createAvatarElement()
+            : document.createDocumentFragment(), content);
+
         return row;
+    }
+    function createAvatarElement() {
+        const avatar = document.createElement("img");
+
+        avatar.src = "/favicon.ico";
+        avatar.width = 20;
+        avatar.height = 20;
+        avatar.alt = "Favicon";
+
+        avatar.className = [
+            "mini-avatar",
+            "w-[27px]",
+            "h-[27px]",
+            "shrink-0",
+            "flex",
+            "items-center",
+            "justify-center",
+            "rounded-[9px]",
+            "bg-[#249e63]",
+            "text-white",
+            "text-[11px]",
+            "font-extrabold",
+            "object-contain"
+        ].join(" ");
+
+        return avatar;
     }
     function renderMessageText(content) {
         const text = String(content ?? "");
@@ -3081,7 +3252,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 link.textContent = url;
                 link.target = "_blank";
                 link.rel = "noopener noreferrer";
-                link.className = "message-link";
+                link.className = [
+                    "message-link",
+                    "text-[#1687e8]",
+                    "underline",
+                    "break-all",
+                    "cursor-pointer"
+                ].join(" ");
 
                 fragment.appendChild(link);
             }
@@ -3182,157 +3359,100 @@ document.addEventListener("DOMContentLoaded", () => {
     // ============================================================
     // MESSAGE STATUS
     // ============================================================
-
     function buildMessageStatusHtml(status) {
-        const statusConfig = getMessageStatusConfig(status);
+        const config = getMessageStatusConfig(status);
 
-        if (!statusConfig) {
+        if (!config) {
             return "";
         }
 
         return `
-            <span class="message-status ${statusConfig.className}" data-message-status="${statusConfig.status}" title="${statusConfig.title}">
-                ${statusConfig.content}
-            </span>
-        `;
+        <span
+            class="message-status inline-flex items-center justify-center text-[11px] leading-none transition-all duration-200 ${config.className}"
+            data-message-status="${config.status}"
+            title="${config.title}">
+            ${config.content}
+        </span>
+    `;
     }
-
 
     function getMessageStatusConfig(status) {
-        switch (Number(status)) {
-            case CONFIG.messageStatus.pending:
-                return {
-                    status:
-                        CONFIG.messageStatus.pending,
+        const configs = {
+            [CONFIG.messageStatus.pending]: {
+                status: CONFIG.messageStatus.pending,
+                className: "opacity-50 animate-[message-status-spin_1s_linear_infinite]",
+                title: "Đang gửi",
+                content: `<i class="ph ph-spinner"></i>`
+            },
 
-                    className:
-                        "pending",
+            [CONFIG.messageStatus.sent]: {
+                status: CONFIG.messageStatus.sent,
+                className: "opacity-65",
+                title: "Đã gửi",
+                content: "✓"
+            },
 
-                    title:
-                        "Đang gửi",
+            [CONFIG.messageStatus.delivered]: {
+                status: CONFIG.messageStatus.delivered,
+                className: "opacity-80",
+                title: "Đã nhận",
+                content: "✓✓"
+            },
 
-                    content:
-                        `<i class="ph ph-spinner"></i>`
-                };
+            [CONFIG.messageStatus.read]: {
+                status: CONFIG.messageStatus.read,
+                className: "text-[#1687e8] opacity-100",
+                title: "Đã đọc",
+                content: "✓✓"
+            },
 
-            case CONFIG.messageStatus.sent:
-                return {
-                    status:
-                        CONFIG.messageStatus.sent,
+            [CONFIG.messageStatus.failed]: {
+                status: CONFIG.messageStatus.failed,
+                className: "opacity-100 text-red-600",
+                title: "Gửi thất bại",
+                content: `<i class="ph ph-warning-circle"></i>`
+            }
+        };
 
-                    className:
-                        "sent",
-
-                    title:
-                        "Đã gửi",
-
-                    content:
-                        "✓"
-                };
-
-            case CONFIG.messageStatus.delivered:
-                return {
-                    status:
-                        CONFIG.messageStatus.delivered,
-
-                    className:
-                        "delivered",
-
-                    title:
-                        "Đã nhận",
-
-                    content:
-                        "✓✓"
-                };
-
-            case CONFIG.messageStatus.read:
-                return {
-                    status:
-                        CONFIG.messageStatus.read,
-
-                    className:
-                        "read",
-
-                    title:
-                        "Đã đọc",
-
-                    content:
-                        "✓✓"
-                };
-
-            case CONFIG.messageStatus.failed:
-                return {
-                    status:
-                        CONFIG.messageStatus.failed,
-
-                    className:
-                        "failed",
-
-                    title:
-                        "Gửi thất bại",
-
-                    content:
-                        `<i class="ph ph-warning-circle"></i>`
-                };
-
-            default:
-                return null;
-        }
+        return configs[Number(status)] ?? null;
     }
 
+    function updateMessageStatus(messageId, status) {
+        if (!DOM.chatBody) return;
 
-    function updateMessageStatus(
-        messageId,
-        status
-    ) {
-        if (!DOM.chatBody) {
-            return;
-        }
+        const row = [...DOM.chatBody.querySelectorAll(".message-row")]
+            .find(item => item.dataset.messageId === String(messageId));
 
-        const row =
-            DOM.chatBody.querySelector(
-                `.message-row[data-message-id="${messageId}"]`
-            );
+        if (!row) return;
 
-        if (!row) {
-            return;
-        }
+        const statusElement = row.querySelector(".message-status");
+        if (!statusElement) return;
 
-        const statusElement =
-            row.querySelector(
-                ".message-status"
-            );
-
-        if (!statusElement) {
-            return;
-        }
-
-        const config =
-            getMessageStatusConfig(
-                status
-            );
+        const config = getMessageStatusConfig(status);
 
         if (!config) {
-            statusElement.className =
-                "message-status";
-
+            statusElement.className = "message-status";
             statusElement.innerHTML = "";
             statusElement.title = "";
-
+            delete statusElement.dataset.messageStatus;
             return;
         }
 
-        statusElement.className =
-            `message-status ${config.className}`;
+        statusElement.className = [
+            "message-status",
+            "inline-flex",
+            "items-center",
+            "justify-center",
+            "text-[11px]",
+            "leading-none",
+            "transition-all",
+            "duration-200",
+            ...config.className.split(/\s+/).filter(Boolean)
+        ].join(" ");
 
-        statusElement.dataset.messageStatus =
-            String(config.status);
-
-        statusElement.innerHTML =
-            config.content;
-
-        statusElement.title =
-            config.title;
+        statusElement.dataset.messageStatus = String(config.status);
+        statusElement.innerHTML = config.content;
+        statusElement.title = config.title;
     }
 
 
@@ -3599,8 +3719,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         revokeImageObjectUrl(img);
 
-        img.classList.remove("is-loaded");
-        img.classList.remove("is-load-failed");
+        img.classList.remove(
+            "is-loaded",
+            "is-load-failed",
+            "opacity-100"
+        );
+
+        img.classList.add("opacity-0");
 
         try {
             const response = await fetch(
@@ -3648,8 +3773,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                img.classList.add("is-loaded");
-                img.classList.remove("is-load-failed");
+                img.classList.add("is-loaded", "opacity-100");
+                img.classList.remove("is-load-failed", "opacity-0");
             };
 
             img.onerror = () => {
@@ -3657,8 +3782,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                img.classList.remove("is-loaded");
-                img.classList.add("is-load-failed");
+                img.classList.remove("is-loaded", "opacity-100");
+                img.classList.add("is-load-failed", "opacity-0");
 
                 revokeImageObjectUrl(img);
             };
@@ -3668,8 +3793,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (img.dataset.previewRequestId === requestId) {
                 revokeImageObjectUrl(img);
 
-                img.classList.remove("is-loaded");
-                img.classList.add("is-load-failed");
+                img.classList.remove("is-loaded", "opacity-100");
+                img.classList.add("is-load-failed", "opacity-0");
             }
 
             console.error("Load attachment preview failed:", error);
@@ -3682,7 +3807,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const container = document.createElement("div");
-        container.className = "message-attachments";
+
+        container.className = [
+            "message-attachments",
+            "mt-2",
+            "flex",
+            "w-full",
+            "min-w-0",
+            "max-w-[360px]",
+            "flex-col",
+            "items-start",
+            "gap-[10px]",
+            "max-[600px]:max-w-full"
+        ].join(" ");
 
         attachments.forEach(attachment => {
             const attachmentId = Number(attachment?.id);
@@ -3691,33 +3828,116 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const fileName = String(attachment.fileName || `File ${attachmentId}`);
+            const fileName = String(
+                attachment.fileName || `File ${attachmentId}`
+            );
+
             const contentType = String(attachment.contentType || "");
             const fileSize = Number(attachment.fileSize) || 0;
             const type = getAttachmentType(contentType, fileName);
 
             const item = document.createElement("div");
-            item.className = `message-attachment is-${type}`;
+
+            item.className = [
+                "message-attachment",
+                `is-${type}`,
+                "flex",
+                "w-full",
+                "min-w-0",
+                "items-center",
+                "gap-3",
+                "rounded-xl",
+                "border",
+                "border-[#e5e7eb]",
+                "bg-[#f8fafc]",
+                "p-[10px]",
+                "text-[#1f2937]"
+            ].join(" ");
 
             if (type === "image") {
-                item.classList.add("message-attachment-image");
+                item.classList.add(
+                    "message-attachment-image",
+                    "block",
+                    "max-w-full",
+                    "overflow-hidden",
+                    "border-0",
+                    "bg-transparent",
+                    "!p-0"
+                );
 
                 const imageWrapper = document.createElement("div");
-                imageWrapper.className = "message-image-container";
+
+                imageWrapper.className = [
+                    "message-image-container",
+                    "relative",
+                    "inline-block",
+                    "max-w-full",
+                    "overflow-hidden",
+                    "rounded-[10px]"
+                ].join(" ");
 
                 const imageButton = document.createElement("button");
+
                 imageButton.type = "button";
-                imageButton.className = "message-attachment-image-button";
-                imageButton.setAttribute("aria-label", "Xem ảnh đính kèm");
+                imageButton.className = [
+                    "message-attachment-image-button",
+                    "relative",
+                    "flex",
+                    "min-h-[90px]",
+                    "max-h-[320px]",
+                    "w-full",
+                    "items-center",
+                    "justify-center",
+                    "overflow-hidden",
+                    "rounded-xl",
+                    "border",
+                    "border-[#e5e7eb]",
+                    "bg-[#f3f4f6]",
+                    "p-0",
+                    "cursor-pointer",
+                    "max-[600px]:max-h-[260px]"
+                ].join(" ");
+
+                imageButton.setAttribute(
+                    "aria-label",
+                    "Xem ảnh đính kèm"
+                );
 
                 const image = document.createElement("img");
-                image.className = "message-attachment-preview";
+
+                image.className = [
+                    "message-attachment-preview",
+                    "block",
+                    "h-auto",
+                    "max-h-[320px]",
+                    "w-auto",
+                    "max-w-full",
+                    "object-contain",
+                    "opacity-0",
+                    "transition-opacity",
+                    "duration-200",
+                    "max-[600px]:max-h-[260px]"
+                ].join(" ");
+
                 image.alt = fileName;
                 image.loading = "lazy";
                 image.decoding = "async";
 
                 const loading = document.createElement("span");
-                loading.className = "message-attachment-image-loading";
+
+                loading.className = [
+                    "message-attachment-image-loading",
+                    "pointer-events-none",
+                    "absolute",
+                    "inset-0",
+                    "flex",
+                    "items-center",
+                    "justify-center",
+                    "p-3",
+                    "text-xs",
+                    "text-[#6b7280]"
+                ].join(" ");
+
                 loading.textContent = "Đang tải ảnh...";
 
                 image.addEventListener("load", () => {
@@ -3736,31 +3956,87 @@ document.addEventListener("DOMContentLoaded", () => {
                         return;
                     }
 
-                    openImageLightbox(image.dataset.objectUrl, fileName);
+                    openImageLightbox(
+                        image.dataset.objectUrl,
+                        fileName
+                    );
                 });
 
                 imageButton.append(image, loading);
 
-                // Thanh thông tin nằm ở đáy ảnh
                 const imageBottom = document.createElement("div");
-                imageBottom.className = "message-image-bottom";
 
-                // Bên trái: tên file và dung lượng
+                imageBottom.className = [
+                    "message-image-bottom",
+                    "absolute",
+                    "right-0",
+                    "bottom-0",
+                    "left-0",
+                    "z-[3]",
+                    "flex",
+                    "items-center",
+                    "justify-between",
+                    "gap-3",
+                    "bg-black/70",
+                    "px-3",
+                    "py-[10px]",
+                    "text-white",
+                    "opacity-0",
+                    "invisible",
+                    "pointer-events-none",
+                    "transition-all",
+                    "duration-200",
+                    "group-hover:opacity-100",
+                    "group-hover:visible",
+                    "group-hover:pointer-events-auto",
+                    "max-[hover:none]:opacity-100",
+                    "max-[hover:none]:visible",
+                    "max-[hover:none]:pointer-events-auto"
+                ].join(" ");
+
+                // Dùng group để Tailwind xử lý hover trên phần tử cha.
+                imageWrapper.classList.add("group");
+
                 const imageInfo = document.createElement("div");
-                imageInfo.className = "message-image-info";
+
+                imageInfo.className = [
+                    "message-image-info",
+                    "flex",
+                    "min-w-0",
+                    "flex-1",
+                    "flex-col",
+                    "gap-[3px]"
+                ].join(" ");
 
                 const name = document.createElement("span");
-                name.className = "message-image-name";
+
+                name.className = [
+                    "message-image-name",
+                    "overflow-hidden",
+                    "text-ellipsis",
+                    "whitespace-nowrap",
+                    "text-[13px]",
+                    "font-medium",
+                    "leading-[1.4]",
+                    "text-white"
+                ].join(" ");
+
                 name.textContent = fileName;
                 name.title = fileName;
 
                 const size = document.createElement("span");
-                size.className = "message-attachment-size";
+
+                size.className = [
+                    "message-attachment-size",
+                    "text-[11px]",
+                    "leading-[1.4]",
+                    "text-white/75"
+                ].join(" ");
+
                 size.textContent = formatAttachmentSize(fileSize);
 
                 imageInfo.append(name, size);
 
-                // Bên phải: nút tải xuống
                 const downloadButton = createAttachmentDownloadButton(
                     attachmentId,
                     fileName
@@ -3768,27 +4044,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 imageBottom.append(imageInfo, downloadButton);
 
-                imageWrapper.append(imageButton, imageBottom);
+                imageWrapper.append(
+                    imageButton,
+                    imageBottom
+                );
+
                 item.appendChild(imageWrapper);
 
                 loadAttachmentImage(image, attachmentId);
-
             } else {
                 const icon = document.createElement("div");
-                icon.className = `message-attachment-icon is-${type}`;
+
+                icon.className = [
+                    "message-attachment-icon",
+                    `is-${type}`,
+                    "flex",
+                    "h-12",
+                    "w-12",
+                    "shrink-0",
+                    "items-center",
+                    "justify-center",
+                    "rounded-lg",
+                    "border",
+                    "border-current",
+                    "bg-white",
+                    "text-[11px]",
+                    "font-extrabold",
+                    "tracking-[.2px]",
+                    getAttachmentIconColor(type)
+                ].join(" ");
+
                 icon.setAttribute("aria-hidden", "true");
                 icon.textContent = getAttachmentTypeLabel(type);
 
                 const info = document.createElement("div");
-                info.className = "message-attachment-info";
+
+                info.className = [
+                    "message-attachment-info",
+                    "flex",
+                    "min-w-0",
+                    "flex-1",
+                    "flex-col",
+                    "gap-1"
+                ].join(" ");
 
                 const name = document.createElement("span");
-                name.className = "message-attachment-name";
+
+                name.className = [
+                    "message-attachment-name",
+                    "overflow-hidden",
+                    "text-ellipsis",
+                    "whitespace-nowrap",
+                    "text-[13px]",
+                    "font-semibold",
+                    "leading-[1.4]"
+                ].join(" ");
+
                 name.textContent = fileName;
                 name.title = fileName;
 
                 const size = document.createElement("span");
-                size.className = "message-attachment-size";
+
+                size.className = [
+                    "message-attachment-size",
+                    "text-xs",
+                    "leading-[1.4]",
+                    "text-[#6b7280]"
+                ].join(" ");
+
                 size.textContent = formatAttachmentSize(fileSize);
 
                 info.append(name, size);
@@ -3804,7 +4127,22 @@ document.addEventListener("DOMContentLoaded", () => {
             container.appendChild(item);
         });
 
-        return container.childElementCount > 0 ? container : null;
+        return container.childElementCount > 0
+            ? container
+            : null;
+    }
+    function getAttachmentIconColor(type) {
+        const colors = {
+            pdf: "text-red-600",
+            word: "text-blue-600",
+            excel: "text-green-700",
+            powerpoint: "text-orange-700",
+            archive: "text-yellow-700",
+            text: "text-slate-500",
+            file: "text-slate-500"
+        };
+
+        return colors[type] || colors.file;
     }
     function validateAdminAttachment(file) {
         const dotIndex = file.name.lastIndexOf('.');
@@ -3841,16 +4179,56 @@ document.addEventListener("DOMContentLoaded", () => {
         const button = document.createElement("button");
 
         button.type = "button";
-        button.className = "message-attachment-download";
-        button.setAttribute("aria-label", `Tải xuống ${fileName}`);
+
+        button.className = [
+            "message-attachment-download",
+            "inline-flex",
+            "min-h-[35px]",
+            "shrink-0",
+            "items-center",
+            "justify-center",
+            "gap-1",
+            "rounded-lg",
+            "border",
+            "border-[#d1d5db]",
+            "bg-white",
+            "px-[10px]",
+            "text-xs",
+            "font-semibold",
+            "leading-[1.2]",
+            "text-[#374151]",
+            "cursor-pointer",
+            "transition-colors",
+            "duration-200",
+            "hover:border-[#268f42]",
+            "hover:bg-[#268f42]",
+            "hover:text-white",
+            "focus-visible:outline-2",
+            "focus-visible:outline-[#268f42]",
+            "focus-visible:outline-offset-2",
+            "disabled:cursor-wait",
+            "disabled:opacity-65",
+            "max-[600px]:px-[9px]",
+            "max-[600px]:py-[7px]"
+        ].join(" ");
+
+        button.setAttribute(
+            "aria-label",
+            `Tải xuống ${fileName}`
+        );
 
         const icon = document.createElement("span");
-        icon.className = "message-attachment-download-icon";
+
+        icon.className = [
+            "message-attachment-download-icon",
+            "text-base",
+            "leading-none"
+        ].join(" ");
+
         icon.setAttribute("aria-hidden", "true");
         icon.textContent = "↓";
 
         const label = document.createElement("span");
-        label.textContent = "";
 
         button.append(icon, label);
 
@@ -3861,7 +4239,10 @@ document.addEventListener("DOMContentLoaded", () => {
             label.textContent = "Đang tải...";
 
             try {
-                await downloadChatAttachment(attachmentId, fileName);
+                await downloadChatAttachment(
+                    attachmentId,
+                    fileName
+                );
             } catch (error) {
                 console.error("Download attachment failed:", error);
                 Toast.error("Không thể tải file. Vui lòng thử lại.");
@@ -3912,13 +4293,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!lightbox) {
             lightbox = document.createElement("div");
-            lightbox.className = "chat-image-lightbox";
+
+            lightbox.className = [
+                "chat-image-lightbox",
+                "fixed",
+                "inset-0",
+                "z-[100000]",
+                "hidden",
+                "items-center",
+                "justify-center",
+                "bg-black/85",
+                "p-6",
+                "[&.is-open]:flex"
+            ].join(" ");
 
             lightbox.innerHTML = `
-            <button type="button"
-                    class="chat-image-lightbox-close"
-                    aria-label="Đóng ảnh">&times;</button>
-            <img class="chat-image-lightbox-img" alt="">
+            <button
+                type="button"
+                class="chat-image-lightbox-close absolute right-[22px] top-4 flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-full border-0 bg-white/15 text-[30px] leading-none text-white transition-colors hover:bg-white/30"
+                aria-label="Đóng ảnh">
+                &times;
+            </button>
+
+            <img
+                class="chat-image-lightbox-img block h-auto w-auto max-h-[90vh] max-w-[95vw] object-contain"
+                alt="">
         `;
 
             lightbox.addEventListener("click", event => {
@@ -4266,16 +4665,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function createAttachmentPreviewItem(file, index) {
         const item = document.createElement("div");
-        item.className = "chat-attachment-item";
+
+        item.className = [
+            "chat-attachment-item",
+            "relative",
+            "h-[50px]",
+            "w-[50px]",
+            "shrink-0",
+            "overflow-hidden",
+            "rounded-[10px]",
+            "border",
+            "border-[#dce5df]",
+            "bg-[#f7f9f7]"
+        ].join(" ");
 
         if (file.type.startsWith("image/")) {
             const image = document.createElement("img");
+
             const objectUrl = URL.createObjectURL(file);
 
             image.dataset.objectUrl = objectUrl;
             image.src = objectUrl;
             image.alt = file.name;
             image.loading = "lazy";
+
+            image.className = [
+                "block",
+                "h-full",
+                "w-full",
+                "object-cover",
+                "cursor-pointer"
+            ].join(" ");
 
             image.onload = () => {
                 image.classList.add("is-loaded");
@@ -4300,46 +4720,100 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             const fileInfo = document.createElement("div");
             const type = getAttachmentType(file.type, file.name);
-            fileInfo.className = "chat-attachment-file is-${type}";
+
+            fileInfo.className = [
+                "chat-attachment-file",
+                `is-${type}`,
+                "flex",
+                "h-full",
+                "w-full",
+                "flex-col",
+                "items-center",
+                "justify-center",
+                "gap-1",
+                "px-[5px]",
+                "py-2",
+                "text-center",
+                "text-[#65756b]"
+            ].join(" ");
 
             const icon = document.createElement("div");
-            icon.className = `message-attachment-icon is-${type}`;
+
+            icon.className = [
+                "message-attachment-icon",
+                `is-${type}`,
+                "flex",
+                "h-[25px]",
+                "w-[25px]",
+                "items-center",
+                "justify-center",
+                "text-[9px]",
+                "font-extrabold",
+                getAttachmentIconColor(type)
+            ].join(" ");
+
             icon.setAttribute("aria-hidden", "true");
             icon.textContent = getAttachmentTypeLabel(type);
 
-
-            //icon.className = `message-attachment-icon is-${type}`;
-            //icon.setAttribute("aria-hidden", "true");
-            //icon.textContent = getAttachmentTypeLabel(type);
-            //icon.setAttribute("class", "chat-attachment-icon is-${type}");
-            //icon.setAttribute("viewBox", "0 0 24 24");
-            //icon.setAttribute("fill", "none");
-
-        //    icon.innerHTML = `
-        //    <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
-        //          stroke="currentColor"
-        //          stroke-width="1.7"
-        //          stroke-linejoin="round" />
-        //    <path d="M14 2V8H20"
-        //          stroke="currentColor"
-        //          stroke-width="1.7"
-        //          stroke-linejoin="round" />
-        //`;
-
             const fileName = document.createElement("span");
-            fileName.className = "chat-attachment-file-name";
+
+            fileName.className = [
+                "chat-attachment-file-name",
+                "w-full",
+                "overflow-hidden",
+                "text-ellipsis",
+                "whitespace-nowrap",
+                "text-[9px]",
+                "leading-3"
+            ].join(" ");
+
             fileName.title = file.name;
             fileName.textContent = file.name;
 
-            fileInfo.append(icon);
+            fileInfo.append(icon, fileName);
             item.appendChild(fileInfo);
         }
 
         const removeButton = document.createElement("button");
 
         removeButton.type = "button";
-        removeButton.className = "chat-attachment-remove";
-        removeButton.setAttribute("aria-label", `Xóa ${file.name}`);
+
+        removeButton.className = [
+            "chat-attachment-remove",
+            "absolute",
+            "right-1",
+            "top-1",
+            "flex",
+            "h-5",
+            "w-5",
+            "scale-90",
+            "cursor-pointer",
+            "items-center",
+            "justify-center",
+            "rounded-full",
+            "border-0",
+            "bg-[#24372b]/80",
+            "p-0",
+            "text-[13px]",
+            "leading-none",
+            "text-white",
+            "opacity-0",
+            "transition-all",
+            "duration-150",
+            "hover:!bg-[#d64545]",
+            "hover:opacity-100",
+            "hover:scale-100",
+            "focus-visible:opacity-100",
+            "focus-visible:scale-100",
+            "[@media(hover:none)]:opacity-100",
+            "max-[hover:none]:scale-100"
+        ].join(" ");
+
+        removeButton.setAttribute(
+            "aria-label",
+            `Xóa ${file.name}`
+        );
+
         removeButton.textContent = "×";
 
         removeButton.addEventListener("click", () => {

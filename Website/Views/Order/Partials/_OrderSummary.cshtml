@@ -1,0 +1,48 @@
+﻿@using Website.Models.Order
+@model OrderDetailsViewModel
+
+<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+    <h2 class="font-bold text-gray-900">Tóm tắt đơn hàng</h2>
+
+    <div class="mt-5 space-y-4 text-sm">
+        <div class="flex justify-between gap-3">
+            <span class="text-gray-500">Mã đơn hàng</span>
+            <span class="font-semibold text-gray-900">@Model.OrderCode</span>
+        </div>
+
+        <div class="flex justify-between gap-3">
+            <span class="text-gray-500">Ngày đặt</span>
+            <span class="font-medium text-gray-800">
+                @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+            </span>
+        </div>
+
+        <div class="border-t border-dashed border-gray-200 pt-4"></div>
+
+        <div class="flex justify-between gap-3">
+            <span class="text-gray-500">Tạm tính</span>
+            <span class="font-medium text-gray-800">@Model.SubTotal.ToString("N0")đ</span>
+        </div>
+
+        <div class="flex justify-between gap-3">
+            <span class="text-gray-500">Phí vận chuyển</span>
+            <span class="font-medium text-gray-800">@Model.ShippingFee.ToString("N0")đ</span>
+        </div>
+
+        <div class="flex justify-between gap-3">
+            <span class="text-gray-500">Giảm giá</span>
+            <span class="font-medium text-[#1F9345]">
+                -@Model.DiscountAmount.ToString("N0")đ
+            </span>
+        </div>
+
+        <div class="border-t border-dashed border-gray-200 pt-4">
+            <div class="flex items-center justify-between gap-3">
+                <span class="font-semibold text-gray-900">Tổng thanh toán</span>
+                <span class="text-xl font-bold text-[#1F9345]">
+                    @Model.TotalAmount.ToString("N0")đ
+                </span>
+            </div>
+        </div>
+    </div>
+</div>

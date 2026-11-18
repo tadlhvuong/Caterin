@@ -1,0 +1,749 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết bài viết";
+}
+
+@* ========================= BREADCRUMB ========================= *@
+<section class="border-b border-gray-100 bg-[#F1F8EE] py-5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-xl font-bold text-gray-900">Blog</h1>
+
+            <nav aria-label="Breadcrumb">
+                <ol class="flex flex-wrap items-center gap-2 text-sm">
+                    <li>
+                        <a href="/"
+                           class="inline-flex items-center gap-2 text-gray-500 transition-colors hover:text-[#1F9345]">
+                            <i class="ph ph-house text-base"></i>
+                            Trang chủ
+                        </a>
+                    </li>
+                    <li class="text-gray-300">
+                        <i class="ph ph-caret-right"></i>
+                    </li>
+                    <li>
+                        <a href="/blog"
+                           class="text-gray-500 transition-colors hover:text-[#1F9345]">
+                            Blog
+                        </a>
+                    </li>
+                    <li class="text-gray-300">
+                        <i class="ph ph-caret-right"></i>
+                    </li>
+                    <li class="font-semibold text-[#1F9345]">
+                        Chi tiết bài viết
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+@* ========================= BLOG DETAILS ========================= *@
+<section class="py-12 lg:py-20">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-12 lg:px-8">
+
+        @* ========================= MAIN CONTENT ========================= *@
+        <main class="min-w-0 lg:col-span-8">
+
+            @* Blog article *@
+            <article>
+                @* Featured image *@
+                <div class="group relative overflow-hidden rounded-3xl bg-gray-100">
+                    <img src="/images/blog-img1.png"
+                         alt="Chăm sóc không gian sống cùng Caterin"
+                         class="h-auto max-h-[520px] min-h-[240px] w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                         fetchpriority="high">
+
+                    <div class="absolute bottom-5 left-5">
+                        <span class="inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-xs font-bold text-[#1F9345] shadow-lg backdrop-blur">
+                            Chăm sóc gia đình
+                        </span>
+                    </div>
+                </div>
+
+                @* Article heading *@
+                <div class="mt-8">
+                    <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-gray-500">
+                        <span class="inline-flex items-center gap-2">
+                            <i class="ph ph-calendar-dots text-lg text-[#1F9345]"></i>
+                            12 tháng 07, 2025
+                        </span>
+
+                        <span class="inline-flex items-center gap-2">
+                            <i class="ph ph-chats-circle text-lg text-[#1F9345]"></i>
+                            0 bình luận
+                        </span>
+
+                        <span class="inline-flex items-center gap-2">
+                            <i class="ph ph-clock text-lg text-[#1F9345]"></i>
+                            5 phút đọc
+                        </span>
+                    </div>
+
+                    <h2 class="mt-5 text-3xl font-bold leading-tight tracking-tight text-gray-900 sm:text-4xl">
+                        Bí quyết giữ cho không gian sống luôn sạch sẽ và dễ chịu
+                    </h2>
+
+                    <p class="mt-5 border-l-4 border-[#1F9345] pl-5 text-lg leading-8 text-gray-600">
+                        Một ngôi nhà sạch không chỉ tạo cảm giác thoải mái mà còn góp phần
+                        mang đến một môi trường sống gọn gàng, dễ chịu cho cả gia đình.
+                    </p>
+                </div>
+
+                @* Article body *@
+                <div class="mt-8 space-y-6 text-base leading-8 text-gray-600">
+
+                    <p>
+                        Ngôi nhà là nơi mỗi thành viên nghỉ ngơi, thư giãn và dành thời gian bên nhau.
+                        Vì vậy, việc duy trì không gian sống sạch sẽ luôn là một phần quan trọng
+                        trong thói quen chăm sóc gia đình hằng ngày.
+                    </p>
+
+                    <p>
+                        Thay vì chờ đến khi nhà cửa bừa bộn mới bắt đầu dọn dẹp,
+                        bạn có thể xây dựng những thói quen nhỏ và duy trì chúng thường xuyên.
+                        Điều này giúp công việc vệ sinh trở nên nhẹ nhàng và dễ thực hiện hơn.
+                    </p>
+
+                    <h3 class="pt-3 text-2xl font-bold leading-snug text-gray-900">
+                        Bắt đầu từ những khu vực thường xuyên sử dụng
+                    </h3>
+
+                    <p>
+                        Bếp, phòng tắm, sàn nhà và các bề mặt thường xuyên tiếp xúc
+                        là những khu vực nên được quan tâm trong quá trình vệ sinh.
+                        Hãy lựa chọn sản phẩm phù hợp với từng bề mặt và sử dụng theo hướng dẫn
+                        để đạt hiệu quả làm sạch tốt.
+                    </p>
+
+                    @* Article images *@
+                    <div class="grid grid-cols-1 gap-5 pt-3 sm:grid-cols-2">
+                        <div class="overflow-hidden rounded-2xl bg-gray-100">
+                            <img src="/images/blog-details-img1.png"
+                                 alt="Không gian sống sạch sẽ"
+                                 class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105"
+                                 loading="lazy">
+                        </div>
+
+                        <div class="overflow-hidden rounded-2xl bg-gray-100">
+                            <img src="/images/blog-details-img2.png"
+                                 alt="Chăm sóc nhà cửa"
+                                 class="h-64 w-full object-cover transition-transform duration-500 hover:scale-105"
+                                 loading="lazy">
+                        </div>
+                    </div>
+
+                    <h3 class="pt-3 text-2xl font-bold leading-snug text-gray-900">
+                        Những thói quen giúp việc vệ sinh trở nên đơn giản
+                    </h3>
+
+                    <p>
+                        Một kế hoạch vệ sinh hợp lý giúp bạn tiết kiệm thời gian
+                        và duy trì sự ngăn nắp cho không gian sống.
+                        Bạn có thể bắt đầu với những việc đơn giản sau:
+                    </p>
+
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Dọn dẹp và sắp xếp đồ dùng sau khi sử dụng.</span>
+                        </li>
+
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Vệ sinh khu vực bếp và các bề mặt thường xuyên tiếp xúc.</span>
+                        </li>
+
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Lựa chọn sản phẩm vệ sinh phù hợp với từng mục đích sử dụng.</span>
+                        </li>
+
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Đọc kỹ hướng dẫn và bảo quản sản phẩm đúng cách.</span>
+                        </li>
+
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Duy trì lịch vệ sinh định kỳ cho từng khu vực trong nhà.</span>
+                        </li>
+
+                        <li class="flex items-start gap-3">
+                            <span class="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#EAF6E9] text-sm text-[#1F9345]">
+                                <i class="ph-bold ph-check"></i>
+                            </span>
+                            <span>Giữ không gian thông thoáng sau khi vệ sinh.</span>
+                        </li>
+                    </ul>
+
+                    @* Quote *@
+                    <blockquote class="relative overflow-hidden rounded-3xl bg-[#F1F8EE] p-7 sm:p-9">
+                        <div class="absolute -right-5 -top-8 text-9xl leading-none text-[#1F9345]/10">
+                            <i class="ph-fill ph-quotes"></i>
+                        </div>
+
+                        <div class="relative">
+                            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#1F9345] text-2xl text-white">
+                                <i class="ph-fill ph-quotes"></i>
+                            </span>
+
+                            <p class="mt-6 text-lg font-medium leading-8 text-gray-700">
+                                Một không gian sống sạch sẽ được tạo nên từ những thói quen nhỏ
+                                và sự quan tâm mỗi ngày. Hãy bắt đầu từ những điều đơn giản nhất.
+                            </p>
+
+                            <div class="mt-6 flex items-center gap-3">
+                                <span class="h-0.5 w-8 bg-[#1F9345]"></span>
+                                <span class="text-sm font-bold text-[#1F9345]">Caterin</span>
+                            </div>
+                        </div>
+                    </blockquote>
+
+                    <h3 class="pt-3 text-2xl font-bold leading-snug text-gray-900">
+                        Lựa chọn sản phẩm phù hợp với nhu cầu gia đình
+                    </h3>
+
+                    <p>
+                        Mỗi khu vực trong nhà có những đặc điểm và nhu cầu vệ sinh khác nhau.
+                        Việc lựa chọn đúng sản phẩm, sử dụng đúng cách và bảo quản hợp lý
+                        sẽ giúp quá trình chăm sóc nhà cửa thuận tiện hơn.
+                    </p>
+
+                    <p>
+                        Caterin hướng đến việc mang lại những giải pháp chăm sóc gia đình
+                        thiết thực, giúp công việc vệ sinh hằng ngày trở nên dễ dàng hơn.
+                    </p>
+                </div>
+
+                @* Tags *@
+                <div class="mt-10 flex flex-wrap items-center gap-3 border-t border-gray-100 pt-7">
+                    <span class="font-bold text-gray-900">Từ khóa:</span>
+
+                    <a href="/blog?tag=cham-soc-gia-dinh"
+                       class="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:border-[#1F9345] hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                        Chăm sóc gia đình
+                    </a>
+
+                    <a href="/blog?tag=ve-sinh-nha-cua"
+                       class="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:border-[#1F9345] hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                        Vệ sinh nhà cửa
+                    </a>
+
+                    <a href="/blog?tag=meo-hay"
+                       class="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:border-[#1F9345] hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                        Mẹo hay
+                    </a>
+                </div>
+            </article>
+
+            @* Previous / Next *@
+            <div class="my-10 grid gap-4 border-y border-gray-100 py-7 sm:grid-cols-2">
+                <a href="/blog"
+                   class="group rounded-2xl p-4 transition-colors hover:bg-[#F1F8EE]">
+                    <span class="flex items-center gap-2 text-sm text-gray-500 transition-colors group-hover:text-[#1F9345]">
+                        <i class="ph ph-arrow-left"></i>
+                        Bài viết trước
+                    </span>
+                    <h3 class="mt-3 font-bold leading-6 text-gray-900 transition-colors group-hover:text-[#1F9345]">
+                        Những bí quyết chăm sóc không gian sống
+                    </h3>
+                </a>
+
+                <a href="/blog"
+                   class="group rounded-2xl p-4 text-left transition-colors hover:bg-[#F1F8EE] sm:text-right">
+                    <span class="flex items-center gap-2 text-sm text-gray-500 transition-colors group-hover:text-[#1F9345] sm:justify-end">
+                        Bài viết tiếp theo
+                        <i class="ph ph-arrow-right"></i>
+                    </span>
+                    <h3 class="mt-3 font-bold leading-6 text-gray-900 transition-colors group-hover:text-[#1F9345]">
+                        Cách lựa chọn sản phẩm vệ sinh phù hợp
+                    </h3>
+                </a>
+            </div>
+
+            @* Comment form *@
+            <section class="mt-12 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+                <div class="mb-7">
+                    <span class="text-sm font-bold uppercase tracking-wider text-[#1F9345]">
+                        Cùng chia sẻ
+                    </span>
+                    <h3 class="mt-2 text-2xl font-bold text-gray-900">
+                        Để lại bình luận
+                    </h3>
+                    <p class="mt-2 text-sm leading-6 text-gray-500">
+                        Chia sẻ ý kiến hoặc câu hỏi của bạn về bài viết này.
+                    </p>
+                </div>
+
+                <form action="#" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <label for="name" class="mb-2 block text-sm font-semibold text-gray-800">
+                                Họ và tên
+                            </label>
+                            <input type="text"
+                                   id="name"
+                                   name="name"
+                                   placeholder="Nhập họ và tên"
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10">
+                        </div>
+
+                        <div>
+                            <label for="email" class="mb-2 block text-sm font-semibold text-gray-800">
+                                Địa chỉ email
+                            </label>
+                            <input type="email"
+                                   id="email"
+                                   name="email"
+                                   placeholder="Nhập email của bạn"
+                                   class="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10">
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label for="message" class="mb-2 block text-sm font-semibold text-gray-800">
+                                Nội dung bình luận
+                            </label>
+                            <textarea id="message"
+                                      name="message"
+                                      rows="5"
+                                      placeholder="Bạn nghĩ gì về bài viết này?"
+                                      class="w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10"></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-[#1F9345] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-green-700/15 transition hover:-translate-y-0.5 hover:bg-[#18834f]">
+                        Gửi bình luận
+                        <i class="ph-bold ph-paper-plane-right"></i>
+                    </button>
+                </form>
+            </section>
+
+            @* Comments *@
+            <section class="mt-12">
+                <div class="mb-7 flex items-center justify-between gap-4">
+                    <div>
+                        <span class="text-sm font-bold uppercase tracking-wider text-[#1F9345]">
+                            Cộng đồng
+                        </span>
+                        <h3 class="mt-2 text-2xl font-bold text-gray-900">
+                            Bình luận
+                        </h3>
+                    </div>
+
+                    <span class="rounded-full bg-[#EAF6E9] px-4 py-2 text-sm font-bold text-[#1F9345]">
+                        5 bình luận
+                    </span>
+                </div>
+
+                <div class="space-y-6">
+
+                    @* Comment 1 *@
+                    <div class="flex items-start gap-4 border-b border-gray-100 pb-6">
+                        <img src="/images/comment-img1.png"
+                             alt="Người bình luận"
+                             class="h-12 w-12 shrink-0 rounded-full object-cover"
+                             loading="lazy">
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Marvin McKinney</h4>
+                                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                <span class="text-xs text-gray-500">26 tháng 04, 2024</span>
+                            </div>
+
+                            <p class="mt-3 text-sm leading-7 text-gray-600">
+                                Một bài viết rất hữu ích. Những thói quen nhỏ thực sự giúp việc dọn dẹp
+                                nhà cửa trở nên dễ dàng hơn.
+                            </p>
+
+                            <button type="button"
+                                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition-colors hover:text-[#18834f]">
+                                <i class="ph ph-arrow-bend-up-left"></i>
+                                Trả lời
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Comment 2 *@
+                    <div class="flex items-start gap-4 border-b border-gray-100 pb-6">
+                        <img src="/images/comment-img2.png"
+                             alt="Người bình luận"
+                             class="h-12 w-12 shrink-0 rounded-full object-cover"
+                             loading="lazy">
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Kristin Watson</h4>
+                                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                <span class="text-xs text-gray-500">24 tháng 04, 2024</span>
+                            </div>
+
+                            <p class="mt-3 text-sm leading-7 text-gray-600">
+                                Mình thường chia nhỏ công việc vệ sinh theo từng ngày.
+                                Nhờ vậy nhà cửa luôn gọn gàng mà không mất quá nhiều thời gian.
+                            </p>
+
+                            <button type="button"
+                                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition-colors hover:text-[#18834f]">
+                                <i class="ph ph-arrow-bend-up-left"></i>
+                                Trả lời
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Comment 3 *@
+                    <div class="flex items-start gap-4 border-b border-gray-100 pb-6">
+                        <img src="/images/comment-img3.png"
+                             alt="Người bình luận"
+                             class="h-12 w-12 shrink-0 rounded-full object-cover"
+                             loading="lazy">
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Jenny Wilson</h4>
+                                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                <span class="text-xs text-gray-500">20 tháng 04, 2024</span>
+                            </div>
+
+                            <p class="mt-3 text-sm leading-7 text-gray-600">
+                                Cảm ơn Caterin đã chia sẻ những thông tin hữu ích.
+                            </p>
+
+                            <button type="button"
+                                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition-colors hover:text-[#18834f]">
+                                <i class="ph ph-arrow-bend-up-left"></i>
+                                Trả lời
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Comment 4 *@
+                    <div class="flex items-start gap-4 border-b border-gray-100 pb-6">
+                        <img src="/images/comment-img4.png"
+                             alt="Người bình luận"
+                             class="h-12 w-12 shrink-0 rounded-full object-cover"
+                             loading="lazy">
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Robert Fox</h4>
+                                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                <span class="text-xs text-gray-500">18 tháng 04, 2024</span>
+                            </div>
+
+                            <p class="mt-3 text-sm leading-7 text-gray-600">
+                                Những gợi ý đơn giản nhưng rất thiết thực cho việc chăm sóc gia đình.
+                            </p>
+
+                            <button type="button"
+                                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition-colors hover:text-[#18834f]">
+                                <i class="ph ph-arrow-bend-up-left"></i>
+                                Trả lời
+                            </button>
+                        </div>
+                    </div>
+
+                    @* Comment 5 *@
+                    <div class="flex items-start gap-4">
+                        <img src="/images/comment-img5.png"
+                             alt="Người bình luận"
+                             class="h-12 w-12 shrink-0 rounded-full object-cover"
+                             loading="lazy">
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h4 class="font-bold text-gray-900">Eleanor Pena</h4>
+                                <span class="h-1 w-1 rounded-full bg-gray-300"></span>
+                                <span class="text-xs text-gray-500">07 tháng 04, 2024</span>
+                            </div>
+
+                            <p class="mt-3 text-sm leading-7 text-gray-600">
+                                Rất mong Caterin chia sẻ thêm nhiều mẹo chăm sóc nhà cửa.
+                            </p>
+
+                            <button type="button"
+                                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition-colors hover:text-[#18834f]">
+                                <i class="ph ph-arrow-bend-up-left"></i>
+                                Trả lời
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="mt-8 inline-flex items-center gap-2 rounded-full border border-gray-200 px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#1F9345] hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                    Xem thêm bình luận
+                    <i class="ph ph-arrow-down"></i>
+                </button>
+            </section>
+        </main>
+
+        @* ========================= SIDEBAR ========================= *@
+        <aside class="space-y-6 lg:col-span-4">
+
+            @* Search *@
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:p-7">
+                <h3 class="border-b border-gray-100 pb-5 text-lg font-bold text-gray-900">
+                    Tìm kiếm bài viết
+                </h3>
+
+                <form action="/blog" method="get" class="mt-5">
+                    <div class="flex overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition focus-within:border-[#1F9345] focus-within:ring-4 focus-within:ring-[#1F9345]/10">
+                        <input type="search"
+                               name="keyword"
+                               placeholder="Nhập từ khóa..."
+                               class="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-400">
+
+                        <button type="submit"
+                                aria-label="Tìm kiếm"
+                                class="flex h-12 w-12 shrink-0 items-center justify-center bg-[#1F9345] text-xl text-white transition-colors hover:bg-[#18834f]">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            @* Recent posts *@
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:p-7">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-5">
+                    <h3 class="text-lg font-bold text-gray-900">Bài viết mới nhất</h3>
+                    <i class="ph-fill ph-newspaper text-2xl text-[#1F9345]"></i>
+                </div>
+
+                <div class="mt-6 space-y-5">
+
+                    <a href="/blog"
+                       class="group flex items-start gap-4">
+                        <div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <img src="/images/recent-post1.png"
+                                 alt="Bài viết Caterin"
+                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                 loading="lazy">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="line-clamp-2 text-sm font-bold leading-6 text-gray-800 transition-colors group-hover:text-[#1F9345]">
+                                Bí quyết chăm sóc không gian sống mỗi ngày
+                            </h4>
+                            <span class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                <i class="ph ph-calendar-dots text-[#1F9345]"></i>
+                                12 tháng 07, 2025
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="/blog"
+                       class="group flex items-start gap-4">
+                        <div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <img src="/images/recent-post2.png"
+                                 alt="Bài viết Caterin"
+                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                 loading="lazy">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="line-clamp-2 text-sm font-bold leading-6 text-gray-800 transition-colors group-hover:text-[#1F9345]">
+                                Lựa chọn sản phẩm vệ sinh phù hợp
+                            </h4>
+                            <span class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                <i class="ph ph-calendar-dots text-[#1F9345]"></i>
+                                10 tháng 07, 2025
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="/blog"
+                       class="group flex items-start gap-4">
+                        <div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <img src="/images/recent-post3.png"
+                                 alt="Bài viết Caterin"
+                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                 loading="lazy">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="line-clamp-2 text-sm font-bold leading-6 text-gray-800 transition-colors group-hover:text-[#1F9345]">
+                                Những thói quen giúp nhà cửa luôn gọn gàng
+                            </h4>
+                            <span class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                <i class="ph ph-calendar-dots text-[#1F9345]"></i>
+                                08 tháng 07, 2025
+                            </span>
+                        </div>
+                    </a>
+
+                    <a href="/blog"
+                       class="group flex items-start gap-4">
+                        <div class="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                            <img src="/images/recent-post4.png"
+                                 alt="Bài viết Caterin"
+                                 class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                 loading="lazy">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <h4 class="line-clamp-2 text-sm font-bold leading-6 text-gray-800 transition-colors group-hover:text-[#1F9345]">
+                                Cùng gia đình xây dựng không gian sống xanh
+                            </h4>
+                            <span class="mt-2 flex items-center gap-2 text-xs text-gray-500">
+                                <i class="ph ph-calendar-dots text-[#1F9345]"></i>
+                                05 tháng 07, 2025
+                            </span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            @* Categories *@
+            <div class="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm sm:p-7">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-5">
+                    <h3 class="text-lg font-bold text-gray-900">Danh mục bài viết</h3>
+                    <i class="ph-fill ph-squares-four text-2xl text-[#1F9345]"></i>
+                </div>
+
+                <ul class="mt-5 space-y-3">
+                    <li>
+                        <a href="/blog?category=meo-hay"
+                           class="group flex items-center justify-between rounded-xl border border-gray-100 p-3.5 text-sm text-gray-600 transition-colors hover:border-[#1F9345]/30 hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                            <span class="flex items-center gap-3">
+                                <i class="ph ph-lightbulb text-lg"></i>
+                                Mẹo hay gia đình
+                            </span>
+                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/blog?category=cham-soc-nha-cua"
+                           class="group flex items-center justify-between rounded-xl border border-gray-100 p-3.5 text-sm text-gray-600 transition-colors hover:border-[#1F9345]/30 hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                            <span class="flex items-center gap-3">
+                                <i class="ph ph-house text-lg"></i>
+                                Chăm sóc nhà cửa
+                            </span>
+                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/blog?category=san-pham"
+                           class="group flex items-center justify-between rounded-xl border border-gray-100 p-3.5 text-sm text-gray-600 transition-colors hover:border-[#1F9345]/30 hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                            <span class="flex items-center gap-3">
+                                <i class="ph ph-spray-bottle text-lg"></i>
+                                Kiến thức sản phẩm
+                            </span>
+                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/blog?category=phong-cach-song"
+                           class="group flex items-center justify-between rounded-xl border border-gray-100 p-3.5 text-sm text-gray-600 transition-colors hover:border-[#1F9345]/30 hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                            <span class="flex items-center gap-3">
+                                <i class="ph ph-leaf text-lg"></i>
+                                Phong cách sống xanh
+                            </span>
+                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/blog?category=tin-tuc"
+                           class="group flex items-center justify-between rounded-xl border border-gray-100 p-3.5 text-sm text-gray-600 transition-colors hover:border-[#1F9345]/30 hover:bg-[#F1F8EE] hover:text-[#1F9345]">
+                            <span class="flex items-center gap-3">
+                                <i class="ph ph-newspaper text-lg"></i>
+                                Tin tức Caterin
+                            </span>
+                            <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            @* Brand CTA *@
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#18834f] to-[#1F9345] p-7 text-white shadow-lg">
+                <div class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full border border-white/10"></div>
+                <div class="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full border border-white/10"></div>
+
+                <div class="relative">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-2xl">
+                        <i class="ph-fill ph-leaf"></i>
+                    </span>
+
+                    <h3 class="mt-5 text-2xl font-bold leading-snug">
+                        Chăm sóc tổ ấm cùng Caterin
+                    </h3>
+
+                    <p class="mt-3 text-sm leading-7 text-white/80">
+                        Khám phá các sản phẩm chăm sóc gia đình và lựa chọn giải pháp phù hợp
+                        cho không gian sống của bạn.
+                    </p>
+
+                    <a href="/shop"
+                       class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#18834f] transition-all hover:-translate-y-0.5 hover:bg-[#F1F8EE]">
+                        Khám phá sản phẩm
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+
+@* ========================= SERVICE BENEFITS ========================= *@
+<section class="mb-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+            <div class="flex items-center gap-4 rounded-2xl bg-[#F1F8EE] p-5 transition-colors hover:bg-[#E8F4E3]">
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white">
+                    <i class="ph-fill ph-truck"></i>
+                </span>
+                <div>
+                    <h3 class="font-bold text-gray-900">Giao hàng tiện lợi</h3>
+                    <p class="mt-1 text-sm text-gray-500">Hỗ trợ giao hàng toàn quốc</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl bg-[#F1F8EE] p-5 transition-colors hover:bg-[#E8F4E3]">
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white">
+                    <i class="ph-fill ph-hand-heart"></i>
+                </span>
+                <div>
+                    <h3 class="font-bold text-gray-900">Chăm sóc khách hàng</h3>
+                    <p class="mt-1 text-sm text-gray-500">Luôn lắng nghe và hỗ trợ</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl bg-[#F1F8EE] p-5 transition-colors hover:bg-[#E8F4E3]">
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white">
+                    <i class="ph-fill ph-shield-check"></i>
+                </span>
+                <div>
+                    <h3 class="font-bold text-gray-900">Mua sắm an tâm</h3>
+                    <p class="mt-1 text-sm text-gray-500">Thông tin sản phẩm rõ ràng</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl bg-[#F1F8EE] p-5 transition-colors hover:bg-[#E8F4E3]">
+                <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white">
+                    <i class="ph-fill ph-chats-circle"></i>
+                </span>
+                <div>
+                    <h3 class="font-bold text-gray-900">Hỗ trợ tư vấn</h3>
+                    <p class="mt-1 text-sm text-gray-500">Sẵn sàng giải đáp thắc mắc</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

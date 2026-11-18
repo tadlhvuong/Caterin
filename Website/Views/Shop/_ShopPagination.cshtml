@@ -1,0 +1,70 @@
+﻿@using Microsoft.AspNetCore.WebUtilities
+@using System.Globalization
+@using Website.Models.Shop
+@model ShopIndexViewModel
+
+@{
+    string BuildPageUrl(int page)
+    {
+        var query = new Dictionary<string, string?>
+        {
+            ["keyword"] = Model.Keyword,
+            ["category"] = Model.Category,
+            ["minPrice"] = Model.MinPrice?.ToString(CultureInfo.InvariantCulture),
+            ["maxPrice"] = Model.MaxPrice?.ToString(CultureInfo.InvariantCulture),
+            ["rating"] = Model.Rating?.ToString(CultureInfo.InvariantCulture),
+            ["volume"] = Model.Volume,
+            ["sortBy"] = Model.SortBy,
+            ["page"] = page.ToString(CultureInfo.InvariantCulture)
+        };
+
+        // Loại bỏ các tham số rỗng, ví dụ volume chưa được chọn.
+        var filteredQuery = query
+            .Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .ToDictionary(x => x.Key, x => x.Value!);
+
+        var path = Url.Action("Index", "Shop") ?? "/shop";
+
+        return QueryHelpers.AddQueryString(path, filteredQuery);
+    }
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-10 flex flex-wrap items-center justify-center gap-2"
+         aria-label="Phân trang">
+
+        @if (Model.HasPreviousPage)
+        {
+            <a href="@BuildPageUrl(Model.CurrentPage - 1)"
+               data-shop-page-link
+               class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+               aria-label="Trang trước">
+                <i class="ph ph-caret-left"></i>
+            </a>
+        }
+
+        @for (var pageNumber = 1; pageNumber <= Model.TotalPages; pageNumber++)
+        {
+            <a href="@BuildPageUrl(pageNumber)"
+               data-shop-page-link
+               aria-current="@(Model.CurrentPage == pageNumber ? "page" : null)"
+               class="flex h-10 min-w-10 items-center justify-center rounded-lg border px-3 text-sm font-medium transition
+                              @(Model.CurrentPage == pageNumber
+                                         ? "border-[#1F9345] bg-[#1F9345] text-white"
+                                         : "border-gray-200 text-gray-600 hover:border-[#1F9345] hover:text-[#1F9345]")">
+        @pageNumber
+    </a>
+        }
+
+        @if (Model.HasNextPage)
+        {
+            <a href="@BuildPageUrl(Model.CurrentPage + 1)"
+               data-shop-page-link
+               class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+               aria-label="Trang sau">
+                <i class="ph ph-caret-right"></i>
+            </a>
+        }
+    </nav>
+}

@@ -1,200 +1,435 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Thanh toán | Caterin";
 }
 
-<div class="breadcrumb mb-0 py-26 bg-main-50">
-    <div class="container container-lg">
-        <div class="breadcrumb-wrapper flex-between flex-wrap gap-16">
-            <h6 class="mb-0">Checkout</h6>
-            <ul class="flex items-center gap-8 flex-wrap">
-                <li class="text-sm">
-                    <a href="index.html"
-                       class="text-gray-900 flex items-center gap-8 hover-text-main-600">
-                        <i class="ph ph-house"></i> Home
-                    </a>
-                </li>
-                <li class="flex items-center"><i class="ph ph-caret-right"></i></li>
-                <li class="text-sm text-main-600">Checkout</li>
-            </ul>
+@* ========================= BREADCRUMB ========================= *@
+<section class="bg-[#f1f8ee] py-5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+            <h1 class="text-xl font-bold text-gray-900">Thanh toán</h1>
+
+            <nav aria-label="Breadcrumb">
+                <ol class="flex flex-wrap items-center gap-2 text-sm">
+                    <li>
+                        <a href="/"
+                           class="inline-flex items-center gap-2 text-gray-600 transition hover:text-[#1F9345]">
+                            <i class="ph ph-house text-base"></i>
+                            Trang chủ
+                        </a>
+                    </li>
+                    <li class="text-gray-400">
+                        <i class="ph ph-caret-right"></i>
+                    </li>
+                    <li class="font-medium text-[#1F9345]">Thanh toán</li>
+                </ol>
+            </nav>
         </div>
     </div>
-</div>
-<section class="checkout py-80">
-    <div class="container container-lg">
-        <div class="border border-gray-100 rounded-8 px-30 py-20 mb-40">
-            <span class="">
-                Have a coupon? <a href="cart.html"
-                                  class="font-[600] text-gray-900 hover-text-decoration-underline hover-text-main-600">
-                    Click here
-                    to enter your code
-                </a>
-            </span>
+</section>
+
+@* ========================= CHECKOUT ========================= *@
+<section class="py-12 lg:py-16">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        @* Coupon notice *@
+        <div class="mb-8 flex flex-wrap items-center gap-2 rounded-xl border border-[#dcebd7] bg-[#f8fbf6] px-5 py-4 text-sm text-gray-700">
+            <i class="ph ph-ticket text-xl text-[#1F9345]"></i>
+            <span>Bạn có mã giảm giá?</span>
+            <a href="/cart"
+               class="font-semibold text-[#1F9345] underline-offset-4 transition hover:underline">
+                Nhấn vào đây để nhập mã
+            </a>
         </div>
-        <div class="row">
-            <div class="2xl:w-9/12 flex-grow-0 flex-shrink-0 basis-auto xl:w-8/12">
-                <form action="#" class="pe-xl-5">
-                    <div class="row g-3">
-                        <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto custom-sm:w-6/12">
-                            <input class="common-input border-gray-100" placeholder="First Name">
+
+        <form asp-controller="Checkout" asp-action="PlaceOrder"  method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="grid grid-cols-1 gap-8 xl:grid-cols-12 xl:gap-10">
+
+                @* ========================= BILLING DETAILS ========================= *@
+                <div class="xl:col-span-7 2xl:col-span-8">
+                    <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+
+                        <div class="mb-7 border-b border-gray-100 pb-5">
+                            <h2 class="text-xl font-bold text-gray-900">
+                                Thông tin nhận hàng
+                            </h2>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Vui lòng cung cấp thông tin chính xác để Caterin giao hàng đến bạn.
+                            </p>
                         </div>
-                        <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto custom-sm:w-6/12">
-                            <input class="common-input border-gray-100" placeholder="Last Name">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="Business Name">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="United states (US)">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="House number and street name">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100"
-                                   placeholder="Apartment, suite, unit, etc. (Optional)">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="City">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="Sans Fransisco">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input class="common-input border-gray-100" placeholder="Post Code">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input type="number"
-                                   class="common-input border-gray-100" placeholder="Phone">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <input type="email"
-                                   class="common-input border-gray-100" placeholder="Email Address">
-                        </div>
-                        <div class="w-full flex-grow-0 flex-shrink-0 basis-auto">
-                            <div class="my-40">
-                                <h6 class="text-lg mb-24">Additional Information</h6><input class="common-input border-gray-100"
-                                                                                            placeholder="Notes about your order, e.g. special notes for delivery.">
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="2xl:w-3/12 flex-grow-0 flex-shrink-0 basis-auto xl:w-4/12">
-                <div class="checkout-sidebar">
-                    <div class="bg-color-three rounded-8 p-24 text-center">
-                        <span class="text-gray-900 text-xl font-[600]">Your Orders</span>
-                    </div>
-                    <div class="border border-gray-100 rounded-8 px-24 py-40 mt-24">
-                        <div class="mb-32 pb-32 border-b border-gray-100 flex-between gap-8">
-                            <span class="text-gray-900 font-[500] text-xl font-heading-two">Product</span> <span class="text-gray-900 font-[500] text-xl font-heading-two">Subtotal</span>
-                        </div>
-                        <div class="flex-between gap-24 mb-32">
-                            <div class="flex items-center gap-12">
-                                <span class="text-gray-900 font-normal text-md font-heading-two w-144">
-                                    HP Chromebook
-                                    With Intel Celeron
-                                </span> <span class="text-gray-900 font-normal text-md font-heading-two">
-                                    <i class="ph-bold ph-x"></i>
-                                </span> <span class="text-gray-900 font-[600] text-md font-heading-two">1</span>
-                            </div><span class="text-gray-900 font-[700] text-md font-heading-two">$250.00</span>
-                        </div>
-                        <div class="flex-between gap-24 mb-32">
-                            <div class="flex items-center gap-12">
-                                <span class="text-gray-900 font-normal text-md font-heading-two w-144">
-                                    HP Chromebook
-                                    With Intel Celeron
-                                </span> <span class="text-gray-900 font-normal text-md font-heading-two">
-                                    <i class="ph-bold ph-x"></i>
-                                </span> <span class="text-gray-900 font-[600] text-md font-heading-two">1</span>
-                            </div><span class="text-gray-900 font-[700] text-md font-heading-two">$250.00</span>
-                        </div>
-                        <div class="flex-between gap-24 mb-32">
-                            <div class="flex items-center gap-12">
-                                <span class="text-gray-900 font-normal text-md font-heading-two w-144">
-                                    HP Chromebook
-                                    With Intel Celeron
-                                </span> <span class="text-gray-900 font-normal text-md font-heading-two">
-                                    <i class="ph-bold ph-x"></i>
-                                </span> <span class="text-gray-900 font-[600] text-md font-heading-two">1</span>
-                            </div><span class="text-gray-900 font-[700] text-md font-heading-two">$250.00</span>
-                        </div>
-                        <div class="flex-between gap-24 mb-32">
-                            <div class="flex items-center gap-12">
-                                <span class="text-gray-900 font-normal text-md font-heading-two w-144">
-                                    HP Chromebook
-                                    With Intel Celeron
-                                </span> <span class="text-gray-900 font-normal text-md font-heading-two">
-                                    <i class="ph-bold ph-x"></i>
-                                </span> <span class="text-gray-900 font-[600] text-md font-heading-two">1</span>
-                            </div><span class="text-gray-900 font-[700] text-md font-heading-two">$250.00</span>
-                        </div>
-                        <div class="border-t border-gray-100 pt-30 mt-30">
-                            <div class="mb-32 flex-between gap-8">
-                                <span class="text-gray-900 font-heading-two text-xl font-[600]">Subtotal</span> <span class="text-gray-900 font-heading-two text-md font-[700]">$859.00</span>
-                            </div>
-                            <div class="mb-0 flex-between gap-8">
-                                <span class="text-gray-900 font-heading-two text-xl font-[600]">Total</span> <span class="text-gray-900 font-heading-two text-md font-[700]">$859.00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-32">
-                        <div class="payment-item">
-                            <div class="form-check common-check common-radio py-16 mb-0">
-                                <input class="form-check-input" type="radio" name="payment" id="payment1"
-                                       checked="checked"> <label class="form-check-label font-[600] text-neutral-600"
-                                                                 for="payment1">Direct Bank transfer</label>
-                            </div>
-                            <div class="payment-item__content px-16 py-24 rounded-8 bg-main-50 relative">
-                                <p class="text-gray-800">
-                                    Make your payment directly into our bank account. Please
-                                    use your Order ID as the payment reference. Your order will not be shipped until
-                                    the funds have cleared in our account.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="payment-item">
-                            <div class="form-check common-check common-radio py-16 mb-0">
-                                <input class="form-check-input" type="radio" name="payment" id="payment2"> <label class="form-check-label font-[600] text-neutral-600" for="payment2">
-                                    Check
-                                    payments
+
+                        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                            @* Họ và tên *@
+                            <div>
+                                <label for="firstName"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Họ <span class="text-red-500">*</span>
                                 </label>
+                                <input id="firstName"
+                                       name="FirstName"
+                                       type="text"
+                                       autocomplete="given-name"
+                                       placeholder="Nhập họ"
+                                       required
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
                             </div>
-                            <div class="payment-item__content px-16 py-24 rounded-8 bg-main-50 relative">
-                                <p class="text-gray-800">
-                                    Make your payment directly into our bank account. Please
-                                    use your Order ID as the payment reference. Your order will not be shipped until
-                                    the funds have cleared in our account.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="payment-item">
-                            <div class="form-check common-check common-radio py-16 mb-0">
-                                <input class="form-check-input" type="radio" name="payment" id="payment3"> <label class="form-check-label font-[600] text-neutral-600" for="payment3">
-                                    Cash on
-                                    delivery
+
+                            <div>
+                                <label for="lastName"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Tên <span class="text-red-500">*</span>
                                 </label>
+                                <input id="lastName"
+                                       name="LastName"
+                                       type="text"
+                                       autocomplete="family-name"
+                                       placeholder="Nhập tên"
+                                       required
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
                             </div>
-                            <div class="payment-item__content px-16 py-24 rounded-8 bg-main-50 relative">
-                                <p class="text-gray-800">
-                                    Make your payment directly into our bank account. Please
-                                    use your Order ID as the payment reference. Your order will not be shipped until
-                                    the funds have cleared in our account.
-                                </p>
+
+                            @* Tên công ty *@
+                            <div class="sm:col-span-2">
+                                <label for="company"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Tên công ty
+                                    <span class="font-normal text-gray-400">(Không bắt buộc)</span>
+                                </label>
+                                <input id="company"
+                                       name="Company"
+                                       type="text"
+                                       autocomplete="organization"
+                                       placeholder="Tên công ty (nếu có)"
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
                             </div>
+
+                            @* Địa chỉ *@
+                            <div class="sm:col-span-2">
+                                <label for="country"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Quốc gia <span class="text-red-500">*</span>
+                                </label>
+                                <select id="country"
+                                        name="Country"
+                                        required
+                                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10">
+                                    <option value="VN" selected>Việt Nam</option>
+                                </select>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="address"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Địa chỉ nhận hàng <span class="text-red-500">*</span>
+                                </label>
+                                <input id="address"
+                                       name="Address"
+                                       type="text"
+                                       autocomplete="street-address"
+                                       placeholder="Số nhà, tên đường..."
+                                       required
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="addressDetail"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Căn hộ, tầng, tòa nhà
+                                    <span class="font-normal text-gray-400">(Không bắt buộc)</span>
+                                </label>
+                                <input id="addressDetail"
+                                       name="AddressDetail"
+                                       type="text"
+                                       autocomplete="address-line-2"
+                                       placeholder="Căn hộ, tầng, tòa nhà..."
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                            </div>
+
+                            <div>
+                                <label for="province"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Tỉnh / Thành phố <span class="text-red-500">*</span>
+                                </label>
+                                <select id="province"
+                                        name="ProvinceCode"
+                                        required
+                                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10">
+                                    <option value="">Chọn tỉnh / thành phố</option>
+                                    <option value="1">Thành phố test</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="ward"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Phường / Xã <span class="text-red-500">*</span>
+                                </label>
+                                <select id="ward"
+                                        name="WardCode"
+                                        required
+                                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10">
+                                    <option value="">Chọn phường / xã</option>
+                                    <option value="11">Phường test</option>
+                                </select>
+                            </div>
+
+                            @* Liên hệ *@
+                            <div>
+                                <label for="phone"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Số điện thoại <span class="text-red-500">*</span>
+                                </label>
+                                <input id="phone"
+                                       name="Phone"
+                                       type="tel"
+                                       autocomplete="tel"
+                                       placeholder="Ví dụ: 09xxxxxxxx"
+                                       required
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                            </div>
+
+                            <div>
+                                <label for="email"
+                                       class="mb-2 block text-sm font-semibold text-gray-700">
+                                    Email <span class="text-red-500">*</span>
+                                </label>
+                                <input id="email"
+                                       name="Email"
+                                       type="email"
+                                       autocomplete="email"
+                                       placeholder="example@email.com"
+                                       required
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                            </div>
+
                         </div>
+
+                        @* Additional Information *@
+                        <div class="mt-9 border-t border-gray-100 pt-7">
+                            <h3 class="mb-2 text-lg font-bold text-gray-900">
+                                Thông tin bổ sung
+                            </h3>
+                            <p class="mb-5 text-sm text-gray-500">
+                                Để lại lời nhắn nếu bạn có yêu cầu đặc biệt về đơn hàng hoặc giao hàng.
+                            </p>
+
+                            <label for="orderNotes"
+                                   class="mb-2 block text-sm font-semibold text-gray-700">
+                                Ghi chú đơn hàng
+                            </label>
+                            <textarea id="orderNotes"
+                                      name="OrderNotes"
+                                      rows="4"
+                                      placeholder="Ví dụ: Giao hàng ngoài giờ hành chính, vui lòng gọi trước khi giao..."
+                                      class="w-full resize-y rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10"></textarea>
+                        </div>
+
                     </div>
-                    <div class="mt-32 pt-32 border-t border-gray-100">
-                        <p class="text-gray-500">
-                            Your personal data will be used to process your order, support your
-                            experience throughout this website, and for other purposes described in our <a href="index.html" class="text-main-600 text-decoration-underline">privacy policy</a>
-                            .
-                        </p>
-                    </div><a href="checkout.html"
-                             class="btn btn-main mt-40 py-18 w-full rounded-8 mt-56 text-center">Place Order</a>
                 </div>
+
+                @* ========================= ORDER SUMMARY ========================= *@
+                <div class="xl:col-span-5 2xl:col-span-4">
+                    <div class="xl:sticky xl:top-6">
+
+                        <div class="rounded-2xl bg-gradient-to-r from-[#1F9345] to-[#249e63] px-6 py-5 text-white">
+                            <div class="flex items-center gap-3">
+                                <i class="ph ph-shopping-bag-open text-2xl"></i>
+                                <h2 class="text-xl font-bold">Đơn hàng của bạn</h2>
+                            </div>
+                            <p class="mt-1 text-sm text-white/80">
+                                Kiểm tra sản phẩm trước khi đặt hàng.
+                            </p>
+                        </div>
+
+                        <div class="mt-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+
+                            @* Product heading *@
+                            <div class="mb-5 flex items-center justify-between border-b border-gray-100 pb-4">
+                                <span class="font-semibold text-gray-900">Sản phẩm</span>
+                                <span class="font-semibold text-gray-900">Thành tiền</span>
+                            </div>
+
+                            @* Demo product 1 *@
+                            <div class="mb-5 flex items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium leading-6 text-gray-800">
+                                        Nước rửa chén Caterin Hương Cam Quế
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Đơn giá: 125.000 ₫
+                                        <span class="mx-1">×</span>
+                                        <span class="font-semibold text-gray-700">1</span>
+                                    </p>
+                                </div>
+                                <span class="shrink-0 text-sm font-bold text-gray-900">
+                                    125.000 ₫
+                                </span>
+                            </div>
+
+                            @* Demo product 2 *@
+                            <div class="mb-5 flex items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium leading-6 text-gray-800">
+                                        Nước rửa tay Caterin Hương Sen
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Đơn giá: 125.000 ₫
+                                        <span class="mx-1">×</span>
+                                        <span class="font-semibold text-gray-700">1</span>
+                                    </p>
+                                </div>
+                                <span class="shrink-0 text-sm font-bold text-gray-900">
+                                    125.000 ₫
+                                </span>
+                            </div>
+
+                            @* Demo product 3 *@
+                            <div class="mb-5 flex items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium leading-6 text-gray-800">
+                                        Nước lau sàn Caterin Hương Lavender
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Đơn giá: 125.000 ₫
+                                        <span class="mx-1">×</span>
+                                        <span class="font-semibold text-gray-700">1</span>
+                                    </p>
+                                </div>
+                                <span class="shrink-0 text-sm font-bold text-gray-900">
+                                    125.000 ₫
+                                </span>
+                            </div>
+
+                            @* Demo product 4 *@
+                            <div class="mb-5 flex items-start justify-between gap-4">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium leading-6 text-gray-800">
+                                        Nước rửa tay Caterin Hương Táo Kiwi
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Đơn giá: 125.000 ₫
+                                        <span class="mx-1">×</span>
+                                        <span class="font-semibold text-gray-700">1</span>
+                                    </p>
+                                </div>
+                                <span class="shrink-0 text-sm font-bold text-gray-900">
+                                    125.000 ₫
+                                </span>
+                            </div>
+
+                            @* Order totals *@
+                            <div class="mt-6 space-y-4 border-t border-gray-100 pt-5">
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-gray-600">Tạm tính</span>
+                                    <span class="text-sm font-semibold text-gray-900">
+                                        500.000 ₫
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-gray-600">Phí vận chuyển</span>
+                                    <span class="text-sm font-medium text-gray-500">
+                                        Tính sau
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4">
+                                    <span class="text-sm text-gray-600">Giảm giá</span>
+                                    <span class="text-sm font-medium text-gray-500">
+                                        0 ₫
+                                    </span>
+                                </div>
+
+                                <div class="flex items-center justify-between gap-4 border-t border-dashed border-gray-200 pt-5">
+                                    <span class="text-base font-bold text-gray-900">Tổng cộng</span>
+                                    <span class="text-xl font-bold text-[#1F9345]">
+                                        500.000 ₫
+                                    </span>
+                                </div>
+                            </div>
+
+                            @* Payment methods *@
+                            <div class="mt-7 border-t border-gray-100 pt-6">
+                                <h3 class="mb-4 text-base font-bold text-gray-900">
+                                    Phương thức thanh toán
+                                </h3>
+
+                                <div class="space-y-3">
+
+                                    <label for="paymentCod"
+                                           class="flex cursor-pointer items-start gap-3 rounded-xl border border-[#1F9345] bg-[#f5faf2] p-4 transition">
+                                        <input id="paymentCod"
+                                               type="radio"
+                                               name="PaymentMethod"
+                                               value="COD"
+                                               checked
+                                               class="mt-1 h-4 w-4 shrink-0 accent-[#1F9345]" />
+                                        <span class="min-w-0 flex-1">
+                                            <span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                                <i class="ph ph-truck text-lg text-[#1F9345]"></i>
+                                                Thanh toán khi nhận hàng (COD)
+                                            </span>
+                                            <span class="mt-1 block text-xs leading-5 text-gray-500">
+                                                Thanh toán trực tiếp cho đơn vị vận chuyển khi nhận được hàng.
+                                            </span>
+                                        </span>
+                                    </label>
+
+                                    <label for="paymentBank"
+                                           class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 transition hover:border-[#1F9345] hover:bg-[#f8fbf6]">
+                                        <input id="paymentBank"
+                                               type="radio"
+                                               name="PaymentMethod"
+                                               value="BankTransfer"
+                                               class="mt-1 h-4 w-4 shrink-0 accent-[#1F9345]" />
+                                        <span class="min-w-0 flex-1">
+                                            <span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                                <i class="ph ph-bank text-lg text-[#1F9345]"></i>
+                                                Chuyển khoản ngân hàng
+                                            </span>
+                                            <span class="mt-1 block text-xs leading-5 text-gray-500">
+                                                Thông tin chuyển khoản sẽ được cung cấp sau khi xác nhận đơn hàng.
+                                            </span>
+                                        </span>
+                                    </label>
+
+                                </div>
+                            </div>
+
+                            @* Privacy notice *@
+                            <div class="mt-6 rounded-xl bg-gray-50 p-4">
+                                <div class="flex items-start gap-2">
+                                    <i class="ph ph-shield-check mt-0.5 text-lg text-[#1F9345]"></i>
+                                    <p class="text-xs leading-5 text-gray-500">
+                                        Thông tin cá nhân của bạn được sử dụng để xử lý đơn hàng và hỗ trợ trải nghiệm mua sắm.
+                                        Xem thêm tại
+                                        <a href="/privacy-policy"
+                                           class="font-semibold text-[#1F9345] underline-offset-2 hover:underline">
+                                            Chính sách bảo mật
+                                        </a>
+                                        của Caterin.
+                                    </p>
+                                </div>
+                            </div>
+
+                            @* Place order *@
+                            <button type="submit"
+                                    class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 py-4 text-sm font-bold text-white shadow-sm transition hover:bg-[#18803b] focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20">
+                                <i class="ph ph-lock-key text-lg"></i>
+                                ĐẶT HÀNG
+                                <i class="ph ph-arrow-right text-lg"></i>
+                            </button>
+
+                            <p class="mt-3 text-center text-xs text-gray-400">
+                                Cảm ơn bạn đã tin tưởng và lựa chọn Caterin.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </form>
     </div>
 </section>

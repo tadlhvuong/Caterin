@@ -6,126 +6,190 @@
     Layout = null;
 }
 
-<div class="border border-gray-100 rounded-16 px-32 py-40">
-    <div class="mb-40">
-        <h4 class="mb-8">Thông tin cá nhân</h4>
-        <p class="text-gray-500">
-            Cập nhật thông tin tài khoản của bạn.
-        </p>
+<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+
+    <!-- Header -->
+    <div class="border-b border-gray-100 px-5 py-5 sm:px-7 sm:py-6">
+        <div class="flex items-center gap-3">
+            <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#F1F8EF] text-[#1F9345]">
+                <i class="ph ph-user-circle text-2xl"></i>
+            </div>
+
+            <div class="min-w-0">
+                <h2 class="text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
+                    Thông tin cá nhân
+                </h2>
+                <p class="mt-1 text-sm text-gray-500">
+                    Quản lý thông tin cá nhân và cập nhật hồ sơ của bạn.
+                </p>
+            </div>
+        </div>
     </div>
 
-    <form method="post" action="/profile/personal-info">
+    <form method="post" action="/profile/personal-info" class="bg-gray-50/40 p-5 sm:p-7">
 
         @Html.AntiForgeryToken()
 
+        <!-- Validation summary -->
         <div asp-validation-summary="ModelOnly"
-             class="text-danger mb-16">
+             class="mb-6 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
         </div>
 
-        <div class="row">
-            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
+        <!-- Form fields -->
+        <div class="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+
+            <!-- Họ và tên -->
+            <div class="min-w-0">
                 <label asp-for="DisplayName"
-                       class="text-neutral-900 text-lg mb-8 font-[500]">
+                       class="mb-2 block text-sm font-medium text-gray-700">
                     Họ và tên
                 </label>
 
-                <input class="common-input" asp-for="DisplayName">
+                <input asp-for="DisplayName"
+                       placeholder="Nhập họ và tên"
+                       autocomplete="name"
+                       class="h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300 focus:border-[#1F9345] focus:ring-4 focus:ring-[#1F9345]/10" />
+
                 <span asp-validation-for="DisplayName"
-                      class="text-danger"></span>
+                      class="mt-1.5 block text-xs text-red-500">
+                </span>
             </div>
 
-            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
+            <!-- Email -->
+            <div class="min-w-0">
                 <label asp-for="Email"
-                       class="text-neutral-900 text-lg mb-8 font-[500]">
+                       class="mb-2 block text-sm font-medium text-gray-700">
                     Email
                 </label>
 
-                <input class="common-input" asp-for="Email" readonly>
+                <div class="relative">
+                    <input asp-for="Email"
+                           readonly
+                           autocomplete="email"
+                           class="h-12 w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-100 px-4 pr-11 text-sm text-gray-500 outline-none" />
+
+                    <i class="ph ph-lock-key absolute right-4 top-1/2 -translate-y-1/2 text-base text-gray-400"></i>
+                </div>
+
+                <p class="mt-1.5 text-xs text-gray-400">
+                    Email đăng nhập không thể thay đổi tại đây.
+                </p>
             </div>
 
-            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
+            <!-- Số điện thoại -->
+            <div class="min-w-0">
                 <label asp-for="PhoneNumber"
-                       class="text-neutral-900 text-lg mb-8 font-[500]">
+                       class="mb-2 block text-sm font-medium text-gray-700">
                     Số điện thoại
                 </label>
 
-                <input class="common-input" asp-for="PhoneNumber">
+                <input asp-for="PhoneNumber"
+                       type="tel"
+                       placeholder="Nhập số điện thoại"
+                       autocomplete="tel"
+                       class="h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300 focus:border-[#1F9345] focus:ring-4 focus:ring-[#1F9345]/10" />
+
                 <span asp-validation-for="PhoneNumber"
-                      class="text-danger"></span>
+                      class="mt-1.5 block text-xs text-red-500">
+                </span>
             </div>
 
-            <div class="md:w-6/12 flex-grow-0 flex-shrink-0 basis-auto mb-24">
+            <!-- Ngày sinh -->
+            <div class="min-w-0">
                 <label asp-for="DateOfBirth"
-                       class="text-neutral-900 text-lg mb-8 font-[500]">
+                       class="mb-2 block text-sm font-medium text-gray-700">
                     Ngày sinh
                 </label>
 
-                <input type="date"
-                       class="common-input"
-                       asp-for="DateOfBirth">
+                <input asp-for="DateOfBirth"
+                       type="date"
+                       class="h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300 focus:border-[#1F9345] focus:ring-4 focus:ring-[#1F9345]/10" />
+
                 <span asp-validation-for="DateOfBirth"
-                      class="text-danger"></span>
+                      class="mt-1.5 block text-xs text-red-500">
+                </span>
             </div>
 
-            <div class="w-full mb-24">
-                <label class="text-neutral-900 text-lg mb-8 font-[500]">
+            <!-- Giới tính -->
+            <div class="sm:col-span-2">
+                <label class="mb-3 block text-sm font-medium text-gray-700">
                     Giới tính
                 </label>
 
-                <div class="flex gap-32">
-                    <div class="form-check common-check common-radio">
-                        <input class="form-check-input"
+                <div class="grid grid-cols-3 gap-3">
+
+                    <label class="cursor-pointer">
+                        <input asp-for="Gender"
                                type="radio"
-                               asp-for="Gender"
                                value="@Gender.Male"
-                               id="genderMale">
+                               id="genderMale"
+                               class="peer sr-only flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600 transition-all hover:border-[#8CC63F] peer-checked:border-[#1F9345] peer-checked:bg-[#F1F8EF] peer-checked:font-medium peer-checked:text-[#1F9345] peer-focus-visible:ring-4 peer-focus-visible:ring-[#1F9345]/10" />
 
-                        <label class="form-check-label" for="genderMale">
+                        <span class="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-600 transition-all hover:border-[#8CC63F] peer-checked:border-[#1F9345] peer-checked:bg-[#F1F8EF] peer-checked:font-medium peer-checked:text-[#1F9345] peer-focus-visible:ring-4 peer-focus-visible:ring-[#1F9345]/10">
+                            <i class="ph ph-user text-lg"></i>
                             Nam
-                        </label>
-                    </div>
+                        </span>
+                    </label>
 
-                    <div class="form-check common-check common-radio">
-                        <input class="form-check-input"
+                    <label class="cursor-pointer">
+                        <input asp-for="Gender"
                                type="radio"
-                               asp-for="Gender"
                                value="@Gender.Female"
-                               id="genderFemale">
+                               id="genderFemale"
+                               class="peer sr-only" />
 
-                        <label class="form-check-label" for="genderFemale">
+                        <span class="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-600 transition-all hover:border-[#8CC63F] peer-checked:border-[#1F9345] peer-checked:bg-[#F1F8EF] peer-checked:font-medium peer-checked:text-[#1F9345] peer-focus-visible:ring-4 peer-focus-visible:ring-[#1F9345]/10">
+                            <i class="ph ph-user text-lg"></i>
                             Nữ
-                        </label>
-                    </div>
+                        </span>
+                    </label>
 
-                    <div class="form-check common-check common-radio">
-                        <input class="form-check-input"
+                    <label class="cursor-pointer">
+                        <input asp-for="Gender"
                                type="radio"
-                               asp-for="Gender"
                                value="@Gender.Other"
-                               id="genderOther">
+                               id="genderOther"
+                               class="peer sr-only" />
 
-                        <label class="form-check-label" for="genderOther">
+                        <span class="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-600 transition-all hover:border-[#8CC63F] peer-checked:border-[#1F9345] peer-checked:bg-[#F1F8EF] peer-checked:font-medium peer-checked:text-[#1F9345] peer-focus-visible:ring-4 peer-focus-visible:ring-[#1F9345]/10">
+                            <i class="ph ph-user-circle text-lg"></i>
                             Khác
-                        </label>
-                    </div>
+                        </span>
+                    </label>
+
                 </div>
 
                 <span asp-validation-for="Gender"
-                      class="text-danger"></span>
+                      class="mt-1.5 block text-xs text-red-500">
+                </span>
             </div>
 
-            <div class="w-full">
-                <button class="btn btn-main py-18 px-48" type="submit">
-                    Lưu thay đổi
-                </button>
-            </div>
-
-            @if (Model.SavedSuccessfully)
-            {
-                <div class="alert alert-success mt-16">
-                    Cập nhật thông tin thành công.
-                </div>
-            }
         </div>
+
+        <!-- Footer -->
+        <div class="mt-7 flex flex-col-reverse gap-4 rounded-xl border border-gray-100 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+
+            <p class="text-xs leading-5 text-gray-400">
+                <i class="ph ph-info mr-1"></i>
+                Vui lòng kiểm tra thông tin trước khi lưu.
+            </p>
+
+            <button type="submit"
+                    class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm shadow-[#1F9345]/15 transition-all hover:bg-[#187A39] hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20">
+                <i class="ph ph-floppy-disk-back text-lg"></i>
+                Lưu thay đổi
+            </button>
+
+        </div>
+
+        <!-- Success -->
+        @if (Model.SavedSuccessfully)
+        {
+            <div class="mt-5 flex items-center gap-3 rounded-xl border border-green-100 bg-green-50 px-4 py-3.5 text-sm text-green-700">
+                <i class="ph ph-check-circle text-xl"></i>
+                <span class="font-medium">Cập nhật thông tin thành công.</span>
+            </div>
+        }
+
     </form>
 </div>

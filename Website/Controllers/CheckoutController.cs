@@ -10,13 +10,18 @@ namespace Website.Controllers
         {
             return View();
         }
-        public IActionResult Payment()
+        [HttpPost("place-order")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder()
         {
-            return View();
-        }
-        public IActionResult Success()
-        {
-            return View();
+            // TODO:
+            // 1. Validate thông tin Checkout.
+            // 2. Kiểm tra giỏ hàng.
+            // 3. Tạo Order và OrderItems.
+            // 4. Xử lý phương thức thanh toán.
+
+            // Tạm thời chưa triển khai nghiệp vụ.
+            return RedirectToAction("Success", "Order", new {  orderCode = "" });
         }
     }
 }

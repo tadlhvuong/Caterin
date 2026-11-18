@@ -1,0 +1,250 @@
+﻿@model Website.Models.Order.ReturnRequestDetailsViewModel
+
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu đổi trả";
+
+    var badgeClass = Model.StatusColor switch
+    {
+        "success" => "bg-green-100 text-green-700",
+        "danger" => "bg-red-100 text-red-700",
+        "info" => "bg-blue-100 text-blue-700",
+        _ => "bg-amber-100 text-amber-700"
+    };
+
+    var statusDescription = Model.Status switch
+    {
+        "Pending" => "Caterin đã tiếp nhận yêu cầu và đang chờ kiểm tra thông tin.",
+        "Processing" => "Yêu cầu đang được bộ phận chăm sóc khách hàng xử lý.",
+        "Approved" => "Yêu cầu đã được chấp nhận. Caterin sẽ liên hệ hướng dẫn bạn.",
+        "Rejected" => "Yêu cầu chưa được chấp nhận. Vui lòng liên hệ chăm sóc khách hàng.",
+        "Completed" => "Yêu cầu đổi trả đã được xử lý hoàn tất.",
+        _ => "Yêu cầu đang được cập nhật."
+    };
+}
+
+<section class="min-h-screen bg-[#f7faf7] py-8 lg:py-12">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+            <a href="/" class="hover:text-[#1F9345]">Trang chủ</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Order" asp-action="Index"
+               class="hover:text-[#1F9345]">Đơn hàng của tôi</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Order" asp-action="Details"
+               asp-route-orderCode="@Model.OrderCode"
+               class="hover:text-[#1F9345]">Chi tiết đơn hàng</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <span class="font-medium text-gray-800">Yêu cầu đổi trả</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+            <div>
+                <div class="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-[#1F9345]">
+                    <i class="ph ph-arrows-left-right text-2xl"></i>
+                </div>
+
+                <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">
+                    Chi tiết yêu cầu đổi trả
+                </h1>
+
+                <p class="mt-2 text-sm text-gray-500">
+                    Theo dõi quá trình xử lý yêu cầu của bạn.
+                </p>
+            </div>
+
+            <span class="inline-flex w-fit items-center rounded-full px-4 py-2 text-sm font-semibold @badgeClass">
+                @Model.StatusLabel
+            </span>
+        </div>
+
+        <!-- Status -->
+        <div class="mb-6 rounded-2xl border border-green-100 bg-white p-5 shadow-sm sm:p-6">
+            <div class="flex items-start gap-4">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green-100 text-[#1F9345]">
+                    <i class="ph ph-info text-2xl"></i>
+                </div>
+
+                <div class="flex-1">
+                    <h2 class="font-semibold text-gray-900">
+                        @Model.StatusLabel
+                    </h2>
+                    <p class="mt-1 text-sm leading-6 text-gray-600">
+                        @statusDescription
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-3">
+
+            <!-- Main content -->
+            <div class="space-y-6 lg:col-span-2">
+
+                <!-- Request information -->
+                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-5 flex items-center gap-2 font-semibold text-gray-900">
+                        <i class="ph ph-clipboard-text text-xl text-[#1F9345]"></i>
+                        Thông tin yêu cầu
+                    </h2>
+
+                    <div class="grid gap-5 sm:grid-cols-2">
+                        <div>
+                            <p class="text-xs text-gray-500">Mã yêu cầu</p>
+                            <p class="mt-1 font-semibold text-gray-900">
+                                @Model.RequestCode
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-500">Ngày gửi</p>
+                            <p class="mt-1 font-medium text-gray-800">
+                                @Model.RequestedAt.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-500">Hình thức xử lý</p>
+                            <p class="mt-1 font-medium text-gray-800">
+                                @Model.RequestTypeLabel
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-xs text-gray-500">Lý do</p>
+                            <p class="mt-1 font-medium text-gray-800">
+                                @Model.ReasonLabel
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <div class="mt-5 border-t border-gray-100 pt-5">
+                            <p class="text-xs text-gray-500">Mô tả chi tiết</p>
+                            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                                @Model.Description
+                            </p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Products -->
+                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                    <h2 class="mb-5 flex items-center gap-2 font-semibold text-gray-900">
+                        <i class="ph ph-package text-xl text-[#1F9345]"></i>
+                        Sản phẩm yêu cầu đổi trả
+                    </h2>
+
+                    <div class="space-y-4">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="flex gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                <img src="@item.ImageUrl"
+                                     alt="@item.ProductName"
+                                     class="h-20 w-20 shrink-0 rounded-xl border border-gray-100 object-cover"
+                                     onerror="this.src='/images/Default/default-product.png'" />
+
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-sm font-semibold text-gray-800">
+                                        @item.ProductName
+                                    </h3>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.VariantName))
+                                    {
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            @item.VariantName
+                                        </p>
+                                    }
+
+                                    <p class="mt-2 text-xs text-gray-500">
+                                        Số lượng đã mua: @item.PurchasedQuantity
+                                    </p>
+
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Số lượng yêu cầu: @item.ReturnQuantity
+                                    </p>
+                                </div>
+
+                                <div class="shrink-0 text-right">
+                                    <p class="text-sm font-semibold text-[#1F9345]">
+                                        @item.TotalPrice.ToString("N0")₫
+                                    </p>
+                                    <p class="mt-1 text-xs text-gray-400">
+                                        @item.UnitPrice.ToString("N0")₫ / sản phẩm
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (Model.RequestType == "Refund")
+                    {
+                        <div class="mt-5 flex items-center justify-between border-t border-gray-100 pt-5">
+                            <span class="text-sm font-medium text-gray-600">
+                                Giá trị sản phẩm yêu cầu hoàn
+                            </span>
+                            <span class="text-lg font-bold text-[#1F9345]">
+                                @Model.TotalReturnAmount.ToString("N0")₫
+                            </span>
+                        </div>
+                        <p class="mt-2 text-xs leading-5 text-gray-400">
+                            Giá trị trên chỉ mang tính tham khảo. Số tiền hoàn thực tế sẽ được xác định sau khi Caterin kiểm tra và phê duyệt.
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+
+                <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <h2 class="mb-4 font-semibold text-gray-900">
+                        Đơn hàng liên quan
+                    </h2>
+
+                    <p class="text-xs text-gray-500">Mã đơn hàng</p>
+                    <p class="mt-1 font-semibold text-gray-900">
+                        @Model.OrderCode
+                    </p>
+
+                    <a asp-controller="Order"
+                       asp-action="Details"
+                       asp-route-orderCode="@Model.OrderCode"
+                       class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                        Xem chi tiết đơn hàng
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                </div>
+
+                <div class="rounded-2xl border border-green-100 bg-green-50 p-5">
+                    <div class="flex items-center gap-2 text-[#1F9345]">
+                        <i class="ph ph-headset text-xl"></i>
+                        <h2 class="font-semibold">Cần hỗ trợ?</h2>
+                    </div>
+
+                    <p class="mt-2 text-sm leading-6 text-gray-600">
+                        Nếu cần hỗ trợ thêm về yêu cầu đổi trả, vui lòng liên hệ đội ngũ chăm sóc khách hàng Caterin.
+                    </p>
+
+                    <a href="tel:+84931424207"
+                       class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] hover:underline">
+                        <i class="ph ph-phone"></i>
+                        0931 424 207
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-7">
+            <a asp-controller="Order"
+               asp-action="Index"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 transition hover:text-[#1F9345]">
+                <i class="ph ph-arrow-left"></i>
+                Quay lại danh sách đơn hàng
+            </a>
+        </div>
+    </div>
+</section>

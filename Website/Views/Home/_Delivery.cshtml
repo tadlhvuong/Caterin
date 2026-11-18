@@ -1,0 +1,154 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+}
+
+<section id="delivery-promotion" class="py-6 sm:py-8">
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
+
+        <div class="relative isolate overflow-hidden rounded-2xl bg-[#1F9345] px-5 py-8 sm:px-8 lg:px-10 lg:py-10">
+
+            <!-- Background -->
+            <img src="@Url.Content("~/images/Demos/delivery-bg.png")"
+                 alt=""
+                 aria-hidden="true"
+                 class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-20">
+
+            <div class="grid grid-cols-1 items-center gap-6 md:grid-cols-12 md:gap-4">
+
+                <!-- Delivery man -->
+                <div class="hidden md:col-span-4 md:block lg:col-span-3">
+                    <div class="flex justify-center" data-aos="fade-down-right">
+                        <img src="@Url.Content("~/images/Demos/delivery-man.png")"
+                             alt="Nhân viên giao hàng Caterin"
+                             loading="lazy"
+                             class="max-h-56 w-auto object-contain lg:max-h-64">
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="text-center md:col-span-8 lg:col-span-5">
+                    <h2 class="mb-3 text-xl font-bold leading-snug text-white sm:text-2xl lg:text-3xl"
+                        data-aos="fade-down">
+                        Giao hàng nhanh chóng, tiện lợi
+                    </h2>
+
+                    <p class="text-sm leading-relaxed text-white/90 sm:text-base"
+                       data-aos="zoom-in">
+                        Đặt hàng hôm nay, nhận hàng nhanh chóng vào ngày hôm sau.
+                    </p>
+
+                    <p class="mt-2 text-xs font-medium text-white/80 sm:text-sm">
+                        Áp dụng cho đơn hàng đủ điều kiện giao hàng
+                    </p>
+
+                    <a href="/shop"
+                       class="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#1F9345] shadow-sm transition hover:-translate-y-0.5 hover:bg-[#F0F8ED] hover:shadow-md"
+                       data-aos="fade-up">
+                        Khám phá sản phẩm
+                        <i class="ph ph-arrow-right text-lg"></i>
+                    </a>
+                </div>
+
+                <!-- Product illustration -->
+                <div class="hidden md:col-span-5 md:flex md:justify-center lg:col-span-4"
+                     data-aos="zoom-out"
+                     data-aos-duration="800">
+                    <img src="@Url.Content("~/images/Demos/special-snacks-img.png")"
+                         alt=""
+                         aria-hidden="true"
+                         loading="lazy"
+                         class="max-h-48 w-auto object-contain lg:max-h-60">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="shipping" class="py-6 sm:py-8">
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+
+            <!-- Free shipping -->
+            <div data-aos="zoom-in" data-aos-duration="400">
+                <div class="group flex h-full items-center gap-4 rounded-2xl border border-gray-100 bg-[#F5F9F2] p-4 transition duration-300 hover:-translate-y-1 hover:bg-[#EDF6E9] hover:shadow-md sm:p-5">
+
+                    <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white transition group-hover:bg-[#18783A]">
+                        <i class="ph-fill ph-truck"></i>
+                    </span>
+
+                    <div>
+                        <h3 class="mb-1 text-sm font-bold text-gray-900 sm:text-base">
+                            Miễn phí vận chuyển
+                        </h3>
+                        <p class="text-xs leading-relaxed text-gray-500 sm:text-sm">
+                            Giao hàng toàn quốc cho đơn hàng đủ điều kiện.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Authentic products -->
+            <div data-aos="zoom-in" data-aos-duration="600">
+                <div class="group flex h-full items-center gap-4 rounded-2xl border border-gray-100 bg-[#F5F9F2] p-4 transition duration-300 hover:-translate-y-1 hover:bg-[#EDF6E9] hover:shadow-md sm:p-5">
+
+                    <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white transition group-hover:bg-[#18783A]">
+                        <i class="ph-fill ph-seal-check"></i>
+                    </span>
+
+                    <div>
+                        <h3 class="mb-1 text-sm font-bold text-gray-900 sm:text-base">
+                            Chính hãng 100%
+                        </h3>
+                        <p class="text-xs leading-relaxed text-gray-500 sm:text-sm">
+                            Chất lượng đảm bảo, nguồn gốc rõ ràng.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secure payment -->
+            <div data-aos="zoom-in" data-aos-duration="800">
+                <div class="group flex h-full items-center gap-4 rounded-2xl border border-gray-100 bg-[#F5F9F2] p-4 transition duration-300 hover:-translate-y-1 hover:bg-[#EDF6E9] hover:shadow-md sm:p-5">
+
+                    <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white transition group-hover:bg-[#18783A]">
+                        <i class="ph-fill ph-shield-check"></i>
+                    </span>
+
+                    <div>
+                        <h3 class="mb-1 text-sm font-bold text-gray-900 sm:text-base">
+                            Thanh toán an toàn
+                        </h3>
+                        <p class="text-xs leading-relaxed text-gray-500 sm:text-sm">
+                            Thanh toán nhanh chóng và bảo mật.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer support -->
+            <div data-aos="zoom-in" data-aos-duration="1000">
+                <div class="group flex h-full items-center gap-4 rounded-2xl border border-gray-100 bg-[#F5F9F2] p-4 transition duration-300 hover:-translate-y-1 hover:bg-[#EDF6E9] hover:shadow-md sm:p-5">
+
+                    <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-2xl text-white transition group-hover:bg-[#18783A]">
+                        <i class="ph-fill ph-headset"></i>
+                    </span>
+
+                    <div>
+                        <h3 class="mb-1 text-sm font-bold text-gray-900 sm:text-base">
+                            Hỗ trợ khách hàng
+                        </h3>
+                        <p class="text-xs leading-relaxed text-gray-500 sm:text-sm">
+                            Luôn sẵn sàng tư vấn và hỗ trợ bạn.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

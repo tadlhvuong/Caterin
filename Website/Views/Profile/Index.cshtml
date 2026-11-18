@@ -13,95 +13,28 @@
     };
 }
 
-@section Styles {
-    <style>
-        .account-menu {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 24px;
-            color: #555;
-            transition: .25s;
-        }
+<section class="py-8 sm:py-10 lg:py-14 xl:py-16">
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-5 lg:px-6">
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-6 xl:gap-8">
 
-            .account-menu:hover {
-                background: #F7F8FA;
-                color: var(--main-600);
-            }
-
-            .account-menu.active {
-                background: #EEF9F0;
-                color: var(--main-600);
-                font-weight: 600;
-                border-left: 3px solid var(--main-600);
-            }
-
-            .account-menu i {
-                font-size: 20px;
-                width: 22px;
-            }
-
-        #profile-content[aria-busy="true"] {
-            opacity: .6;
-            pointer-events: none;
-            transition: opacity .15s;
-        }
-    </style>
-}
-
-<section class="account py-80">
-    <div class="container container-lg">
-        <div class="row g-4">
             <partial name="_ProfileSidebar" />
 
             <div id="profile-content"
                  data-initial-tab="@tab"
                  data-initial-url="/profile/@url"
-                 class="2xl:w-9/12 xl:w-8/12 flex-grow-0 flex-shrink-0 basis-auto">
+                 aria-live="polite"
+                 class="min-w-0 lg:col-span-8 2xl:col-span-9">
             </div>
+
         </div>
     </div>
 </section>
 
 @section Scripts {
     <script src="~/js/profile/profile-tabs.js" asp-append-version="true"></script>
-
+    <script src="~/js/profile/profile-page.js" asp-append-version="true"></script>
     <script>
-        document.querySelector('#logout-form')?.addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const form = this;
-
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    credentials: 'same-origin',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Không thể đăng xuất. Vui lòng thử lại.');
-                }
-
-                const result = await response.json();
-
-                if (result.success) {
-                    window.dispatchEvent(new CustomEvent('caterin:customer-logout'));
-                    window.location.href = result.returnUrl;
-                }
-            } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Thông báo',
-                    text: error.message || 'Đã xảy ra lỗi khi đăng xuất.',
-                    confirmButtonText: 'Đóng'
-                });
-            }
-        });
-
+        // Success message.
         @if (TempData["Success"] != null)
         {
                 <text>
@@ -116,6 +49,7 @@
                 </text>
         }
 
+        // Error message.
         @if (TempData["Error"] != null)
         {
                 <text>

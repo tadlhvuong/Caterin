@@ -26,8 +26,8 @@ namespace Shared.Middlewares
                 context.Response.Headers["Content-Security-Policy"] =
                    "default-src 'self'; " +
                    "base-uri 'self'; " +
-                   "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://maps.googleapis.com https://maps.gstatic.com; " +
-                   "style-src 'self' 'unsafe-inline'  https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+                   "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://maps.googleapis.com https://maps.gstatic.com; " +
+                   "style-src 'self' 'unsafe-inline'  https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
                     "worker-src 'self' blob:;" +
                     "img-src 'self'  blob: https://*.googleapis.com https://*.gstatic.com data: https:; " +
                    "font-src 'self' https://fonts.gstatic.com https:; " +

@@ -1,113 +1,210 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
     Layout = null;
 }
 
-<section class="flash-sales pt-80 pb-80 overflow-hidden">
-    <div class="container container-lg">
+<section class="overflow-hidden bg-white py-12 sm:py-16 lg:py-20">
+    <div class="container mx-auto px-4">
 
-        <div class="section-heading">
-            <div class="flex-between flex-wrap gap-8">
-                <h5 class="mb-0">Voucher nổi bật</h5>
-                <div class="flex items-center gap-8">
-                    <button type="button" id="flash-prev"
-                            class="slick-prev slick-arrow flex items-center justify-center rounded-[50%] border border-gray-100 hover-border-main-600 text-xl hover-bg-main-600 hover-text-white transition-1">
-                        <i class="ph ph-caret-left"></i>
-                    </button>
-                    <button type="button" id="flash-next"
-                            class="slick-next slick-arrow flex items-center justify-center rounded-[50%] border border-gray-100 hover-border-main-600 text-xl hover-bg-main-600 hover-text-white transition-1">
-                        <i class="ph ph-caret-right"></i>
-                    </button>
-                </div>
+        <!-- Heading -->
+        <div class="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+            <div>
+                <span class="mb-2 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#1F9345]">
+                    <span class="h-1.5 w-1.5 rounded-full bg-[#8CC63F]"></span>
+                    Ưu đãi dành riêng cho bạn
+                </span>
+
+                <h2 class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl lg:text-3xl">
+                    Voucher nổi bật
+                </h2>
+
+                <p class="mt-2 max-w-xl text-sm leading-6 text-gray-500">
+                    Lưu mã ưu đãi và tận hưởng trải nghiệm mua sắm tiết kiệm hơn cùng Caterin.
+                </p>
+            </div>
+
+            <div class="hidden shrink-0 items-center gap-2 sm:flex">
+                <button type="button"
+                        id="flash-prev"
+                        aria-label="Voucher trước"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-[#1F9345] hover:bg-[#1F9345] hover:text-white">
+                    <i class="ph ph-caret-left text-lg"></i>
+                </button>
+
+                <button type="button"
+                        id="flash-next"
+                        aria-label="Voucher tiếp theo"
+                        class="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-[#1F9345] hover:bg-[#1F9345] hover:text-white">
+                    <i class="ph ph-caret-right text-lg"></i>
+                </button>
             </div>
         </div>
 
-        <div class="flash-sales__slider arrow-style-two">
-            <!-- Voucher -->
-            <div class="px-2">
-                <div class="voucher-item">
-                    <div class="voucher-left">
-                        <div class="voucher-top">
-                            <span class="voucher-tag">VOUCHER</span>
-                            <span class="voucher-code">
-                                Mã: <strong>F1SHOES</strong>
-                            </span>
-                        </div>
-                        <h2 class="voucher-title">
-                            Giảm <span>10%</span>
-                        </h2>
-                        <ul class="voucher-rule">
-                            <li>HD: 30.07.2026</li>
-                        </ul>
-                        <div class="voucher-bottom">
-                            <a href="#" class="voucher-condition xl:block hidden">
-                                Điều kiện áp dụng
-                            </a>
-                            <button class="voucher-copy">
-                                SAO CHÉP MÃ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Voucher list -->
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-            <!-- Voucher -->
-            <div class="px-2">
-                <div class="voucher-item">
-                    <div class="voucher-left">
-                        <div class="voucher-top">
-                            <span class="voucher-tag">VOUCHER</span>
-                            <span class="voucher-code">
-                                Mã: <strong>F1SHOES</strong>
-                            </span>
-                        </div>
-                        <h2 class="voucher-title">
-                            Giảm <span>10%</span>
-                        </h2>
-                        <ul class="voucher-rule">
-                            <li>HD: 30.07.2026</li>
-                        </ul>
-                        <div class="voucher-bottom">
-                            <a href="#" class="voucher-condition xl:block hidden">
-                                Điều kiện áp dụng
-                            </a>
-                            <button class="voucher-copy">
-                                SAO CHÉP MÃ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Voucher 1 -->
+            <article class="group relative flex min-h-[190px] overflow-hidden rounded-2xl border border-[#E5EFDF] bg-[#F7FAF4] transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/5">
 
-            <!-- Voucher -->
-            <div class="px-2">
-                <div class="voucher-item">
-                    <div class="voucher-left">
-                        <div class="voucher-top">
-                            <span class="voucher-tag">VOUCHER</span>
-                            <span class="voucher-code">
-                                Mã: <strong>F1SHOES</strong>
+                <!-- Decorative circles -->
+                <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#8CC63F]/10"></div>
+                <div class="pointer-events-none absolute -bottom-10 right-16 h-24 w-24 rounded-full bg-[#1F9345]/5"></div>
+
+                <div class="relative flex min-w-0 flex-1 flex-col justify-between p-5 sm:p-6">
+                    <div>
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="rounded-full bg-[#E8F3E2] px-3 py-1 text-[10px] font-bold tracking-wider text-[#1F9345]">
+                                VOUCHER
+                            </span>
+
+                            <span class="text-xs text-gray-500">
+                                Mã: <strong class="font-bold tracking-wide text-gray-800">CATERIN10</strong>
                             </span>
                         </div>
-                        <h2 class="voucher-title">
-                            Giảm <span>10%</span>
-                        </h2>
-                        <ul class="voucher-rule">
-                            <li>HD: 30.07.2026</li>
-                        </ul>
-                        <div class="voucher-bottom">
-                            <a href="#" class="voucher-condition xl:block hidden">
-                                Điều kiện áp dụng
-                            </a>
-                            <button class="voucher-copy">
-                                SAO CHÉP MÃ
-                            </button>
-                        </div>
+
+                        <h3 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                            Giảm <span class="text-[#1F9345]">10%</span>
+                        </h3>
+
+                        <p class="mt-2 text-xs text-gray-500">
+                            Áp dụng cho đơn hàng đủ điều kiện
+                        </p>
+                    </div>
+
+                    <div class="mt-5 flex items-center justify-between gap-3">
+                        <span class="text-[11px] text-gray-400">
+                            HSD: 30.11.2026
+                        </span>
+
+                        <button type="button"
+                                class="voucher-copy inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#1F9345] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#18783A]"
+                                data-code="CATERIN10">
+                            <i class="ph ph-copy text-sm"></i>
+                            Sao chép mã
+                        </button>
                     </div>
                 </div>
-            </div>
+
+                <!-- Ticket edge -->
+                <div class="relative flex w-8 shrink-0 items-center justify-center border-l border-dashed border-[#D5E5CD]">
+                    <span class="absolute -left-[9px] top-[-9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="absolute -bottom-[9px] -left-[9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="text-[10px] font-bold tracking-[0.2em] text-[#8CC63F]" style="writing-mode: vertical-rl;">
+                        CATERIN
+                    </span>
+                </div>
+            </article>
+
+            <!-- Voucher 2 -->
+            <article class="group relative flex min-h-[190px] overflow-hidden rounded-2xl border border-[#E5EFDF] bg-[#F7FAF4] transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/5">
+
+                <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#8CC63F]/10"></div>
+                <div class="pointer-events-none absolute -bottom-10 right-16 h-24 w-24 rounded-full bg-[#1F9345]/5"></div>
+
+                <div class="relative flex min-w-0 flex-1 flex-col justify-between p-5 sm:p-6">
+                    <div>
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="rounded-full bg-[#E8F3E2] px-3 py-1 text-[10px] font-bold tracking-wider text-[#1F9345]">
+                                VOUCHER
+                            </span>
+
+                            <span class="text-xs text-gray-500">
+                                Mã: <strong class="font-bold tracking-wide text-gray-800">CATERIN20</strong>
+                            </span>
+                        </div>
+
+                        <h3 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                            Giảm <span class="text-[#1F9345]">20K</span>
+                        </h3>
+
+                        <p class="mt-2 text-xs text-gray-500">
+                            Ưu đãi cho đơn hàng từ 199K
+                        </p>
+                    </div>
+
+                    <div class="mt-5 flex items-center justify-between gap-3">
+                        <span class="text-[11px] text-gray-400">
+                            HSD: 30.11.2026
+                        </span>
+
+                        <button type="button"
+                                class="voucher-copy inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#1F9345] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#18783A]"
+                                data-code="CATERIN20">
+                            <i class="ph ph-copy text-sm"></i>
+                            Sao chép mã
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative flex w-8 shrink-0 items-center justify-center border-l border-dashed border-[#D5E5CD]">
+                    <span class="absolute -left-[9px] top-[-9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="absolute -bottom-[9px] -left-[9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="text-[10px] font-bold tracking-[0.2em] text-[#8CC63F]" style="writing-mode: vertical-rl;">
+                        CATERIN
+                    </span>
+                </div>
+            </article>
+
+            <!-- Voucher 3 -->
+            <article class="group relative flex min-h-[190px] overflow-hidden rounded-2xl border border-[#E5EFDF] bg-[#F7FAF4] transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-green-900/5">
+
+                <div class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[#8CC63F]/10"></div>
+                <div class="pointer-events-none absolute -bottom-10 right-16 h-24 w-24 rounded-full bg-[#1F9345]/5"></div>
+
+                <div class="relative flex min-w-0 flex-1 flex-col justify-between p-5 sm:p-6">
+                    <div>
+                        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                            <span class="rounded-full bg-[#E8F3E2] px-3 py-1 text-[10px] font-bold tracking-wider text-[#1F9345]">
+                                VOUCHER
+                            </span>
+
+                            <span class="text-xs text-gray-500">
+                                Mã: <strong class="font-bold tracking-wide text-gray-800">FREESHIP</strong>
+                            </span>
+                        </div>
+
+                        <h3 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
+                            Miễn phí <span class="text-[#1F9345]">Ship</span>
+                        </h3>
+
+                        <p class="mt-2 text-xs text-gray-500">
+                            Cho đơn hàng từ 299K
+                        </p>
+                    </div>
+
+                    <div class="mt-5 flex items-center justify-between gap-3">
+                        <span class="text-[11px] text-gray-400">
+                            HSD: 30.11.2026
+                        </span>
+
+                        <button type="button"
+                                class="voucher-copy inline-flex shrink-0 items-center gap-2 rounded-lg bg-[#1F9345] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#18783A]"
+                                data-code="FREESHIP">
+                            <i class="ph ph-copy text-sm"></i>
+                            Sao chép mã
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative flex w-8 shrink-0 items-center justify-center border-l border-dashed border-[#D5E5CD]">
+                    <span class="absolute -left-[9px] top-[-9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="absolute -bottom-[9px] -left-[9px] h-[18px] w-[18px] rounded-full bg-white"></span>
+                    <span class="text-[10px] font-bold tracking-[0.2em] text-[#8CC63F]" style="writing-mode: vertical-rl;">
+                        CATERIN
+                    </span>
+                </div>
+            </article>
+
         </div>
+
+        <!-- View all -->
+        <div class="mt-6 text-center">
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:text-[#176F36]">
+                Khám phá sản phẩm
+                <i class="ph ph-arrow-right"></i>
+            </a>
+        </div>
+
     </div>
 </section>

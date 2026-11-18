@@ -1,0 +1,197 @@
+﻿@model Website.Models.Order.MyOrdersViewModel
+
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+
+    var currentStatus = Model.StatusFilter ?? "All";
+
+    var statusTabs = new[]
+    {
+        new { Value = "All", Label = "Tất cả" },
+        new { Value = "Pending", Label = "Chờ xác nhận" },
+        new { Value = "Processing", Label = "Đang chuẩn bị" },
+        new { Value = "Shipping", Label = "Đang giao" },
+        new { Value = "Completed", Label = "Đã giao" },
+        new { Value = "Cancelled", Label = "Đã hủy" }
+    };
+}
+
+<section class="min-h-screen bg-[#f8faf8] py-8 lg:py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+        @* ================= HEADER ================= *@
+        <div class="mb-8">
+            <div class="mb-2 flex items-center gap-2 text-sm text-gray-500">
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="transition hover:text-[#1F9345]">
+                    Trang chủ
+                </a>
+
+                <i class="ph ph-caret-right text-xs"></i>
+
+                <span class="font-medium text-gray-800">
+                    Đơn hàng của tôi
+                </span>
+            </div>
+
+            <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">
+                        Đơn hàng của tôi
+                    </h1>
+
+                    <p class="mt-2 text-sm text-gray-500">
+                        Theo dõi và quản lý các đơn hàng bạn đã đặt tại Caterin.
+                    </p>
+                </div>
+
+                <a asp-controller="Product"
+                   asp-action="Index"
+                   class="inline-flex items-center justify-center gap-2 rounded-full bg-[#1F9345] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187a39]">
+                    <i class="ph ph-shopping-bag text-lg"></i>
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        </div>
+
+        @* ================= ORDER SUMMARY ================= *@
+        <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Tổng đơn hàng</p>
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            @Model.TotalOrders
+                        </p>
+                    </div>
+
+                    <div class="flex size-12 items-center justify-center rounded-xl bg-green-50 text-[#1F9345]">
+                        <i class="ph ph-shopping-bag-open text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Đang xử lý / vận chuyển</p>
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            @Model.InProgressOrders
+                        </p>
+                    </div>
+
+                    <div class="flex size-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <i class="ph ph-truck text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Đã giao thành công</p>
+                        <p class="mt-2 text-2xl font-bold text-gray-900">
+                            @Model.CompletedOrders
+                        </p>
+                    </div>
+
+                    <div class="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i class="ph ph-package text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        @* ================= SEARCH ================= *@
+        <div class="mb-5 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
+
+            <form id="orderSearchForm"
+                  class="flex flex-col gap-3 sm:flex-row">
+
+                <div class="relative flex-1">
+                    <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400"></i>
+
+                    <input type="search"
+                           id="orderKeyword"
+                           name="keyword"
+                           value="@Model.Keyword"
+                           placeholder="Tìm theo mã đơn hàng..."
+                           class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-12 pr-4 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-2 focus:ring-[#1F9345]/10" />
+                </div>
+
+                <button type="submit"
+                        class="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-7 text-sm font-semibold text-white transition hover:bg-[#187a39]">
+                    <i class="ph ph-magnifying-glass text-lg"></i>
+                    Tìm kiếm
+                </button>
+
+                <button type="button"
+                        id="clearOrderSearch"
+                        class="@(string.IsNullOrWhiteSpace(Model.Keyword) ? "hidden" : "") inline-flex h-12 items-center justify-center rounded-xl border border-gray-200 px-5 text-sm font-medium text-gray-600 transition hover:bg-gray-50">
+                    Xóa tìm kiếm
+                </button>
+
+            </form>
+        </div>
+
+        @* ================= STATUS FILTER ================= *@
+        <div class="mb-6 flex flex-col gap-3 border-b border-gray-200 sm:flex-row sm:items-center sm:justify-between">
+
+            <!-- Status Tabs -->
+            <div id="orderStatusTabs" class="overflow-x-auto">
+                <div class="flex min-w-max gap-2 pb-px">
+
+                    @foreach (var tab in statusTabs)
+                    {
+                        var isActive = currentStatus == tab.Value;
+
+                        <button type="button"
+                                data-status="@tab.Value"
+                                aria-pressed="@(isActive ? "true" : "false")"
+                                class="order-status-tab relative whitespace-nowrap px-4 py-3 text-sm font-medium transition
+                                           @(isActive
+                                                                           ? "text-[#1F9345]"
+                                                                           : "text-gray-500 hover:text-gray-900")">
+
+                        @tab.Label
+
+                            <span class="tab-indicator absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-[#1F9345]
+                                             @(isActive ? "" : "hidden")">
+                            </span>
+                        </button>
+                                        }
+
+                </div>
+            </div>
+
+            <!-- Return Request History -->
+            <a href="/order/return-requests"
+               class="inline-flex shrink-0 items-center justify-center gap-2 self-start pb-3 text-sm font-semibold text-[#1F9345] transition hover:text-[#18834f] sm:self-auto sm:pb-0">
+                <i class="ph ph-arrow-counter-clockwise text-lg"></i>
+                <span>Lịch sử đổi trả / hoàn tiền</span>
+                <i class="ph ph-arrow-up-right text-xs"></i>
+            </a>
+
+        </div>
+
+        @* ================= AJAX ORDER LIST ================= *@
+        <div id="orderListContainer"
+             data-url="@Url.Action("GetOrders", "Order")"
+             data-status="@currentStatus"
+             data-keyword="@Model.Keyword">
+
+            <div id="orderListContent">
+                @await Html.PartialAsync("Partials/_OrderList", Model)
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/order/my-orders.js" asp-append-version="true"></script>
+}

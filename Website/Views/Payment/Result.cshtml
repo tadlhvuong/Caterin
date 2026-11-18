@@ -1,0 +1,210 @@
+﻿@using Website.Models.Order
+@model PaymentResultViewModel
+
+@{
+    ViewData["Title"] = "Kết quả thanh toán | Caterin";
+
+    var isSuccess = string.Equals(Model.Result, "Success", StringComparison.OrdinalIgnoreCase);
+    var isFailed = string.Equals(Model.Result, "Failed", StringComparison.OrdinalIgnoreCase);
+
+    var iconClass = isSuccess
+        ? "ph-check"
+        : isFailed
+            ? "ph-x"
+            : "ph-clock";
+
+    var iconBackground = isSuccess
+        ? "bg-[#1F9345]"
+        : isFailed
+            ? "bg-red-500"
+            : "bg-amber-500";
+
+    var heroBackground = isSuccess
+        ? "from-[#f0f9ed] via-white to-[#e9f7ed]"
+        : isFailed
+            ? "from-red-50 via-white to-rose-50"
+            : "from-amber-50 via-white to-yellow-50";
+
+    var title = !string.IsNullOrWhiteSpace(Model.Title)
+        ? Model.Title
+        : isSuccess
+            ? "Thanh toán thành công!"
+            : isFailed
+                ? "Thanh toán chưa thành công"
+                : "Đang xác nhận thanh toán";
+
+    var message = !string.IsNullOrWhiteSpace(Model.Message)
+        ? Model.Message
+        : isSuccess
+            ? "Giao dịch đã được xác nhận. Cảm ơn bạn đã lựa chọn Caterin."
+            : isFailed
+                ? "Giao dịch không thành công. Bạn có thể kiểm tra lại hoặc thử thanh toán bằng phương thức khác."
+                : "Hệ thống đang xác minh giao dịch. Vui lòng chờ cập nhật trước khi thực hiện thanh toán lại.";
+}
+
+<div class="min-h-screen bg-[#f8faf8] text-slate-700">
+
+    <section class="border-b border-gray-100 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="/" class="text-gray-500 hover:text-[#1F9345]">Trang chủ</a>
+                <i class="ph ph-caret-right text-xs text-gray-400"></i>
+                <span class="font-medium text-[#1F9345]">Kết quả thanh toán</span>
+            </nav>
+        </div>
+    </section>
+
+    <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+
+        <section class="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-gray-100 bg-gradient-to-br @heroBackground px-5 py-10 text-center sm:px-10 sm:py-14">
+
+            <div class="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/70 blur-3xl"></div>
+
+            <div class="relative">
+                <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full @iconBackground text-white shadow-lg ring-8 ring-white">
+                    <i class="ph-bold @iconClass text-4xl"></i>
+                </div>
+
+                <h1 class="mt-7 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    @title
+                </h1>
+
+                <p class="mx-auto mt-4 max-w-xl text-sm leading-7 text-gray-600 sm:text-base">
+                    @message
+                </p>
+            </div>
+        </section>
+
+        <section class="mx-auto mt-7 max-w-3xl">
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-7">
+                <h2 class="font-bold text-gray-900">Thông tin giao dịch</h2>
+
+                <div class="mt-5 space-y-4 text-sm">
+                    <div class="flex flex-wrap justify-between gap-2">
+                        <span class="text-gray-500">Mã đơn hàng</span>
+                        <span class="font-semibold text-gray-900">@Model.OrderCode</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.TransactionCode))
+                    {
+                        <div class="flex flex-wrap justify-between gap-2">
+                            <span class="text-gray-500">Mã giao dịch</span>
+                            <span class="break-all text-right font-medium text-gray-800">
+                                @Model.TransactionCode
+                            </span>
+                        </div>
+                    }
+
+                    <div class="flex flex-wrap justify-between gap-2">
+                        <span class="text-gray-500">Phương thức</span>
+                        <span class="font-medium text-gray-800">@Model.PaymentMethod</span>
+                    </div>
+
+                    <div class="flex flex-wrap justify-between gap-2">
+                        <span class="text-gray-500">Thời gian</span>
+                        <span class="font-medium text-gray-800">
+                            @(Model.PaidAt?.ToString("dd/MM/yyyy HH:mm") ?? "Đang cập nhật")
+                        </span>
+                    </div>
+
+                    <div class="border-t border-dashed border-gray-200 pt-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <span class="font-semibold text-gray-900">Số tiền giao dịch</span>
+                            <span class="text-xl font-bold text-[#1F9345]">
+                                @Model.Amount.ToString("N0")đ
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mx-auto mt-7 max-w-3xl">
+            @if (isSuccess)
+            {
+                <div class="rounded-2xl border border-[#dcefd8] bg-[#f2faef] p-5 sm:p-6">
+                    <div class="flex items-start gap-3">
+                        <i class="ph-fill ph-check-circle mt-0.5 text-xl text-[#1F9345]"></i>
+                        <div>
+                            <h2 class="font-bold text-gray-900">Đơn hàng đã được thanh toán</h2>
+                            <p class="mt-1 text-sm leading-6 text-gray-600">
+                                Bạn có thể xem chi tiết đơn hàng và theo dõi quá trình giao hàng.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (isFailed)
+            {
+                <div class="rounded-2xl border border-red-100 bg-red-50 p-5 sm:p-6">
+                    <div class="flex items-start gap-3">
+                        <i class="ph-fill ph-warning-circle mt-0.5 text-xl text-red-600"></i>
+                        <div>
+                            <h2 class="font-bold text-gray-900">Bạn chưa bị tính là đã thanh toán</h2>
+                            <p class="mt-1 text-sm leading-6 text-gray-600">
+                                Vui lòng kiểm tra trạng thái giao dịch trước khi thử lại để tránh thanh toán trùng.
+                                Nếu tài khoản đã bị trừ tiền, hãy liên hệ Caterin để được hỗ trợ đối soát.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5 sm:p-6">
+                    <div class="flex items-start gap-3">
+                        <i class="ph-fill ph-clock mt-0.5 text-xl text-amber-600"></i>
+                        <div>
+                            <h2 class="font-bold text-gray-900">Không nên thanh toán lại ngay</h2>
+                            <p class="mt-1 text-sm leading-6 text-gray-600">
+                                Giao dịch đang chờ xác nhận. Hãy kiểm tra lại trạng thái đơn hàng sau ít phút
+                                hoặc liên hệ hỗ trợ nếu giao dịch kéo dài bất thường.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </section>
+
+        <section class="mx-auto mt-7 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2">
+            @if (isSuccess)
+            {
+                <a asp-controller="Order"
+                   asp-action="Details"
+                   asp-route-orderCode="@Model.OrderCode"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#187b39]">
+                    <i class="ph ph-receipt text-lg"></i>
+                    Xem chi tiết đơn hàng
+                </a>
+
+                <a asp-controller="Order"
+                   asp-action="Track"
+                   asp-route-orderCode="@Model.OrderCode"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                    <i class="ph ph-truck text-lg"></i>
+                    Theo dõi đơn hàng
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Order"
+                   asp-action="Details"
+                   asp-route-orderCode="@Model.OrderCode"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-[#187b39]">
+                    <i class="ph ph-receipt text-lg"></i>
+                    Kiểm tra đơn hàng
+                </a>
+
+                <a href="/contact"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3.5 text-sm font-semibold text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                    <i class="ph ph-headset text-lg"></i>
+                    Liên hệ hỗ trợ
+                </a>
+            }
+        </section>
+
+        <p class="mx-auto mt-8 max-w-3xl text-center text-xs leading-6 text-gray-400">
+            Caterin – An toàn cho mọi nhà. Nếu cần hỗ trợ về giao dịch, vui lòng cung cấp mã đơn hàng khi liên hệ với chúng tôi.
+        </p>
+    </main>
+</div>

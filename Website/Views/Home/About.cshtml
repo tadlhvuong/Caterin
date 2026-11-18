@@ -1,920 +1,620 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Giới thiệu về Caterin";
+
+    var values = new[]
+    {
+        new {
+            Icon = "ph-target",
+            Title = "Sứ mệnh",
+            Description = "Mang đến các sản phẩm chăm sóc gia đình chất lượng cao, an toàn và dễ sử dụng."
+        },
+        new {
+            Icon = "ph-eye",
+            Title = "Tầm nhìn",
+            Description = "Trở thành thương hiệu chăm sóc gia đình được tin dùng tại Việt Nam."
+        },
+        new {
+            Icon = "ph-heart",
+            Title = "Giá trị cốt lõi",
+            Description = "Chất lượng - Uy tín - Đổi mới - Phát triển bền vững."
+        }
+    };
+
+    var advantages = new[]
+    {
+        new {
+            Icon = "ph-shield-check",
+            Title = "An toàn",
+            Description = "Thành phần được lựa chọn kỹ lưỡng."
+        },
+        new {
+            Icon = "ph-sparkle",
+            Title = "Hiệu quả",
+            Description = "Chú trọng hiệu quả làm sạch."
+        },
+        new {
+            Icon = "ph-leaf",
+            Title = "Thân thiện",
+            Description = "Hướng đến môi trường sống xanh."
+        },
+        new {
+            Icon = "ph-medal",
+            Title = "Chất lượng",
+            Description = "Không ngừng cải tiến sản phẩm và dịch vụ."
+        }
+    };
+
+    var commitments = new[]
+    {
+        new {
+            Icon = "ph-shield-check",
+            Title = "An toàn",
+            Description = "Thành phần được lựa chọn cẩn thận, an toàn cho người sử dụng khi dùng đúng hướng dẫn."
+        },
+        new {
+            Icon = "ph-flask",
+            Title = "Kiểm soát chất lượng",
+            Description = "Chú trọng kiểm tra chất lượng và độ ổn định của sản phẩm."
+        },
+        new {
+            Icon = "ph-leaf",
+            Title = "Thân thiện",
+            Description = "Hướng tới giải pháp vệ sinh hiệu quả và giảm tác động đến môi trường."
+        },
+        new {
+            Icon = "ph-medal",
+            Title = "Cam kết",
+            Description = "Luôn cải tiến chất lượng sản phẩm và dịch vụ để mang lại trải nghiệm tốt hơn."
+        }
+    };
+
+    var partners = Enumerable.Range(1, 6);
+
+    var products = new[]
+    {
+        new {
+            Image = "/images/about/handwash.png",
+            Name = "Nước rửa tay",
+            Alt = "Nước rửa tay Caterin"
+        },
+        new {
+            Image = "/images/about/dishwash.png",
+            Name = "Nước rửa chén",
+            Alt = "Nước rửa chén Caterin"
+        },
+        new {
+            Image = "/images/about/floor.png",
+            Name = "Nước lau sàn",
+            Alt = "Nước lau sàn Caterin"
+        },
+        new {
+            Image = "/images/about/glass.png",
+            Name = "Sản phẩm khác",
+            Alt = "Sản phẩm vệ sinh Caterin"
+        }
+    };
+
+    var processes = new[]
+    {
+        new {
+            Icon = "ph-magnifying-glass",
+            Title = "Nghiên cứu",
+            Description = "Nghiên cứu nhu cầu người tiêu dùng và lựa chọn công thức phù hợp."
+        },
+        new {
+            Icon = "ph-flask",
+            Title = "Phát triển",
+            Description = "Hoàn thiện công thức nhằm đảm bảo hiệu quả làm sạch và an toàn."
+        },
+        new {
+            Icon = "ph-check-circle",
+            Title = "Kiểm định",
+            Description = "Kiểm tra chất lượng và độ ổn định trước khi sản xuất."
+        },
+        new {
+            Icon = "ph-factory",
+            Title = "Sản xuất",
+            Description = "Được sản xuất theo quy trình kiểm soát chất lượng."
+        },
+        new {
+            Icon = "ph-truck",
+            Title = "Giao đến khách hàng",
+            Description = "Đóng gói cẩn thận và vận chuyển đến khách hàng."
+        }
+    };
+
+    var statistics = new[]
+    {
+        new { Number = "10+", Label = "Năm phát triển" },
+        new { Number = "500+", Label = "Đại lý & Nhà phân phối" },
+        new { Number = "100K+", Label = "Khách hàng tin dùng" },
+        new { Number = "98%", Label = "Khách hàng hài lòng" }
+    };
 }
-<section class="breadcrumb py-80 bg-color-three">
 
-    <div class="container container-lg text-center">
+@* ========================= HERO ========================= *@
+<section class="relative isolate overflow-hidden bg-gradient-to-br from-[#f2f9ed] via-white to-[#e8f6eb]">
+    <div class="pointer-events-none absolute -right-32 -top-32 h-[450px] w-[450px] rounded-full bg-[#8CC63F]/15 blur-[100px]"></div>
+    <div class="pointer-events-none absolute -bottom-40 -left-32 h-[400px] w-[400px] rounded-full bg-[#1F9345]/10 blur-[100px]"></div>
 
-        <span class="text-main-600 text-sm font-[600]">
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:py-28">
 
-            Welcome to Caterin
+        <div class="text-center lg:text-left">
+            <span class="inline-flex items-center gap-2 rounded-full border border-[#8CC63F]/30 bg-white/80 px-4 py-2 text-xs font-bold uppercase tracking-wider text-[#1F9345] shadow-sm sm:text-sm">
+                <i class="ph-fill ph-leaf text-lg"></i>
+                Welcome to Caterin
+            </span>
 
-        </span>
-
-        <h2 class="mt-12 mb-20">
-
-            An toàn cho mọi nhà
-
-        </h2>
-
-        <p class="text-gray-600 mx-auto"
-           style="max-width:760px;">
-
-            Caterin là thương hiệu chuyên cung cấp các sản phẩm chăm sóc gia đình,
-            mang đến giải pháp vệ sinh an toàn, hiệu quả và thân thiện với môi trường.
-
-        </p>
-
-    </div>
-
-</section>
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <div class="row align-items-center g-5">
-
-            <div class="col-lg-6">
-
-                <img src="/images/about/about.jpg"
-                     class="rounded-24 w-100">
-
-            </div>
-
-            <div class="col-lg-6">
-
-                <span class="text-main-600 font-[600]">
-
-                    OUR STORY
-
+            <h1 class="mt-7 text-4xl font-extrabold leading-[1.15] tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">
+                An toàn cho
+                <span class="text-[#1F9345]">mọi nhà.</span>
+                <span class="mt-3 block text-2xl font-semibold leading-snug text-gray-700 sm:text-3xl lg:text-4xl">
+                    Sạch lành từ những điều giản dị.
                 </span>
+            </h1>
 
-                <h2 class="mt-16 mb-24">
+            <p class="mx-auto mt-6 max-w-xl text-base leading-8 text-gray-600 lg:mx-0">
+                Caterin mang đến những sản phẩm chăm sóc gia đình,
+                hướng đến giải pháp vệ sinh an toàn, hiệu quả và thân thiện
+                với môi trường sống.
+            </p>
 
-                    Chúng tôi tin rằng một ngôi nhà sạch là nền tảng cho cuộc sống khỏe mạnh.
+            <div class="mt-9 flex flex-wrap justify-center gap-3 sm:gap-4 lg:justify-start">
+                <a href="/shop"
+                   class="inline-flex items-center justify-center gap-2 rounded-full bg-[#1F9345] px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-green-800/20 transition duration-300 hover:-translate-y-1 hover:bg-[#16783a]">
+                    Khám phá sản phẩm
+                    <i class="ph-bold ph-arrow-right text-lg"></i>
+                </a>
 
-                </h2>
-
-                <p class="text-gray-600 mb-24">
-
-                    Caterin được xây dựng với mong muốn mang đến những sản phẩm chăm sóc gia đình chất lượng cao,
-                    an toàn cho sức khỏe và thân thiện với môi trường.
-
-                </p>
-
-                <p class="text-gray-600">
-
-                    Chúng tôi không ngừng nghiên cứu và cải tiến để mỗi sản phẩm đều mang lại sự tiện lợi,
-                    hiệu quả và cảm giác yên tâm cho mọi gia đình Việt.
-
-                </p>
-
+                <a href="/contact"
+                   class="inline-flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-7 py-3.5 text-sm font-bold text-gray-700 transition duration-300 hover:border-[#1F9345] hover:text-[#1F9345]">
+                    Liên hệ với chúng tôi
+                    <i class="ph-bold ph-arrow-up-right text-lg"></i>
+                </a>
             </div>
 
+            <div class="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-4 text-sm font-medium text-gray-600 lg:justify-start">
+                <span class="inline-flex items-center gap-2">
+                    <i class="ph-fill ph-shield-check text-xl text-[#1F9345]"></i>
+                    Quan tâm an toàn
+                </span>
+                <span class="inline-flex items-center gap-2">
+                    <i class="ph-fill ph-sparkle text-xl text-[#1F9345]"></i>
+                    Chú trọng hiệu quả
+                </span>
+                <span class="inline-flex items-center gap-2">
+                    <i class="ph-fill ph-leaf text-xl text-[#1F9345]"></i>
+                    Hướng đến bền vững
+                </span>
+            </div>
         </div>
 
+        <div class="relative mx-auto w-full max-w-xl lg:max-w-none">
+            <div class="absolute -inset-5 rounded-[3rem] bg-gradient-to-br from-[#8CC63F]/20 to-[#1F9345]/10 blur-2xl"></div>
+
+            <div class="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white p-3 shadow-2xl shadow-green-900/10 sm:rounded-[2.5rem] sm:p-4">
+                <img src="/images/about/about.jpg"
+                     alt="Caterin - Sản phẩm chăm sóc gia đình"
+                     class="aspect-[4/3] w-full rounded-[1.5rem] object-cover sm:rounded-[2rem]"
+                     fetchpriority="high">
+
+                <div class="absolute bottom-7 left-7 right-7 rounded-2xl border border-white/70 bg-white/90 p-4 shadow-xl backdrop-blur-md sm:bottom-9 sm:left-9 sm:right-9 sm:p-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#eaf6e9] text-2xl text-[#1F9345]">
+                            <i class="ph-fill ph-heart"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900">Caterin</p>
+                            <p class="mt-1 text-sm text-gray-500">An toàn cho mọi nhà</p>
+                        </div>
+                        <i class="ph-fill ph-seal-check ml-auto text-2xl text-[#1F9345]"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute -right-4 -top-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#8CC63F] text-3xl text-white shadow-lg sm:-right-6 sm:-top-6 sm:h-20 sm:w-20">
+                <i class="ph-fill ph-leaf"></i>
+            </div>
+        </div>
     </div>
-
 </section>
-<section class="py-80 bg-neutral-50">
 
-    <div class="container container-lg">
+@* ========================= OUR STORY ========================= *@
+<section class="overflow-hidden py-20 lg:py-28">
+    <div class="mx-auto grid max-w-7xl items-center gap-14 px-4 sm:px-6 lg:grid-cols-2 lg:gap-20 lg:px-8">
 
-        <div class="row g-4">
+        <div class="relative mx-auto w-full max-w-xl lg:max-w-none">
+            <div class="absolute -left-5 -top-5 h-32 w-32 rounded-tl-[3rem] border-l-2 border-t-2 border-[#8CC63F]/60"></div>
+            <div class="absolute -bottom-5 -right-5 h-32 w-32 rounded-br-[3rem] border-b-2 border-r-2 border-[#1F9345]/40"></div>
 
-            <div class="col-md-4">
-
-                <div class="border rounded-16 p-32 h-full text-center">
-
-                    <i class="ph-fill ph-target text-main-600 text-5xl mb-20"></i>
-
-                    <h4>Sứ mệnh</h4>
-
-                    <p>
-
-                        Mang đến các sản phẩm chăm sóc gia đình chất lượng cao,
-                        an toàn và dễ sử dụng.
-
-                    </p>
-
-                </div>
-
+            <div class="relative overflow-hidden rounded-[2rem] bg-[#f2f8ef] p-3 shadow-xl">
+                <img src="/images/about/about.jpg"
+                     alt="Câu chuyện thương hiệu Caterin"
+                     class="h-[360px] w-full rounded-[1.5rem] object-cover sm:h-[480px]"
+                     loading="lazy">
             </div>
 
-            <div class="col-md-4">
-
-                <div class="border rounded-16 p-32 h-full text-center">
-
-                    <i class="ph-fill ph-eye text-main-600 text-5xl mb-20"></i>
-
-                    <h4>Tầm nhìn</h4>
-
-                    <p>
-
-                        Trở thành thương hiệu chăm sóc gia đình được tin dùng
-                        tại Việt Nam.
-
-                    </p>
-
+            <div class="absolute -bottom-7 right-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-xl sm:right-8 sm:p-5">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#eaf6e9] text-2xl text-[#1F9345]">
+                        <i class="ph-fill ph-house-line"></i>
+                    </span>
+                    <div>
+                        <p class="font-bold text-gray-900">Caterin</p>
+                        <p class="mt-1 text-xs text-gray-500">Chăm sóc tổ ấm mỗi ngày</p>
+                    </div>
                 </div>
-
             </div>
-
-            <div class="col-md-4">
-
-                <div class="border rounded-16 p-32 h-full text-center">
-
-                    <i class="ph-fill ph-heart text-main-600 text-5xl mb-20"></i>
-
-                    <h4>Giá trị cốt lõi</h4>
-
-                    <p>
-
-                        Chất lượng - Uy tín - Đổi mới - Phát triển bền vững.
-
-                    </p>
-
-                </div>
-
-            </div>
-
         </div>
 
+        <div class="pt-3 lg:pt-0">
+            <span class="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                <span class="h-0.5 w-8 bg-[#1F9345]"></span>
+                Our Story
+            </span>
+
+            <h2 class="mt-5 text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl">
+                Chúng tôi tin rằng một ngôi nhà sạch là nền tảng cho cuộc sống tốt đẹp.
+            </h2>
+
+            <p class="mt-6 text-base leading-8 text-gray-600">
+                Caterin được xây dựng với mong muốn mang đến những sản phẩm
+                chăm sóc gia đình chất lượng, chú trọng sự an toàn khi sử dụng
+                và thân thiện với môi trường.
+            </p>
+
+            <p class="mt-4 text-base leading-8 text-gray-600">
+                Chúng tôi không ngừng nghiên cứu và cải tiến để mỗi sản phẩm
+                đều mang lại sự tiện lợi, hiệu quả và cảm giác yên tâm
+                cho mọi gia đình Việt.
+            </p>
+
+            <div class="mt-9 grid grid-cols-2 gap-4">
+                <div class="rounded-2xl bg-[#f2f8ef] p-5 transition hover:bg-[#eaf6e9]">
+                    <i class="ph-fill ph-house-line text-3xl text-[#1F9345]"></i>
+                    <h3 class="mt-3 font-bold text-gray-900">Cho gia đình</h3>
+                    <p class="mt-2 text-sm leading-6 text-gray-500">
+                        Chăm sóc không gian sống mỗi ngày.
+                    </p>
+                </div>
+
+                <div class="rounded-2xl bg-[#f2f8ef] p-5 transition hover:bg-[#eaf6e9]">
+                    <i class="ph-fill ph-leaf text-3xl text-[#1F9345]"></i>
+                    <h3 class="mt-3 font-bold text-gray-900">Hướng bền vững</h3>
+                    <p class="mt-2 text-sm leading-6 text-gray-500">
+                        Quan tâm đến môi trường sống.
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
-
 </section>
-<section class="py-80">
 
-    <div class="container container-lg">
+@* ========================= MISSION / VISION / VALUES ========================= *@
+<section class="bg-[#f7faf6] py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-2xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                What Drives Us
+            </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Những giá trị tạo nên Caterin
+            </h2>
+            <p class="mt-4 leading-7 text-gray-500">
+                Mỗi sản phẩm và hoạt động của Caterin đều hướng đến một mục tiêu chung:
+                mang lại trải nghiệm chăm sóc gia đình tốt hơn.
+            </p>
+        </div>
 
-        <div class="text-center mb-64">
+        <div class="grid gap-6 md:grid-cols-3">
+            @foreach (var item in values)
+            {
+                <div class="group rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-sm transition duration-300 hover:-translate-y-2 hover:border-[#8CC63F]/40 hover:shadow-xl">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf6e9] text-3xl text-[#1F9345] transition duration-300 group-hover:bg-[#1F9345] group-hover:text-white">
+                        <i class="ph-fill @item.Icon"></i>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900">@item.Title</h3>
+                    <p class="mt-3 leading-7 text-gray-500">@item.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
 
-            <h2>
-
+@* ========================= WHY CHOOSE US ========================= *@
+<section class="py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-2xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Why Caterin
+            </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                 Vì sao chọn Caterin?
-
             </h2>
-
-        </div>
-
-        <div class="row g-4">
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-shield-check text-main-600 text-5xl mb-20"></i>
-
-                    <h5>An toàn</h5>
-
-                    <p>
-
-                        Thành phần được lựa chọn kỹ lưỡng.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-sparkle text-main-600 text-5xl mb-20"></i>
-
-                    <h5>Hiệu quả</h5>
-
-                    <p>
-
-                        Làm sạch mạnh mẽ.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-leaf text-main-600 text-5xl mb-20"></i>
-
-                    <h5>Thân thiện</h5>
-
-                    <p>
-
-                        Thân thiện môi trường.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3">
-
-                <div class="border rounded-16 p-32 text-center">
-
-                    <i class="ph-fill ph-medal text-main-600 text-5xl mb-20"></i>
-
-                    <h5>Chất lượng</h5>
-
-                    <p>
-
-                        Được nhiều khách hàng tin dùng.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-<section class="py-80 bg-neutral-50">
-
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <span class="text-main-600 font-[600]">
-                QUALITY COMMITMENT
-            </span>
-
-            <h2 class="mt-12">
-                Chứng nhận & Cam kết
-            </h2>
-
-            <p class="text-gray-500 mx-auto"
-               style="max-width:700px;">
-
-                Caterin luôn đặt chất lượng và sự an toàn lên hàng đầu,
-                mang đến những sản phẩm chăm sóc gia đình đáng tin cậy.
-
+            <p class="mt-4 leading-7 text-gray-500">
+                Chúng tôi luôn hướng đến những giá trị thiết thực
+                trong từng sản phẩm chăm sóc gia đình.
             </p>
-
         </div>
 
-        <div class="row g-4">
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-shield-check text-main-600 text-6xl mb-24"></i>
-
-                    <h5 class="mb-16">
-                        An toàn
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Thành phần được lựa chọn cẩn thận,
-                        an toàn cho người sử dụng khi dùng đúng hướng dẫn.
-
-                    </p>
-
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var item in advantages)
+            {
+                <div class="group rounded-3xl border border-gray-100 bg-white p-7 text-center transition duration-300 hover:-translate-y-2 hover:border-[#8CC63F]/50 hover:shadow-xl">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf6e9] text-3xl text-[#1F9345] transition duration-300 group-hover:bg-[#1F9345] group-hover:text-white">
+                        <i class="ph-fill @item.Icon"></i>
+                    </div>
+                    <h3 class="mt-5 text-lg font-bold text-gray-900">@item.Title</h3>
+                    <p class="mt-2 text-sm leading-6 text-gray-500">@item.Description</p>
                 </div>
-
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-flask text-main-600 text-6xl mb-24"></i>
-
-                    <h5 class="mb-16">
-                        Kiểm soát chất lượng
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Mỗi lô sản phẩm đều trải qua quy trình kiểm tra trước khi đến tay khách hàng.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-leaf text-main-600 text-6xl mb-24"></i>
-
-                    <h5 class="mb-16">
-                        Thân thiện
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Hướng tới giải pháp vệ sinh hiệu quả và giảm tác động đến môi trường.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3 col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <i class="ph-fill ph-medal text-main-600 text-6xl mb-24"></i>
-
-                    <h5 class="mb-16">
-                        Cam kết
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Luôn cải tiến chất lượng sản phẩm và dịch vụ để mang lại trải nghiệm tốt nhất.
-
-                    </p>
-
-                </div>
-
-            </div>
-
+            }
         </div>
-
     </div>
-
 </section>
-<section class="py-80">
 
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <span class="text-main-600 font-[600]">
-
-                TRUSTED BY
-
+@* ========================= QUALITY COMMITMENT ========================= *@
+<section class="bg-[#f7faf6] py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-3xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Quality Commitment
             </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Chất lượng & Cam kết
+            </h2>
+            <p class="mt-4 leading-7 text-gray-500">
+                Caterin luôn đặt chất lượng và sự an tâm của khách hàng
+                làm trọng tâm trong quá trình phát triển sản phẩm.
+            </p>
+        </div>
 
-            <h2 class="mt-12">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach (var item in commitments)
+            {
+                <div class="group rounded-3xl border border-gray-100 bg-white p-7 text-center shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf6e9] text-3xl text-[#1F9345] transition group-hover:bg-[#1F9345] group-hover:text-white">
+                        <i class="ph-fill @item.Icon"></i>
+                    </div>
+                    <h3 class="mt-5 font-bold text-gray-900">@item.Title</h3>
+                    <p class="mt-3 text-sm leading-7 text-gray-500">@item.Description</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
 
+@* ========================= PARTNERS ========================= *@
+<section class="py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-12 max-w-2xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Trusted By
+            </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                 Đối tác & Khách hàng
-
             </h2>
-
-            <p class="text-gray-500">
-
-                Caterin tự hào đồng hành cùng nhiều đại lý,
-                cửa hàng và doanh nghiệp trên toàn quốc.
-
+            <p class="mt-4 leading-7 text-gray-500">
+                Caterin mong muốn xây dựng mối quan hệ hợp tác bền vững
+                cùng các đại lý, cửa hàng và doanh nghiệp.
             </p>
-
         </div>
 
-        <div class="row g-4">
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo1.png"
-                         class="img-fluid"
-                         alt="Partner">
-
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            @foreach (var partner in partners)
+            {
+                <div class="group flex h-28 items-center justify-center rounded-2xl border border-gray-100 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:border-[#8CC63F]/40 hover:shadow-lg">
+                    <img src="/images/partners/logo@(partner).png"
+                         alt="Đối tác Caterin @partner"
+                         class="max-h-16 max-w-full object-contain opacity-70 grayscale transition duration-300 group-hover:opacity-100 group-hover:grayscale-0"
+                         loading="lazy">
                 </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo2.png"
-                         class="img-fluid">
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo3.png"
-                         class="img-fluid">
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo4.png"
-                         class="img-fluid">
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo5.png"
-                         class="img-fluid">
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-2 col-md-4 col-6">
-
-                <div class="border rounded-16 p-24 text-center">
-
-                    <img src="/images/partners/logo6.png"
-                         class="img-fluid">
-
-                </div>
-
-            </div>
-
+            }
         </div>
-
     </div>
-
 </section>
 
-
-<section class="py-80 bg-neutral-50">
-
-    <div class="container container-lg">
-
-        <div class="text-center mb-64">
-
-            <h2>
-
-                Danh mục sản phẩm
-
-            </h2>
-
-        </div>
-
-        <div class="row g-4">
-
-            <div class="col-md-3">
-
-                <div class="category-card">
-
-                    <img src="/images/about/handwash.png">
-
-                    <h5>Nước rửa tay</h5>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="category-card">
-
-                    <img src="/images/about/dishwash.png">
-
-                    <h5>Nước rửa chén</h5>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="category-card">
-
-                    <img src="/images/about/floor.png">
-
-                    <h5>Nước lau sàn</h5>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3">
-
-                <div class="category-card">
-
-                    <img src="/images/about/glass.png">
-
-                    <h5>Sản phẩm khác</h5>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <span class="text-main-600 text-sm font-[600]">
-                OUR PROCESS
+@* ========================= PRODUCT CATEGORIES ========================= *@
+<section class="bg-[#f7faf6] py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-2xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Our Products
             </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                Danh mục sản phẩm
+            </h2>
+            <p class="mt-4 leading-7 text-gray-500">
+                Những giải pháp chăm sóc và vệ sinh giúp ngôi nhà luôn sạch sẽ, thơm mát.
+            </p>
+        </div>
 
-            <h2 class="mt-12">
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+            @foreach (var product in products)
+            {
+                <a href="/shop"
+                   class="group overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition duration-300 hover:-translate-y-2 hover:shadow-xl">
+                    <div class="relative aspect-square overflow-hidden bg-[#f1f7ee] p-5 sm:p-7">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/0 to-[#8CC63F]/10 opacity-0 transition group-hover:opacity-100"></div>
+                        <img src="@product.Image"
+                             alt="@product.Alt"
+                             class="relative h-full w-full object-contain transition duration-500 group-hover:scale-110"
+                             loading="lazy">
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 p-4 sm:p-5">
+                        <h3 class="font-bold text-gray-900 transition group-hover:text-[#1F9345]">
+                            @product.Name
+                        </h3>
+                        <i class="ph-bold ph-arrow-up-right shrink-0 text-xl text-[#1F9345] transition duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"></i>
+                    </div>
+                </a>
+            }
+        </div>
+
+        <div class="mt-10 text-center">
+            <a href="/shop"
+               class="inline-flex items-center gap-2 rounded-full border border-[#1F9345]/30 bg-white px-7 py-3.5 text-sm font-bold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+                Xem tất cả sản phẩm
+                <i class="ph-bold ph-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+@* ========================= PROCESS ========================= *@
+<section class="py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-3xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Our Process
+            </span>
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                 Quy trình tạo nên sản phẩm Caterin
             </h2>
-
-            <p class="text-gray-500 mx-auto"
-               style="max-width:720px">
-
-                Mỗi sản phẩm đều trải qua quy trình nghiên cứu, kiểm soát chất lượng và sản xuất nghiêm ngặt nhằm mang đến sự an tâm cho mọi gia đình.
-
+            <p class="mt-4 leading-7 text-gray-500">
+                Mỗi sản phẩm đều hướng đến quy trình nghiên cứu,
+                kiểm soát chất lượng và sản xuất nhằm mang đến
+                sự an tâm cho mọi gia đình.
             </p>
-
         </div>
 
-        <div class="row g-4">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            @for (var i = 0; i < processes.Length; i++)
+            {
+                var item = processes[i];
 
-            <div class="col-lg col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full position-relative">
-
-                    <div class="mb-24">
-
-                        <span class="w-72 h-72 rounded-circle bg-main-50 inline-flex items-center justify-center">
-
-                            <i class="ph-fill ph-magnifying-glass text-main-600 text-4xl"></i>
-
-                        </span>
-
-                    </div>
-
-                    <span class="badge bg-main-600 mb-16">
-
-                        STEP 01
-
+                <div class="group relative rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm transition duration-300 hover:-translate-y-2 hover:border-[#8CC63F]/40 hover:shadow-lg">
+                    <span class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eaf6e9] text-3xl text-[#1F9345] transition group-hover:bg-[#1F9345] group-hover:text-white">
+                        <i class="ph-fill @item.Icon"></i>
                     </span>
 
-                    <h5 class="mb-16">
-
-                        Nghiên cứu
-
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Nghiên cứu nhu cầu người tiêu dùng và lựa chọn công thức phù hợp.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <div class="mb-24">
-
-                        <span class="w-72 h-72 rounded-circle bg-main-50 inline-flex items-center justify-center">
-
-                            <i class="ph-fill ph-flask text-main-600 text-4xl"></i>
-
-                        </span>
-
-                    </div>
-
-                    <span class="badge bg-main-600 mb-16">
-
-                        STEP 02
-
+                    <span class="mt-5 inline-flex rounded-full bg-[#eaf6e9] px-3 py-1 text-xs font-bold tracking-wider text-[#1F9345]">
+                        STEP 0@(i + 1)
                     </span>
 
-                    <h5 class="mb-16">
-
-                        Phát triển
-
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Hoàn thiện công thức nhằm đảm bảo hiệu quả làm sạch và an toàn.
-
-                    </p>
-
+                    <h3 class="mt-4 font-bold text-gray-900">@item.Title</h3>
+                    <p class="mt-3 text-sm leading-6 text-gray-500">@item.Description</p>
                 </div>
-
-            </div>
-
-            <div class="col-lg col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <div class="mb-24">
-
-                        <span class="w-72 h-72 rounded-circle bg-main-50 inline-flex items-center justify-center">
-
-                            <i class="ph-fill ph-check-circle text-main-600 text-4xl"></i>
-
-                        </span>
-
-                    </div>
-
-                    <span class="badge bg-main-600 mb-16">
-
-                        STEP 03
-
-                    </span>
-
-                    <h5 class="mb-16">
-
-                        Kiểm định
-
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Kiểm tra chất lượng và độ ổn định trước khi sản xuất hàng loạt.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <div class="mb-24">
-
-                        <span class="w-72 h-72 rounded-circle bg-main-50 inline-flex items-center justify-center">
-
-                            <i class="ph-fill ph-factory text-main-600 text-4xl"></i>
-
-                        </span>
-
-                    </div>
-
-                    <span class="badge bg-main-600 mb-16">
-
-                        STEP 04
-
-                    </span>
-
-                    <h5 class="mb-16">
-
-                        Sản xuất
-
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Được sản xuất theo quy trình kiểm soát nghiêm ngặt.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg col-md-6">
-
-                <div class="border border-gray-100 rounded-16 p-32 text-center h-full">
-
-                    <div class="mb-24">
-
-                        <span class="w-72 h-72 rounded-circle bg-main-50 inline-flex items-center justify-center">
-
-                            <i class="ph-fill ph-truck text-main-600 text-4xl"></i>
-
-                        </span>
-
-                    </div>
-
-                    <span class="badge bg-main-600 mb-16">
-
-                        STEP 05
-
-                    </span>
-
-                    <h5 class="mb-16">
-
-                        Giao đến khách hàng
-
-                    </h5>
-
-                    <p class="text-gray-500 mb-0">
-
-                        Đóng gói cẩn thận và vận chuyển nhanh chóng trên toàn quốc.
-
-                    </p>
-
-                </div>
-
-            </div>
-
+            }
         </div>
-
     </div>
-
 </section>
 
-<section class="py-80 bg-neutral-50">
-
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <span class="text-main-600 font-[600]">
-
-                GALLERY
-
+@* ========================= GALLERY ========================= *@
+<section class="bg-[#f7faf6] py-20 lg:py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto mb-14 max-w-2xl text-center">
+            <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345] sm:text-sm">
+                Gallery
             </span>
-
-            <h2 class="mt-12">
-
+            <h2 class="mt-4 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                 Thư viện hình ảnh
-
             </h2>
-
-            <p class="text-gray-500">
-
+            <p class="mt-4 leading-7 text-gray-500">
                 Một số hình ảnh về sản phẩm, hoạt động và thương hiệu Caterin.
-
             </p>
-
         </div>
 
-        <div class="row g-4">
-
-            <div class="col-lg-4">
-
+        <div class="grid auto-rows-[160px] grid-cols-2 gap-3 sm:auto-rows-[220px] sm:gap-5 lg:grid-cols-4">
+            <div class="group relative col-span-2 row-span-2 overflow-hidden rounded-3xl bg-gray-200">
                 <img src="/images/about/gallery1.jpg"
-                     class="rounded-16 w-100">
-
+                     alt="Hình ảnh thương hiệu Caterin"
+                     class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                     loading="lazy">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-70"></div>
+                <span class="absolute bottom-6 left-6 text-lg font-bold text-white sm:text-xl">
+                    Caterin - An toàn cho mọi nhà
+                </span>
             </div>
 
-            <div class="col-lg-4">
-
+            <div class="group overflow-hidden rounded-3xl bg-gray-200">
                 <img src="/images/about/gallery2.jpg"
-                     class="rounded-16 w-100">
-
+                     alt="Sản phẩm Caterin"
+                     class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                     loading="lazy">
             </div>
 
-            <div class="col-lg-4">
-
+            <div class="group overflow-hidden rounded-3xl bg-gray-200">
                 <img src="/images/about/gallery3.jpg"
-                     class="rounded-16 w-100">
-
+                     alt="Hoạt động Caterin"
+                     class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                     loading="lazy">
             </div>
 
-            <div class="col-lg-6">
-
+            <div class="group col-span-2 overflow-hidden rounded-3xl bg-gray-200">
                 <img src="/images/about/gallery4.jpg"
-                     class="rounded-16 w-100">
-
+                     alt="Không gian và sản phẩm Caterin"
+                     class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                     loading="lazy">
             </div>
 
-            <div class="col-lg-6">
-
+            <div class="group col-span-2 overflow-hidden rounded-3xl bg-gray-200">
                 <img src="/images/about/gallery5.jpg"
-                     class="rounded-16 w-100">
-
+                     alt="Caterin - An toàn cho mọi nhà"
+                     class="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                     loading="lazy">
             </div>
-
         </div>
-
     </div>
-
 </section>
-<section class="py-80 bg-main-600">
 
-    <div class="container container-lg">
+@* ========================= STATISTICS ========================= *@
+<section class="relative isolate overflow-hidden bg-gradient-to-br from-[#16783a] via-[#1F9345] to-[#249e63] py-16 lg:py-20">
+    <div class="pointer-events-none absolute -right-20 -top-28 h-80 w-80 rounded-full border border-white/10"></div>
+    <div class="pointer-events-none absolute -bottom-40 -left-20 h-96 w-96 rounded-full border border-white/10"></div>
+    <div class="pointer-events-none absolute left-1/2 top-0 h-full w-px bg-white/10"></div>
 
-        <div class="row g-4 text-center text-white">
-
-            <div class="col-lg-3 col-6">
-
-                <div>
-
-                    <h2 class="mb-12 text-white">
-
-                        10+
-
-                    </h2>
-
-                    <p class="mb-0 opacity-75">
-
-                        Năm phát triển
-
+    <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4">
+            @foreach (var item in statistics)
+            {
+                <div class="text-center">
+                    <p class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                        @item.Number
                     </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3 col-6">
-
-                <div>
-
-                    <h2 class="mb-12 text-white">
-
-                        500+
-
-                    </h2>
-
-                    <p class="mb-0 opacity-75">
-
-                        Đại lý & Nhà phân phối
-
+                    <p class="mt-3 text-sm font-medium text-white/80 sm:text-base">
+                        @item.Label
                     </p>
-
                 </div>
-
-            </div>
-
-            <div class="col-lg-3 col-6">
-
-                <div>
-
-                    <h2 class="mb-12 text-white">
-
-                        100K+
-
-                    </h2>
-
-                    <p class="mb-0 opacity-75">
-
-                        Khách hàng tin dùng
-
-                    </p>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-3 col-6">
-
-                <div>
-
-                    <h2 class="mb-12 text-white">
-
-                        98%
-
-                    </h2>
-
-                    <p class="mb-0 opacity-75">
-
-                        Khách hàng hài lòng
-
-                    </p>
-
-                </div>
-
-            </div>
-
+            }
         </div>
-
     </div>
-
 </section>
-<section class="py-80 bg-main-600">
 
-    <div class="container text-center text-white">
+@* ========================= FINAL CTA ========================= *@
+<section class="relative isolate overflow-hidden bg-[#f2f8ef] py-20 lg:py-28">
+    <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-[#8CC63F]/20 blur-3xl"></div>
+    <div class="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-[#1F9345]/10 blur-3xl"></div>
 
-        <h2>
+    <div class="relative mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+        <span class="inline-flex items-center gap-2 rounded-full border border-[#8CC63F]/20 bg-white px-4 py-2 text-sm font-semibold text-[#1F9345] shadow-sm">
+            <i class="ph-fill ph-heart text-lg"></i>
+            Caterin - An toàn cho mọi nhà
+        </span>
 
-            Đồng hành cùng Caterin
-
+        <h2 class="mt-7 text-3xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+            Cùng Caterin
+            <span class="text-[#1F9345]">chăm sóc tổ ấm</span>
+            mỗi ngày.
         </h2>
 
-        <p>
-
-            Mang đến không gian sống sạch sẽ và an toàn cho mọi gia đình.
-
+        <p class="mx-auto mt-5 max-w-2xl text-base leading-8 text-gray-600">
+            Mang đến không gian sống sạch sẽ, thơm mát và an tâm hơn
+            cho mọi gia đình.
         </p>
 
-        <a href="/shop"
-           class="btn btn-white">
+        <div class="mt-9 flex flex-wrap justify-center gap-4">
+            <a href="/shop"
+               class="inline-flex items-center gap-2 rounded-full bg-[#1F9345] px-8 py-4 font-bold text-white shadow-lg shadow-green-800/20 transition duration-300 hover:-translate-y-1 hover:bg-[#16783a]">
+                Khám phá sản phẩm
+                <i class="ph-bold ph-arrow-right text-lg"></i>
+            </a>
 
-            Khám phá sản phẩm
-
-        </a>
-
+            <a href="/contact"
+               class="inline-flex items-center gap-2 rounded-full border border-[#1F9345]/30 bg-white px-8 py-4 font-bold text-[#1F9345] transition duration-300 hover:border-[#1F9345] hover:bg-[#eaf6e9]">
+                Liên hệ Caterin
+                <i class="ph ph-chat-circle-dots text-lg"></i>
+            </a>
+        </div>
     </div>
-
 </section>

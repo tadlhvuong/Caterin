@@ -1,0 +1,106 @@
+﻿@model Website.Models.Order.ReturnRequestSummaryViewModel
+
+@{
+    var badgeClass = Model.StatusColor switch
+    {
+        "success" => "bg-green-100 text-green-700",
+        "danger" => "bg-red-100 text-red-700",
+        "info" => "bg-blue-100 text-blue-700",
+        _ => "bg-amber-100 text-amber-700"
+    };
+
+    var reasonLabel = Model.Reason switch
+    {
+        "Damaged" => "Sản phẩm bị hư hỏng",
+        "WrongProduct" => "Giao sai sản phẩm",
+        "MissingItem" => "Thiếu sản phẩm",
+        "QualityIssue" => "Vấn đề về chất lượng",
+        "NotAsDescribed" => "Không đúng mô tả",
+        "Other" => "Lý do khác",
+        _ => Model.Reason
+    };
+}
+
+<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 class="flex items-center gap-2 font-semibold text-gray-900">
+            <i class="ph ph-arrows-left-right text-xl text-[#1F9345]"></i>
+            Yêu cầu đổi trả
+        </h2>
+
+        <span class="rounded-full px-3 py-1 text-xs font-semibold @badgeClass">
+            @Model.StatusLabel
+        </span>
+    </div>
+
+    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        <div>
+            <p class="text-xs text-gray-500">Mã yêu cầu</p>
+            <p class="mt-1 font-semibold text-gray-900">
+                @Model.RequestCode
+            </p>
+        </div>
+
+        <div>
+            <p class="text-xs text-gray-500">Ngày gửi yêu cầu</p>
+            <p class="mt-1 font-medium text-gray-800">
+                @Model.RequestedAt.ToString("dd/MM/yyyy HH:mm")
+            </p>
+        </div>
+
+        <div>
+            <p class="text-xs text-gray-500">Hình thức xử lý</p>
+            <p class="mt-1 font-medium text-gray-800">
+                @Model.RequestTypeLabel
+            </p>
+        </div>
+
+        <div>
+            <p class="text-xs text-gray-500">Lý do</p>
+            <p class="mt-1 font-medium text-gray-800">
+                @reasonLabel
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Description))
+    {
+        <div class="mt-4 border-t border-gray-100 pt-4">
+            <p class="text-xs text-gray-500">Mô tả chi tiết</p>
+            <p class="mt-2 whitespace-pre-line text-sm leading-6 text-gray-700">
+                @Model.Description
+            </p>
+        </div>
+    }
+
+    <div class="mt-5 rounded-xl bg-green-50 p-4">
+        <div class="flex items-start gap-3">
+            <i class="ph ph-info mt-0.5 text-xl text-[#1F9345]"></i>
+            <div>
+                <p class="text-sm font-semibold text-gray-800">
+                    Thông tin xử lý
+                </p>
+                <p class="mt-1 text-sm leading-6 text-gray-600">
+                    @switch (Model.Status)
+                    {
+                        case "Pending":
+                            @:Caterin đã tiếp nhận yêu cầu và sẽ kiểm tra thông tin của bạn.
+                            break;
+                        case "Processing":
+                            @:Yêu cầu đang được bộ phận chăm sóc khách hàng xử lý.
+                            break;
+                        case "Approved":
+                            @:Yêu cầu đã được chấp nhận. Caterin sẽ liên hệ để hướng dẫn bước tiếp theo.
+                            break;
+                        case "Rejected":
+                            @:Yêu cầu chưa được chấp nhận. Vui lòng liên hệ bộ phận chăm sóc khách hàng để được hỗ trợ.
+                            break;
+                        case "Completed":
+                            @:Yêu cầu đổi trả đã được xử lý hoàn tất.
+                            break;
+                    }
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

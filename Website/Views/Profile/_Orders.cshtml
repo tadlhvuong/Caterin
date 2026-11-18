@@ -1,288 +1,312 @@
 ﻿@using Shared.DTOs
 @model OrderItemDto
+
 @{
     Layout = null;
 }
 
-<div class="border border-gray-100 rounded-16 px-32 py-40">
+<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white">
 
     <!-- Header -->
-    <div class="flex-between flex-wrap gap-16 mb-40">
+    <div class="border-b border-gray-100 px-5 py-5 sm:px-7 sm:py-6">
 
-        <div>
-            <h4 class="mb-8">Đơn hàng của tôi</h4>
-            <div class="flex flex-wrap gap-12 mb-32">
-                <a class="btn btn-main btn-sm">Tất cả</a>
-                <a class="btn btn-outline-main btn-sm">Chờ thanh toán</a>
-                <a class="btn btn-outline-main btn-sm">Đang xử lý</a>
-                <a class="btn btn-outline-main btn-sm">Đang giao</a>
-                <a class="btn btn-outline-main btn-sm">Đã giao</a>
-                <a class="btn btn-outline-main btn-sm">Đã hủy</a>
-            </div>
-            <p class="text-gray-500 mb-0">
-                Theo dõi trạng thái các đơn hàng của bạn.
-            </p>
-        </div>
+        <div class="flex flex-col gap-5">
 
-        <div style="max-width:280px;width:100%;">
-            <input class="common-input"
-                   placeholder="Tìm theo mã đơn hàng...">
-        </div>
-
-    </div>
-
-    <!-- Order -->
-
-    <div class="border border-gray-100 rounded-16 p-24 mb-24">
-
-        <div class="flex-between flex-wrap gap-16 mb-24">
-
-            <div>
-
-                <div class="text-sm text-gray-500 mb-8">
-                    Mã đơn hàng
+            <div class="flex items-center gap-3">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#F1F8EF] text-[#1F9345]">
+                    <i class="ph ph-shopping-bag-open text-2xl"></i>
                 </div>
-
-                <h6 class="mb-0">
-                    #CT240700012
-                </h6>
-
-            </div>
-
-            <div class="text-end">
-
-                <span class="badge bg-success-600 px-20 py-8 rounded-pill">
-                    Đã giao
-                </span>
-
-                <div class="text-gray-500 text-sm mt-8">
-                    09/07/2026
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="border-top pt-24">
-
-            <div class="flex items-center gap-20">
-
-                <img src="/images/product/product-img1.png"
-                     width="72"
-                     class="rounded-8"
-                     alt="">
-
-                <div class="flex-grow">
-
-                    <h6 class="mb-4">
-
-                        Nước rửa chén Gạo Caterin
-
-                    </h6>
-
-                    <span class="text-gray-500">
-
-                        x2
-
-                    </span>
-
-                </div>
-
-                <div class="font-[700]">
-
-                    130.000đ
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="border-top pt-20 mt-20">
-
-            <div class="flex-between flex-wrap gap-16">
 
                 <div>
+                    <h2 class="text-lg font-semibold tracking-tight text-gray-900 sm:text-xl">
+                        Đơn hàng của tôi
+                    </h2>
 
-                    <span class="text-gray-500">
-
-                        Tổng thanh toán
-
-                    </span>
-
-                    <h5 class="text-main-600 mt-8">
-
-                        245.000đ
-
-                    </h5>
-
+                    <p class="mt-1 text-sm text-gray-500">
+                        Theo dõi và quản lý các đơn hàng của bạn.
+                    </p>
                 </div>
+            </div>
 
-                <div class="flex gap-12 flex-wrap">
+            <!-- Search -->
+            <div class="relative w-full sm:max-w-sm">
+                <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-lg text-gray-400"></i>
 
-                    <a href="#"
-                       class="btn btn-outline-main">
-
-                        Mua lại
-
-                    </a>
-
-                    <a href="#"
-                       class="btn btn-main">
-
-                        Xem chi tiết
-
-                    </a>
-
-                </div>
-
+                <input type="search"
+                       placeholder="Tìm theo mã đơn hàng..."
+                       class="h-11 w-full rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10" />
             </div>
 
         </div>
 
-    </div>
+        <!-- Order filters -->
+        <div class="-mx-5 mt-6 overflow-x-auto px-5 sm:-mx-7 sm:px-7">
+            <div class="flex min-w-max items-center gap-2">
 
-    <!-- Order -->
+                <button type="button"
+                        class="rounded-lg bg-[#1F9345] px-4 py-2 text-xs font-semibold text-white shadow-sm">
+                    Tất cả
+                </button>
 
-    <div class="border border-gray-100 rounded-16 p-24 mb-24">
+                <button type="button"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-[#8CC63F] hover:text-[#1F9345]">
+                    Chờ thanh toán
+                </button>
 
-        <div class="flex-between flex-wrap gap-16 mb-24">
+                <button type="button"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-[#8CC63F] hover:text-[#1F9345]">
+                    Đang xử lý
+                </button>
 
-            <div>
-
-                <div class="text-sm text-gray-500 mb-8">
-                    Mã đơn hàng
-                </div>
-
-                <h6 class="mb-0">
-                    #CT240700011
-                </h6>
-
-            </div>
-
-            <div class="text-end">
-
-                <span class="badge bg-warning-600 px-20 py-8 rounded-pill">
+                <button type="button"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-[#8CC63F] hover:text-[#1F9345]">
                     Đang giao
-                </span>
+                </button>
 
-                <div class="text-gray-500 text-sm mt-8">
-                    07/07/2026
-                </div>
+                <button type="button"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-[#8CC63F] hover:text-[#1F9345]">
+                    Đã giao
+                </button>
+
+                <button type="button"
+                        class="rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs font-medium text-gray-600 transition-colors hover:border-[#8CC63F] hover:text-[#1F9345]">
+                    Đã hủy
+                </button>
 
             </div>
-
         </div>
 
-        <div class="border-top pt-24">
+    </div>
 
-            <div class="flex items-center gap-20">
+    <!-- Order list -->
 
-                <img src="/images/product/product-img2.png"
-                     width="72"
-                     class="rounded-8"
-                     alt="">
+    <div class="space-y-4 p-4 sm:p-6">
 
-                <div class="flex-grow">
+        <!-- Order 1 -->
+        <article class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/80 transition duration-200 hover:border-[#1F9345]/40">
 
-                    <h6 class="mb-4">
+            <!-- Order header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200/80 bg-[#F1F8EF] px-4 py-4 sm:px-5">
 
-                        Combo An Khang
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-500">
+                        Mã đơn hàng
+                    </p>
 
-                    </h6>
+                    <p class="mt-1 text-sm font-semibold tracking-wide text-gray-900">
+                        #CT240700012
+                    </p>
+                </div>
 
-                    <span class="text-gray-500">
-
-                        3 sản phẩm
-
+                <div class="flex flex-col items-start gap-1.5 sm:items-end">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                        <span class="size-1.5 rounded-full bg-green-500"></span>
+                        Đã giao
                     </span>
 
-                </div>
-
-                <div class="font-[700]">
-
-                    499.000đ
-
+                    <span class="text-xs text-gray-500">
+                        09/07/2026
+                    </span>
                 </div>
 
             </div>
 
-        </div>
+            <!-- Product -->
+            <div class="flex items-center gap-3.5 bg-white px-4 py-5 sm:gap-4 sm:px-5">
 
-        <div class="border-top pt-20 mt-20">
+                <div class="size-[76px] shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:size-[88px]">
+                    <img src="/images/product/product-img1.png"
+                         class="size-full object-cover"
+                         alt="Nước rửa chén Gạo Caterin"
+                         loading="lazy">
+                </div>
 
-            <div class="flex-between flex-wrap gap-16">
+                <div class="min-w-0 flex-1">
+                    <h3 class="line-clamp-2 text-sm font-semibold leading-5 text-gray-900">
+                        Nước rửa chén Gạo Caterin
+                    </h3>
+
+                    <p class="mt-1.5 text-xs text-gray-500">
+                        Số lượng: x2
+                    </p>
+
+                    <p class="mt-2 text-sm font-semibold text-gray-800">
+                        130.000đ
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Order footer -->
+            <div class="flex flex-col gap-4 border-t border-gray-200/80 bg-gray-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
 
                 <div>
-
-                    <span class="text-gray-500">
-
+                    <p class="text-xs text-gray-500">
                         Tổng thanh toán
+                    </p>
 
-                    </span>
+                    <p class="mt-1 text-lg font-bold tracking-tight text-[#1F9345]">
+                        245.000đ
+                    </p>
+                </div>
 
-                    <h5 class="text-main-600 mt-8">
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
 
-                        499.000đ
+                    <a href="#"
+                       class="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-xs font-semibold text-gray-600 transition-colors hover:border-[#1F9345] hover:text-[#1F9345]">
+                        Mua lại
+                    </a>
 
-                    </h5>
+                    <a href="#"
+                       class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-[#1F9345] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#187A39]">
+                        Xem chi tiết
+                        <i class="ph ph-arrow-right text-sm"></i>
+                    </a>
 
                 </div>
 
-                <div class="flex gap-12 flex-wrap">
+            </div>
 
-                    <button class="btn btn-outline-danger">
+        </article>
 
+        <!-- Order 2 -->
+        <article class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50/80 transition duration-200 hover:border-[#1F9345]/40">
+
+            <!-- Order header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200/80 bg-[#F1F8EF] px-4 py-4 sm:px-5">
+
+                <div class="min-w-0">
+                    <p class="text-xs text-gray-500">
+                        Mã đơn hàng
+                    </p>
+
+                    <p class="mt-1 text-sm font-semibold tracking-wide text-gray-900">
+                        #CT240700011
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-start gap-1.5 sm:items-end">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                        <span class="size-1.5 rounded-full bg-amber-500"></span>
+                        Đang giao
+                    </span>
+
+                    <span class="text-xs text-gray-500">
+                        07/07/2026
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- Product -->
+            <div class="flex items-center gap-3.5 bg-white px-4 py-5 sm:gap-4 sm:px-5">
+
+                <div class="size-[76px] shrink-0 overflow-hidden rounded-xl border border-gray-100 bg-gray-50 sm:size-[88px]">
+                    <img src="/images/product/product-img2.png"
+                         class="size-full object-cover"
+                         alt="Combo An Khang"
+                         loading="lazy">
+                </div>
+
+                <div class="min-w-0 flex-1">
+                    <h3 class="line-clamp-2 text-sm font-semibold leading-5 text-gray-900">
+                        Combo An Khang
+                    </h3>
+
+                    <p class="mt-1.5 text-xs text-gray-500">
+                        3 sản phẩm
+                    </p>
+
+                    <p class="mt-2 text-sm font-semibold text-gray-800">
+                        499.000đ
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Order footer -->
+            <div class="flex flex-col gap-4 border-t border-gray-200/80 bg-gray-50/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+
+                <div>
+                    <p class="text-xs text-gray-500">
+                        Tổng thanh toán
+                    </p>
+
+                    <p class="mt-1 text-lg font-bold tracking-tight text-[#1F9345]">
+                        499.000đ
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+
+                    <button type="button"
+                            class="inline-flex h-10 items-center justify-center rounded-lg border border-red-100 bg-red-50 px-4 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100">
                         Hủy đơn
-
                     </button>
 
                     <a href="#"
-                       class="btn btn-main">
-
+                       class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg bg-[#1F9345] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#187A39]">
                         Theo dõi
-
+                        <i class="ph ph-arrow-right text-sm"></i>
                     </a>
 
                 </div>
 
             </div>
-
-        </div>
-
+        </article>
     </div>
 
+
     <!-- Pagination -->
+    <div class="flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 px-5 py-5 sm:px-7">
 
-    <div class="mt-40">
+        <p class="text-xs text-gray-500">
+            Hiển thị <span class="font-semibold text-gray-700">1–2</span> trong số <span class="font-semibold text-gray-700">12</span> đơn hàng
+        </p>
 
-        <ul class="pagination flex-center flex-wrap">
+        <nav aria-label="Phân trang đơn hàng">
+            <ul class="flex items-center gap-1.5">
 
-            <li>
-                <a href="#">
-                    <i class="ph ph-caret-left"></i>
-                </a>
-            </li>
+                <li>
+                    <a href="#"
+                       aria-label="Trang trước"
+                       class="flex size-9 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition-colors hover:border-[#1F9345] hover:text-[#1F9345]">
+                        <i class="ph ph-caret-left"></i>
+                    </a>
+                </li>
 
-            <li>
-                <a href="#" class="active">1</a>
-            </li>
+                <li>
+                    <a href="#"
+                       aria-current="page"
+                       class="flex size-9 items-center justify-center rounded-lg bg-[#1F9345] text-xs font-semibold text-white">
+                        1
+                    </a>
+                </li>
 
-            <li>
-                <a href="#">2</a>
-            </li>
+                <li>
+                    <a href="#"
+                       class="flex size-9 items-center justify-center rounded-lg border border-gray-200 text-xs font-medium text-gray-600 transition-colors hover:border-[#1F9345] hover:text-[#1F9345]">
+                        2
+                    </a>
+                </li>
 
-            <li>
-                <a href="#">3</a>
-            </li>
+                <li>
+                    <a href="#"
+                       class="flex size-9 items-center justify-center rounded-lg border border-gray-200 text-xs font-medium text-gray-600 transition-colors hover:border-[#1F9345] hover:text-[#1F9345]">
+                        3
+                    </a>
+                </li>
 
-            <li>
-                <a href="#">
-                    <i class="ph ph-caret-right"></i>
-                </a>
-            </li>
+                <li>
+                    <a href="#"
+                       aria-label="Trang tiếp"
+                       class="flex size-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:border-[#1F9345] hover:text-[#1F9345]">
+                        <i class="ph ph-caret-right"></i>
+                    </a>
+                </li>
 
-        </ul>
+            </ul>
+        </nav>
 
     </div>
 

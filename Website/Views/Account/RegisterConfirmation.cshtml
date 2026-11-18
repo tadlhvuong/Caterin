@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Xác nhận đăng ký";
+
+    var email = ViewBag.Email as string ?? string.Empty;
+}
+
+<!-- Confirmation -->
+<section class="min-h-[65vh] bg-[#FAFCF9] px-4 py-12 sm:py-16 lg:py-20">
+    <div class="mx-auto flex min-h-[55vh] max-w-7xl items-center justify-center">
+
+        <div class="w-full max-w-xl">
+
+            <!-- Confirmation Card -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-5 py-9 text-center shadow-sm sm:px-10 sm:py-12">
+
+                <!-- Icon -->
+                <div class="mx-auto flex size-20 items-center justify-center rounded-full bg-[#F1F8EF] text-4xl text-[#1F9345]">
+                    <i class="ph ph-envelope-simple-open"></i>
+                </div>
+
+                <!-- Heading -->
+                <div class="mt-7">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-[#F1F8EF] px-3 py-1 text-xs font-semibold text-[#1F9345]">
+                        <i class="ph ph-check-circle"></i>
+                        Đăng ký thành công
+                    </span>
+
+                    <h1 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                        Hoàn tất đăng ký
+                    </h1>
+
+                    <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
+                        Chúng tôi đã tiếp nhận thông tin đăng ký của bạn.
+                        Chỉ còn một bước nữa để kích hoạt tài khoản Caterin.
+                    </p>
+                </div>
+
+                <!-- Email -->
+                @if (!string.IsNullOrWhiteSpace(email))
+                {
+                    <div class="mt-7 rounded-xl border border-[#DCEBDD] bg-[#F7FAF6] px-4 py-4">
+                        <p class="mb-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+                            Email đăng ký
+                        </p>
+
+                        <p class="break-all text-base font-semibold text-gray-900">
+                            @email
+                        </p>
+                    </div>
+                }
+
+                <!-- Instructions -->
+                <div class="mt-7 rounded-xl border border-gray-100 bg-gray-50/80 p-4 text-left sm:p-5">
+                    <div class="flex items-start gap-3">
+                        <i class="ph ph-info mt-0.5 shrink-0 text-xl text-[#1F9345]"></i>
+
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">
+                                Vui lòng kiểm tra hộp thư email
+                            </p>
+
+                            <p class="mt-1.5 text-sm leading-6 text-gray-500">
+                                Chúng tôi đã gửi liên kết xác nhận đến email của bạn.
+                                Hãy mở email và nhấn vào liên kết để kích hoạt tài khoản.
+                                Bạn chưa thể đăng nhập cho đến khi hoàn tất bước này.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action -->
+                <div class="mt-8">
+                    <a asp-controller="Account"
+                       asp-action="Login"
+                       class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20 sm:w-auto sm:min-w-56">
+                        <i class="ph ph-arrow-left text-lg"></i>
+                        Quay lại đăng nhập
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-5 text-center text-xs text-gray-400">
+                Caterin – An toàn cho mọi nhà
+            </p>
+
+        </div>
+    </div>
+</section>

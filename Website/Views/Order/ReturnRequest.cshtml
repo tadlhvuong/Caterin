@@ -1,0 +1,550 @@
+﻿@model Website.Models.Order.ReturnRequestViewModel
+
+@{
+    ViewData["Title"] = "Yêu cầu đổi trả";
+
+    var reasons = new[]
+    {
+        new { Value = "Damaged", Label = "Sản phẩm bị hư hỏng", Description = "Sản phẩm bị vỡ, móp méo hoặc hư hại khi nhận hàng.", Icon = "ph-package" },
+        new { Value = "WrongProduct", Label = "Giao sai sản phẩm", Description = "Sản phẩm nhận được không đúng với đơn đã đặt.", Icon = "ph-swap" },
+        new { Value = "MissingItem", Label = "Thiếu sản phẩm", Description = "Đơn hàng không có đủ sản phẩm như đã đặt.", Icon = "ph-warning-circle" },
+        new { Value = "QualityIssue", Label = "Vấn đề về chất lượng", Description = "Sản phẩm có dấu hiệu bất thường về chất lượng.", Icon = "ph-shield-warning" },
+        new { Value = "NotAsDescribed", Label = "Không đúng mô tả", Description = "Sản phẩm không giống thông tin được giới thiệu.", Icon = "ph-info" },
+        new { Value = "Other", Label = "Lý do khác", Description = "Lý do khác cần được Caterin hỗ trợ.", Icon = "ph-chat-circle-text" }
+    };
+}
+
+<section class="min-h-screen bg-[#f7faf7] py-8 lg:py-12">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+            <a href="/" class="transition hover:text-[#1F9345]">Trang chủ</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Order" asp-action="Index"
+               class="transition hover:text-[#1F9345]">Đơn hàng của tôi</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Order" asp-action="Details"
+               asp-route-orderCode="@Model.OrderCode"
+               class="transition hover:text-[#1F9345]">Chi tiết đơn hàng</a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <span class="font-medium text-gray-800">Yêu cầu đổi trả</span>
+        </nav>
+
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-100 text-[#1F9345]">
+                <i class="ph ph-arrows-left-right text-3xl"></i>
+            </div>
+
+            <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl">
+                Yêu cầu đổi trả / hoàn tiền
+            </h1>
+
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+                Hãy cung cấp thông tin bên dưới để Caterin có thể hỗ trợ bạn nhanh chóng.
+            </p>
+        </div>
+
+        <form id="returnRequestForm" class="space-y-6">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" id="orderCode" value="@Model.OrderCode" />
+
+            <!-- Order information -->
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                <div class="mb-5 flex items-center justify-between gap-3">
+                    <h2 class="flex items-center gap-2 font-semibold text-gray-900">
+                        <i class="ph ph-receipt text-xl text-[#1F9345]"></i>
+                        Thông tin đơn hàng
+                    </h2>
+
+                    <span class="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-[#1F9345]">
+                        Đã giao thành công
+                    </span>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <p class="text-xs text-gray-500">Mã đơn hàng</p>
+                        <p class="mt-1 font-semibold text-gray-900">@Model.OrderCode</p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-gray-500">Ngày nhận hàng</p>
+                        <p class="mt-1 font-semibold text-gray-900">
+                            @(Model.ReceivedAt?.ToString("dd/MM/yyyy") ?? "Chưa xác định")
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-gray-500">Người nhận</p>
+                        <p class="mt-1 font-medium text-gray-800">@Model.RecipientName</p>
+                    </div>
+
+                    <div>
+                        <p class="text-xs text-gray-500">Số điện thoại</p>
+                        <p class="mt-1 font-medium text-gray-800">@Model.PhoneNumber</p>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-xl border border-green-100 bg-green-50 p-4">
+                    <div class="flex items-start gap-3">
+                        <i class="ph ph-calendar-check mt-0.5 text-xl text-[#1F9345]"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">
+                                Thời hạn yêu cầu đổi trả
+                            </p>
+                            <p class="mt-1 text-sm text-gray-600">
+                                Đến hết ngày
+                                <strong class="text-[#1F9345]">
+                                    @(Model.ReturnDeadline?.ToString("dd/MM/yyyy") ?? "N/A")
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product selection -->
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                <div class="mb-5">
+                    <h2 class="flex items-center gap-2 font-semibold text-gray-900">
+                        <i class="ph ph-shopping-bag text-xl text-[#1F9345]"></i>
+                        Sản phẩm cần đổi trả
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Chọn sản phẩm và số lượng bạn muốn đổi trả.
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    @for (var i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+
+                        <div class="return-item rounded-xl border border-gray-200 p-4 transition
+                                        has-[:checked]:border-[#1F9345] has-[:checked]:bg-green-50/50">
+
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                <label class="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+                                    <input type="checkbox"
+                                           class="return-item-checkbox mt-2 h-4 w-4 shrink-0 accent-[#1F9345]"
+                                           data-index="@i" data-product-name="@item.ProductName"
+                                           checked="@item.IsSelected" />
+
+                                    <img src="@item.ImageUrl"
+                                         alt="@item.ProductName"
+                                         class="h-20 w-20 shrink-0 rounded-xl border border-gray-100 object-cover"
+                                         onerror="this.src='/images/Default/default-product.png'" />
+
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-semibold text-gray-800">
+                                            @item.ProductName
+                                        </span>
+
+                                        @if (!string.IsNullOrWhiteSpace(item.VariantName))
+                                        {
+                                            <span class="mt-1 block text-xs text-gray-500">
+                                                @item.VariantName
+                                            </span>
+                                        }
+
+                                        <span class="mt-2 block text-sm font-semibold text-[#1F9345]">
+                                            @item.UnitPrice.ToString("N0")₫
+                                        </span>
+
+                                        <span class="mt-1 block text-xs text-gray-500">
+                                            Đã mua: @item.PurchasedQuantity sản phẩm
+                                        </span>
+                                    </span>
+                                </label>
+
+                                <div class="flex items-center justify-between gap-4 sm:block sm:text-right">
+                                    <label class="text-xs font-medium text-gray-600">
+                                        Số lượng đổi trả
+                                    </label>
+
+                                    <input type="number"
+                                           class="return-quantity mt-1 h-10 w-24 rounded-lg border border-gray-200 px-3 text-center text-sm outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-green-100 disabled:bg-gray-100"
+                                           min="1"
+                                           max="@item.PurchasedQuantity"
+                                           value="@item.ReturnQuantity"
+                                           data-index="@i"
+                                           disabled="@(!item.IsSelected)" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <p id="productError" class="mt-3 hidden text-sm text-red-500">
+                    Vui lòng chọn ít nhất một sản phẩm cần đổi trả.
+                </p>
+            </div>
+
+            <!-- Request type -->
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                <h2 class="mb-1 flex items-center gap-2 font-semibold text-gray-900">
+                    <i class="ph ph-arrows-left-right text-xl text-[#1F9345]"></i>
+                    Hình thức xử lý
+                </h2>
+
+                <p class="mb-5 text-sm text-gray-500">
+                    Bạn muốn Caterin hỗ trợ theo hình thức nào?
+                </p>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 transition
+                                  has-[:checked]:border-[#1F9345] has-[:checked]:bg-green-50">
+                        <input type="radio"
+                               name="requestType"
+                               value="Refund"
+                               checked
+                               class="mt-1 accent-[#1F9345]" />
+
+                        <span>
+                            <span class="block font-semibold text-gray-800">Hoàn tiền</span>
+                            <span class="mt-1 block text-xs leading-5 text-gray-500">
+                                Yêu cầu hoàn lại số tiền tương ứng với sản phẩm được chấp nhận.
+                            </span>
+                        </span>
+                    </label>
+
+                    <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 transition
+                                  has-[:checked]:border-[#1F9345] has-[:checked]:bg-green-50">
+                        <input type="radio"
+                               name="requestType"
+                               value="Exchange"
+                               class="mt-1 accent-[#1F9345]" />
+
+                        <span>
+                            <span class="block font-semibold text-gray-800">Đổi sản phẩm</span>
+                            <span class="mt-1 block text-xs leading-5 text-gray-500">
+                                Yêu cầu đổi sang sản phẩm khác hoặc sản phẩm đúng theo đơn hàng.
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                <h2 class="mb-1 flex items-center gap-2 font-semibold text-gray-900">
+                    <i class="ph ph-chat-circle-text text-xl text-[#1F9345]"></i>
+                    Lý do đổi trả
+                </h2>
+
+                <p class="mb-5 text-sm text-gray-500">
+                    Vui lòng chọn lý do phù hợp nhất.
+                </p>
+
+                <div class="grid gap-3 sm:grid-cols-2">
+                    @foreach (var reason in reasons)
+                    {
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 transition
+                                          hover:border-[#8CC63F] hover:bg-green-50/50
+                                          has-[:checked]:border-[#1F9345] has-[:checked]:bg-green-50">
+
+                            <input type="radio"
+                                   name="reason"
+                                   value="@reason.Value"
+                                   class="mt-1 accent-[#1F9345]"
+                                   required />
+
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                                <i class="ph @reason.Icon text-xl"></i>
+                            </span>
+
+                            <span>
+                                <span class="block text-sm font-semibold text-gray-800">
+                                    @reason.Label
+                                </span>
+                                <span class="mt-1 block text-xs leading-5 text-gray-500">
+                                    @reason.Description
+                                </span>
+                            </span>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+                <h2 class="mb-1 font-semibold text-gray-900">
+                    Mô tả chi tiết
+                    <span class="font-normal text-gray-400">(Không bắt buộc)</span>
+                </h2>
+
+                <p class="mb-4 text-sm text-gray-500">
+                    Hãy mô tả rõ tình trạng sản phẩm để Caterin hỗ trợ bạn tốt hơn.
+                </p>
+
+                <textarea id="description"
+                          rows="4"
+                          maxlength="1000"
+                          placeholder="Nhập nội dung mô tả..."
+                          class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:ring-2 focus:ring-green-100"></textarea>
+
+                <div class="mt-2 text-right text-xs text-gray-400">
+                    <span id="descriptionCount">0</span>/1000 ký tự
+                </div>
+            </div>
+
+            <!-- Evidence notice -->
+            <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                <div class="flex items-start gap-3">
+                    <i class="ph ph-info mt-0.5 text-xl text-amber-600"></i>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">
+                            Lưu ý về hình ảnh minh chứng
+                        </p>
+                        <p class="mt-1 text-sm leading-6 text-gray-600">
+                            Nếu sản phẩm bị hư hỏng hoặc giao sai, bạn nên chuẩn bị hình ảnh
+                            sản phẩm và bao bì để gửi cho bộ phận chăm sóc khách hàng khi được yêu cầu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
+                <a asp-controller="Order"
+                   asp-action="Details"
+                   asp-route-orderCode="@Model.OrderCode"
+                   class="inline-flex h-12 items-center justify-center rounded-xl border border-gray-200 bg-white px-6 text-sm font-semibold text-gray-600 transition hover:bg-gray-50">
+                    <i class="ph ph-arrow-left mr-2"></i>
+                    Quay lại đơn hàng
+                </a>
+
+                <button type="submit"
+                        id="submitReturnRequest"
+                        class="inline-flex h-12 items-center justify-center rounded-xl bg-[#1F9345] px-7 text-sm font-semibold text-white shadow-sm transition hover:bg-[#18813c] disabled:cursor-not-allowed disabled:opacity-60">
+                    Gửi yêu cầu đổi trả
+                    <i class="ph ph-arrow-right ml-2 text-lg"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('returnRequestForm');
+
+            if (!form) return;
+
+            const submitButton = document.getElementById('submitReturnRequest');
+            const description = document.getElementById('description');
+            const descriptionCount = document.getElementById('descriptionCount');
+            const productError = document.getElementById('productError');
+
+            // Bật/tắt input số lượng theo sản phẩm được chọn.
+            form.querySelectorAll('.return-item-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const index = checkbox.dataset.index;
+                    const quantityInput = form.querySelector(
+                        `.return-quantity[data-index="${index}"]`
+                    );
+
+                    if (!quantityInput) return;
+
+                    quantityInput.disabled = !checkbox.checked;
+
+                    if (checkbox.checked && Number(quantityInput.value) < 1) {
+                        quantityInput.value = 1;
+                    }
+
+                    productError.classList.add('hidden');
+                });
+            });
+
+            // Giới hạn số lượng nhập.
+            form.querySelectorAll('.return-quantity').forEach(input => {
+                input.addEventListener('change', () => {
+                    const min = Number(input.min);
+                    const max = Number(input.max);
+                    let value = Number(input.value);
+
+                    if (!Number.isFinite(value)) value = min;
+
+                    value = Math.max(min, Math.min(max, value));
+                    input.value = value;
+                });
+            });
+
+            // Đếm ký tự mô tả.
+            description.addEventListener('input', () => {
+                descriptionCount.textContent = description.value.length;
+            });
+
+            form.addEventListener('submit', async event => {
+                event.preventDefault();
+
+                const orderCode = document.getElementById('orderCode').value;
+
+                const token = form.querySelector(
+                    'input[name="__RequestVerificationToken"]'
+                )?.value;
+
+                const selectedType = form.querySelector(
+                    'input[name="requestType"]:checked'
+                );
+
+                const selectedReason = form.querySelector(
+                    'input[name="reason"]:checked'
+                );
+
+                const selectedItems = [];
+
+                form.querySelectorAll('.return-item-checkbox:checked')
+                    .forEach(checkbox => {
+                        const index = checkbox.dataset.index;
+
+                        const quantityInput = form.querySelector(
+                            `.return-quantity[data-index="${index}"]`
+                        );
+
+                        const productCard = checkbox.closest('.return-item');
+
+                        const productName = checkbox.dataset.productName;
+
+                        const quantity = Number(quantityInput?.value);
+                        const maxQuantity = Number(quantityInput?.max);
+
+                        if (!productName ||
+                            !Number.isInteger(quantity) ||
+                            quantity < 1 ||
+                            quantity > maxQuantity) {
+                            return;
+                        }
+
+                        selectedItems.push({
+                            productName,
+                            isSelected: true,
+                            returnQuantity: quantity
+                        });
+                    });
+
+                if (selectedItems.length === 0) {
+                    productError.classList.remove('hidden');
+
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Chưa chọn sản phẩm',
+                        text: 'Vui lòng chọn ít nhất một sản phẩm và nhập số lượng hợp lệ.',
+                        confirmButtonColor: '#1F9345'
+                    });
+
+                    return;
+                }
+
+                if (!selectedType || !selectedReason) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Thiếu thông tin',
+                        text: 'Vui lòng chọn hình thức xử lý và lý do đổi trả.',
+                        confirmButtonColor: '#1F9345'
+                    });
+
+                    return;
+                }
+
+                const descriptionValue = description.value.trim();
+
+                if (selectedReason.value === 'Other' && !descriptionValue) {
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Cần mô tả thêm',
+                        text: 'Vui lòng mô tả lý do đổi trả của bạn.',
+                        confirmButtonColor: '#1F9345'
+                    });
+
+                    description.focus();
+                    return;
+                }
+
+                const confirm = await Swal.fire({
+                    title: 'Gửi yêu cầu đổi trả?',
+                    text: 'Bạn vui lòng kiểm tra lại thông tin trước khi gửi.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xác nhận gửi',
+                    cancelButtonText: 'Kiểm tra lại',
+                    confirmButtonColor: '#1F9345',
+                    reverseButtons: true
+                });
+
+                if (!confirm.isConfirmed) return;
+
+                const payload = {
+                    requestType: selectedType.value,
+                    reason: selectedReason.value,
+                    description: descriptionValue || null,
+                    items: selectedItems
+                };
+
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <i class="ph ph-spinner-gap mr-2 animate-spin"></i>
+                    Đang gửi yêu cầu...
+                `;
+
+                try {
+                    const response = await fetch(
+                        `/order/${encodeURIComponent(orderCode)}/return-request`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error(
+                            data.message || 'Không thể gửi yêu cầu đổi trả.'
+                        );
+                    }
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Gửi yêu cầu thành công',
+                        html: `
+                            <p class="text-sm text-gray-600">
+                                Yêu cầu đổi trả của bạn đã được ghi nhận.
+                            </p>
+                            <p class="mt-3 text-sm font-semibold text-[#1F9345]">
+                                Mã yêu cầu: ${data.requestCode}
+                            </p>
+                        `,
+                        confirmButtonText: 'Xem đơn hàng',
+                        confirmButtonColor: '#1F9345'
+                    });
+
+                    window.location.href = data.redirectUrl || `/order/return-request/${encodeURIComponent(data.requestCode)}`;
+                } catch (error) {
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Không thể gửi yêu cầu',
+                        text: error.message || 'Đã xảy ra lỗi. Vui lòng thử lại.',
+                        confirmButtonColor: '#1F9345'
+                    });
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `
+                        Gửi yêu cầu đổi trả
+                        <i class="ph ph-arrow-right ml-2 text-lg"></i>
+                    `;
+                }
+            });
+        });
+
+    </script>
+}

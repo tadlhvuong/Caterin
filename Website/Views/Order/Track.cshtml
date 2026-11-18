@@ -1,0 +1,196 @@
+﻿@using Website.Models.Order
+@model OrderTrackingViewModel
+
+@{
+   ViewData["Title"] = "Theo dõi đơn hàng | Caterin";
+}
+
+<div class="min-h-screen bg-[#f8faf8] text-slate-700">
+
+    <section class="border-b border-gray-100 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+            <nav class="flex items-center gap-2 text-sm">
+                <a href="/" class="text-gray-500 hover:text-[#1F9345]">Trang chủ</a>
+                <i class="ph ph-caret-right text-xs text-gray-400"></i>
+                <span class="font-medium text-[#1F9345]">Theo dõi đơn hàng</span>
+            </nav>
+        </div>
+    </section>
+
+    <section class="relative overflow-hidden bg-gradient-to-br from-[#f0f9ed] via-white to-[#e9f7ed]">
+        <div class="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#8CC63F]/10 blur-3xl"></div>
+
+        <div class="relative mx-auto max-w-7xl px-4 py-12 text-center sm:px-6 sm:py-16 lg:px-8">
+            <span class="inline-flex items-center gap-2 rounded-full border border-[#8CC63F]/30 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#1F9345]">
+                <i class="ph-fill ph-package text-base"></i>
+                Caterin Order Tracking
+            </span>
+
+            <h1 class="mt-5 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Theo dõi đơn hàng
+            </h1>
+
+            <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base">
+                Nhập mã đơn hàng và thông tin liên hệ để kiểm tra trạng thái giao hàng của bạn.
+            </p>
+        </div>
+    </section>
+
+    <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+
+        @* SEARCH FORM *@
+        <section class="mx-auto max-w-3xl">
+            <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_12px_40px_rgba(31,147,69,0.07)] sm:p-8">
+                <div class="mb-6 text-center">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eaf7e9] text-[#1F9345]">
+                        <i class="ph ph-magnifying-glass text-2xl"></i>
+                    </div>
+                    <h2 class="mt-4 text-xl font-bold text-gray-900">Tra cứu đơn hàng</h2>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Vui lòng cung cấp đúng thông tin khi đặt hàng.
+                    </p>
+                </div>
+
+                <form asp-controller="Order" asp-action="Track" method="post" class="space-y-4">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="orderCode" value="@Model.OrderCode" />
+                    <div>
+                        <label for="orderCode" class="mb-2 block text-sm font-semibold text-gray-700">
+                            Mã đơn hàng
+                        </label>
+                        <div class="relative">
+                            <i class="ph ph-receipt absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-400"></i>
+                            <input id="orderCode"
+                                   name="orderCode"
+                                   value="@Model.OrderCode"
+                                   type="text"
+                                   required
+                                   autocomplete="off"
+                                   placeholder="Nhập mã đơn hàng"
+                                   class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="contact" class="mb-2 block text-sm font-semibold text-gray-700">
+                            Số điện thoại hoặc email đặt hàng
+                        </label>
+                        <div class="relative">
+                            <i class="ph ph-user-circle absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-400"></i>
+                            <input id="contact"
+                                   name="contact"
+                                   value="@Model.Contact"
+                                   type="text"
+                                   required
+                                   autocomplete="off"
+                                   placeholder="Nhập số điện thoại hoặc email"
+                                   class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 pl-11 pr-4 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10" />
+                        </div>
+                    </div>
+
+                    <button type="submit"
+                            class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-lg shadow-[#1F9345]/20 transition hover:bg-[#187b39] focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20">
+                        <i class="ph ph-magnifying-glass text-lg"></i>
+                        Tra cứu đơn hàng
+                    </button>
+                </form>
+
+                <div class="mt-5 flex items-start gap-2 rounded-xl bg-[#f2f9ef] p-3 text-xs leading-5 text-gray-600">
+                    <i class="ph-fill ph-shield-check mt-0.5 text-base text-[#1F9345]"></i>
+                    <p>
+                        Thông tin đơn hàng chỉ được hiển thị khi mã đơn và thông tin liên hệ khớp với dữ liệu đặt hàng.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        @* SEARCH RESULT *@
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="mx-auto mt-6 flex max-w-3xl items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+                <i class="ph ph-warning-circle mt-0.5 text-lg"></i>
+                <p>@Model.ErrorMessage</p>
+            </div>
+        }
+
+        @if (Model.Order is not null)
+        {
+            var order = Model.Order;
+
+            <section class="mt-10 space-y-6">
+
+                <div class="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                    <div>
+                        <p class="text-xs font-medium uppercase tracking-wider text-gray-500">
+                            Kết quả tra cứu
+                        </p>
+                        <h2 class="mt-2 text-xl font-bold text-gray-900">
+                            Đơn hàng #@order.OrderCode
+                        </h2>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Đặt ngày @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+                    </div>
+
+                    <span class="inline-flex w-fit items-center gap-2 rounded-full bg-[#eaf7e9] px-4 py-2 text-sm font-semibold text-[#1F9345]">
+                        <span class="h-2 w-2 rounded-full bg-[#1F9345]"></span>
+                        @order.StatusLabel
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div class="space-y-6 lg:col-span-2">
+                        @await Html.PartialAsync("Partials/_OrderStatusTimeline", order)
+                        @await Html.PartialAsync("Partials/_OrderShippingInfo", order)
+                        @await Html.PartialAsync("Partials/_OrderItems", order)
+                    </div>
+
+                    <aside class="space-y-6">
+                        @await Html.PartialAsync("Partials/_OrderSummary", order)
+                        @await Html.PartialAsync("Partials/_OrderPaymentInfo", order)
+
+                        <div class="rounded-2xl border border-[#dcefd8] bg-gradient-to-br from-[#f2faef] to-white p-5">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#1F9345] shadow-sm">
+                                    <i class="ph ph-headset text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-900">Cần hỗ trợ?</h3>
+                                    <p class="mt-1 text-xs text-gray-500">Liên hệ đội ngũ Caterin</p>
+                                </div>
+                            </div>
+
+                            <a href="/contact"
+                               class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#1F9345]/20 bg-white px-4 py-3 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+                                Liên hệ Caterin
+                                <i class="ph ph-arrow-up-right"></i>
+                            </a>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        }
+
+        <section class="mx-auto mt-10 max-w-4xl rounded-2xl border border-gray-100 bg-white p-6 sm:p-8">
+            <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#eaf7e9] text-[#1F9345]">
+                        <i class="ph ph-question text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900">Bạn cần hỗ trợ về đơn hàng?</h3>
+                        <p class="mt-1 text-sm leading-6 text-gray-500">
+                            Đội ngũ Caterin sẵn sàng hỗ trợ bạn kiểm tra thông tin giao hàng.
+                        </p>
+                    </div>
+                </div>
+                <a href="/contact"
+                   class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-[#1F9345] px-5 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+                    Liên hệ với chúng tôi
+                    <i class="ph ph-arrow-up-right"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+</div>

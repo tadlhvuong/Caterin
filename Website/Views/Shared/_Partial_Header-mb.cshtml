@@ -1,147 +1,231 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
     Layout = null;
+
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+
+    // TODO: Thay bằng kết quả kiểm tra quyền thực tế.
+    // Không dùng trạng thái đăng nhập để thay thế kiểm tra quyền Kênh bán hàng.
+    var canAccessSalesChannel = ViewBag.CanAccessSalesChannel as bool? ?? false;
 }
 
-<div class="mobile-menu scroll-sm xl:hidden block">
-    <button type="button" class="close-button">
-        <i class="ph ph-x"></i>
-    </button>
-    <div class="mobile-menu__inner">
-        <a asp-controller="Home" asp-action="" class="mobile-menu__logo text-center">
-           <img width="150" src="~/images/Default/logo-caterin.png" alt="Logo thương hiệu Caterin">
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu-overlay invisible pointer-events-none fixed inset-0 z-[10000] bg-slate-950/50 opacity-0 transition-[opacity,visibility] duration-300 [&.active]:visible [&.active]:pointer-events-auto [&.active]:opacity-100"
+     aria-hidden="true">
+</div>
+
+<!-- MOBILE MENU -->
+<aside id="mobileMenu"
+       class="mobile-menu invisible pointer-events-none fixed inset-y-0 left-0 z-[10010] flex h-dvh w-[340px] max-w-[88vw] -translate-x-full flex-col overflow-y-auto overscroll-contain bg-white shadow-2xl transition-[transform,visibility] duration-300 ease-in-out xl:hidden [&.active]:visible [&.active]:pointer-events-auto [&.active]:translate-x-0"
+       aria-label="Menu điều hướng"
+       aria-hidden="true">
+
+    <!-- HEADER -->
+    <div class="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
+        <a asp-controller="Home"
+           asp-action="Index"
+           aria-label="Caterin - Trang chủ"
+           class="inline-flex items-center">
+            <img src="@Url.Content("~/images/Default/logo-caterin.png")"
+                 alt="Caterin"
+                 class="w-[120px] object-contain">
         </a>
-        <div class="mobile-menu__menu">
-            <ul class="nav-menu flex items-center nav-menu--mobile">
-                <li class="on-hover-item nav-menu__item has-submenu activePage">
-                    <a href="javascript:void(0)"
-                       class="nav-menu__link">Home</a>
-                    <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                        <li class="common-dropdown__item nav-submenu__item activePage">
-                            <a href="index.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Home
-                                Grocery
+
+        <button type="button"
+                class="close-button flex size-10 shrink-0 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100"
+                aria-label="Đóng menu">
+            <i class="ph ph-x text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- MENU CONTENT -->
+    <div class="flex-1 px-5 py-5">
+
+        <!-- MAIN NAVIGATION -->
+        <nav aria-label="Điều hướng chính">
+            <ul class="flex flex-col gap-1">
+
+                <!-- TRANG CHỦ -->
+                <li>
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="flex items-center justify-between rounded-xl px-4 py-3 font-semibold text-gray-800 transition hover:bg-green-50 hover:text-[#1F9345]">
+                        <span>Trang chủ</span>
+                        <i class="ph ph-house text-lg"></i>
+                    </a>
+                </li>
+
+                <!-- GIỚI THIỆU -->
+                <li>
+                    <a asp-controller="Home"
+                       asp-action="About"
+                       class="flex items-center justify-between rounded-xl px-4 py-3 font-semibold text-gray-800 transition hover:bg-green-50 hover:text-[#1F9345]">
+                        <span>Giới thiệu</span>
+                        <i class="ph ph-info text-lg"></i>
+                    </a>
+                </li>
+
+                <!-- SẢN PHẨM -->
+                <li class="mobile-menu__item">
+                    <button type="button"
+                            class="mobile-menu__toggle flex w-full items-center justify-between rounded-xl px-4 py-3 text-left font-semibold text-gray-800 transition hover:bg-green-50 hover:text-[#1F9345]"
+                            aria-expanded="false"
+                            aria-controls="mobileProductSubmenu">
+                        <span>Sản phẩm</span>
+                        <i class="ph ph-caret-down text-lg transition-transform duration-200"></i>
+                    </button>
+
+                    <ul id="mobileProductSubmenu"
+                        class="hidden space-y-1 pb-2 pl-4 [&.show]:block">
+
+                        <li>
+                            <a href="/shop?category=nuoc-rua-tay"
+                               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-gray-600 transition hover:bg-green-50 hover:text-[#1F9345]">
+                                <i class="ph ph-hand-soap text-lg"></i>
+                                Rửa tay
                             </a>
                         </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="index-two.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Home
-                                Electronics
+
+                        <li>
+                            <a href="/shop?category=nuoc-rua-chen"
+                               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-gray-600 transition hover:bg-green-50 hover:text-[#1F9345]">
+                                <i class="ph ph-bowl-food text-lg"></i>
+                                Rửa chén
                             </a>
                         </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="index-three.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Home
-                                Fashion
+
+                        <li>
+                            <a href="/shop?category=nuoc-lau-san"
+                               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-gray-600 transition hover:bg-green-50 hover:text-[#1F9345]">
+                                <i class="ph ph-spray-bottle text-lg"></i>
+                                Lau sàn
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/shop?category=nuoc-lau-kinh"
+                               class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-gray-600 transition hover:bg-green-50 hover:text-[#1F9345]">
+                                <i class="ph ph-sparkle text-lg"></i>
+                                Lau kính
                             </a>
                         </li>
                     </ul>
                 </li>
-                <li class="on-hover-item nav-menu__item has-submenu">
-                    <a href="javascript:void(0)"
-                       class="nav-menu__link">Shop</a>
-                    <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="shop.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Shop</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="product-details.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Shop
-                                Details
-                            </a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="product-details-two.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Shop Details
-                                Two
-                            </a>
-                        </li>
-                    </ul>
+
+                <!-- TIN TỨC -->
+                <li>
+                    <a href="/blog"
+                       class="flex items-center justify-between rounded-xl px-4 py-3 font-semibold text-gray-800 transition hover:bg-green-50 hover:text-[#1F9345]">
+                        <span>Tin tức</span>
+                        <i class="ph ph-newspaper text-lg"></i>
+                    </a>
                 </li>
-                <li class="on-hover-item nav-menu__item has-submenu">
-                    <span class="badge-notification bg-warning-600 text-white text-sm py-2 px-8 rounded-4">New</span>
-                    <a href="javascript:void(0)" class="nav-menu__link">Pages</a>
-                    <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="cart.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Cart</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="wishlist.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Wishlist</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="checkout.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Checkout</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="become-seller.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Become
-                                Seller
-                            </a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a asp-controller="Account" asp-action="Login"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Account</a>
-                        </li>
-                    </ul>
+
+                <!-- LIÊN HỆ -->
+                <li>
+                    <a asp-controller="Home"
+                       asp-action="Contact"
+                       class="flex items-center justify-between rounded-xl px-4 py-3 font-semibold text-gray-800 transition hover:bg-green-50 hover:text-[#1F9345]">
+                        <span>Liên hệ</span>
+                        <i class="ph ph-headset text-lg"></i>
+                    </a>
                 </li>
-                <li class="on-hover-item nav-menu__item has-submenu">
-                    <span class="badge-notification bg-tertiary-600 text-white text-sm py-2 px-8 rounded-4">New</span>
-                    <a href="javascript:void(0)" class="nav-menu__link">Vendors</a>
-                    <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="vendor.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Vendors</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="vendor-details.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Vendor
-                                Details
-                            </a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="vendor-two.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Vendors Two</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="vendor-two-details.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Vendors Two
-                                Details
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="on-hover-item nav-menu__item has-submenu">
-                    <a href="javascript:void(0)"
-                       class="nav-menu__link">Blog</a>
-                    <ul class="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="blog.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">Blog</a>
-                        </li>
-                        <li class="common-dropdown__item nav-submenu__item">
-                            <a href="blog-details.html"
-                               class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
-                                Blog
-                                Details
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="nav-menu__item"><a href="contact.html" class="nav-menu__link">Contact Us</a></li>
             </ul>
+        </nav>
+
+        <!-- DIVIDER -->
+        <div class="my-5 border-t border-slate-100"></div>
+
+        <!-- QUICK ACTIONS -->
+        <div class="grid grid-cols-2 gap-3">
+
+            <!-- HOTLINE -->
+            <a href="tel:YOUR_HOTLINE_NUMBER"
+               class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-xl border border-green-100 bg-green-50 px-2 py-3 text-center text-[#1F9345] transition hover:border-green-300 hover:bg-green-100">
+                <i class="ph ph-phone-call text-2xl"></i>
+                <span class="text-sm font-semibold">Hotline</span>
+            </a>
+
+            <!-- MY PROFILE / LOGIN -->
+            @if (isAuthenticated)
+            {
+                <a href="/account/profile"
+                   class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-[#1F9345]">
+                    <i class="ph ph-user-circle text-2xl"></i>
+                    <span class="text-sm font-semibold">My Profile</span>
+                </a>
+            }
+            else
+            {
+                <a href="/auth/login"
+                   class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-[#1F9345]">
+                    <i class="ph ph-sign-in text-2xl"></i>
+                    <span class="text-sm font-semibold">Đăng nhập</span>
+                </a>
+            }
+
+            <!-- SALES CHANNEL -->
+            @if (canAccessSalesChannel)
+            {
+                <a asp-area="Admin"
+                   asp-controller="Home"
+                   asp-action="Dashboard"
+                   class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-xl border border-green-200 bg-[#1F9345] px-2 py-3 text-center text-white transition hover:bg-green-700">
+                    <i class="ph ph-storefront text-2xl"></i>
+                    <span class="text-sm font-semibold">Kênh bán hàng</span>
+                </a>
+            }
+
+            <!-- PARTNER CENTER -->
+            <a asp-controller="Home"
+               asp-action="PartnerCenter"
+               class="flex min-h-[76px] flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center text-gray-700 transition hover:border-green-200 hover:bg-green-50 hover:text-[#1F9345] @(canAccessSalesChannel ? "" : "col-span-2")">
+                <i class="ph ph-handshake text-2xl"></i>
+                <span class="text-sm font-semibold">Đồng hành cùng Caterin</span>
+            </a>
+
         </div>
     </div>
-</div>
+
+    <!-- MENU FOOTER -->
+    <div class="shrink-0 border-t border-slate-100 bg-[#F5F9F2] px-5 py-5">
+
+        <div class="mb-4 text-center">
+            <p class="text-sm font-bold text-[#1F9345]">
+                Caterin – An toàn cho mọi nhà
+            </p>
+            <p class="mt-1 text-xs leading-relaxed text-gray-500">
+                Giải pháp chăm sóc và vệ sinh gia đình an toàn, tiện lợi mỗi ngày.
+            </p>
+        </div>
+
+        <!-- SOCIAL LINKS -->
+        <div class="flex items-center justify-center gap-3">
+            <a href="https://www.facebook.com/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Facebook Caterin"
+               class="flex size-10 items-center justify-center rounded-full bg-white text-[#1F9345] shadow-sm transition hover:bg-[#1F9345] hover:text-white">
+                <i class="ph ph-facebook-logo text-xl"></i>
+            </a>
+
+            <a href="https://shopee.vn/"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Shopee Caterin"
+               class="flex size-10 items-center justify-center rounded-full bg-white text-[#1F9345] shadow-sm transition hover:bg-[#1F9345] hover:text-white">
+                <i class="ph ph-shopping-bag text-xl"></i>
+            </a>
+
+            <a asp-controller="Home"
+               asp-action="Contact"
+               aria-label="Liên hệ Caterin"
+               class="flex size-10 items-center justify-center rounded-full bg-white text-[#1F9345] shadow-sm transition hover:bg-[#1F9345] hover:text-white">
+                <i class="ph ph-envelope-simple text-xl"></i>
+            </a>
+        </div>
+
+        <p class="mt-4 text-center text-[11px] text-gray-400">
+            © @DateTime.Now.Year Caterin. All rights reserved.
+        </p>
+    </div>
+</aside>

@@ -1,13 +1,37 @@
 ﻿@{
 }
-<section class="content">
-    <div class="error-page" style="width: 100%;">
-        <div class="error-content" style="margin-left: 20px;">
-            <h3><i class="fas fa-exclamation-triangle text-danger"></i> @ViewData["Title"]</h3>
 
-            <p>
-                <localize>DeniedAccessContentText</localize> <a href="/admin/auth/login" >LoginText</a>.
-            </p>
+<section class="flex min-h-[60vh] items-center justify-center bg-[#FAFCF9] px-4 py-12 sm:py-16">
+    <div class="w-full max-w-xl rounded-2xl border border-gray-200 bg-white p-6 text-center shadow-sm sm:p-8 lg:p-10">
+
+        <!-- Icon -->
+        <div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+            <i class="ph-fill ph-shield-warning text-4xl text-red-500"></i>
+        </div>
+
+        <!-- Heading -->
+        <div class="mb-3">
+            <span class="mb-3 inline-flex items-center rounded-full border border-red-100 bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                Truy cập bị từ chối
+            </span>
+
+            <h1 class="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+                @ViewData["Title"]
+            </h1>
+        </div>
+
+        <!-- Message -->
+        <p class="mx-auto max-w-md text-sm leading-7 text-gray-600 sm:text-base">
+            <localize>DeniedAccessContentText</localize>
+        </p>
+
+        <!-- Action -->
+        <div class="mt-8">
+            <a href="/admin/auth/login"
+               class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A39] focus:outline-none focus:ring-4 focus:ring-green-100 sm:w-auto">
+                <i class="ph ph-sign-in text-lg"></i>
+                <localize>LoginText</localize>
+            </a>
         </div>
     </div>
 </section>

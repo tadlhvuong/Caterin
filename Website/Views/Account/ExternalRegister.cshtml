@@ -1,0 +1,171 @@
+﻿@using Website.Models.Account
+@model ExternalRegisterViewModel
+
+@{
+    ViewData["Title"] = "Hoàn tất đăng ký | Caterin";
+}
+
+<!-- External Register -->
+<section class="flex min-h-[70vh] items-center bg-[#FAFCF9] px-4 py-12 sm:py-16 lg:py-20">
+    <div class="mx-auto w-full max-w-7xl">
+
+        <div class="mx-auto max-w-xl">
+
+            <!-- Register Card -->
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-8 lg:p-10">
+
+                <!-- Heading -->
+                <div class="mb-8 text-center">
+
+                    <div class="mx-auto flex size-16 items-center justify-center rounded-full bg-[#F1F8EF] text-3xl text-[#1F9345]">
+                        <i class="ph ph-user-circle-plus"></i>
+                    </div>
+
+                    <span class="mt-5 inline-flex items-center gap-1.5 rounded-full bg-[#F1F8EF] px-3 py-1 text-xs font-semibold text-[#1F9345]">
+                        <i class="ph ph-shield-check"></i>
+                        Bước cuối cùng
+                    </span>
+
+                    <h1 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                        Hoàn tất đăng ký
+                    </h1>
+
+                    <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
+                        Vui lòng kiểm tra thông tin và hoàn tất đăng ký
+                        để sử dụng đầy đủ tài khoản Caterin.
+                    </p>
+                </div>
+
+                <!-- Form -->
+                <form asp-controller="Account"
+                      asp-action="ExternalRegister"
+                      method="post"
+                      data-auth-form
+                      data-ajax="true">
+
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly"
+                         data-valmsg-summary="true"
+                         class="mb-5 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-5">
+                        <label asp-for="Email"
+                               class="mb-2 block text-sm font-semibold text-gray-800">
+                            Địa chỉ Email <span class="text-red-500">*</span>
+                        </label>
+
+                        <div class="relative">
+                            <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-400">
+                                <i class="ph ph-envelope-simple"></i>
+                            </span>
+
+                            <input asp-for="Email"
+                                   type="email"
+                                   class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50/70 pl-11 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10"
+                                   placeholder="Nhập địa chỉ email"
+                                   autocomplete="email" />
+                        </div>
+
+                        <span asp-validation-for="Email"
+                              class="mt-1.5 block text-sm text-red-600"></span>
+                    </div>
+
+                    <!-- Username -->
+                    <div class="mb-6">
+                        <label asp-for="UserName"
+                               class="mb-2 block text-sm font-semibold text-gray-800">
+                            Tên tài khoản <span class="text-red-500">*</span>
+                        </label>
+
+                        <div class="relative">
+                            <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-400">
+                                <i class="ph ph-user"></i>
+                            </span>
+
+                            <input asp-for="UserName"
+                                   class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50/70 pl-11 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 hover:border-gray-300 focus:border-[#1F9345] focus:bg-white focus:ring-4 focus:ring-[#1F9345]/10"
+                                   placeholder="Nhập tên tài khoản"
+                                   autocomplete="username" />
+                        </div>
+
+                        <span asp-validation-for="UserName"
+                              class="mt-1.5 block text-sm text-red-600"></span>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="mb-5 rounded-xl border border-gray-200 bg-gray-50/70 p-4">
+                        <div class="flex items-start gap-3">
+                            <input asp-for="AcceptTerms"
+                                   type="checkbox"
+                                   class="mt-1 size-4 shrink-0 cursor-pointer rounded border-gray-300 accent-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/20" />
+
+                            <label asp-for="AcceptTerms"
+                                   class="cursor-pointer text-sm leading-6 text-gray-600">
+                                Tôi đồng ý với
+                                <a href="/terms"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="font-semibold text-[#1F9345] underline underline-offset-2 transition hover:text-[#187A38]">
+                                    Điều khoản sử dụng
+                                </a>.
+                            </label>
+                        </div>
+
+                        <span asp-validation-for="AcceptTerms"
+                              class="mt-2 block pl-7 text-sm text-red-600"></span>
+                    </div>
+
+                    <!-- Privacy -->
+                    <div class="mb-7 rounded-xl border border-gray-200 bg-gray-50/70 p-4">
+                        <div class="flex items-start gap-3">
+                            <input asp-for="AcceptPrivacy"
+                                   type="checkbox"
+                                   class="mt-1 size-4 shrink-0 cursor-pointer rounded border-gray-300 accent-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/20" />
+
+                            <label asp-for="AcceptPrivacy"
+                                   class="cursor-pointer text-sm leading-6 text-gray-600">
+                                Tôi đã đọc và đồng ý với
+                                <a href="/privacy-policy"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="font-semibold text-[#1F9345] underline underline-offset-2 transition hover:text-[#187A38]">
+                                    Chính sách quyền riêng tư
+                                </a>.
+                            </label>
+                        </div>
+
+                        <span asp-validation-for="AcceptPrivacy"
+                              class="mt-2 block pl-7 text-sm text-red-600"></span>
+                    </div>
+
+                    <!-- Submit -->
+                    <button type="submit"
+                            class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20">
+                        Hoàn tất đăng ký
+                        <i class="ph ph-arrow-right text-lg"></i>
+                    </button>
+
+                    <!-- Cancel -->
+                    <div class="mt-6 text-center">
+                        <a asp-controller="Account"
+                           asp-action="Login"
+                           class="inline-flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[#1F9345]">
+                            <i class="ph ph-arrow-left"></i>
+                            Hủy và quay lại đăng nhập
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-5 text-center text-xs text-gray-400">
+                Caterin – An toàn cho mọi nhà
+            </p>
+
+        </div>
+    </div>
+</section>

@@ -1,0 +1,179 @@
+﻿@{
+    var products = new[]
+    {
+        new { Id = 1, Name = "Nước rửa tay Caterin hương sen", Image = "~/images/Demos/product-img7.png", Price = 89000m, OriginalPrice = 109000m, Badge = "Bán chạy", Rating = 4.9, Reviews = 128, Category = "handwash" },
+        new { Id = 2, Name = "Nước rửa tay Caterin hương gạo", Image = "~/images/Demos/product-img8.png", Price = 79000m, OriginalPrice = 99000m, Badge = "Giảm giá", Rating = 4.8, Reviews = 96, Category = "handwash" },
+        new { Id = 3, Name = "Nước rửa tay Caterin táo kiwi", Image = "~/images/Demos/product-img9.png", Price = 89000m, OriginalPrice = 0m, Badge = "", Rating = 4.8, Reviews = 75, Category = "handwash" },
+        new { Id = 4, Name = "Nước rửa chén Caterin cam quế", Image = "~/images/Demos/product-img10.png", Price = 69000m, OriginalPrice = 85000m, Badge = "Bán chạy", Rating = 4.9, Reviews = 152, Category = "dishwash" },
+        new { Id = 5, Name = "Nước rửa chén Caterin sả chanh", Image = "~/images/Demos/product-img11.png", Price = 69000m, OriginalPrice = 0m, Badge = "", Rating = 4.7, Reviews = 64, Category = "dishwash" },
+        new { Id = 6, Name = "Nước rửa chén Caterin hương gạo", Image = "~/images/Demos/product-img12.png", Price = 69000m, OriginalPrice = 85000m, Badge = "Giảm giá", Rating = 4.8, Reviews = 83, Category = "dishwash" },
+        new { Id = 7, Name = "Nước lau sàn Caterin hương lavender", Image = "~/images/Demos/product-img13.png", Price = 75000m, OriginalPrice = 0m, Badge = "", Rating = 4.9, Reviews = 112, Category = "floor" },
+        new { Id = 8, Name = "Nước lau sàn Caterin hương ylang", Image = "~/images/Demos/product-img14.png", Price = 75000m, OriginalPrice = 89000m, Badge = "Bán chạy", Rating = 4.8, Reviews = 91, Category = "floor" },
+        new { Id = 9, Name = "Nước lau sàn Caterin hương hoa hạ", Image = "~/images/Demos/product-img15.png", Price = 75000m, OriginalPrice = 0m, Badge = "", Rating = 4.7, Reviews = 58, Category = "floor" },
+        new { Id = 10, Name = "Dung dịch lau kính Caterin", Image = "~/images/Demos/product-img16.png", Price = 59000m, OriginalPrice = 69000m, Badge = "Giảm giá", Rating = 4.8, Reviews = 47, Category = "glass" },
+        new { Id = 11, Name = "Dung dịch tẩy rửa đa năng Caterin", Image = "~/images/Demos/product-img17.png", Price = 65000m, OriginalPrice = 0m, Badge = "", Rating = 4.9, Reviews = 102, Category = "cleaner" },
+        new { Id = 12, Name = "Dung dịch vệ sinh nhà bếp Caterin", Image = "~/images/Demos/product-img18.png", Price = 65000m, OriginalPrice = 79000m, Badge = "Mới", Rating = 4.8, Reviews = 39, Category = "cleaner" }
+    };
+}
+
+<section id="recommended"
+         class="overflow-hidden rounded-2xl bg-white py-10 sm:py-12 lg:py-16"
+         data-cart-url="/cart/add">
+
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
+
+        <!-- Heading -->
+        <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <span class="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#1F9345]">
+                    Caterin Collection
+                </span>
+                <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    Gợi Ý Riêng Cho Bạn
+                </h2>
+            </div>
+
+            <!-- Category tabs -->
+            <div class="flex max-w-full gap-2 overflow-x-auto pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0"
+                 id="recommendedFilters">
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full bg-[#1F9345] px-4 py-2 text-sm font-semibold text-white"
+                        data-filter="all">
+                    Tất cả
+                </button>
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+                        data-filter="handwash">
+                    Rửa tay
+                </button>
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+                        data-filter="dishwash">
+                    Rửa chén
+                </button>
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+                        data-filter="floor">
+                    Lau sàn
+                </button>
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+                        data-filter="glass">
+                    Lau kính
+                </button>
+
+                <button type="button"
+                        class="recommended-filter shrink-0 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-[#1F9345] hover:text-[#1F9345]"
+                        data-filter="cleaner">
+                    Tẩy rửa
+                </button>
+            </div>
+        </div>
+
+        <!-- Anti forgery token for AJAX cart -->
+        @Html.AntiForgeryToken()
+
+        <!-- Product grid -->
+        <div id="recommendedGrid"
+             class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4">
+
+            @for (var i = 0; i < products.Length; i++)
+            {
+                var product = products[i];
+
+                <article class="recommended-item group relative flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-3 transition duration-300 hover:-translate-y-1 hover:border-[#8CC63F] hover:shadow-lg sm:p-4"
+                         data-index="@i"
+                         data-category="@product.Category"
+                         data-product-id="@product.Id">
+
+                    <!-- Badge -->
+                    @if (!string.IsNullOrWhiteSpace(product.Badge))
+                    {
+                        <span class="absolute left-3 top-3 z-10 rounded-full bg-[#1F9345] px-2.5 py-1 text-[10px] font-bold text-white sm:left-4 sm:top-4 sm:text-xs">
+                            @product.Badge
+                        </span>
+                    }
+
+                    <!-- Image -->
+                    <a href="/shop/details/@product.Id"
+                       class="flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-[#F7FAF6] p-3 sm:p-4">
+
+                        <img src="@Url.Content(product.Image)"
+                             alt="@product.Name"
+                             loading="lazy"
+                             class="h-full w-full object-contain transition duration-300 group-hover:scale-105" />
+                    </a>
+
+                    <!-- Product info -->
+                    <div class="flex flex-1 flex-col pt-3">
+
+                        <h3 class="mb-2 line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-gray-900 sm:text-base">
+                            <a href="/shop/details/@product.Id"
+                               class="transition hover:text-[#1F9345]">
+                                @product.Name
+                            </a>
+                        </h3>
+
+                        <div class="mb-3 flex items-center gap-1.5 text-xs text-gray-500">
+                            <i class="ph-fill ph-seal-check text-base text-[#1F9345]"></i>
+                            <span>Caterin chính hãng</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-2 mt-auto flex flex-wrap items-center gap-2">
+                            <span class="text-base font-bold text-[#1F9345] sm:text-lg">
+                                @product.Price.ToString("#,##0")đ
+                            </span>
+
+                            @if (product.OriginalPrice > 0)
+                            {
+                                <span class="text-xs text-gray-400 line-through">
+                                    @product.OriginalPrice.ToString("#,##0")đ
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="mb-3 flex items-center gap-1.5 text-xs">
+                            <i class="ph-fill ph-star text-sm text-amber-400"></i>
+                            <span class="font-semibold text-gray-700">
+                                @product.Rating.ToString("0.0")
+                            </span>
+                            <span class="text-gray-400">
+                                (@product.Reviews)
+                            </span>
+                        </div>
+
+                        <!-- Add to cart -->
+                        <button type="button"
+                                class="recommended-add-cart flex w-full items-center justify-center gap-2 rounded-full bg-[#EAF5EC] px-3 py-2.5 text-xs font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+                                data-product-id="@product.Id">
+
+                            <i class="ph ph-shopping-cart text-base"></i>
+                            <span>Thêm giỏ hàng</span>
+                        </button>
+                    </div>
+                </article>
+            }
+        </div>
+
+        <!-- Load more -->
+        <div id="recommendedLoadMoreWrapper"
+             class="mt-8 flex justify-center sm:mt-10">
+
+            <button type="button"
+                    id="recommendedLoadMore"
+                    class="inline-flex min-w-40 items-center justify-center gap-2 rounded-full border border-[#1F9345] bg-white px-7 py-3 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
+
+                <span class="recommended-load-text">Xem thêm</span>
+                <i class="ph ph-arrow-down text-base"></i>
+            </button>
+        </div>
+
+    </div>
+</section>

@@ -1,0 +1,66 @@
+﻿@using Website.Models.Order
+@model OrderDetailsViewModel
+
+<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
+    <div class="mb-7">
+        <h2 class="font-bold text-gray-900">Hành trình đơn hàng</h2>
+        <p class="mt-1 text-sm text-gray-500">
+            Theo dõi tiến trình xử lý đơn hàng của bạn.
+        </p>
+    </div>
+
+    @if (Model.Timeline == null || Model.Timeline.Count == 0)
+    {
+        <p class="text-sm text-gray-500">
+            Chưa có thông tin cập nhật hành trình đơn hàng.
+        </p>
+    }
+    else
+    {
+        <div class="relative space-y-7">
+            <div class="absolute bottom-5 left-5 top-5 w-0.5 bg-gray-200"></div>
+
+            @foreach (var item in Model.Timeline)
+            {
+                var isActive = item.IsCompleted || item.IsCurrent;
+
+                <div class="relative flex gap-4">
+                    <div class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ring-4 ring-white
+                                @(isActive ? "bg-[#1F9345] text-white" : "border border-gray-200 bg-white text-gray-400")">
+                        <i class="ph @item.Icon text-xl"></i>
+                    </div>
+
+                    <div class="min-w-0 flex-1 pb-1">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h3 class="text-sm font-semibold
+                                        @(item.IsCurrent ? "text-[#1F9345]" : isActive ? "text-gray-900" : "text-gray-400")">
+                                @item.Title
+                            </h3>
+
+                            @if (item.IsCurrent)
+                            {
+                                <span class="rounded-full bg-[#eaf7e9] px-2.5 py-1 text-xs font-semibold text-[#1F9345]">
+                                    Hiện tại
+                                </span>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <p class="mt-1 text-xs leading-5 text-gray-500">
+                                @item.Description
+                            </p>
+                        }
+
+                        @if (item.OccurredAt.HasValue)
+                        {
+                            <p class="mt-2 text-xs text-gray-400">
+                                @item.OccurredAt.Value.ToString("dd/MM/yyyy HH:mm")
+                            </p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

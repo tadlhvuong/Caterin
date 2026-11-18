@@ -1,0 +1,736 @@
+﻿@using Website.Models.Shop
+@using System.Globalization
+@model ShopProductViewModel
+
+@{
+    var viCulture = CultureInfo.GetCultureInfo("vi-VN");
+
+    ViewData["Title"] = $"{Model.Name} | Caterin";
+
+    var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl)
+     ? Url.Content("~/images/Default/default-product.png")
+     : Url.Content(Model.ImageUrl);
+
+    var badgeBackground =
+        string.Equals(Model.BadgeColor, "success", StringComparison.OrdinalIgnoreCase)
+            ? "#1F9345"
+            : !string.IsNullOrWhiteSpace(Model.BadgeColor)
+                && Model.BadgeColor.StartsWith("#")
+                    ? Model.BadgeColor
+                    : "#1F9345";
+
+    var hasDiscount = Model.OriginalPrice.HasValue
+        && Model.OriginalPrice.Value > Model.Price;
+
+    var isInStock = Model.StockQuantity > 0;
+    var maxQuantity = Math.Max(1, Model.StockQuantity);
+
+    // Sản phẩm cùng danh mục, loại trừ sản phẩm đang xem.
+    var relatedProducts = MockProductCatalog.Products
+        .Where(x => x.CategorySlug == Model.CategorySlug && x.Id != Model.Id)
+        .Take(4)
+        .ToList();
+}
+
+<!-- Breadcrumb + page heading -->
+<section class="bg-[#F5F9F2] py-6 md:py-8">
+    <div class="container mx-auto px-4">
+        <nav class="flex flex-wrap items-center gap-2 text-sm text-gray-500"
+             aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index"
+               class="transition hover:text-[#1F9345]">
+                Trang chủ
+            </a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Shop" asp-action="Index"
+               class="transition hover:text-[#1F9345]">
+                Cửa hàng
+            </a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <a asp-controller="Shop" asp-action="Index"
+               asp-route-category="@Model.CategorySlug"
+               class="transition hover:text-[#1F9345]">
+                @Model.CategoryName
+            </a>
+            <i class="ph ph-caret-right text-xs"></i>
+            <span class="font-medium text-[#1F9345]" aria-current="page">
+                @Model.Name
+            </span>
+        </nav>
+    </div>
+</section>
+
+<main>
+    <!-- Product overview -->
+    <section class="py-8 md:py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+
+                <!-- Product image -->
+                <div class="min-w-0">
+                    <div class="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl border border-gray-100 bg-[#F5F9F2] p-6 sm:min-h-[480px] sm:p-10">
+                        @if (!string.IsNullOrWhiteSpace(Model.Badge))
+                        {
+                            <span class="absolute left-4 top-4 z-10 rounded-full px-3 py-1.5 text-xs font-semibold text-white sm:left-5 sm:top-5"
+                                  style="background-color: @badgeBackground">
+                                @Model.Badge
+                            </span>
+                        }
+                        else if (Model.IsNew)
+                        {
+                            <span class="absolute left-4 top-4 z-10 rounded-full bg-[#1F9345] px-3 py-1.5 text-xs font-semibold text-white sm:left-5 sm:top-5">
+                                Sản phẩm mới
+                            </span>
+                        }
+
+                        <button type="button"
+                                data-detail-wishlist
+                                class="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-gray-100 bg-white text-gray-500 shadow-sm transition hover:text-red-500 sm:right-5 sm:top-5"
+                                aria-label="Thêm vào danh sách yêu thích"
+                                aria-pressed="false">
+                            <i class="ph ph-heart text-xl"></i>
+                        </button>
+
+                        <img src="@imageUrl"
+                             alt="@Model.Name"
+                             class="max-h-[440px] w-full object-contain"
+                             loading="eager"
+                             onerror="this.onerror=null;this.src='@Url.Content("~/images/Default/default-product.png")';" />
+                    </div>
+
+                    <div class="mt-3 flex items-center gap-3">
+                        <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border-2 border-[#1F9345] bg-white p-2">
+                            <img src="@imageUrl"
+                                 alt="@Model.Name"
+                                 class="h-full w-full object-contain"
+                                 loading="lazy" />
+                        </div>
+                        <p class="text-xs text-gray-500">Hình ảnh sản phẩm</p>
+                    </div>
+                </div>
+
+                <!-- Product information -->
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a asp-controller="Shop" asp-action="Index"
+                           asp-route-category="@Model.CategorySlug"
+                           class="text-sm font-semibold text-[#1F9345] hover:underline">
+                            @Model.CategoryName
+                        </a>
+
+                        @if (Model.IsFeatured)
+                        {
+                            <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                <i class="ph-fill ph-star"></i>
+                                Nổi bật
+                            </span>
+                        }
+                    </div>
+
+                    <h1 class="mt-3 text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
+                        @Model.Name
+                    </h1>
+
+                    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                        <div class="flex items-center gap-1 text-amber-500"
+                             aria-label="Đánh giá @Model.Rating trên 5">
+                            @for (var i = 1; i <= 5; i++)
+                            {
+                                var starClass = Model.Rating >= i
+                                ? "ph-fill ph-star"
+                                : Model.Rating >= i - 0.5
+                                ? "ph-fill ph-star-half"
+                                : "ph ph-star";
+
+                                <i class="@starClass"></i>
+                            }
+                            <span class="ml-1 font-semibold text-gray-900">
+                                @Model.Rating.ToString("0.0", viCulture)
+                            </span>
+                        </div>
+                        <span class="text-gray-500">@Model.ReviewCount đánh giá</span>
+                        <span class="hidden text-gray-300 sm:inline">|</span>
+                        <span class="text-gray-500">Đã bán @Model.SoldCount</span>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mt-6 rounded-2xl bg-[#F5F9F2] p-5 sm:p-6">
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                            <span class="text-3xl font-bold text-[#1F9345] sm:text-4xl">
+                                @Model.Price.ToString("N0", viCulture)₫
+                            </span>
+
+                            @if (hasDiscount)
+                            {
+                                <span class="text-base text-gray-400 line-through">
+                                    @Model.OriginalPrice!.Value.ToString("N0", viCulture)₫
+                                </span>
+                                <span class="rounded-md bg-red-50 px-2 py-1 text-xs font-semibold text-red-600">
+                                    -@Model.DiscountPercent%
+                                </span>
+                            }
+                        </div>
+                        <p class="mt-2 text-xs leading-5 text-gray-500">
+                            Phí vận chuyển (nếu có) sẽ được hiển thị tại bước thanh toán.
+                        </p>
+                    </div>
+
+                    <!-- Product attributes -->
+                    <!-- Product variants -->
+                    <div class="mt-6 space-y-6">
+
+                        <!-- Volume selection -->
+                        <div>
+                            <div class="mb-3 flex items-center justify-between">
+                                <label class="text-sm font-semibold text-gray-900">
+                                    Dung tích
+                                </label>
+                                <span class="text-xs text-gray-500">
+                                    Vui lòng chọn dung tích
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+                                <button type="button"
+                                        class="rounded-lg border-2 border-[#1F9345] bg-[#F5F9F2] px-5 py-3 text-sm font-semibold text-[#1F9345]">
+                                    500ml
+                                </button>
+
+                                <button type="button"
+                                        class="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                    750ml
+                                </button>
+
+                                <button type="button"
+                                        class="rounded-lg border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                    1L
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Scent selection -->
+                        <div>
+                            <div class="mb-3 flex items-center justify-between">
+                                <label class="text-sm font-semibold text-gray-900">
+                                    Mùi hương
+                                </label>
+                                <span class="text-xs text-gray-500">
+                                    Vui lòng chọn mùi hương
+                                </span>
+                            </div>
+
+                            <div class="flex flex-wrap gap-3">
+
+                                <button type="button"
+                                        class="inline-flex items-center gap-2 rounded-lg border-2 border-[#1F9345] bg-[#F5F9F2] px-4 py-3 text-sm font-semibold text-[#1F9345]">
+                                    <span class="h-3 w-3 rounded-full bg-pink-300"></span>
+                                    Hương sen
+                                </button>
+
+                                <button type="button"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                    <span class="h-3 w-3 rounded-full bg-amber-200"></span>
+                                    Hương gạo
+                                </button>
+
+                                <button type="button"
+                                        class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:text-[#1F9345]">
+                                    <span class="h-3 w-3 rounded-full bg-green-300"></span>
+                                    Táo Kiwi
+                                </button>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 space-y-4 border-b border-gray-100 pb-6">
+                        <div class="grid grid-cols-[105px_1fr] gap-3 text-sm">
+                            <span class="text-gray-500">Dung tích</span>
+                            <span class="font-medium text-gray-900">
+                                @(string.IsNullOrWhiteSpace(Model.Volume) ? "Đang cập nhật" : Model.Volume)
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-[105px_1fr] gap-3 text-sm">
+                            <span class="text-gray-500">Tình trạng</span>
+                            @if (isInStock)
+                            {
+                                <span class="flex items-center gap-1.5 font-medium text-[#1F9345]">
+                                    <i class="ph-fill ph-check-circle"></i>
+                                    Còn hàng
+                                    <span class="font-normal text-gray-500">(@Model.StockQuantity sản phẩm)</span>
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="font-medium text-red-600">Tạm hết hàng</span>
+                            }
+                        </div>
+
+                        <div class="grid grid-cols-[105px_1fr] gap-3 text-sm">
+                            <span class="text-gray-500">Danh mục</span>
+                            <span class="font-medium text-gray-900">@Model.CategoryName</span>
+                        </div>
+                    </div>
+
+                    <!-- Purchase actions -->
+                    <div class="mt-6">
+                        <label for="detailQuantity"
+                               class="mb-2 block text-sm font-semibold text-gray-800">
+                            Số lượng
+                        </label>
+
+                        <div class="flex w-full items-center gap-2 sm:gap-3">
+                            <!-- Quantity -->
+                            <div class="inline-flex h-12 w-fit shrink-0 items-center overflow-hidden rounded-full border border-gray-200">
+                                <button type="button"
+                                        data-quantity-minus
+                                        class="flex h-full w-9 items-center justify-center text-gray-600 transition hover:bg-gray-50 hover:text-[#1F9345] sm:w-11"
+                                        aria-label="Giảm số lượng">
+                                    <i class="ph ph-minus"></i>
+                                </button>
+
+                                <input id="detailQuantity"
+                                       type="number"
+                                       value="1"
+                                       min="1"
+                                       max="@maxQuantity"
+                                       inputmode="numeric"
+                                       data-quantity-input
+                                       class="h-full w-10 border-0 bg-transparent p-0 text-center text-sm font-semibold text-gray-900 focus:ring-0 sm:w-12"
+                                       aria-label="Số lượng sản phẩm" />
+
+                                <button type="button"
+                                        data-quantity-plus
+                                        class="flex h-full w-9 items-center justify-center text-gray-600 transition hover:bg-gray-50 hover:text-[#1F9345] sm:w-11"
+                                        aria-label="Tăng số lượng">
+                                    <i class="ph ph-plus"></i>
+                                </button>
+                            </div>
+
+                            <!-- Add to cart -->
+                            <button type="button"
+                                    data-detail-add-to-cart
+                                    class="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 rounded-full bg-[#1F9345] px-2 text-xs font-semibold text-white transition hover:bg-[#187C3B] disabled:cursor-not-allowed disabled:opacity-50 sm:px-6 sm:text-sm"
+                                    disabled="@(!isInStock)">
+                                <i class="ph ph-shopping-cart shrink-0 text-lg"></i>
+                                <span class="truncate">
+                                    @(isInStock ? "Thêm vào giỏ hàng" : "Tạm hết hàng")
+                                </span>
+                            </button>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-500" data-quantity-hint>
+                            @if (isInStock)
+                            {
+                                <text>Tối đa @Model.StockQuantity sản phẩm cho mỗi lần thêm vào giỏ.</text>
+                            }
+                            else
+                            {
+                                <text>Sản phẩm hiện chưa có sẵn để đặt hàng.</text>
+                            }
+                        </p>
+                    </div>
+
+                    <!-- Trust information -->
+                    <div class="mt-6 grid grid-cols-1 gap-3 rounded-2xl border border-gray-100 p-4 sm:grid-cols-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i class="ph ph-truck text-xl text-[#1F9345]"></i>
+                            <span>Giao hàng tận nơi</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i class="ph ph-shield-check text-xl text-[#1F9345]"></i>
+                            <span>Thanh toán an toàn</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i class="ph ph-leaf text-xl text-[#1F9345]"></i>
+                            <span>An toàn cho mọi nhà</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product information tabs -->
+    <section class="pb-12 md:pb-16">
+        <div class="container mx-auto px-4">
+            <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+                <div class="flex overflow-x-auto border-b border-gray-100 px-4 sm:px-6"
+                     role="tablist"
+                     aria-label="Thông tin chi tiết sản phẩm">
+                    <button type="button"
+                            id="detail-tab-description"
+                            data-detail-tab="description"
+                            role="tab"
+                            aria-controls="detail-panel-description"
+                            aria-selected="true"
+                            class="shrink-0 border-b-2 border-[#1F9345] px-4 py-4 text-sm font-semibold text-[#1F9345]">
+                        Mô tả sản phẩm
+                    </button>
+                    <button type="button"
+                            id="detail-tab-information"
+                            data-detail-tab="information"
+                            role="tab"
+                            aria-controls="detail-panel-information"
+                            aria-selected="false"
+                            class="shrink-0 border-b-2 border-transparent px-4 py-4 text-sm font-medium text-gray-500 transition hover:text-[#1F9345]">
+                        Thông tin sản phẩm
+                    </button>
+                    <button type="button"
+                            id="detail-tab-reviews"
+                            data-detail-tab="reviews"
+                            role="tab"
+                            aria-controls="detail-panel-reviews"
+                            aria-selected="false"
+                            class="shrink-0 border-b-2 border-transparent px-4 py-4 text-sm font-medium text-gray-500 transition hover:text-[#1F9345]">
+                        Đánh giá (@Model.ReviewCount)
+                    </button>
+                </div>
+
+                <div class="p-5 sm:p-8">
+                    <div id="detail-panel-description"
+                         data-detail-panel="description"
+                         role="tabpanel"
+                         aria-labelledby="detail-tab-description">
+                        <h2 class="text-lg font-semibold text-gray-900">@Model.Name</h2>
+                        <p class="mt-3 max-w-4xl text-sm leading-7 text-gray-600">
+                            @Model.Name là sản phẩm thuộc danh mục @Model.CategoryName của Caterin.
+                            Thông tin chi tiết về thành phần, công dụng và hướng dẫn sử dụng cần được
+                            cập nhật theo nội dung chính thức của sản phẩm.
+                        </p>
+                    </div>
+
+                    <div id="detail-panel-information"
+                         data-detail-panel="information"
+                         role="tabpanel"
+                         aria-labelledby="detail-tab-information"
+                         hidden>
+                        <div class="max-w-3xl overflow-hidden rounded-xl border border-gray-100 text-sm">
+                            <div class="grid grid-cols-1 border-b border-gray-100 sm:grid-cols-2">
+                                <div class="bg-gray-50 px-4 py-3 text-gray-500">Tên sản phẩm</div>
+                                <div class="px-4 py-3 font-medium text-gray-900">@Model.Name</div>
+                            </div>
+                            <div class="grid grid-cols-1 border-b border-gray-100 sm:grid-cols-2">
+                                <div class="bg-gray-50 px-4 py-3 text-gray-500">Danh mục</div>
+                                <div class="px-4 py-3 text-gray-900">@Model.CategoryName</div>
+                            </div>
+                            <div class="grid grid-cols-1 border-b border-gray-100 sm:grid-cols-2">
+                                <div class="bg-gray-50 px-4 py-3 text-gray-500">Dung tích / Quy cách</div>
+                                <div class="px-4 py-3 text-gray-900">
+                                    @(string.IsNullOrWhiteSpace(Model.Volume) ? "Đang cập nhật" : Model.Volume)
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2">
+                                <div class="bg-gray-50 px-4 py-3 text-gray-500">Tình trạng</div>
+                                <div class="px-4 py-3 text-gray-900">@(isInStock ? "Còn hàng" : "Tạm hết hàng")</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="detail-panel-reviews"
+                         data-detail-panel="reviews"
+                         role="tabpanel"
+                         aria-labelledby="detail-tab-reviews"
+                         hidden>
+                        <div class="grid grid-cols-1 gap-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+                            <!-- Review summary -->
+                            <div class="rounded-2xl bg-[#F5F9F2] p-5 sm:p-6">
+                                <p class="text-sm font-semibold text-gray-700">Đánh giá trung bình</p>
+                                <div class="mt-3 flex items-end gap-2">
+                                    <span class="text-5xl font-bold leading-none text-gray-900">
+                                        @Model.Rating.ToString("0.0", viCulture)
+                                    </span>
+                                    <span class="pb-1 text-sm text-gray-500">/ 5</span>
+                                </div>
+                                <div class="mt-3 flex gap-1 text-xl text-amber-500" aria-label="@Model.Rating trên 5 sao">
+                                    @for (var i = 1; i <= 5; i++)
+                                    {
+                                        var reviewStarClass = Model.Rating >= i
+                                        ? "ph-fill ph-star"
+                                        : Model.Rating >= i - 0.5
+                                        ? "ph-fill ph-star-half"
+                                        : "ph ph-star";
+                                        <i class="@reviewStarClass"></i>
+                                    }
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    @Model.ReviewCount lượt đánh giá
+                                </p>
+                                <div class="mt-5 rounded-xl border border-[#DCEBDD] bg-white p-3">
+                                    <p class="text-xs leading-5 text-gray-500">
+                                        Điểm đánh giá và số lượt đánh giá được lấy từ thông tin sản phẩm hiện có.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Review list and form -->
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <h3 class="text-lg font-semibold text-gray-900">Nhận xét của khách hàng</h3>
+                                    <span class="text-xs text-gray-500">@Model.ReviewCount đánh giá</span>
+                                </div>
+
+                                <div class="mt-4 rounded-xl border border-dashed border-gray-200 px-5 py-8 text-center">
+                                    <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gray-50 text-gray-400">
+                                        <i class="ph ph-chat-circle-dots text-2xl"></i>
+                                    </span>
+                                    <p class="mt-3 text-sm font-semibold text-gray-800">Chưa có nội dung nhận xét để hiển thị</p>
+                                    <p class="mt-1 text-xs leading-5 text-gray-500">
+                                        Nhận xét chi tiết sẽ xuất hiện tại đây sau khi hệ thống đánh giá được kết nối.
+                                    </p>
+                                </div>
+
+                                <div class="mt-8 border-t border-gray-100 pt-6">
+                                    <h3 class="text-lg font-semibold text-gray-900">Viết đánh giá của bạn</h3>
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        Chia sẻ trải nghiệm của bạn về @Model.Name.
+                                    </p>
+
+                                    <form class="mt-5 space-y-4" data-review-form>
+                                        <fieldset>
+                                            <legend class="mb-2 text-sm font-medium text-gray-700">Mức độ hài lòng</legend>
+                                            <div class="flex flex-row-reverse justify-end gap-1" aria-label="Chọn số sao">
+                                                @for (var i = 5; i >= 1; i--)
+                                                {
+                                                    <input class="peer sr-only" type="radio" id="review-star-@i" name="rating" value="@i" />
+                                                    <label for="review-star-@i"
+                                                           class="cursor-pointer text-2xl text-gray-300 transition hover:text-amber-400 peer-checked:text-amber-400"
+                                                           title="@i sao">
+                                                        <i class="ph-fill ph-star"></i>
+                                                    </label>
+                                                }
+                                            </div>
+                                        </fieldset>
+
+                                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                            <div>
+                                                <label for="reviewName" class="mb-2 block text-sm font-medium text-gray-700">Tên hiển thị</label>
+                                                <input id="reviewName" name="displayName" type="text" autocomplete="name"
+                                                       placeholder="Nhập tên của bạn"
+                                                       class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                                            </div>
+                                            <div>
+                                                <label for="reviewTitle" class="mb-2 block text-sm font-medium text-gray-700">Tiêu đề đánh giá</label>
+                                                <input id="reviewTitle" name="title" type="text"
+                                                       placeholder="Tóm tắt trải nghiệm của bạn"
+                                                       class="h-11 w-full rounded-lg border border-gray-200 px-3 text-sm outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label for="reviewContent" class="mb-2 block text-sm font-medium text-gray-700">Nội dung nhận xét</label>
+                                            <textarea id="reviewContent" name="content" rows="4"
+                                                      placeholder="Chia sẻ cảm nhận về chất lượng, mùi hương và trải nghiệm sử dụng..."
+                                                      class="w-full resize-y rounded-lg border border-gray-200 px-3 py-3 text-sm outline-none transition focus:border-[#1F9345] focus:ring-2 focus:ring-[#1F9345]/10"></textarea>
+                                        </div>
+
+                                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <p class="text-xs leading-5 text-gray-400">Giao diện đánh giá hiện chưa kết nối chức năng gửi nhận xét.</p>
+                                            <button type="button" disabled
+                                                    class="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-gray-200 px-6 text-sm font-semibold text-gray-500 cursor-not-allowed">
+                                                <i class="ph ph-paper-plane-tilt"></i>
+                                                Gửi đánh giá
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <a asp-controller="Shop" asp-action="Index"
+                   class="inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:gap-3">
+                    <i class="ph ph-arrow-left"></i>
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related products -->
+    @if (relatedProducts.Count > 0)
+    {
+        <section class="border-t border-gray-100 bg-[#FAFCF9] py-12 md:py-16">
+            <div class="container mx-auto px-4">
+                <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <p class="text-sm font-semibold text-[#1F9345]">Có thể bạn quan tâm</p>
+                        <h2 class="mt-1 text-2xl font-bold text-gray-900">Sản phẩm liên quan</h2>
+                        <p class="mt-2 text-sm text-gray-500">Khám phá thêm sản phẩm cùng danh mục.</p>
+                    </div>
+                    <a asp-controller="Shop" asp-action="Index" asp-route-category="@Model.CategorySlug"
+                       class="inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:gap-3">
+                        Xem tất cả <i class="ph ph-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
+                    @foreach (var related in relatedProducts)
+                    {
+                        var relatedImage = string.IsNullOrWhiteSpace(related.ImageUrl)
+                        ? Url.Content("~/images/Default/default-product.png")
+                        : Url.Content(related.ImageUrl);
+                        var relatedHasDiscount = related.OriginalPrice.HasValue && related.OriginalPrice.Value > related.Price;
+
+                        <article class="group min-w-0 overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:-translate-y-1 hover:shadow-lg">
+                            <a asp-controller="Shop" asp-action="Details" asp-route-slug="@related.Slug"
+                               class="relative flex aspect-square items-center justify-center overflow-hidden bg-[#F5F9F2] p-4 sm:p-6">
+                                @if (!string.IsNullOrWhiteSpace(related.Badge))
+                                {
+                                    <span class="absolute left-3 top-3 rounded-full bg-[#1F9345] px-2.5 py-1 text-[10px] font-semibold text-white sm:text-xs">@related.Badge</span>
+                                }
+                                else if (related.IsNew)
+                                {
+                                    <span class="absolute left-3 top-3 rounded-full bg-[#1F9345] px-2.5 py-1 text-[10px] font-semibold text-white sm:text-xs">Mới</span>
+                                }
+                                <img src="@relatedImage" alt="@related.Name" loading="lazy"
+                                     class="h-full w-full object-contain transition duration-300 group-hover:scale-105"
+                                     onerror="this.onerror=null;this.src='@Url.Content("~/images/Default/default-product.png")';" />
+                            </a>
+
+                            <div class="p-3 sm:p-4">
+                                <p class="text-[11px] font-medium text-gray-400 sm:text-xs">@related.CategoryName</p>
+                                <a asp-controller="Shop" asp-action="Details" asp-route-slug="@related.Slug"
+                                   class="mt-1 line-clamp-2 min-h-10 text-sm font-semibold leading-5 text-gray-900 transition hover:text-[#1F9345] sm:text-base">
+                                    @related.Name
+                                </a>
+                                <div class="mt-2 flex items-center gap-1 text-xs text-amber-500">
+                                    <i class="ph-fill ph-star"></i>
+                                    <span class="font-semibold text-gray-700">@related.Rating.ToString("0.0", viCulture)</span>
+                                    <span class="text-gray-400">(@related.ReviewCount)</span>
+                                </div>
+                                <div class="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                    <span class="text-sm font-bold text-[#1F9345] sm:text-base">@related.Price.ToString("N0", viCulture)₫</span>
+                                    @if (relatedHasDiscount)
+                                    {
+                                        <span class="text-[11px] text-gray-400 line-through">@related.OriginalPrice!.Value.ToString("N0", viCulture)₫</span>
+                                    }
+                                </div>
+                                <a asp-controller="Shop" asp-action="Details" asp-route-slug="@related.Slug"
+                                   class="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full border border-[#1F9345] px-3 text-xs font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white sm:text-sm">
+                                    Xem sản phẩm
+                                </a>
+                            </div>
+                        </article>
+                    }
+                </div>
+            </div>
+        </section>
+    }
+</main>
+
+@section Scripts {
+    <script>
+        (() => {
+            'use strict';
+
+            const root = document.querySelector('[data-detail-add-to-cart]')?.closest('main');
+            if (!root) return;
+
+            const product = {
+                id: @Model.Id,
+                name: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name)),
+                price: @Model.Price.ToString(CultureInfo.InvariantCulture),
+                image: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(imageUrl)),
+                slug: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Slug))
+            };
+
+            const quantityInput = root.querySelector('[data-quantity-input]');
+            const minusButton = root.querySelector('[data-quantity-minus]');
+            const plusButton = root.querySelector('[data-quantity-plus]');
+            const addButton = root.querySelector('[data-detail-add-to-cart]');
+            const wishlistButton = root.querySelector('[data-detail-wishlist]');
+            const maxQuantity = Math.max(1, Number(quantityInput?.max || 1));
+
+            const getQuantity = () => {
+                const parsed = Number.parseInt(quantityInput?.value || '1', 10);
+                return Math.min(maxQuantity, Math.max(1, Number.isFinite(parsed) ? parsed : 1));
+            };
+
+            const updateQuantity = value => {
+                if (quantityInput) {
+                    quantityInput.value = String(Math.min(maxQuantity, Math.max(1, value)));
+                }
+            };
+
+            minusButton?.addEventListener('click', () => updateQuantity(getQuantity() - 1));
+            plusButton?.addEventListener('click', () => updateQuantity(getQuantity() + 1));
+            quantityInput?.addEventListener('change', () => updateQuantity(getQuantity()));
+            quantityInput?.addEventListener('blur', () => updateQuantity(getQuantity()));
+
+            addButton?.addEventListener('click', () => {
+                if (!window.Caterin?.Cart?.add) {
+                    console.error('Caterin.Cart is not available. Check that common/cart.js is loaded.');
+                    return;
+                }
+
+                window.Caterin.Cart.add(product, getQuantity());
+
+                if (window.Swal) {
+                    window.Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Đã thêm sản phẩm vào giỏ hàng',
+                        showConfirmButton: false,
+                        timer: 2200,
+                        timerProgressBar: true
+                    });
+                }
+            });
+
+            const syncWishlistState = () => {
+                const active = window.Caterin?.Wishlist?.contains?.(product.id) ?? false;
+                const icon = wishlistButton?.querySelector('i');
+
+                wishlistButton?.setAttribute('aria-pressed', String(active));
+                icon?.classList.toggle('ph-fill', active);
+                icon?.classList.toggle('ph', !active);
+                icon?.classList.toggle('text-red-500', active);
+            };
+
+            wishlistButton?.addEventListener('click', () => {
+                if (!window.Caterin?.Wishlist?.toggle) {
+                    console.error('Caterin.Wishlist is not available. Check that common/wishlist.js is loaded.');
+                    return;
+                }
+
+                window.Caterin.Wishlist.toggle(product);
+                syncWishlistState();
+            });
+
+            syncWishlistState();
+
+            // Product information tabs
+            const tabButtons = root.querySelectorAll('[data-detail-tab]');
+            const tabPanels = root.querySelectorAll('[data-detail-panel]');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selected = button.dataset.detailTab;
+
+                    tabButtons.forEach(tab => {
+                        const active = tab === button;
+
+                        tab.setAttribute('aria-selected', String(active));
+                        tab.classList.toggle('border-[#1F9345]', active);
+                        tab.classList.toggle('text-[#1F9345]', active);
+                        tab.classList.toggle('font-semibold', active);
+                        tab.classList.toggle('border-transparent', !active);
+                        tab.classList.toggle('text-gray-500', !active);
+                        tab.classList.toggle('font-medium', !active);
+                    });
+
+                    tabPanels.forEach(panel => {
+                        const active = panel.dataset.detailPanel === selected;
+                        panel.hidden = !active;
+                    });
+                });
+            });
+        })();
+    </script>
+}

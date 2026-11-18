@@ -17,74 +17,155 @@
             opacity: .45;
             pointer-events: none;
         }
-        </style>
+</style>
 
-<div class="2xl:w-3/12 xl:w-4/12 flex-grow-0 flex-shrink-0 basis-auto">
-    <div class="border border-gray-100 rounded-16 overflow-hidden">
-        <div class="bg-main-50 text-center py-40">
-            <img src="@avatarUrl"
-                 class="rounded-circle mb-20"
-                 width="90"
-                 height="90"
-                 alt="Avatar">
+<aside class="min-w-0 lg:col-span-4 2xl:col-span-3">
+    <div class="overflow-hidden rounded-2xl border border-gray-100 bg-white">
 
-            <h5 class="mb-8">@displayName</h5>
+        <!-- User information -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-[#F2F9EF] via-[#F8FCF6] to-white px-5 pb-6 pt-7 text-center">
+            <div class="pointer-events-none absolute -right-10 -top-12 size-36 rounded-full bg-[#8CC63F]/10 blur-2xl"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-10 size-36 rounded-full bg-[#1F9345]/5 blur-2xl"></div>
 
-            <span class="text-gray-500">@email</span>
+            <div class="relative mx-auto mb-4 size-24">
+                <img src="@avatarUrl"
+                     class="size-24 rounded-full border-4 border-white object-cover shadow-md"
+                     width="96"
+                     height="96"
+                     alt="Ảnh đại diện">
+
+                <span class="absolute bottom-1 right-1 size-4 rounded-full border-[3px] border-white bg-[#1F9345]"
+                      title="Tài khoản">
+                </span>
+            </div>
+
+            <h2 class="relative truncate text-base font-semibold text-gray-900">
+                @displayName
+            </h2>
+
+            <p class="relative mt-1 break-all text-xs text-gray-500">
+                @email
+            </p>
+
+            <div class="relative mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#DCEED7] bg-white/80 px-3 py-1 text-xs font-medium text-[#1F9345]">
+                <i class="ph ph-shield-check text-sm"></i>
+                Tài khoản của tôi
+            </div>
         </div>
 
-        <div class="py-16">
-            <button type="button"
-                    class="account-menu"
-                    data-url="/profile/personal-info"
-                    data-tab="personal">
-                <i class="ph ph-user"></i>
-                Hồ sơ
-            </button>
+        <!-- Navigation -->
+        <nav class="p-3" aria-label="Điều hướng tài khoản">
 
-            <button type="button"
-                    class="account-menu"
-                    data-url="/profile/orders"
-                    data-tab="orders">
-                <i class="ph ph-shopping-bag"></i>
-                Đơn hàng
-            </button>
+            <p class="mb-2 px-3 pt-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                Quản lý tài khoản
+            </p>
 
-            <button type="button"
-                    class="account-menu"
-                    data-url="/profile/addresses"
-                    data-tab="addresses">
-                <i class="ph ph-map-pin"></i>
-                Địa chỉ
-            </button>
+            <div class="space-y-1">
 
-            <button type="button"
-                    class="account-menu"
-                    data-url="/profile/change-password"
-                    data-tab="password">
-                <i class="ph ph-lock-key"></i>
-                @(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")
-            </button>
+                <!-- Personal information -->
+                <button type="button"
+                        class="account-menu flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                        data-url="/profile/personal-info"
+                        data-tab="personal"
+                        aria-current="page">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-lg text-[#1F9345] shadow-sm">
+                        <i class="ph ph-user"></i>
+                    </span>
 
-            <button type="button"
-                    class="account-menu"
-                    data-url="/profile/connections"
-                    data-tab="connections">
-                <i class="ph ph-link"></i>
-                Kết nối tài khoản
-            </button>
+                    <span class="min-w-0 flex-1">Hồ sơ cá nhân</span>
 
+                    <i class="ph ph-caret-right text-sm text-[#1F9345]"></i>
+                </button>
+
+                <!-- Orders -->
+                <button type="button"
+                        class="account-menu flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                        data-url="/profile/orders"
+                        data-tab="orders">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-lg text-gray-500 transition-colors group-hover:bg-[#F1F8EF] group-hover:text-[#1F9345]">
+                        <i class="ph ph-shopping-bag"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">Đơn hàng của tôi</span>
+
+                    <i class="ph ph-caret-right text-sm text-gray-300"></i>
+                </button>
+
+                <!-- Addresses -->
+                <button type="button"
+                        class="account-menu flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                        data-url="/profile/addresses"
+                        data-tab="addresses">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-lg text-gray-500 transition-colors group-hover:bg-[#F1F8EF] group-hover:text-[#1F9345]">
+                        <i class="ph ph-map-pin"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">Địa chỉ giao hàng</span>
+
+                    <i class="ph ph-caret-right text-sm text-gray-300"></i>
+                </button>
+
+            </div>
+
+            <div class="my-3 border-t border-gray-100"></div>
+
+            <p class="mb-2 px-3 pt-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                Bảo mật và kết nối
+            </p>
+
+            <div class="space-y-1">
+
+                <!-- Password -->
+                <button type="button"
+                        class="account-menu flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                        data-url="/profile/change-password"
+                        data-tab="password">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-lg text-gray-500 transition-colors group-hover:bg-[#F1F8EF] group-hover:text-[#1F9345]">
+                        <i class="ph ph-lock-key"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">@(hasPassword ? "Đổi mật khẩu" : "Tạo mật khẩu")</span>
+
+                    <i class="ph ph-caret-right text-sm text-gray-300"></i>
+                </button>
+
+                <!-- Connections -->
+                <button type="button"
+                        class="account-menu flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                        data-url="/profile/connections"
+                        data-tab="connections">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-50 text-lg text-gray-500 transition-colors group-hover:bg-[#F1F8EF] group-hover:text-[#1F9345]">
+                        <i class="ph ph-link"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">Kết nối tài khoản</span>
+
+                    <i class="ph ph-caret-right text-sm text-gray-300"></i>
+                </button>
+
+            </div>
+
+            <div class="my-3 border-t border-gray-100"></div>
+
+            <!-- Logout -->
             <form id="logout-form"
                   asp-controller="Account"
                   asp-action="Logout"
                   method="post">
                 @Html.AntiForgeryToken()
 
-                <button type="submit" class="account-menu text-danger-600">
-                    <i class="ph ph-sign-out"></i>
-                    Đăng xuất
+                <button type="submit"
+                        class="group flex w-full items-center gap-3 rounded-xl px-3.5 py-3 text-left text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
+                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-lg text-red-500 transition-colors group-hover:bg-red-100">
+                        <i class="ph ph-sign-out"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">Đăng xuất</span>
+
+                    <i class="ph ph-caret-right text-sm text-red-300"></i>
                 </button>
             </form>
-        </div>
+
+        </nav>
     </div>
-</div>
+</aside>

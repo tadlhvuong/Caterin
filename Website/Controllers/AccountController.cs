@@ -94,8 +94,8 @@ namespace Website.Controllers
         [HttpPost("login")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(
-            LoginViewModel model,
-            CancellationToken cancellationToken)
+    LoginViewModel model,
+    CancellationToken cancellationToken)
         {
             SetAuthSeo(
                 "Đăng nhập",
@@ -104,11 +104,26 @@ namespace Website.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 await ClearExternalCookieAsync();
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        redirectUrl = Url.Action("Index", "Home")
+                    });
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
             if (!ModelState.IsValid)
+            {
+                if (IsAjaxRequest())
+                    return AjaxValidationError("Vui lòng kiểm tra thông tin đăng nhập.");
+
                 return View(model);
+            }
 
             var result = await _authService.LoginAsync(
                 new LoginRequest
@@ -125,10 +140,28 @@ namespace Website.Controllers
                     string.Empty,
                     result.Message ?? "Đăng nhập không thành công.");
 
+                if (IsAjaxRequest())
+                    return AjaxValidationError(
+                        result.Message ?? "Đăng nhập không thành công.");
+
                 return View(model);
             }
 
             SetAuthCookies(result);
+
+            if (IsAjaxRequest())
+            {
+                var redirectUrl = IsLocalReturnUrl(model.ReturnUrl)
+                    ? model.ReturnUrl
+                    : Url.Action("Index", "Home");
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Đăng nhập thành công.",
+                    redirectUrl
+                });
+            }
 
             return RedirectAfterAuthentication(model.ReturnUrl);
         }
@@ -153,6 +186,7 @@ namespace Website.Controllers
             return View(new RegisterViewModel());
         }
 
+
         [HttpPost("register")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(
@@ -166,11 +200,26 @@ namespace Website.Controllers
             if (User.Identity?.IsAuthenticated == true)
             {
                 await ClearExternalCookieAsync();
+
+                if (IsAjaxRequest())
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        redirectUrl = Url.Action("Index", "Home")
+                    });
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
             if (!ModelState.IsValid)
+            {
+                if (IsAjaxRequest())
+                    return AjaxValidationError("Vui lòng kiểm tra lại thông tin đăng ký.");
+
                 return View(model);
+            }
 
             var result = await _authService.RegisterAsync(
                 new RegisterRequest
@@ -189,10 +238,30 @@ namespace Website.Controllers
                     string.Empty,
                     result.Message ?? "Đăng ký không thành công.");
 
+                if (IsAjaxRequest())
+                {
+                    return AjaxValidationError(
+                        result.Message ?? "Đăng ký không thành công.");
+                }
+
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = result.Message;
+            // Đánh dấu cho phép truy cập trang xác nhận.
+            TempData["RegistrationCompleted"] = true;
+            TempData["RegistrationEmail"] = model.Email.Trim();
+
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = result.Message ?? "Đăng ký thành công.",
+                    redirectUrl = Url.Action(
+                        nameof(RegisterConfirmation),
+                        "Account")
+                });
+            }
 
             return RedirectToAction(nameof(RegisterConfirmation));
         }
@@ -205,9 +274,16 @@ namespace Website.Controllers
                 await ClearExternalCookieAsync();
                 return RedirectToAction("Index", "Home");
             }
-            SetAuthSeo(
-                "Kiểm tra email",
-                "Vui lòng kiểm tra email để hoàn tất đăng ký tài khoản Caterin.");
+
+            // Chỉ cho phép truy cập sau khi đăng ký thành công.
+            if (TempData["RegistrationCompleted"] is not true)
+            {
+                return RedirectToAction(nameof(Register));
+            }
+
+            ViewBag.Email = TempData["RegistrationEmail"] as string ?? string.Empty;
+
+            SetAuthSeo("Kiểm tra email", "Vui lòng kiểm tra email để hoàn tất đăng ký tài khoản Caterin.");
 
             return View("RegisterConfirmation");
         }
@@ -291,13 +367,27 @@ namespace Website.Controllers
                 return RedirectToAction("Index", "Home");
             }
             if (!ModelState.IsValid)
+            {
+                if (IsAjaxRequest())
+                    return AjaxValidationError("Vui lòng kiểm tra địa chỉ email.");
+
                 return View("ResendConfirmEmail", model);
+            }
 
             var result = await _authService.ResendConfirmEmailAsync(
                 model.Email.Trim(),
                 cancellationToken);
 
-            // Thông báo chung, không tiết lộ email có tồn tại hay không.
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Nếu tài khoản cần xác nhận, hướng dẫn xác nhận sẽ được gửi đến email của bạn.",
+                    redirectUrl = Url.Action(nameof(ResendConfirmEmail))
+                });
+            }
+
             TempData["SuccessMessage"] = result.Message;
 
             return RedirectToAction(nameof(ResendConfirmEmail));
@@ -321,22 +411,26 @@ namespace Website.Controllers
             return View(new ForgotPasswordViewModel());
         }
 
+
         [HttpPost("forgot-password")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(
-            ForgotPasswordViewModel model,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model, CancellationToken cancellationToken)
         {
-            SetAuthSeo(
-                "Quên mật khẩu",
-                "Nhận hướng dẫn đặt lại mật khẩu tài khoản Caterin qua email.");
+            SetAuthSeo("Quên mật khẩu", "Nhận hướng dẫn đặt lại mật khẩu tài khoản Caterin qua email.");
+
             if (User.Identity?.IsAuthenticated == true)
             {
                 await ClearExternalCookieAsync();
                 return RedirectToAction("Index", "Home");
             }
+
             if (!ModelState.IsValid)
+            {
+                if (IsAjaxRequest())
+                    return AjaxValidationError("Vui lòng kiểm tra địa chỉ email.");
+
                 return View(model);
+            }
 
             var result = await _authService.ForgotPasswordAsync(
                 new ForgotPasswordRequest
@@ -345,24 +439,46 @@ namespace Website.Controllers
                 },
                 cancellationToken);
 
-            TempData["SuccessMessage"] = result.Message;
+            // Đánh dấu đã hoàn tất xử lý yêu cầu.
+            TempData["ForgotPasswordCompleted"] = true;
+
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Nếu email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu sẽ được gửi đến bạn.",
+                    redirectUrl = Url.Action(nameof(ForgotPasswordConfirmation))
+                });
+            }
 
             return RedirectToAction(nameof(ForgotPasswordConfirmation));
         }
 
+
+
         [HttpGet("forgot-password/confirmation")]
         public async Task<IActionResult> ForgotPasswordConfirmation()
         {
-            SetAuthSeo(
-                "Kiểm tra email",
-                "Hướng dẫn đặt lại mật khẩu đã được xử lý.");
             if (User.Identity?.IsAuthenticated == true)
             {
                 await ClearExternalCookieAsync();
                 return RedirectToAction("Index", "Home");
             }
+
+            // Không cho phép truy cập trực tiếp khi chưa gửi yêu cầu.
+            if (TempData["ForgotPasswordCompleted"] is not true)
+            {
+                return RedirectToAction(nameof(ForgotPassword));
+            }
+
+            SetAuthSeo(
+                "Kiểm tra email",
+                "Hướng dẫn đặt lại mật khẩu đã được xử lý.");
+
             return View("ForgotPasswordConfirmation");
         }
+
 
         #endregion
 
@@ -404,7 +520,12 @@ namespace Website.Controllers
                 return RedirectToAction("Index", "Home");
             }
             if (!ModelState.IsValid)
+            {
+                if (IsAjaxRequest())
+                    return AjaxValidationError("Vui lòng kiểm tra lại mật khẩu.");
+
                 return View(model);
+            }
 
             var result = await _authService.ResetPasswordByTokenAsync(
                 model.Key,
@@ -420,7 +541,21 @@ namespace Website.Controllers
                     string.Empty,
                     result.Message ?? "Không thể đặt lại mật khẩu.");
 
+                if (IsAjaxRequest())
+                    return AjaxValidationError(
+                        result.Message ?? "Không thể đặt lại mật khẩu.");
+
                 return View(model);
+            }
+
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Đặt lại mật khẩu thành công.",
+                    redirectUrl = Url.Action(nameof(ResetPasswordConfirmation))
+                });
             }
 
             return RedirectToAction(nameof(ResetPasswordConfirmation));
@@ -936,6 +1071,38 @@ namespace Website.Controllers
             }
 
             return candidate;
+        }
+
+        #endregion
+
+        #region AJAX Helpers
+
+        private bool IsAjaxRequest()
+        {
+            return string.Equals(
+                Request.Headers["X-Requested-With"],
+                "XMLHttpRequest",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        private IActionResult AjaxValidationError(
+            string message,
+            int statusCode = StatusCodes.Status400BadRequest)
+        {
+            return StatusCode(statusCode, new
+            {
+                success = false,
+                message,
+                errors = ModelState
+                    .Where(x => x.Value?.Errors.Count > 0)
+                    .ToDictionary(
+                        x => x.Key,
+                        x => x.Value!.Errors
+                            .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage)
+                                ? "Dữ liệu không hợp lệ."
+                                : e.ErrorMessage)
+                            .ToArray())
+            });
         }
 
         #endregion

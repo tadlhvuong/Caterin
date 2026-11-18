@@ -1,63 +1,16 @@
 ﻿@using Website.Models.Account
 @using Website.Models.Enum
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+
 @model VerifyEmailViewModel
 
-@section Styles{
-    <style>
-        .verify-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-            .verify-icon i {
-                font-size: 40px;
-            }
-
-        .verify-pending {
-            background: #EEF8FF;
-            color: #0D6EFD;
-        }
-
-        .verify-success {
-            background: #EFFAF2;
-            color: #16A34A;
-        }
-
-        .verify-warning {
-            background: #FFF8E8;
-            color: #F59E0B;
-        }
-
-        .verify-danger {
-            background: #FFF1F2;
-            color: #DC2626;
-        }
-
-        .email-preview {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 22px;
-            border-radius: 999px;
-            background: #F8F9FA;
-            font-weight: 600;
-            color: #374151;
-        }
-    </style>
-}
-
 @{
+    ViewData["Title"] = "Xác thực Email | Caterin";
+
     var icon = "ph-envelope-simple";
-    var iconBg = "verify-pending";
+    var iconColor = "text-blue-600";
+    var iconBg = "bg-blue-50";
+    var badgeColor = "bg-blue-50 text-blue-700";
+    var badgeText = "Đang chờ xác thực";
     var title = "";
     var description = "";
     var showOpenMail = false;
@@ -68,7 +21,10 @@
     {
         case VerifyEmailStatus.Pending:
             icon = "ph-envelope-simple";
-            iconBg = "verify-pending";
+            iconColor = "text-blue-600";
+            iconBg = "bg-blue-50";
+            badgeColor = "bg-blue-50 text-blue-700";
+            badgeText = "Đang chờ xác thực";
             title = "Xác thực địa chỉ Email";
             description = "Chúng tôi đã gửi email xác thực đến địa chỉ bên dưới. Vui lòng kiểm tra hộp thư và nhấn vào liên kết để kích hoạt tài khoản.";
             showOpenMail = true;
@@ -78,7 +34,10 @@
 
         case VerifyEmailStatus.Success:
             icon = "ph-check-circle";
-            iconBg = "verify-success";
+            iconColor = "text-[#1F9345]";
+            iconBg = "bg-[#EAF7ED]";
+            badgeColor = "bg-[#EAF7ED] text-[#1F9345]";
+            badgeText = "Xác thực thành công";
             title = "Xác thực thành công";
             description = "Email của bạn đã được xác thực thành công. Bây giờ bạn có thể đăng nhập và sử dụng đầy đủ các tính năng.";
             showLogin = true;
@@ -86,99 +45,132 @@
 
         case VerifyEmailStatus.Expired:
             icon = "ph-clock-countdown";
-            iconBg = "verify-warning";
+            iconColor = "text-amber-600";
+            iconBg = "bg-amber-50";
+            badgeColor = "bg-amber-50 text-amber-700";
+            badgeText = "Liên kết đã hết hạn";
             title = "Liên kết đã hết hạn";
-            description = "Liên kết xác thực đã hết hạn. Vui lòng yêu cầu gửi lại email xác thực.";
+            description = "Liên kết xác thực đã hết hạn. Vui lòng yêu cầu gửi lại email xác thực để tiếp tục kích hoạt tài khoản.";
             showResend = true;
             showLogin = true;
             break;
 
         case VerifyEmailStatus.Invalid:
             icon = "ph-warning-circle";
-            iconBg = "verify-danger";
+            iconColor = "text-red-600";
+            iconBg = "bg-red-50";
+            badgeColor = "bg-red-50 text-red-700";
+            badgeText = "Không thể xác thực";
             title = "Không thể xác thực";
-            description = "Liên kết xác thực không hợp lệ hoặc đã được sử dụng.";
+            description = "Liên kết xác thực không hợp lệ hoặc đã được sử dụng. Vui lòng yêu cầu một email xác thực mới.";
             showResend = true;
             showLogin = true;
             break;
     }
 }
 
-<section class="account py-80">
-    <div class="container container-lg">
+<!-- Verify Email -->
+<section class="flex min-h-[70vh] items-center bg-[#FAFCF9] px-4 py-12 sm:py-16 lg:py-20">
+    <div class="mx-auto w-full max-w-7xl">
 
-        <div class="row justify-content-center">
+        <div class="mx-auto max-w-xl">
 
-            <div class="col-xl-5 col-lg-6 col-md-8">
+            <!-- Verification Card -->
+            <div class="rounded-2xl border border-gray-200 bg-white px-5 py-9 text-center shadow-sm sm:px-10 sm:py-12">
 
-                <div class="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-32 py-48">
+                <!-- Status Icon -->
+                <div class="mx-auto flex size-20 items-center justify-center rounded-full @iconBg @iconColor text-4xl">
+                    <i class="ph-fill @icon"></i>
+                </div>
 
-                    <div class="text-center">
+                <!-- Heading -->
+                <div class="mt-7">
 
-                        <div class="verify-icon @iconBg mx-auto mb-32">
-                            <i class="ph-fill @icon"></i>
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold @badgeColor">
+                        <i class="ph-fill @icon"></i>
+                        @badgeText
+                    </span>
+
+                    <h1 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                        @title
+                    </h1>
+
+                    <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-500 sm:text-base">
+                        @description
+                    </p>
+
+                </div>
+
+                <!-- Email Address -->
+                @if (Model.Status == VerifyEmailStatus.Pending && !string.IsNullOrWhiteSpace(Model.Email))
+                {
+                    <div class="mt-7 rounded-xl border border-gray-200 bg-gray-50/80 px-4 py-4">
+                        <div class="mb-2 flex items-center justify-center gap-2 text-xs font-medium text-gray-500">
+                            <i class="ph ph-envelope text-base"></i>
+                            Email cần xác thực
                         </div>
 
-                        <span class="text-main-600 text-sm font-[600] d-block mb-12">
-                            Verify Email
-                        </span>
-
-                        <h3 class="mb-16">
-                            @title
-                        </h3>
-
-                        <p class="text-gray-500 mb-24">
-                            @description
+                        <p class="break-all text-sm font-semibold text-gray-800 sm:text-base">
+                            @Model.Email
                         </p>
-
-                        @if (Model.Status == VerifyEmailStatus.Pending && !string.IsNullOrWhiteSpace(Model.Email))
-                        {
-                            <div class="email-preview mb-32">
-                                @Model.Email
-                            </div>
-                        }
-
-                        @if (!string.IsNullOrWhiteSpace(Model.Message))
-                        {
-                            <div class="alert alert-info rounded-12 mb-24">
-                                @Model.Message
-                            </div>
-                        }
-
-                        @if (showOpenMail)
-                        {
-                            <a href="https://mail.google.com"
-                               target="_blank"
-                               class="btn btn-main py-18 w-100">
-                                Mở Gmail
-                            </a>
-                        }
-
-                        @if (showResend)
-                        {
-                            <a asp-action="ResendVerificationEmail"
-                               class="btn btn-outline-main py-18 w-100 mt-16">
-                                Gửi lại Email xác thực
-                            </a>
-                        }
-
-                        @if (showLogin)
-                        {
-                            <div class="mt-32">
-                                <a asp-action="Login"
-                                   class="text-main-600 font-[600]">
-                                    ← Quay lại đăng nhập
-                                </a>
-                            </div>
-                        }
-
                     </div>
+                }
+
+                <!-- Server Message -->
+                @if (!string.IsNullOrWhiteSpace(Model.Message))
+                {
+                    <div class="mt-6 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-left">
+                        <div class="flex items-start gap-3">
+                            <i class="ph ph-info mt-0.5 shrink-0 text-xl text-blue-600"></i>
+
+                            <p class="text-sm leading-6 text-blue-800">
+                                @Model.Message
+                            </p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Actions -->
+                <div class="mt-8 flex flex-col gap-3">
+
+                    @if (showOpenMail)
+                    {
+                        <a href="https://mail.google.com"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A38] hover:shadow-md focus:outline-none focus:ring-4 focus:ring-[#1F9345]/20">
+                            <i class="ph ph-envelope-simple-open text-lg"></i>
+                            Mở Gmail
+                        </a>
+                    }
+
+                    @if (showResend)
+                    {
+                        <a asp-action="ResendVerificationEmail"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#1F9345] bg-white px-6 text-sm font-semibold text-[#1F9345] transition hover:bg-[#F1F8EF] focus:outline-none focus:ring-4 focus:ring-[#1F9345]/10">
+                            <i class="ph ph-paper-plane-tilt text-lg"></i>
+                            Gửi lại Email xác thực
+                        </a>
+                    }
+
+                    @if (showLogin)
+                    {
+                        <a asp-action="Login"
+                           class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-6 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-4 focus:ring-gray-100">
+                            <i class="ph ph-arrow-left text-lg"></i>
+                            Quay lại đăng nhập
+                        </a>
+                    }
 
                 </div>
 
             </div>
 
-        </div>
+            <!-- Footer -->
+            <p class="mt-5 text-center text-xs text-gray-400">
+                Caterin – An toàn cho mọi nhà
+            </p>
 
+        </div>
     </div>
 </section>

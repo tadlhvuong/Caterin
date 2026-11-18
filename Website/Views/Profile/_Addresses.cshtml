@@ -1,152 +1,142 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
     Layout = null;
 }
 
+<div class="rounded-2xl border border-gray-100 bg-white p-5 sm:p-7 lg:p-8">
 
-<div class="border border-gray-100 rounded-16 px-32 py-40">
-
-    <div class="flex-between flex-wrap gap-16 mb-40">
+    <!-- Heading -->
+    <div class="mb-7 flex flex-wrap items-center justify-between gap-4 sm:mb-8">
 
         <div>
-
-            <h4 class="mb-8">
-
+            <h2 class="text-xl font-semibold tracking-tight text-gray-900 sm:text-2xl">
                 Địa chỉ giao hàng
+            </h2>
 
-            </h4>
-
-            <p class="text-gray-500 mb-0">
-
+            <p class="mt-2 text-sm leading-6 text-gray-500">
                 Quản lý địa chỉ nhận hàng của bạn.
-
             </p>
-
         </div>
 
-        <button class="btn btn-main">
-
-            <i class="ph ph-plus me-8"></i>
-
-            Thêm địa chỉ
-
+        <button type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A39] focus:outline-none focus:ring-2 focus:ring-[#1F9345]/30 focus:ring-offset-2 active:scale-[0.98]">
+            <i class="ph ph-plus text-lg"></i>
+            <span>Thêm địa chỉ</span>
         </button>
 
     </div>
 
-    <!-- Address -->
+    <!-- Address List -->
+    <div class="space-y-4">
 
-    <div class="border border-main-600 rounded-16 p-24 mb-24">
+        <!-- Default Address -->
+        <div class="rounded-2xl border border-[#1F9345] bg-[#F8FCF7] p-5 sm:p-6">
 
-        <div class="flex-between flex-wrap gap-20">
+            <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
 
-            <div>
+                <!-- Address Information -->
+                <div class="min-w-0 flex-1">
 
-                <div class="flex items-center gap-12 mb-8">
+                    <div class="mb-3 flex flex-wrap items-center gap-2.5">
 
-                    <h6 class="mb-0">
+                        <h3 class="text-base font-semibold text-gray-900">
+                            Nguyễn Văn A
+                        </h3>
 
-                        Nguyễn Văn A
+                        <span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                            <i class="ph-fill ph-check-circle"></i>
+                            Mặc định
+                        </span>
 
-                    </h6>
+                    </div>
 
-                    <span class="badge bg-success-600">
+                    <div class="mb-2 flex items-center gap-2 text-sm text-gray-600">
+                        <i class="ph ph-phone text-base text-gray-400"></i>
+                        <span>0988888888</span>
+                    </div>
 
-                        Mặc định
+                    <div class="flex items-start gap-2 text-sm leading-6 text-gray-600">
+                        <i class="ph ph-map-pin mt-1 shrink-0 text-base text-gray-400"></i>
 
-                    </span>
+                        <span>
+                            123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM
+                        </span>
+                    </div>
 
                 </div>
 
-                <div class="text-gray-500 mb-8">
+                <!-- Actions -->
+                <div class="flex shrink-0 items-center gap-2">
 
-                    0988888888
+                    <button type="button"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:bg-green-50 hover:text-[#1F9345]">
+                        <i class="ph ph-pencil-simple text-base"></i>
+                        Sửa
+                    </button>
+
+                    <button type="button"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-100 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-200 hover:bg-red-50">
+                        <i class="ph ph-trash text-base"></i>
+                        Xóa
+                    </button>
 
                 </div>
-
-                <div>
-
-                    123 Nguyễn Huệ,
-                    Phường Bến Nghé,
-                    Quận 1,
-                    TP.HCM
-
-                </div>
-
-            </div>
-
-            <div class="flex gap-12">
-
-                <button class="btn btn-outline-main">
-
-                    Sửa
-
-                </button>
-
-                <button class="btn btn-outline-danger">
-
-                    Xóa
-
-                </button>
 
             </div>
 
         </div>
 
-    </div>
+        <!-- Other Address -->
+        <div class="rounded-2xl border border-gray-200 bg-gray-50/80 p-5 transition duration-200 hover:border-[#1F9345]/40 hover:bg-white sm:p-6">
 
-    <!-- Address -->
+            <div class="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
 
-    <div class="border border-gray-100 rounded-16 p-24">
+                <!-- Address Information -->
+                <div class="min-w-0 flex-1">
 
-        <div class="flex-between flex-wrap gap-20">
+                    <div class="mb-3 flex flex-wrap items-center gap-2.5">
+                        <h3 class="text-base font-semibold text-gray-900">
+                            Nguyễn Văn A
+                        </h3>
 
-            <div>
+                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">
+                            Địa chỉ khác
+                        </span>
+                    </div>
 
-                <h6>
+                    <div class="mb-2 flex items-center gap-2 text-sm text-gray-600">
+                        <i class="ph ph-phone text-base text-gray-400"></i>
+                        <span>0909999999</span>
+                    </div>
 
-                    Nguyễn Văn A
+                    <div class="flex items-start gap-2 text-sm leading-6 text-gray-600">
+                        <i class="ph ph-map-pin mt-1 shrink-0 text-base text-gray-400"></i>
 
-                </h6>
-
-                <div class="text-gray-500 mb-8">
-
-                    0909999999
+                        <span>
+                            25 Phạm Văn Đồng, TP.Thủ Đức, TP.HCM
+                        </span>
+                    </div>
 
                 </div>
 
-                <div>
+                <!-- Actions -->
+                <div class="flex shrink-0 flex-wrap items-center gap-2">
 
-                    25 Phạm Văn Đồng,
-                    TP.Thủ Đức,
-                    TP.HCM
-
-                </div>
-
-            </div>
-
-            <div class="text-end">
-
-                <button class="btn btn-outline-main mb-12">
-
-                    Đặt mặc định
-
-                </button>
-
-                <div class="flex gap-12">
-
-                    <button class="btn btn-outline-main">
-
-                        Sửa
-
+                    <button type="button"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#1F9345]/30 bg-white px-3.5 py-2.5 text-sm font-medium text-[#1F9345] transition hover:bg-green-50">
+                        <i class="ph ph-check-circle text-base"></i>
+                        Đặt mặc định
                     </button>
 
-                    <button class="btn btn-outline-danger">
+                    <button type="button"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:border-[#1F9345] hover:bg-green-50 hover:text-[#1F9345]">
+                        <i class="ph ph-pencil-simple text-base"></i>
+                        Sửa
+                    </button>
 
+                    <button type="button"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-red-100 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition hover:border-red-200 hover:bg-red-50">
+                        <i class="ph ph-trash text-base"></i>
                         Xóa
-
                     </button>
 
                 </div>

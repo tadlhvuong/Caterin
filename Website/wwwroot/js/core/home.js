@@ -108,6 +108,62 @@
 
 
     //VOURCHER
+    //slider
+
+    (() => {
+        const initCouponSwiper = () => {
+            const element = document.getElementById("couponSwiper");
+
+            if (!element || typeof Swiper === "undefined") return;
+
+            if (element.swiper) return;
+
+            new Swiper(element, {
+                slidesPerView: "auto",
+                spaceBetween: 16,
+                speed: 650,
+
+                grabCursor: true,
+                watchOverflow: true,
+                resistanceRatio: 0.85,
+
+                noSwiping: true,
+                noSwipingSelector: ".voucher-copy",
+
+                pagination: {
+                    el: "#couponPagination",
+                    clickable: true
+                },
+
+                breakpoints: {
+                    640: {
+                        slidesPerView: 2,
+                        spaceBetween: 16
+                    },
+
+                    1024: {
+                        slidesPerView: 3,
+                        spaceBetween: 16
+                    }
+                },
+
+                a11y: {
+                    enabled: true
+                }
+            });
+        };
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initCouponSwiper, {
+                once: true
+            });
+        } else {
+            initCouponSwiper();
+        }
+    })();
+
+
+    //COUPON BUTTON
     document.addEventListener('click', async (event) => {
         const button = event.target.closest('.voucher-copy');
 
@@ -144,6 +200,70 @@
         }
     });
 
+    //PROMOTIONAL
+
+    const initLifestyleSlider = () => {
+        const element = document.getElementById("lifestyleSwiper");
+
+        if (!element || typeof Swiper === "undefined") return;
+
+        const desktopQuery = window.matchMedia("(min-width: 1024px)");
+        let slider = null;
+
+        const syncSlider = () => {
+            if (desktopQuery.matches) {
+                if (slider) {
+                    slider.destroy(true, true);
+                    slider = null;
+                }
+
+                return;
+            }
+
+            if (slider) return;
+
+            slider = new Swiper(element, {
+                slidesPerView: 1.08,
+                spaceBetween: 12,
+                speed: 650,
+
+                grabCursor: true,
+                watchOverflow: true,
+                resistanceRatio: 0.85,
+                threshold: 5,
+
+                rewind: true,
+
+                pagination: {
+                    el: "#lifestylePagination",
+                    clickable: true
+                },
+
+                a11y: {
+                    enabled: true,
+                    prevSlideMessage: "Banner trước",
+                    nextSlideMessage: "Banner tiếp theo",
+                    paginationBulletMessage: "Chuyển đến banner {{index}}"
+                }
+            });
+        };
+
+        syncSlider();
+
+        if (desktopQuery.addEventListener) {
+            desktopQuery.addEventListener("change", syncSlider);
+        } else {
+            desktopQuery.addListener(syncSlider);
+        }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initLifestyleSlider, {
+            once: true
+        });
+    } else {
+        initLifestyleSlider();
+    }
 
     //RECOMMEND
     const section = document.getElementById('recommended');

@@ -1,403 +1,307 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Chính sách bảo mật | Caterin";
+    ViewData["PageTitle"] = "Chính sách bảo mật";
+    ViewData["PageDescription"] =
+        "Caterin tôn trọng quyền riêng tư và cam kết bảo vệ thông tin cá nhân của khách hàng trong quá trình sử dụng dịch vụ.";
+
+    ViewData["Breadcrumbs"] = new (string Text, string? Url)[]
+    {
+        ("Chính sách bảo mật", null)
+    };
 }
-<section class="breadcrumb py-80 bg-color-three">
 
-    <div class="container container-lg text-center">
+<partial name="_PageHeader" />
 
-        <span class="text-main-600 text-sm font-[600]">
-            Caterin
-        </span>
+<section class="bg-gray-50 py-10 sm:py-14">
+    <div class="container mx-auto max-w-5xl px-4">
 
-        <h2 class="mt-12 mb-16">
-            Chính sách bảo mật
-        </h2>
+        <div class="mb-8 rounded-2xl border border-[#E2EDE0] bg-white p-5 sm:p-7">
+            <div class="flex items-start gap-3">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#EDF7EA] text-[#1F9345]">
+                    <i class="ph ph-shield-check text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900">
+                        Cam kết bảo vệ thông tin của bạn
+                    </h2>
+                    <p class="mt-2 text-sm leading-6 text-gray-600">
+                        Tại Caterin, chúng tôi hiểu rằng thông tin cá nhân là tài sản riêng tư
+                        của mỗi khách hàng. Chính sách này giải thích cách chúng tôi thu thập,
+                        sử dụng, lưu trữ và bảo vệ thông tin khi bạn truy cập website,
+                        đăng ký tài khoản hoặc sử dụng các dịch vụ của Caterin.
+                    </p>
+                    <p class="mt-3 text-xs text-gray-400">
+                        Cập nhật lần cuối: 18/11/2026
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        <p class="text-gray-600 mx-auto" style="max-width:700px;">
+        <div class="grid gap-8 lg:grid-cols-[230px_minmax(0,1fr)] lg:items-start">
 
-            Caterin cam kết bảo vệ thông tin cá nhân của khách hàng và chỉ sử dụng dữ liệu cho các mục đích hợp pháp, minh bạch.
+            <!-- Table of contents -->
+            <aside class="lg:sticky lg:top-24">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <h3 class="mb-4 text-sm font-bold text-gray-900">
+                        Nội dung chính
+                    </h3>
 
-        </p>
+                    <nav class="space-y-3 text-sm">
+                        <a href="#collection" class="block text-gray-600 transition hover:text-[#1F9345]">01. Thông tin thu thập</a>
+                        <a href="#purpose" class="block text-gray-600 transition hover:text-[#1F9345]">02. Mục đích sử dụng</a>
+                        <a href="#cookies" class="block text-gray-600 transition hover:text-[#1F9345]">03. Cookie và xác thực</a>
+                        <a href="#sharing" class="block text-gray-600 transition hover:text-[#1F9345]">04. Chia sẻ thông tin</a>
+                        <a href="#storage" class="block text-gray-600 transition hover:text-[#1F9345]">05. Lưu trữ dữ liệu</a>
+                        <a href="#security" class="block text-gray-600 transition hover:text-[#1F9345]">06. Bảo mật thông tin</a>
+                        <a href="#rights" class="block text-gray-600 transition hover:text-[#1F9345]">07. Quyền của khách hàng</a>
+                        <a href="#children" class="block text-gray-600 transition hover:text-[#1F9345]">08. Quyền riêng tư trẻ em</a>
+                        <a href="#changes" class="block text-gray-600 transition hover:text-[#1F9345]">09. Thay đổi chính sách</a>
+                        <a href="#contact" class="block text-gray-600 transition hover:text-[#1F9345]">10. Liên hệ</a>
+                    </nav>
+                </div>
+            </aside>
 
+            <!-- Policy content -->
+            <div class="space-y-5">
+
+                <article id="collection" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        01. Thông tin chúng tôi thu thập
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Khi bạn sử dụng website và dịch vụ của Caterin, chúng tôi có thể thu thập
+                        những thông tin cần thiết để cung cấp và duy trì trải nghiệm mua sắm.
+                    </p>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Thông tin tài khoản</h3>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+                        <li>Họ tên hoặc tên hiển thị, tên đăng nhập.</li>
+                        <li>Địa chỉ email và số điện thoại.</li>
+                        <li>Thông tin xác thực và trạng thái tài khoản.</li>
+                        <li>Thông tin liên kết tài khoản Google hoặc Facebook khi bạn chủ động sử dụng chức năng này.</li>
+                    </ul>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Thông tin cá nhân và giao hàng</h3>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+                        <li>Ngày sinh, giới tính và ảnh đại diện nếu bạn cung cấp.</li>
+                        <li>Địa chỉ nhận hàng, tỉnh/thành phố, phường/xã và thông tin liên hệ giao hàng.</li>
+                        <li>Thông tin khác mà bạn chủ động cập nhật trong hồ sơ cá nhân.</li>
+                    </ul>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Thông tin đơn hàng và giao dịch</h3>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+                        <li>Sản phẩm, số lượng, giá trị đơn hàng và lịch sử mua hàng.</li>
+                        <li>Thông tin thanh toán và trạng thái giao dịch cần thiết để xử lý đơn hàng.</li>
+                        <li>Thông tin giao nhận, trạng thái vận chuyển và yêu cầu hỗ trợ liên quan.</li>
+                    </ul>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Thông tin tương tác và kỹ thuật</h3>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+                        <li>Nội dung trao đổi qua hệ thống hỗ trợ và trò chuyện trực tuyến.</li>
+                        <li>Thông tin phiên đăng nhập, thiết bị, trình duyệt và dữ liệu kỹ thuật cần thiết cho bảo mật.</li>
+                        <li>Nhật ký hoạt động và sự kiện bảo mật liên quan đến tài khoản.</li>
+                    </ul>
+                </article>
+
+                <article id="purpose" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        02. Mục đích sử dụng thông tin
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin sử dụng thông tin cá nhân cho các mục đích phù hợp với hoạt động
+                        của website và dịch vụ mà khách hàng yêu cầu, bao gồm:
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li><strong class="text-gray-800">Quản lý tài khoản:</strong> Đăng ký, xác minh email, đăng nhập, khôi phục mật khẩu và quản lý hồ sơ cá nhân.</li>
+                        <li><strong class="text-gray-800">Xử lý đơn hàng:</strong> Tiếp nhận đơn, xác nhận thông tin, giao hàng và hỗ trợ sau mua hàng.</li>
+                        <li><strong class="text-gray-800">Hỗ trợ khách hàng:</strong> Tiếp nhận câu hỏi, phản hồi và giải quyết các yêu cầu thông qua hệ thống chat hoặc kênh liên hệ.</li>
+                        <li><strong class="text-gray-800">Bảo mật hệ thống:</strong> Phát hiện hành vi bất thường, quản lý phiên đăng nhập, ngăn chặn truy cập trái phép và bảo vệ tài khoản.</li>
+                        <li><strong class="text-gray-800">Cải thiện dịch vụ:</strong> Phân tích các vấn đề vận hành và nâng cao chất lượng trải nghiệm mua sắm.</li>
+                        <li><strong class="text-gray-800">Tuân thủ pháp luật:</strong> Thực hiện các nghĩa vụ pháp lý và giải quyết tranh chấp khi cần thiết.</li>
+                    </ul>
+                </article>
+
+                <article id="cookies" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        03. Cookie và công nghệ xác thực
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Website Caterin sử dụng cookie và các công nghệ lưu trữ cần thiết
+                        để duy trì hoạt động của hệ thống, hỗ trợ đăng nhập và bảo vệ tài khoản.
+                    </p>
+
+                    <h3 class="mt-4 font-semibold text-gray-800">Cookie xác thực</h3>
+                    <p class="mt-2 text-sm leading-7 text-gray-600">
+                        Khi đăng nhập, hệ thống có thể sử dụng Access Token và Refresh Token
+                        được lưu trong cookie có thuộc tính HttpOnly nhằm hỗ trợ xác thực
+                        và duy trì phiên đăng nhập. Các cookie này không được thiết kế để
+                        cho phép JavaScript thông thường đọc trực tiếp.
+                    </p>
+
+                    <h3 class="mt-4 font-semibold text-gray-800">Quản lý phiên đăng nhập</h3>
+                    <p class="mt-2 text-sm leading-7 text-gray-600">
+                        Caterin có thể quản lý các phiên đăng nhập và thông tin bảo mật
+                        liên quan nhằm hỗ trợ đăng xuất, thu hồi phiên và xử lý những
+                        hoạt động truy cập bất thường.
+                    </p>
+
+                    <p class="mt-4 rounded-xl bg-[#F5F9F2] p-4 text-sm leading-6 text-gray-700">
+                        Việc vô hiệu hóa cookie cần thiết có thể khiến một số chức năng
+                        như đăng nhập, quản lý tài khoản hoặc đặt hàng không hoạt động
+                        chính xác.
+                    </p>
+                </article>
+
+                <article id="sharing" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        04. Chia sẻ thông tin với bên thứ ba
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin không mua bán thông tin cá nhân của khách hàng.
+                        Trong phạm vi cần thiết, thông tin có thể được cung cấp cho:
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li><strong class="text-gray-800">Đơn vị vận chuyển:</strong> Thông tin người nhận, số điện thoại, địa chỉ và dữ liệu đơn hàng cần thiết để giao sản phẩm.</li>
+                        <li><strong class="text-gray-800">Đơn vị thanh toán:</strong> Thông tin giao dịch cần thiết khi khách hàng sử dụng phương thức thanh toán do bên thứ ba cung cấp.</li>
+                        <li><strong class="text-gray-800">Nhà cung cấp dịch vụ:</strong> Các đơn vị hỗ trợ hạ tầng, lưu trữ, gửi email và vận hành hệ thống trong phạm vi công việc được giao.</li>
+                        <li><strong class="text-gray-800">Nhà cung cấp đăng nhập:</strong> Google hoặc Facebook khi khách hàng chủ động sử dụng chức năng đăng nhập hoặc liên kết tài khoản.</li>
+                        <li><strong class="text-gray-800">Cơ quan có thẩm quyền:</strong> Khi có yêu cầu hợp pháp theo quy định pháp luật.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Việc chia sẻ được giới hạn trong phạm vi cần thiết cho mục đích tương ứng
+                        và theo các nghĩa vụ bảo vệ dữ liệu áp dụng.
+                    </p>
+                </article>
+
+                <article id="storage" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        05. Lưu trữ và thời gian lưu giữ thông tin
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin lưu trữ thông tin cá nhân trong phạm vi và thời gian cần thiết
+                        để thực hiện các mục đích đã nêu trong chính sách này.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Thông tin tài khoản được lưu giữ trong thời gian tài khoản còn hoạt động và theo nhu cầu quản lý hợp pháp.</li>
+                        <li>Thông tin đơn hàng và giao dịch được lưu giữ theo yêu cầu vận hành, kế toán và quy định pháp luật.</li>
+                        <li>Thông tin hỗ trợ và trao đổi được lưu giữ trong thời gian cần thiết để xử lý yêu cầu và giải quyết khiếu nại.</li>
+                        <li>Nhật ký bảo mật và dữ liệu phiên được lưu giữ theo nhu cầu bảo vệ hệ thống và thời hạn áp dụng.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Khi không còn cần thiết, thông tin sẽ được xóa, ẩn danh hoặc xử lý
+                        theo quy định pháp luật và chính sách lưu trữ dữ liệu của Caterin.
+                    </p>
+                </article>
+
+                <article id="security" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        06. Bảo mật thông tin cá nhân
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin áp dụng các biện pháp kỹ thuật và tổ chức phù hợp để bảo vệ
+                        thông tin khách hàng trước nguy cơ truy cập, sử dụng, thay đổi hoặc
+                        tiết lộ trái phép.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Sử dụng cơ chế xác thực và kiểm soát quyền truy cập tài khoản.</li>
+                        <li>Quản lý phiên đăng nhập và hỗ trợ thu hồi phiên khi cần thiết.</li>
+                        <li>Áp dụng cơ chế bảo vệ thông tin xác thực và mật khẩu.</li>
+                        <li>Ghi nhận các sự kiện bảo mật cần thiết để phát hiện và xử lý rủi ro.</li>
+                        <li>Giới hạn quyền truy cập dữ liệu theo chức năng và trách nhiệm được phân công.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Tuy nhiên, không có phương thức truyền tải hoặc lưu trữ dữ liệu nào
+                        có thể bảo đảm an toàn tuyệt đối. Caterin sẽ nỗ lực xử lý các sự cố
+                        bảo mật theo quy định pháp luật hiện hành.
+                    </p>
+                    <div class="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                        <p class="text-sm leading-6 text-amber-900">
+                            Khách hàng có trách nhiệm bảo mật mật khẩu, thiết bị và thông tin
+                            đăng nhập của mình. Nếu phát hiện hoạt động bất thường, vui lòng
+                            liên hệ Caterin sớm nhất có thể.
+                        </p>
+                    </div>
+                </article>
+
+                <article id="rights" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        07. Quyền của khách hàng đối với dữ liệu cá nhân
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Theo quy định pháp luật về bảo vệ dữ liệu cá nhân, khách hàng có các
+                        quyền tương ứng đối với dữ liệu của mình, bao gồm:
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Được biết về hoạt động xử lý dữ liệu cá nhân theo quy định.</li>
+                        <li>Truy cập và yêu cầu chỉnh sửa thông tin cá nhân không chính xác.</li>
+                        <li>Yêu cầu rút lại sự đồng ý, hạn chế hoặc phản đối việc xử lý dữ liệu trong các trường hợp pháp luật cho phép.</li>
+                        <li>Yêu cầu xóa hoặc xử lý dữ liệu theo quy định pháp luật.</li>
+                        <li>Yêu cầu cung cấp thông tin và thực hiện các quyền khác theo pháp luật hiện hành.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Một số yêu cầu có thể bị giới hạn khi Caterin có nghĩa vụ pháp lý
+                        phải tiếp tục lưu trữ hoặc xử lý thông tin.
+                    </p>
+                </article>
+
+                <article id="children" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        08. Quyền riêng tư của trẻ em
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Website Caterin hướng đến người tiêu dùng có đủ năng lực xác lập
+                        giao dịch theo quy định pháp luật. Việc cung cấp thông tin và sử dụng
+                        dịch vụ bởi người chưa thành niên phải tuân thủ các quy định về độ tuổi,
+                        sự đồng ý và đại diện hợp pháp tương ứng.
+                    </p>
+                </article>
+
+                <article id="changes" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        09. Thay đổi chính sách bảo mật
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin có thể cập nhật chính sách này để phản ánh những thay đổi
+                        trong hoạt động, chức năng website hoặc quy định pháp luật.
+                        Phiên bản mới sẽ được công bố trên website kèm ngày cập nhật.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Đối với những thay đổi quan trọng ảnh hưởng đến quyền và lợi ích
+                        của khách hàng, Caterin sẽ thực hiện việc thông báo hoặc lấy ý kiến
+                        đồng ý khi pháp luật yêu cầu.
+                    </p>
+                </article>
+
+                <article id="contact" class="scroll-mt-24 rounded-2xl border border-[#DCEBDD] bg-[#F5F9F2] p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        10. Liên hệ về quyền riêng tư
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Nếu có câu hỏi, yêu cầu hoặc khiếu nại liên quan đến việc xử lý
+                        thông tin cá nhân, khách hàng có thể liên hệ với Caterin thông qua
+                        các kênh hỗ trợ chính thức.
+                    </p>
+                    <div class="mt-5 rounded-xl border border-[#E2EDE0] bg-white p-4">
+                        <p class="text-sm font-semibold text-gray-900">Bộ phận hỗ trợ Caterin</p>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Email: [EMAIL HỖ TRỢ]
+                        </p>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Điện thoại: [SỐ ĐIỆN THOẠI]
+                        </p>
+                        <p class="mt-2 text-sm text-gray-600">
+                            Địa chỉ: [ĐỊA CHỈ KINH DOANH]
+                        </p>
+                    </div>
+                </article>
+
+                <div class="py-4 text-center">
+                    <p class="text-xs leading-6 text-gray-400">
+                        Caterin – An toàn cho mọi nhà
+                    </p>
+                </div>
+
+            </div>
+        </div>
     </div>
-
 </section>
-<div class="border border-gray-100 rounded-16 p-24 position-sticky"
-     style="top:120px;">
-
-    <h6 class="mb-20">
-        Nội dung
-    </h6>
-
-    <ul class="list-unstyled">
-
-        <li class="mb-16">
-            <a href="#overview" class="text-main-600">
-                1. Mục đích thu thập
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#information">
-                2. Thông tin thu thập
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#usage">
-                3. Mục đích sử dụng
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#sharing">
-                4. Chia sẻ thông tin
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#storage">
-                5. Lưu trữ dữ liệu
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#security">
-                6. Bảo mật thông tin
-            </a>
-        </li>
-
-        <li>
-            <a href="#contact">
-                7. Liên hệ
-            </a>
-        </li>
-
-    </ul>
-
-</div>
-<span class="text-main-600 text-sm font-[600]">
-
-    Cập nhật: 09/07/2026
-
-</span>
-
-<h3 class="mt-8 mb-40">
-
-    Chính sách bảo mật
-
-</h3>
-<div id="overview" class="mb-48">
-
-    <h4 class="mb-20">
-
-        1. Mục đích thu thập thông tin
-
-    </h4>
-
-    <p class="text-gray-600">
-
-        Caterin thu thập thông tin cá nhân nhằm hỗ trợ quá trình đặt hàng, giao hàng,
-        chăm sóc khách hàng, xử lý khiếu nại và nâng cao chất lượng dịch vụ.
-
-    </p>
-
-    <p class="text-gray-600">
-
-        Việc thu thập thông tin luôn được thực hiện trên cơ sở minh bạch và tuân thủ
-        quy định của pháp luật hiện hành.
-
-    </p>
-
-</div>
-<div id="information" class="mb-48">
-
-    <h4 class="mb-20">
-
-        2. Thông tin được thu thập
-
-    </h4>
-
-    <ul>
-
-        <li>Họ và tên.</li>
-
-        <li>Số điện thoại.</li>
-
-        <li>Địa chỉ email.</li>
-
-        <li>Địa chỉ giao hàng.</li>
-
-        <li>Lịch sử đơn hàng.</li>
-
-        <li>Thông tin đăng nhập tài khoản.</li>
-
-    </ul>
-
-</div>
-<div id="usage" class="mb-48">
-
-    <h4 class="mb-20">
-
-        3. Mục đích sử dụng thông tin
-
-    </h4>
-
-    <ul>
-
-        <li>Xử lý đơn hàng.</li>
-
-        <li>Giao hàng đến đúng địa chỉ.</li>
-
-        <li>Hỗ trợ khách hàng.</li>
-
-        <li>Thông báo trạng thái đơn hàng.</li>
-
-        <li>Gửi ưu đãi và chương trình khuyến mại (khi khách hàng đồng ý).</li>
-
-        <li>Cải thiện trải nghiệm sử dụng website.</li>
-
-    </ul>
-
-</div>
-<div id="sharing" class="mb-48">
-
-    <h4 class="mb-20">
-
-        4. Chia sẻ thông tin
-
-    </h4>
-
-    <p>
-
-        Caterin không bán, trao đổi hoặc chia sẻ thông tin cá nhân của khách hàng cho
-        bên thứ ba, ngoại trừ các trường hợp sau:
-
-    </p>
-
-    <ul>
-
-        <li>Đơn vị vận chuyển.</li>
-
-        <li>Đơn vị thanh toán.</li>
-
-        <li>Theo yêu cầu của cơ quan nhà nước có thẩm quyền.</li>
-
-    </ul>
-
-</div>
-<div id="storage" class="mb-48">
-
-    <h4 class="mb-20">
-
-        5. Thời gian lưu trữ
-
-    </h4>
-
-    <p>
-
-        Thông tin khách hàng được lưu trữ trong thời gian cần thiết để phục vụ
-        việc mua bán, chăm sóc khách hàng và thực hiện các nghĩa vụ theo quy định
-        của pháp luật.
-
-    </p>
-
-</div>
-<div id="security" class="mb-48">
-
-    <h4 class="mb-20">
-
-        6. Cam kết bảo mật
-
-    </h4>
-
-    <ul>
-
-        <li>Dữ liệu được bảo vệ bằng các biện pháp kỹ thuật phù hợp.</li>
-
-        <li>Thông tin thanh toán không được lưu dưới dạng dễ đọc.</li>
-
-        <li>Hệ thống chỉ cho phép nhân sự được phân quyền truy cập.</li>
-
-        <li>Thường xuyên rà soát và cập nhật các biện pháp bảo mật.</li>
-
-    </ul>
-
-</div>
-<div id="contact">
-
-    <h4 class="mb-20">
-
-        7. Liên hệ
-
-    </h4>
-
-    <div class="bg-main-50 rounded-16 p-24">
-
-        <h6 class="mb-16">
-
-            CATERIN
-
-        </h6>
-
-        <p class="mb-8">
-
-            Email: support@caterin.vn
-
-        </p>
-
-        <p class="mb-8">
-
-            Hotline: 1900 xxxx
-
-        </p>
-
-        <p class="mb-0">
-
-            Nếu có bất kỳ thắc mắc nào liên quan đến việc thu thập và sử dụng dữ liệu cá nhân,
-            vui lòng liên hệ với chúng tôi để được hỗ trợ.
-
-        </p>
-
-    </div>
-
-</div>
-<div id="rights" class="mb-48">
-
-    <h4 class="mb-20">
-
-        8. Quyền của khách hàng
-
-    </h4>
-
-    <p class="text-gray-600">
-
-        Caterin tôn trọng quyền riêng tư của khách hàng và cam kết tạo điều kiện để khách hàng thực hiện các quyền đối với thông tin cá nhân của mình theo quy định của pháp luật.
-
-    </p>
-
-    <ul>
-
-        <li>Yêu cầu xem hoặc xác nhận thông tin cá nhân mà Caterin đang lưu trữ.</li>
-
-        <li>Cập nhật hoặc chỉnh sửa thông tin cá nhân khi có thay đổi.</li>
-
-        <li>Yêu cầu xóa hoặc hạn chế xử lý thông tin cá nhân trong các trường hợp được pháp luật cho phép.</li>
-
-        <li>Rút lại sự đồng ý đối với việc nhận email marketing hoặc thông tin khuyến mại bất kỳ lúc nào.</li>
-
-        <li>Yêu cầu giải đáp các vấn đề liên quan đến việc thu thập, lưu trữ và xử lý dữ liệu cá nhân.</li>
-
-    </ul>
-
-    <div class="bg-main-50 rounded-16 p-24 mt-24">
-
-        <strong class="text-main-600">
-
-            Lưu ý
-
-        </strong>
-
-        <p class="mb-0 mt-8">
-
-            Một số thông tin có thể tiếp tục được lưu trữ trong thời gian cần thiết nhằm phục vụ việc thực hiện hợp đồng, giải quyết khiếu nại hoặc tuân thủ các nghĩa vụ theo quy định của pháp luật.
-
-        </p>
-
-    </div>
-
-</div>
-
-<div id="cookies" class="mb-48">
-
-    <h4 class="mb-20">
-
-        9. Cookie và công nghệ theo dõi
-
-    </h4>
-
-    <p class="text-gray-600">
-
-        Website Caterin sử dụng cookie và các công nghệ tương tự nhằm nâng cao trải nghiệm sử dụng, cải thiện hiệu suất hoạt động và cung cấp các dịch vụ phù hợp với nhu cầu của khách hàng.
-
-    </p>
-
-    <h6 class="mt-32 mb-16">
-
-        Cookie được sử dụng để:
-
-    </h6>
-
-    <ul>
-
-        <li>Duy trì trạng thái đăng nhập trong quá trình sử dụng website.</li>
-
-        <li>Ghi nhớ ngôn ngữ, khu vực và các tùy chọn cá nhân.</li>
-
-        <li>Lưu thông tin giỏ hàng và danh sách yêu thích.</li>
-
-        <li>Phân tích lưu lượng truy cập và cải thiện hiệu năng website.</li>
-
-        <li>Đảm bảo an toàn và phát hiện các hoạt động bất thường.</li>
-
-    </ul>
-
-    <h6 class="mt-32 mb-16">
-
-        Quản lý Cookie
-
-    </h6>
-
-    <p>
-
-        Khách hàng có thể thay đổi hoặc vô hiệu hóa cookie thông qua phần cài đặt của trình duyệt. Tuy nhiên, việc tắt cookie có thể khiến một số chức năng của website hoạt động không đầy đủ hoặc ảnh hưởng đến trải nghiệm sử dụng.
-
-    </p>
-
-    <div class="bg-main-50 rounded-16 p-24 mt-24">
-
-        <strong class="text-main-600">
-
-            Cam kết
-
-        </strong>
-
-        <p class="mb-0 mt-8">
-
-            Caterin không sử dụng cookie để thu thập thông tin cá nhân vượt quá phạm vi cần thiết và luôn tuân thủ các quy định hiện hành về bảo vệ dữ liệu cá nhân.
-
-        </p>
-
-    </div>
-
-</div>
-<div id="changes" class="mb-48">
-
-    <h4 class="mb-20">
-
-        10. Thay đổi Chính sách bảo mật
-
-    </h4>
-
-    <p>
-
-        Caterin có thể cập nhật Chính sách bảo mật nhằm phản ánh những thay đổi về hoạt động kinh doanh, công nghệ hoặc quy định của pháp luật. Phiên bản mới nhất sẽ được đăng tải trên website cùng với ngày cập nhật để khách hàng dễ dàng theo dõi.
-
-    </p>
-
-</div>
-<div id="effective">
-
-    <h4 class="mb-20">
-
-        11. Hiệu lực
-
-    </h4>
-
-    <p>
-
-        Chính sách bảo mật này có hiệu lực kể từ ngày được công bố trên website Caterin và áp dụng đối với mọi khách hàng truy cập hoặc sử dụng các sản phẩm, dịch vụ do Caterin cung cấp.
-
-    </p>
-
-</div>

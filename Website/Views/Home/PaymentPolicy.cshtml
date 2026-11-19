@@ -1,314 +1,396 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Chính sách thanh toán";
+
+    ViewData["PageTitle"] = "Chính sách thanh toán";
+    ViewData["PageDescription"] =
+        "Caterin cung cấp nhiều phương thức thanh toán an toàn, thuận tiện nhằm mang đến trải nghiệm mua sắm nhanh chóng và minh bạch.";
+
+    ViewData["Breadcrumbs"] = new (string Text, string? Url)[]
+    {
+        ("Chính sách thanh toán", null)
+    };
 }
-<section class="breadcrumb py-80 bg-color-three">
 
-    <div class="container container-lg text-center">
+<!-- Page Header -->
+<partial name="Components/_PageHeader" />
 
-        <span class="text-main-600 text-sm font-[600]">
-            Caterin
-        </span>
+<section id="shipping" class="bg-gray-50 py-10 sm:py-14">
+    <div class="container mx-auto px-4">
 
-        <h2 class="mt-12 mb-16">
-            Chính sách thanh toán
-        </h2>
+        <!-- Payment Highlights -->
+        <div class="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-        <p class="text-gray-600 mx-auto" style="max-width:700px;">
-
-            Caterin cung cấp nhiều phương thức thanh toán an toàn, thuận tiện nhằm mang đến trải nghiệm mua sắm nhanh chóng và minh bạch.
-
-        </p>
-
-    </div>
-
-</section>
-
-<section class="shipping mb-24" id="shipping">
-    <div class="container container-lg">
-        <div class="row g-4">
-            <div class="custom-2xl:w-3/12 flex-grow-0 flex-shrink-0 basis-auto md:w-6/12" data-aos="zoom-in"
-                 data-aos-duration="400">
-                <div class="shipping-item flex items-center gap-16 rounded-16 bg-main-50 hover-bg-main-100 transition-2">
-                    <span class="w-56 h-56 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-32 flex-shrink-0">
-                        <i class="ph-fill ph-car-profile"></i>
-                    </span>
-                    <div class="">
-                        <h6 class="mb-0">Free Shipping</h6><span class="text-sm text-heading">
-                            💵 Thanh toán khi nhận hàng (COD)
-                        </span>
-                    </div>
+            <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-[#B9DDBD] hover:shadow-sm">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-white">
+                    <i class="ph-fill ph-money text-2xl"></i>
+                </span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-gray-900">Thanh toán COD</h3>
+                    <p class="mt-1 text-sm leading-5 text-gray-600">
+                        Thanh toán khi nhận hàng
+                    </p>
                 </div>
             </div>
-            <div class="custom-2xl:w-3/12 flex-grow-0 flex-shrink-0 basis-auto md:w-6/12" data-aos="zoom-in"
-                 data-aos-duration="600">
-                <div class="shipping-item flex items-center gap-16 rounded-16 bg-main-50 hover-bg-main-100 transition-2">
-                    <span class="w-56 h-56 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-32 flex-shrink-0">
-                        <i class="ph-fill ph-hand-heart"></i>
-                    </span>
-                    <div class="">
-                        <h6 class="mb-0">100% Satisfaction</h6><span class="text-sm text-heading">
-                            🏦 Chuyển khoản ngân hàng
-                        </span>
-                    </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-[#B9DDBD] hover:shadow-sm">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-white">
+                    <i class="ph-fill ph-bank text-2xl"></i>
+                </span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-gray-900">Chuyển khoản</h3>
+                    <p class="mt-1 text-sm leading-5 text-gray-600">
+                        Chuyển khoản ngân hàng
+                    </p>
                 </div>
             </div>
-            <div class="custom-2xl:w-3/12 flex-grow-0 flex-shrink-0 basis-auto md:w-6/12" data-aos="zoom-in"
-                 data-aos-duration="800">
-                <div class="shipping-item flex items-center gap-16 rounded-16 bg-main-50 hover-bg-main-100 transition-2">
-                    <span class="w-56 h-56 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-32 flex-shrink-0">
-                        <i class="ph-fill ph-credit-card"></i>
-                    </span>
-                    <div class="">
-                        <h6 class="mb-0">Secure Payments</h6><span class="text-sm text-heading">
-                            💳 Thẻ ATM / Visa / MasterCard
-                        </span>
-                    </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-[#B9DDBD] hover:shadow-sm">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-white">
+                    <i class="ph-fill ph-credit-card text-2xl"></i>
+                </span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-gray-900">Thẻ thanh toán</h3>
+                    <p class="mt-1 text-sm leading-5 text-gray-600">
+                        ATM, Visa, MasterCard
+                    </p>
                 </div>
             </div>
-            <div class="custom-2xl:w-3/12 flex-grow-0 flex-shrink-0 basis-auto md:w-6/12" data-aos="zoom-in"
-                 data-aos-duration="1000">
-                <div class="shipping-item flex items-center gap-16 rounded-16 bg-main-50 hover-bg-main-100 transition-2">
-                    <span class="w-56 h-56 flex items-center justify-center rounded-[50%] bg-main-600 text-white text-32 flex-shrink-0">
-                        <i class="ph-fill ph-chats"></i>
-                    </span>
-                    <div class="">
-                        <h6 class="mb-0">24/7 Support</h6><span class="text-sm text-heading">
-                            📱 Ví điện tử & QR Code
-                        </span>
-                    </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-[#B9DDBD] hover:shadow-sm">
+                <span class="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#1F9345] text-white">
+                    <i class="ph-fill ph-qr-code text-2xl"></i>
+                </span>
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-gray-900">Thanh toán điện tử</h3>
+                    <p class="mt-1 text-sm leading-5 text-gray-600">
+                        Ví điện tử và QR Code
+                    </p>
                 </div>
+            </div>
+
+        </div>
+
+        <!-- Main Layout -->
+        <div class="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)] xl:gap-8">
+
+            <!-- Sidebar -->
+            <aside class="lg:sticky lg:top-24">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-6">
+
+                    <h2 class="mb-5 flex items-center gap-2 font-bold text-gray-900">
+                        <i class="ph ph-list-bullets text-xl text-[#1F9345]"></i>
+                        Nội dung
+                    </h2>
+
+                    <nav class="space-y-1 text-sm">
+
+                        <a href="#methods"
+                           class="block rounded-lg bg-[#F5F9F2] px-3 py-2.5 font-medium text-[#1F9345] transition hover:bg-[#EDF7EA]">
+                            1. Phương thức thanh toán
+                        </a>
+
+                        <a href="#online"
+                           class="block rounded-lg px-3 py-2.5 text-gray-600 transition hover:bg-[#F5F9F2] hover:text-[#1F9345]">
+                            2. Thanh toán trực tuyến
+                        </a>
+
+                        <a href="#cod"
+                           class="block rounded-lg px-3 py-2.5 text-gray-600 transition hover:bg-[#F5F9F2] hover:text-[#1F9345]">
+                            3. Thanh toán khi nhận hàng
+                        </a>
+
+                        <a href="#security"
+                           class="block rounded-lg px-3 py-2.5 text-gray-600 transition hover:bg-[#F5F9F2] hover:text-[#1F9345]">
+                            4. Bảo mật thanh toán
+                        </a>
+
+                        <a href="#refund"
+                           class="block rounded-lg px-3 py-2.5 text-gray-600 transition hover:bg-[#F5F9F2] hover:text-[#1F9345]">
+                            5. Hoàn tiền
+                        </a>
+
+                        <a href="#contact"
+                           class="block rounded-lg px-3 py-2.5 text-gray-600 transition hover:bg-[#F5F9F2] hover:text-[#1F9345]">
+                            6. Liên hệ
+                        </a>
+
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Content -->
+            <div class="min-w-0">
+
+                <!-- Update Date -->
+                <div class="mb-5">
+                    <span class="text-sm font-semibold text-[#1F9345]">
+                        Cập nhật: 09/07/2026
+                    </span>
+
+                    <h2 class="mt-2 text-xl font-bold tracking-tight text-gray-900 sm:text-2xl">
+                        Chính sách thanh toán
+                    </h2>
+                </div>
+
+                <!-- 1. Payment Methods -->
+                <article id="methods"
+                         class="mb-5 scroll-mt-28 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-sm font-bold text-[#1F9345]">
+                            01
+                        </span>
+                        Phương thức thanh toán
+                    </h3>
+
+                    <p class="mb-4 text-sm leading-7 text-gray-600">
+                        Caterin hỗ trợ các hình thức thanh toán linh hoạt để đáp ứng nhu cầu của khách hàng.
+                    </p>
+
+                    <div class="grid gap-3 sm:grid-cols-2">
+
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
+                            <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                <i class="ph ph-money text-2xl"></i>
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                Thanh toán khi nhận hàng (COD)
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
+                            <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                <i class="ph ph-bank text-2xl"></i>
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                Thanh toán bằng chuyển khoản ngân hàng
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
+                            <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                <i class="ph ph-credit-card text-2xl"></i>
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                Thanh toán trực tuyến qua cổng thanh toán được hỗ trợ
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-3 rounded-xl border border-gray-200 p-4">
+                            <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                <i class="ph ph-device-mobile text-2xl"></i>
+                            </span>
+                            <span class="text-sm font-medium text-gray-800">
+                                Ví điện tử (nếu được hỗ trợ)
+                            </span>
+                        </div>
+
+                    </div>
+
+                </article>
+
+                <!-- 2. Online Payment -->
+                <article id="online"
+                         class="mb-5 scroll-mt-28 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-sm font-bold text-[#1F9345]">
+                            02
+                        </span>
+                        Thanh toán trực tuyến
+                    </h3>
+
+                    <p class="text-sm leading-7 text-gray-600">
+                        Khi lựa chọn thanh toán trực tuyến, khách hàng sẽ được chuyển đến cổng thanh toán an toàn của đối tác để hoàn tất giao dịch.
+                    </p>
+
+                    <div class="mt-5 rounded-xl border border-[#DCEBDD] bg-[#F5F9F2] p-5">
+
+                        <h4 class="mb-4 flex items-center gap-2 font-semibold text-gray-900">
+                            <i class="ph ph-check-circle text-xl text-[#1F9345]"></i>
+                            Các hình thức được hỗ trợ
+                        </h4>
+
+                        <ul class="space-y-3 text-sm leading-6 text-gray-700">
+                            <li class="flex gap-3">
+                                <i class="ph ph-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Hỗ trợ thẻ ATM nội địa.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <i class="ph ph-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Hỗ trợ thẻ Visa/MasterCard.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <i class="ph ph-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Hỗ trợ QR Code và Internet Banking (nếu có).</span>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </article>
+
+                <!-- 3. COD -->
+                <article id="cod"
+                         class="mb-5 scroll-mt-28 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-sm font-bold text-[#1F9345]">
+                            03
+                        </span>
+                        Thanh toán khi nhận hàng (COD)
+                    </h3>
+
+                    <p class="mb-4 text-sm leading-7 text-gray-600">
+                        Đối với hình thức COD, khách hàng thanh toán trực tiếp cho đơn vị vận chuyển sau khi kiểm tra thông tin đơn hàng.
+                    </p>
+
+                    <ul class="space-y-3 text-sm leading-6 text-gray-600">
+                        <li class="flex gap-3">
+                            <i class="ph ph-check-circle mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Chuẩn bị đúng số tiền cần thanh toán.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <i class="ph ph-check-circle mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Kiểm tra thông tin người nhận và sản phẩm trước khi thanh toán.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <i class="ph ph-info mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Một số khu vực có thể không hỗ trợ COD.</span>
+                        </li>
+                    </ul>
+
+                </article>
+
+                <!-- 4. Security -->
+                <article id="security"
+                         class="mb-5 scroll-mt-28 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-sm font-bold text-[#1F9345]">
+                            04
+                        </span>
+                        Bảo mật thanh toán
+                    </h3>
+
+                    <p class="mb-4 text-sm leading-7 text-gray-600">
+                        Caterin không lưu trữ thông tin thẻ thanh toán của khách hàng trên hệ thống.
+                    </p>
+
+                    <ul class="space-y-3 text-sm leading-6 text-gray-600">
+                        <li class="flex gap-3">
+                            <i class="ph ph-shield-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Thông tin thanh toán được xử lý thông qua cổng thanh toán bảo mật.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <i class="ph ph-lock-key mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Dữ liệu truyền tải được mã hóa nhằm đảm bảo an toàn.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <i class="ph ph-user-check mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                            <span>Khách hàng chịu trách nhiệm bảo mật thông tin tài khoản và mật khẩu thanh toán.</span>
+                        </li>
+                    </ul>
+
+                </article>
+
+                <!-- 5. Refund -->
+                <article id="refund"
+                         class="mb-5 scroll-mt-28 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-sm font-bold text-[#1F9345]">
+                            05
+                        </span>
+                        Chính sách hoàn tiền
+                    </h3>
+
+                    <p class="mb-4 text-sm leading-7 text-gray-600">
+                        Trong trường hợp đơn hàng đủ điều kiện hoàn tiền theo Chính sách đổi trả & hoàn tiền, Caterin sẽ tiến hành hoàn tiền theo phương thức phù hợp.
+                    </p>
+
+                    <div class="rounded-xl border border-[#DCEBDD] bg-[#F5F9F2] p-5">
+
+                        <ul class="space-y-3 text-sm leading-6 text-gray-700">
+                            <li class="flex gap-3">
+                                <i class="ph ph-check-circle mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Hoàn về tài khoản ngân hàng.</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <i class="ph ph-check-circle mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Hoàn về phương thức thanh toán ban đầu (nếu được hỗ trợ).</span>
+                            </li>
+                            <li class="flex gap-3">
+                                <i class="ph ph-clock mt-0.5 shrink-0 text-lg text-[#1F9345]"></i>
+                                <span>Thời gian xử lý từ 3–7 ngày làm việc sau khi yêu cầu được chấp thuận.</span>
+                            </li>
+                        </ul>
+
+                    </div>
+
+                </article>
+
+                <!-- 6. Contact -->
+                <article id="contact"
+                         class="scroll-mt-28 rounded-2xl border border-[#DCEBDD] bg-[#F5F9F2] p-5 sm:p-7">
+
+                    <h3 class="mb-5 flex items-center gap-3 text-lg font-bold text-gray-900">
+                        <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-bold text-[#1F9345]">
+                            06
+                        </span>
+                        Liên hệ
+                    </h3>
+
+                    <div class="rounded-xl border border-gray-200 bg-white p-5 sm:p-6">
+
+                        <h4 class="mb-5 font-semibold text-gray-900">
+                            Bộ phận Chăm sóc khách hàng Caterin
+                        </h4>
+
+                        <div class="space-y-4">
+
+                            <div class="flex items-center gap-3">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                    <i class="ph ph-phone text-xl"></i>
+                                </span>
+                                <div>
+                                    <p class="text-xs text-gray-500">Hotline</p>
+                                    <p class="mt-1 text-sm font-medium text-gray-900">
+                                        1900 xxxx
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#EDF7EA] text-[#1F9345]">
+                                    <i class="ph ph-envelope-simple text-xl"></i>
+                                </span>
+                                <div>
+                                    <p class="text-xs text-gray-500">Email</p>
+                                    <p class="mt-1 text-sm font-medium text-gray-900">
+                                        support@caterin.vn
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <p class="mt-5 border-t border-gray-100 pt-4 text-sm leading-7 text-gray-600">
+                            Nếu có bất kỳ thắc mắc nào liên quan đến việc thanh toán, vui lòng liên hệ với chúng tôi để được hỗ trợ.
+                        </p>
+
+                    </div>
+
+                </article>
+
+                <!-- Footer -->
+                <div class="pt-6 text-center">
+                    <p class="text-sm font-medium text-[#1F9345]">
+                        Caterin – An toàn cho mọi nhà
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>
 </section>
-<div class="border border-gray-100 rounded-16 p-24 position-sticky"
-     style="top:120px;">
-
-    <h6 class="mb-20">
-
-        Nội dung
-
-    </h6>
-
-    <ul class="list-unstyled">
-
-        <li class="mb-16">
-            <a href="#methods" class="text-main-600">
-                1. Phương thức thanh toán
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#online">
-                2. Thanh toán trực tuyến
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#cod">
-                3. Thanh toán khi nhận hàng
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#security">
-                4. Bảo mật thanh toán
-            </a>
-        </li>
-
-        <li class="mb-16">
-            <a href="#refund">
-                5. Hoàn tiền
-            </a>
-        </li>
-
-        <li>
-            <a href="#contact">
-                6. Liên hệ
-            </a>
-        </li>
-
-    </ul>
-
-</div>
-<span class="text-main-600 text-sm font-[600]">
-
-    Cập nhật: 09/07/2026
-
-</span>
-
-<h3 class="mt-8 mb-40">
-
-    Chính sách thanh toán
-
-</h3>
-<div id="methods" class="mb-48">
-
-    <h4 class="mb-20">
-
-        1. Phương thức thanh toán
-
-    </h4>
-
-    <p class="text-gray-600">
-
-        Caterin hỗ trợ các hình thức thanh toán linh hoạt để đáp ứng nhu cầu của khách hàng.
-
-    </p>
-
-    <ul>
-
-        <li>Thanh toán khi nhận hàng (COD).</li>
-
-        <li>Thanh toán bằng chuyển khoản ngân hàng.</li>
-
-        <li>Thanh toán trực tuyến qua cổng thanh toán được hỗ trợ.</li>
-
-        <li>Ví điện tử (nếu được hỗ trợ).</li>
-
-    </ul>
-
-</div>
-<div id="online" class="mb-48">
-
-    <h4 class="mb-20">
-
-        2. Thanh toán trực tuyến
-
-    </h4>
-
-    <p>
-
-        Khi lựa chọn thanh toán trực tuyến, khách hàng sẽ được chuyển đến cổng thanh toán an toàn của đối tác để hoàn tất giao dịch.
-
-    </p>
-
-    <div class="bg-main-50 rounded-16 p-24 mt-24">
-
-        <ul class="mb-0">
-
-            <li>Hỗ trợ thẻ ATM nội địa.</li>
-
-            <li>Hỗ trợ thẻ Visa/MasterCard.</li>
-
-            <li>Hỗ trợ QR Code và Internet Banking (nếu có).</li>
-
-        </ul>
-
-    </div>
-
-</div>
-<div id="cod" class="mb-48">
-
-    <h4 class="mb-20">
-
-        3. Thanh toán khi nhận hàng (COD)
-
-    </h4>
-
-    <p>
-
-        Đối với hình thức COD, khách hàng thanh toán trực tiếp cho đơn vị vận chuyển sau khi kiểm tra thông tin đơn hàng.
-
-    </p>
-
-    <ul>
-
-        <li>Chuẩn bị đúng số tiền cần thanh toán.</li>
-
-        <li>Kiểm tra thông tin người nhận và sản phẩm trước khi thanh toán.</li>
-
-        <li>Một số khu vực có thể không hỗ trợ COD.</li>
-
-    </ul>
-
-</div>
-<div id="security" class="mb-48">
-
-    <h4 class="mb-20">
-
-        4. Bảo mật thanh toán
-
-    </h4>
-
-    <p>
-
-        Caterin không lưu trữ thông tin thẻ thanh toán của khách hàng trên hệ thống.
-
-    </p>
-
-    <ul>
-
-        <li>Thông tin thanh toán được xử lý thông qua cổng thanh toán bảo mật.</li>
-
-        <li>Dữ liệu truyền tải được mã hóa nhằm đảm bảo an toàn.</li>
-
-        <li>Khách hàng chịu trách nhiệm bảo mật thông tin tài khoản và mật khẩu thanh toán.</li>
-
-    </ul>
-
-</div>
-<div id="refund" class="mb-48">
-
-    <h4 class="mb-20">
-
-        5. Chính sách hoàn tiền
-
-    </h4>
-
-    <p>
-
-        Trong trường hợp đơn hàng đủ điều kiện hoàn tiền theo Chính sách đổi trả & hoàn tiền, Caterin sẽ tiến hành hoàn tiền theo phương thức phù hợp.
-
-    </p>
-
-    <ul>
-
-        <li>Hoàn về tài khoản ngân hàng.</li>
-
-        <li>Hoàn về phương thức thanh toán ban đầu (nếu được hỗ trợ).</li>
-
-        <li>Thời gian xử lý từ 3–7 ngày làm việc sau khi yêu cầu được chấp thuận.</li>
-
-    </ul>
-
-</div>
-<div id="contact">
-
-    <h4 class="mb-20">
-
-        6. Liên hệ
-
-    </h4>
-
-    <div class="bg-main-50 rounded-16 p-24">
-
-        <h6 class="mb-16">
-
-            Bộ phận Chăm sóc khách hàng Caterin
-
-        </h6>
-
-        <p class="mb-8">
-
-            Hotline: 1900 xxxx
-
-        </p>
-
-        <p class="mb-8">
-
-            Email: support@caterin.vn
-
-        </p>
-
-        <p class="mb-0">
-
-            Nếu có bất kỳ thắc mắc nào liên quan đến việc thanh toán, vui lòng liên hệ với chúng tôi để được hỗ trợ.
-
-        </p>
-
-    </div>
-
-</div>

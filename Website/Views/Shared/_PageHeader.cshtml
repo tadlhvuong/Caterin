@@ -1,0 +1,59 @@
+﻿@{
+}
+@{
+    var title = ViewData["PageTitle"] as string ?? "";
+    var description = ViewData["PageDescription"] as string;
+    var breadcrumbs = ViewData["Breadcrumbs"] as IEnumerable<(string Text, string? Url)> ?? Enumerable.Empty<(string, string?)>();
+}
+
+<section class="bg-[#F5F9F2] py-7 sm:py-9">
+    <div class="container mx-auto px-4">
+
+        <!-- Breadcrumb -->
+        <nav class="mb-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm"
+             aria-label="Breadcrumb">
+
+            <a href="/"
+               class="text-gray-500 transition hover:text-[#1F9345]">
+                Trang chủ
+            </a>
+
+            @foreach (var item in breadcrumbs)
+            {
+                <i class="ph ph-caret-right text-xs text-gray-400"></i>
+
+                if (!string.IsNullOrEmpty(item.Url))
+                {
+                    <a href="@item.Url"
+                       class="text-gray-500 transition hover:text-[#1F9345]">
+                        @item.Text
+                    </a>
+                }
+                else
+                {
+                    <span class="font-medium text-[#1F9345]"
+                          aria-current="page">
+                        @item.Text
+                    </span>
+                }
+            }
+        </nav>
+
+        <!-- Heading -->
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                @title
+            </h1>
+
+            @if (!string.IsNullOrWhiteSpace(description))
+            {
+                <p class="mt-2 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+                    @description
+                </p>
+            }
+
+            <div class="mt-4 h-[3px] w-12 rounded-full bg-[#1F9345]"></div>
+        </div>
+
+    </div>
+</section>

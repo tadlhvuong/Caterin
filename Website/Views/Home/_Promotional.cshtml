@@ -2,146 +2,199 @@
     Layout = null;
 }
 
-<section class="bg-white py-12 sm:py-16 lg:py-20">
-    <div class="container mx-auto px-4">
+<section class="bg-white py-10 sm:py-14 lg:py-16">
+    <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-8">
 
-        <div class="mb-7 flex items-end justify-between gap-4">
+        <!-- Heading -->
+        <div class="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+
             <div>
                 <span class="text-xs font-bold uppercase tracking-[0.2em] text-[#1F9345]">
                     Caterin Lifestyle
                 </span>
+
                 <h2 class="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-                    Chăm sóc nhà, <span class="text-[#1F9345]">chăm sóc yêu thương</span>
+                    Chăm sóc nhà,
+                    <span class="text-[#1F9345]">chăm sóc yêu thương</span>
                 </h2>
-                <p class="mt-2 text-sm text-gray-500">
+
+                <p class="mt-2 text-sm leading-6 text-gray-500 sm:text-base">
                     Những lựa chọn nhỏ cho không gian sống sạch lành hơn.
                 </p>
             </div>
-            <a asp-controller="Shop" asp-action="Index"
-               class="hidden shrink-0 items-center gap-2 text-sm font-semibold text-[#1F9345] transition hover:gap-3 sm:inline-flex">
+
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="hidden shrink-0 items-center gap-2 text-sm font-semibold text-[#1F9345] transition-all hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F9345] focus-visible:ring-offset-4 sm:inline-flex">
+                Khám phá tất cả
+                <i class="ph ph-arrow-right text-base"></i>
+            </a>
+        </div>
+
+        <!-- Responsive Slider / Desktop Grid -->
+        <div id="lifestyleSwiper" class="swiper">
+
+            <div class="swiper-wrapper">
+
+                <!-- 1. Main banner -->
+                <div class="swiper-slide lifestyle-slide-main">
+
+                    <a asp-controller="Shop"
+                       asp-action="Index"
+                       class="group relative isolate flex h-full min-h-[360px] overflow-hidden rounded-2xl bg-[#EDF4E9] sm:min-h-[420px] lg:min-h-[520px]">
+
+                        <img src="~/images/home/promotional-banner-img1.webp"
+                             alt="Caterin - An toàn cho mọi nhà"
+                             loading="lazy"
+                             class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+
+                        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/75 to-[#F5F9F2]/10"></div>
+
+                        <div class="flex w-full flex-col items-start justify-center p-6 sm:p-10 lg:p-12">
+
+                            <span class="inline-flex items-center gap-2 rounded-full border border-[#1F9345]/15 bg-white/80 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#1F9345] backdrop-blur-sm sm:text-xs">
+                                <i class="ph-fill ph-leaf text-sm"></i>
+                                Sống xanh cùng Caterin
+                            </span>
+
+                            <h3 class="mt-5 max-w-[360px] text-3xl font-extrabold leading-[1.15] tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+                                An toàn cho mọi nhà
+                            </h3>
+
+                            <p class="mt-4 max-w-[320px] text-sm leading-7 text-gray-600 sm:text-base">
+                                Chăm sóc không gian sống bằng những lựa chọn làm sạch chất lượng.
+                            </p>
+
+                            <span class="mt-7 inline-flex items-center gap-3 rounded-full bg-[#1F9345] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all group-hover:bg-[#187C3B] group-hover:shadow-md">
+                                Khám phá ngay
+                                <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 2. Gentle cleaning -->
+                <div class="swiper-slide lifestyle-slide-right-one">
+
+                    <a asp-controller="Shop"
+                       asp-action="Index"
+                       class="group relative isolate flex h-full min-h-[360px] overflow-hidden rounded-2xl bg-[#F2F5ED] lg:min-h-0">
+
+                        <img src="~/images/home/promotional-banner-img2.webp"
+                             alt="Làm sạch dịu nhẹ"
+                             loading="lazy"
+                             class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+
+                        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/75 to-[#F5F9F2]/15"></div>
+
+                        <div class="flex w-full max-w-[75%] flex-col justify-center p-5 sm:p-7">
+
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1F9345] sm:text-xs">
+                                Gentle Care
+                            </span>
+
+                            <h3 class="mt-3 text-xl font-bold leading-snug text-gray-900 sm:text-2xl">
+                                Sạch hiệu quả,
+                                <span class="text-[#1F9345]">dịu nhẹ đôi tay</span>
+                            </h3>
+
+                            <span class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#1F9345] sm:text-sm">
+                                Tìm hiểu thêm
+                                <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 3. Monthly offer -->
+                <div class="swiper-slide lifestyle-slide-right-two">
+
+                    <a asp-controller="Shop"
+                       asp-action="Index"
+                       class="group relative isolate flex h-full min-h-[360px] overflow-hidden rounded-2xl bg-[#F8F0E5] lg:min-h-0">
+
+                        <img src="~/images/home/promotional-banner-img3.webp"
+                             alt="Ưu đãi Caterin"
+                             loading="lazy"
+                             class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]" />
+
+                        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#FAF3E9]/95 via-[#FAF3E9]/75 to-[#FAF3E9]/15"></div>
+
+                        <div class="flex w-full max-w-[75%] flex-col justify-center p-5 sm:p-7">
+
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-amber-700 sm:text-xs">
+                                Special Offers
+                            </span>
+
+                            <h3 class="mt-3 text-xl font-bold leading-snug text-gray-900 sm:text-2xl">
+                                Ưu đãi
+                                <span class="text-amber-700">dành cho bạn</span>
+                            </h3>
+
+                            <p class="mt-2 text-xs leading-relaxed text-gray-600 sm:text-sm">
+                                Khám phá những chương trình ưu đãi hiện có.
+                            </p>
+
+                            <span class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-amber-700 sm:text-sm">
+                                Xem ưu đãi
+                                <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 4. Bottom lifestyle banner -->
+                <div class="swiper-slide lifestyle-slide-bottom">
+
+                    <a asp-controller="Shop"
+                       asp-action="Index"
+                       class="group relative isolate flex h-full min-h-[360px] items-center overflow-hidden rounded-2xl bg-[#EAF2E7] lg:min-h-0">
+
+                        <img src="~/images/home/promotional-banner-img4.webp"
+                             alt="Chăm sóc ngôi nhà cùng Caterin"
+                             loading="lazy"
+                             class="absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" />
+
+                        <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/80 to-[#F5F9F2]/15"></div>
+
+                        <div class="relative max-w-2xl p-6 sm:p-9 lg:p-10">
+
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#1F9345] sm:text-xs">
+                                A Better Home Everyday
+                            </span>
+
+                            <h3 class="mt-2 text-2xl font-extrabold leading-tight tracking-tight text-gray-900 sm:text-3xl">
+                                Chăm sóc ngôi nhà từ những điều nhỏ nhất.
+                            </h3>
+
+                            <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345]">
+                                Khám phá Caterin
+                                <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
+                            </span>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Mobile pagination -->
+        <div class="mt-5 flex items-center justify-center gap-3 lg:hidden">
+            <div id="lifestylePagination"></div>
+            <span class="text-[11px] font-medium text-gray-400">
+                Vuốt để khám phá
+            </span>
+        </div>
+
+        <!-- Mobile link -->
+        <div class="mt-6 flex justify-center sm:hidden">
+            <a asp-controller="Shop"
+               asp-action="Index"
+               class="inline-flex items-center gap-2 rounded-full border border-[#1F9345] px-5 py-2.5 text-sm font-semibold text-[#1F9345] transition hover:bg-[#1F9345] hover:text-white">
                 Khám phá tất cả
                 <i class="ph ph-arrow-right"></i>
             </a>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
-
-            <!-- Main banner -->
-            <a asp-controller="Shop" asp-action="Index"
-               class="group relative isolate flex min-h-[340px] overflow-hidden rounded-[24px] bg-[#EDF4E9] sm:min-h-[420px] lg:col-span-7 lg:min-h-[500px]">
-
-                <img src="~/images/Demos/promotional-banner-img1.png"
-                     alt="Caterin - An toàn cho mọi nhà"
-                     class="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-                     loading="lazy" />
-
-                <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/65 to-transparent"></div>
-
-                <div class="flex w-full flex-col items-start justify-center p-6 sm:p-10 lg:p-12">
-                    <span class="inline-flex items-center gap-2 rounded-full border border-[#1F9345]/15 bg-white/70 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[#1F9345] backdrop-blur">
-                        <i class="ph-fill ph-leaf"></i>
-                        Sống xanh cùng Caterin
-                    </span>
-
-                    <h3 class="mt-5 max-w-[340px] text-3xl font-extrabold leading-[1.15] tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
-                        An toàn cho mọi nhà
-                    </h3>
-
-                    <p class="mt-4 max-w-[300px] text-sm leading-7 text-gray-600 sm:text-base">
-                        Chăm sóc không gian sống bằng những lựa chọn làm sạch chất lượng.
-                    </p>
-
-                    <span class="mt-7 inline-flex items-center gap-3 rounded-full bg-[#1F9345] px-6 py-3 text-sm font-semibold text-white transition group-hover:bg-[#187C3B]">
-                        Khám phá ngay
-                        <i class="ph ph-arrow-right text-lg transition-transform group-hover:translate-x-1"></i>
-                    </span>
-                </div>
-            </a>
-
-            <!-- Right column -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
-
-                <!-- Gentle cleaning -->
-                <a asp-controller="Shop" asp-action="Index"
-                   class="group relative isolate flex min-h-[220px] overflow-hidden rounded-[24px] bg-[#F2F5ED] sm:min-h-[240px] lg:min-h-0 lg:flex-1">
-
-                    <img src="~/images/Demos/promotional-banner-img2.png"
-                         alt="Làm sạch dịu nhẹ"
-                         class="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                         loading="lazy" />
-
-                    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/60 to-transparent"></div>
-
-                    <div class="flex max-w-[65%] flex-col justify-center p-5 sm:p-6">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-[#1F9345]">
-                            Gentle Care
-                        </span>
-                        <h3 class="mt-3 text-xl font-bold leading-snug text-gray-900 sm:text-2xl">
-                            Sạch hiệu quả,
-                            <span class="text-[#1F9345]">dịu nhẹ đôi tay</span>
-                        </h3>
-                        <span class="mt-4 inline-flex items-center gap-2 text-xs font-semibold text-[#1F9345]">
-                            Tìm hiểu thêm
-                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
-                        </span>
-                    </div>
-                </a>
-
-                <!-- Monthly offer -->
-                <a asp-controller="Shop" asp-action="Index"
-                   class="group relative isolate flex min-h-[220px] overflow-hidden rounded-[24px] bg-[#F8F0E5] sm:min-h-[240px] lg:min-h-0 lg:flex-1">
-
-                    <img src="~/images/Demos/promotional-banner-img3.png"
-                         alt="Ưu đãi Caterin"
-                         class="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-                         loading="lazy" />
-
-                    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#FAF3E9]/95 via-[#FAF3E9]/60 to-transparent"></div>
-
-                    <div class="flex max-w-[65%] flex-col justify-center p-5 sm:p-6">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-700">
-                            Special Offers
-                        </span>
-                        <h3 class="mt-3 text-xl font-bold leading-snug text-gray-900 sm:text-2xl">
-                            Ưu đãi
-                            <span class="text-amber-700">dành cho bạn</span>
-                        </h3>
-                        <p class="mt-2 text-xs leading-relaxed text-gray-600">
-                            Khám phá những chương trình ưu đãi hiện có.
-                        </p>
-                        <span class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-amber-700">
-                            Xem ưu đãi
-                            <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
-                        </span>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Bottom lifestyle banner -->
-            <a asp-controller="Shop" asp-action="Index"
-               class="group relative isolate flex min-h-[180px] items-center overflow-hidden rounded-[24px] bg-[#EAF2E7] lg:col-span-12 lg:min-h-[210px]">
-
-                <img src="~/images/Demos/promotional-banner-img4.png"
-                     alt="Chăm sóc ngôi nhà cùng Caterin"
-                     class="absolute inset-0 -z-20 h-full w-full object-cover transition duration-700 group-hover:scale-[1.02]"
-                     loading="lazy" />
-
-                <div class="absolute inset-0 -z-10 bg-gradient-to-r from-[#F5F9F2]/95 via-[#F5F9F2]/75 to-transparent"></div>
-
-                <div class="max-w-xl p-6 sm:p-9 lg:p-10">
-                    <span class="text-[10px] font-bold uppercase tracking-widest text-[#1F9345]">
-                        A Better Home Everyday
-                    </span>
-                    <h3 class="mt-2 text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
-                        Chăm sóc ngôi nhà từ những điều nhỏ nhất.
-                    </h3>
-                    <span class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#1F9345]">
-                        Khám phá Caterin
-                        <i class="ph ph-arrow-right transition-transform group-hover:translate-x-1"></i>
-                    </span>
-                </div>
-            </a>
-
-        </div>
     </div>
 </section>

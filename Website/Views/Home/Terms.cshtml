@@ -1,283 +1,340 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "Điều khoản sử dụng | Caterin";
+    ViewData["PageTitle"] = "Điều khoản sử dụng";
+    ViewData["PageDescription"] =
+        "Các điều khoản và điều kiện áp dụng khi khách hàng truy cập, đăng ký tài khoản và sử dụng dịch vụ mua sắm tại Caterin.";
+
+    ViewData["Breadcrumbs"] = new (string Text, string? Url)[]
+    {
+        ("Điều khoản sử dụng", null)
+    };
 }
-<section class="breadcrumb py-80 bg-color-three">
 
-    <div class="container container-lg text-center">
+<partial name="_PageHeader" />
 
-        <span class="text-main-600 text-sm font-[600]">
-            Caterin
-        </span>
+<section class="bg-gray-50 py-10 sm:py-14">
+    <div class="container mx-auto max-w-5xl px-4">
 
-        <h2 class="mt-12 mb-16">
-            Điều khoản mua hàng
-        </h2>
-
-        <p class="text-gray-600 mx-auto" style="max-width:700px;">
-
-            Vui lòng đọc kỹ các điều khoản trước khi sử dụng website và đặt mua sản phẩm tại Caterin.
-
-        </p>
-
-    </div>
-
-</section>
-
-<section class="py-80">
-
-    <div class="container container-lg">
-
-        <div class="row g-4">
-
-            <!-- Sidebar -->
-
-            <div class="col-lg-3">
-
-                <div class="border border-gray-100 rounded-16 p-24 position-sticky"
-                     style="top:120px;">
-
-                    <h6 class="mb-20">
-
-                        Nội dung
-
-                    </h6>
-
-                    <ul class="list-unstyled">
-
-                        <li class="mb-16">
-                            <a href="#intro" class="text-main-600">
-                                1. Giới thiệu
-                            </a>
-                        </li>
-
-                        <li class="mb-16">
-                            <a href="#order">
-                                2. Điều kiện đặt hàng
-                            </a>
-                        </li>
-
-                        <li class="mb-16">
-                            <a href="#payment">
-                                3. Thanh toán
-                            </a>
-                        </li>
-
-                        <li class="mb-16">
-                            <a href="#shipping">
-                                4. Giao hàng
-                            </a>
-                        </li>
-
-                        <li class="mb-16">
-                            <a href="#return">
-                                5. Đổi trả
-                            </a>
-                        </li>
-
-                        <li class="mb-16">
-                            <a href="#privacy">
-                                6. Bảo mật thông tin
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="#contact">
-                                7. Liên hệ
-                            </a>
-                        </li>
-
-                    </ul>
-
+        <div class="mb-8 rounded-2xl border border-[#E2EDE0] bg-white p-5 sm:p-7">
+            <div class="flex items-start gap-3">
+                <div class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#EDF7EA] text-[#1F9345]">
+                    <i class="ph ph-file-text text-2xl"></i>
                 </div>
-
-            </div>
-
-            <!-- Content -->
-
-            <div class="col-lg-9">
-
-                <div class="border border-gray-100 rounded-16 p-40">
-
-                    <span class="text-main-600 text-sm font-[600]">
-
-                        Cập nhật: 09/07/2026
-
-                    </span>
-
-                    <h3 class="mt-8 mb-40">
-
-                        Điều khoản mua hàng
-
-                    </h3>
-                    <div id="intro" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            1. Giới thiệu
-
-                        </h4>
-
-                        <p class="text-gray-600">
-
-                            Website Caterin cung cấp các sản phẩm chăm sóc gia đình
-                            như nước rửa chén, nước rửa tay, nước lau sàn và các sản
-                            phẩm vệ sinh khác.
-
-                        </p>
-
-                        <p class="text-gray-600">
-
-                            Khi truy cập hoặc đặt hàng trên website, bạn đồng ý tuân
-                            thủ các điều khoản được quy định tại trang này.
-
-                        </p>
-
-                    </div>
-                    <div id="order" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            2. Điều kiện đặt hàng
-
-                        </h4>
-
-                        <ul>
-
-                            <li>Khách hàng cung cấp đầy đủ thông tin nhận hàng.</li>
-
-                            <li>Thông tin phải chính xác để đảm bảo giao hàng.</li>
-
-                            <li>Caterin có quyền từ chối các đơn hàng có dấu hiệu gian lận.</li>
-
-                        </ul>
-
-                    </div>
-                    <div id="payment" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            3. Thanh toán
-
-                        </h4>
-
-                        <ul>
-
-                            <li>Thanh toán khi nhận hàng (COD).</li>
-
-                            <li>Thanh toán trực tuyến qua cổng thanh toán được hỗ trợ.</li>
-
-                            <li>Thanh toán bằng chuyển khoản ngân hàng.</li>
-
-                        </ul>
-
-                    </div>
-                    <div id="shipping" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            4. Giao hàng
-
-                        </h4>
-
-                        <p>
-
-                            Caterin sẽ xử lý đơn hàng trong thời gian sớm nhất.
-
-                        </p>
-
-                        <ul>
-
-                            <li>Nội thành: 1–2 ngày.</li>
-
-                            <li>Ngoại thành: 2–5 ngày.</li>
-
-                            <li>Tỉnh thành khác: 3–7 ngày.</li>
-
-                        </ul>
-
-                    </div>
-                    <div id="return" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            5. Đổi trả
-
-                        </h4>
-
-                        <ul>
-
-                            <li>Sản phẩm bị lỗi do nhà sản xuất.</li>
-
-                            <li>Sản phẩm giao sai.</li>
-
-                            <li>Sản phẩm bị hư hỏng trong quá trình vận chuyển.</li>
-
-                        </ul>
-
-                    </div>
-                    <div id="privacy" class="mb-48">
-
-                        <h4 class="mb-20">
-
-                            6. Bảo mật thông tin
-
-                        </h4>
-
-                        <p>
-
-                            Caterin cam kết bảo mật thông tin cá nhân của khách hàng và
-                            chỉ sử dụng để xử lý đơn hàng, chăm sóc khách hàng và thực
-                            hiện các nghĩa vụ theo quy định của pháp luật.
-
-                        </p>
-
-                    </div>
-                    <div id="contact">
-
-                        <h4 class="mb-20">
-
-                            7. Liên hệ
-
-                        </h4>
-
-                        <div class="bg-main-50 rounded-16 p-24">
-
-                            <h6 class="mb-16">
-
-                                CÔNG TY CATERIN
-
-                            </h6>
-
-                            <p class="mb-8">
-
-                                Email: support@caterin.vn
-
-                            </p>
-
-                            <p class="mb-8">
-
-                                Hotline: 1900 xxxx
-
-                            </p>
-
-                            <p class="mb-0">
-
-                                Thời gian hỗ trợ: 08:00 - 17:30 (Thứ 2 - Thứ 7)
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
+                <div>
+                    <h2 class="text-base font-semibold text-gray-900">
+                        Chào mừng bạn đến với Caterin
+                    </h2>
+                    <p class="mt-2 text-sm leading-6 text-gray-600">
+                        Khi truy cập, đăng ký tài khoản hoặc sử dụng các dịch vụ tại website
+                        Caterin, bạn đồng ý tuân thủ những điều khoản được quy định dưới đây.
+                        Vui lòng đọc kỹ trước khi sử dụng dịch vụ hoặc thực hiện giao dịch.
+                    </p>
+                    <p class="mt-3 text-xs text-gray-400">
+                        Cập nhật lần cuối: 18/11/2026
+                    </p>
                 </div>
-
             </div>
-
         </div>
 
-    </div>
+        <div class="grid gap-8 lg:grid-cols-[230px_minmax(0,1fr)] lg:items-start">
 
+            <!-- Table of contents -->
+            <aside class="lg:sticky lg:top-24">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5">
+                    <h3 class="mb-4 text-sm font-bold text-gray-900">
+                        Nội dung chính
+                    </h3>
+
+                    <nav class="space-y-3 text-sm">
+                        <a href="#general" class="block text-gray-600 hover:text-[#1F9345]">01. Quy định chung</a>
+                        <a href="#account" class="block text-gray-600 hover:text-[#1F9345]">02. Tài khoản khách hàng</a>
+                        <a href="#products" class="block text-gray-600 hover:text-[#1F9345]">03. Sản phẩm và thông tin</a>
+                        <a href="#orders" class="block text-gray-600 hover:text-[#1F9345]">04. Đặt hàng và xác nhận</a>
+                        <a href="#payment" class="block text-gray-600 hover:text-[#1F9345]">05. Giá và thanh toán</a>
+                        <a href="#delivery" class="block text-gray-600 hover:text-[#1F9345]">06. Giao hàng</a>
+                        <a href="#returns" class="block text-gray-600 hover:text-[#1F9345]">07. Đổi trả và khiếu nại</a>
+                        <a href="#conduct" class="block text-gray-600 hover:text-[#1F9345]">08. Quy tắc sử dụng</a>
+                        <a href="#intellectual" class="block text-gray-600 hover:text-[#1F9345]">09. Sở hữu trí tuệ</a>
+                        <a href="#liability" class="block text-gray-600 hover:text-[#1F9345]">10. Trách nhiệm và giới hạn</a>
+                        <a href="#changes" class="block text-gray-600 hover:text-[#1F9345]">11. Thay đổi điều khoản</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Terms content -->
+            <div class="space-y-5">
+
+                <article id="general" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        01. Quy định chung
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Website Caterin cung cấp thông tin sản phẩm và các chức năng hỗ trợ
+                        khách hàng tìm hiểu, lựa chọn và mua sắm các sản phẩm chăm sóc,
+                        vệ sinh gia đình.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Các điều khoản này áp dụng cho mọi cá nhân truy cập và sử dụng website.</li>
+                        <li>Khách hàng cần đọc và hiểu các điều khoản trước khi đăng ký hoặc thực hiện giao dịch.</li>
+                        <li>Việc tiếp tục sử dụng dịch vụ đồng nghĩa với việc khách hàng chấp thuận các điều khoản áp dụng tại thời điểm sử dụng, trong phạm vi pháp luật cho phép.</li>
+                        <li>Những nội dung về bảo vệ thông tin cá nhân được quy định riêng tại Chính sách bảo mật của Caterin.</li>
+                    </ul>
+                </article>
+
+                <article id="account" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        02. Đăng ký và quản lý tài khoản
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Một số chức năng của Caterin yêu cầu khách hàng đăng ký và xác thực
+                        tài khoản trước khi sử dụng.
+                    </p>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Trách nhiệm của khách hàng</h3>
+                    <ul class="mt-2 list-disc space-y-2 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Cung cấp thông tin đăng ký chính xác, đầy đủ và cập nhật khi có thay đổi.</li>
+                        <li>Sử dụng địa chỉ email và thông tin liên hệ thuộc quyền kiểm soát hợp pháp của mình.</li>
+                        <li>Bảo mật mật khẩu, thông tin xác thực và thiết bị đăng nhập.</li>
+                        <li>Không chia sẻ hoặc sử dụng tài khoản nhằm thực hiện hành vi trái pháp luật.</li>
+                        <li>Thông báo cho Caterin khi phát hiện tài khoản bị truy cập trái phép.</li>
+                    </ul>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Đăng nhập bằng tài khoản bên ngoài</h3>
+                    <p class="mt-2 text-sm leading-7 text-gray-600">
+                        Khách hàng có thể sử dụng Google hoặc Facebook để xác thực
+                        theo các chức năng được Caterin hỗ trợ.
+                        Việc đăng nhập bên ngoài không mặc nhiên đồng nghĩa với việc
+                        một tài khoản Caterin có cùng địa chỉ email sẽ được tự động liên kết.
+                        Việc liên kết tài khoản cần được thực hiện thông qua quy trình
+                        xác thực và xác nhận tương ứng của Caterin.
+                    </p>
+
+                    <h3 class="mt-5 font-semibold text-gray-800">Quản lý và bảo vệ tài khoản</h3>
+                    <p class="mt-2 text-sm leading-7 text-gray-600">
+                        Caterin có quyền áp dụng các biện pháp bảo vệ như giới hạn đăng nhập,
+                        khóa tạm thời, thu hồi phiên hoặc hạn chế tài khoản khi phát hiện
+                        dấu hiệu vi phạm, rủi ro bảo mật hoặc theo yêu cầu hợp pháp.
+                    </p>
+                </article>
+
+                <article id="products" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        03. Thông tin sản phẩm
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin nỗ lực cung cấp thông tin sản phẩm đầy đủ và chính xác,
+                        bao gồm hình ảnh, mô tả, thành phần, công dụng, dung tích,
+                        mùi hương và hướng dẫn sử dụng.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Hình ảnh sản phẩm mang tính minh họa trong phạm vi phù hợp; màu sắc thực tế có thể khác biệt do điều kiện hiển thị.</li>
+                        <li>Khách hàng nên đọc kỹ thông tin, thành phần và hướng dẫn sử dụng trước khi mua và sử dụng sản phẩm.</li>
+                        <li>Các thông tin về công dụng và đặc tính sản phẩm được công bố theo thông tin tương ứng của từng sản phẩm.</li>
+                        <li>Caterin có thể cập nhật nội dung, hình ảnh hoặc thông số sản phẩm để phản ánh thông tin mới nhất.</li>
+                    </ul>
+                </article>
+
+                <article id="orders" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        04. Đặt hàng và xác nhận đơn hàng
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Khách hàng có thể lựa chọn sản phẩm, thuộc tính sản phẩm,
+                        số lượng và cung cấp thông tin giao hàng thông qua chức năng
+                        đặt hàng trên website.
+                    </p>
+                    <h3 class="mt-5 font-semibold text-gray-800">Quy trình đặt hàng</h3>
+                    <ol class="mt-3 list-decimal space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Khách hàng lựa chọn sản phẩm và thêm vào giỏ hàng.</li>
+                        <li>Kiểm tra sản phẩm, số lượng và thông tin đơn hàng.</li>
+                        <li>Cung cấp thông tin người nhận, địa chỉ giao hàng và phương thức thanh toán được hỗ trợ.</li>
+                        <li>Kiểm tra và gửi yêu cầu đặt hàng.</li>
+                        <li>Theo dõi trạng thái xử lý đơn hàng thông qua hệ thống Caterin.</li>
+                    </ol>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Việc gửi yêu cầu đặt hàng không loại trừ các bước kiểm tra,
+                        xác nhận và xử lý đơn hàng của Caterin.
+                        Đơn hàng chỉ được tiếp nhận và xử lý theo trạng thái xác nhận
+                        được hệ thống hoặc nhân viên Caterin thông báo.
+                    </p>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Caterin có thể liên hệ khách hàng để xác minh thông tin,
+                        xử lý sai lệch hoặc thông báo khi đơn hàng không thể được thực hiện
+                        vì lý do hợp lệ như hết hàng hoặc thông tin giao hàng không chính xác.
+                    </p>
+                </article>
+
+                <article id="payment" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        05. Giá sản phẩm và thanh toán
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Giá sản phẩm được hiển thị trên website tại thời điểm khách hàng
+                        thực hiện đặt hàng. Thông tin về phí vận chuyển, ưu đãi và các
+                        khoản chi phí liên quan sẽ được thể hiện trong quá trình đặt hàng
+                        khi có áp dụng.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Khách hàng có trách nhiệm kiểm tra tổng giá trị đơn hàng trước khi xác nhận.</li>
+                        <li>Các chương trình khuyến mãi có thể đi kèm điều kiện áp dụng riêng.</li>
+                        <li>Phương thức thanh toán được áp dụng theo các lựa chọn hiển thị tại thời điểm đặt hàng.</li>
+                        <li>Trạng thái thanh toán được cập nhật theo thông tin giao dịch và quy trình xử lý tương ứng.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Trong trường hợp xảy ra sai lệch về giá hoặc lỗi hiển thị có ảnh hưởng
+                        đến giao dịch, Caterin sẽ liên hệ khách hàng để kiểm tra và xử lý
+                        theo quy định pháp luật.
+                    </p>
+                </article>
+
+                <article id="delivery" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        06. Giao hàng và nhận hàng
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin thực hiện giao hàng theo địa chỉ và thông tin người nhận
+                        do khách hàng cung cấp khi đặt hàng.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Khách hàng có trách nhiệm cung cấp địa chỉ và số điện thoại chính xác.</li>
+                        <li>Thời gian giao hàng phụ thuộc vào khu vực nhận hàng, tình trạng đơn hàng và đơn vị vận chuyển.</li>
+                        <li>Khách hàng nên kiểm tra tình trạng sản phẩm và thông tin đơn hàng khi nhận.</li>
+                        <li>Nếu phát hiện thiếu hàng, sai sản phẩm hoặc hư hỏng, khách hàng nên liên hệ Caterin để được hỗ trợ kịp thời.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Các thông tin cụ thể về phạm vi giao hàng, phí vận chuyển và
+                        thời gian dự kiến sẽ được áp dụng theo chính sách giao hàng
+                        được Caterin công bố tại thời điểm giao dịch.
+                    </p>
+                </article>
+
+                <article id="returns" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        07. Đổi trả, hoàn tiền và khiếu nại
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin tiếp nhận các yêu cầu hỗ trợ liên quan đến sản phẩm
+                        và đơn hàng nhằm bảo vệ quyền lợi hợp pháp của khách hàng.
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Khách hàng có thể liên hệ khi nhận sản phẩm không đúng với đơn đặt hàng.</li>
+                        <li>Các trường hợp sản phẩm bị hư hỏng, thiếu hàng hoặc có vấn đề về chất lượng sẽ được tiếp nhận để kiểm tra.</li>
+                        <li>Yêu cầu đổi trả và hoàn tiền được xem xét theo tình trạng thực tế, chính sách áp dụng và quy định pháp luật.</li>
+                        <li>Khách hàng nên cung cấp mã đơn hàng và hình ảnh hoặc thông tin liên quan để hỗ trợ quá trình xác minh.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Điều kiện, thời hạn, quy trình và các trường hợp không áp dụng
+                        đổi trả sẽ được thực hiện theo Chính sách đổi trả và hoàn tiền
+                        riêng của Caterin.
+                    </p>
+                </article>
+
+                <article id="conduct" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        08. Quy tắc sử dụng website
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Khi sử dụng website, khách hàng cam kết không thực hiện các hành vi:
+                    </p>
+                    <ul class="mt-4 list-disc space-y-3 pl-5 text-sm leading-7 text-gray-600">
+                        <li>Vi phạm pháp luật hoặc xâm phạm quyền và lợi ích hợp pháp của tổ chức, cá nhân khác.</li>
+                        <li>Cung cấp thông tin giả mạo, sử dụng danh tính hoặc thông tin thanh toán trái phép.</li>
+                        <li>Can thiệp, phá hoại hoặc tìm cách truy cập trái phép vào hệ thống, dữ liệu và tài khoản.</li>
+                        <li>Sử dụng công cụ tự động để gây quá tải, thu thập dữ liệu hoặc làm gián đoạn website trái phép.</li>
+                        <li>Phát tán mã độc, nội dung lừa đảo hoặc nội dung gây ảnh hưởng đến an toàn hệ thống.</li>
+                        <li>Lợi dụng chức năng chat, đánh giá hoặc hỗ trợ để quấy rối, đe dọa hoặc phát tán nội dung bất hợp pháp.</li>
+                    </ul>
+                    <p class="mt-4 text-sm leading-7 text-gray-600">
+                        Caterin có quyền áp dụng biện pháp phù hợp để ngăn chặn hành vi vi phạm,
+                        bảo vệ hệ thống và quyền lợi của khách hàng.
+                    </p>
+                </article>
+
+                <article id="intellectual" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        09. Quyền sở hữu trí tuệ
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Các nội dung trên website Caterin, bao gồm nhưng không giới hạn
+                        ở thương hiệu, logo, hình ảnh, nội dung mô tả sản phẩm, thiết kế
+                        giao diện, đồ họa và tài liệu, thuộc quyền sở hữu của Caterin
+                        hoặc bên cấp phép hợp pháp.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Khách hàng không được sao chép, phân phối, sửa đổi, khai thác
+                        thương mại hoặc sử dụng những nội dung này khi chưa được
+                        chủ sở hữu cho phép, trừ trường hợp pháp luật có quy định khác.
+                    </p>
+                </article>
+
+                <article id="liability" class="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        10. Trách nhiệm và giới hạn trách nhiệm
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin nỗ lực duy trì website hoạt động ổn định và cung cấp
+                        thông tin chính xác. Tuy nhiên, trong quá trình vận hành có thể
+                        phát sinh sự cố kỹ thuật, gián đoạn kết nối hoặc lỗi ngoài
+                        khả năng kiểm soát hợp lý.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin không chịu trách nhiệm đối với những thiệt hại phát sinh
+                        từ việc khách hàng cung cấp thông tin sai lệch, để lộ thông tin
+                        đăng nhập hoặc sử dụng dịch vụ trái với hướng dẫn và quy định,
+                        trong phạm vi pháp luật cho phép.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Không nội dung nào trong điều khoản này được hiểu là loại trừ
+                        hoặc hạn chế các trách nhiệm mà Caterin bắt buộc phải thực hiện
+                        theo quy định pháp luật về bảo vệ người tiêu dùng, thương mại
+                        và các quy định pháp luật liên quan.
+                    </p>
+                </article>
+
+                <article id="changes" class="scroll-mt-24 rounded-2xl border border-[#DCEBDD] bg-[#F5F9F2] p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        11. Thay đổi điều khoản và quy định áp dụng
+                    </h2>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Caterin có thể điều chỉnh các điều khoản này để phù hợp với
+                        hoạt động kinh doanh, chức năng website và quy định pháp luật.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Những thay đổi sẽ được công bố trên website và ghi nhận ngày
+                        cập nhật. Các giao dịch đã xác lập được xử lý theo thỏa thuận
+                        và quy định pháp luật áp dụng tương ứng.
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-gray-600">
+                        Các điều khoản này được áp dụng và giải thích theo pháp luật
+                        Việt Nam. Tranh chấp phát sinh sẽ được ưu tiên giải quyết
+                        thông qua thương lượng; nếu không đạt được thỏa thuận,
+                        tranh chấp được giải quyết theo thẩm quyền và trình tự
+                        pháp luật quy định.
+                    </p>
+                </article>
+
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+                    <h2 class="text-lg font-bold text-gray-900">
+                        Bạn cần hỗ trợ thêm?
+                    </h2>
+                    <p class="mt-2 text-sm leading-6 text-gray-600">
+                        Nếu có thắc mắc về điều khoản sử dụng, vui lòng liên hệ
+                        bộ phận hỗ trợ của Caterin.
+                    </p>
+                    <div class="mt-4 space-y-2 text-sm text-gray-600">
+                        <p>Email: [EMAIL HỖ TRỢ]</p>
+                        <p>Điện thoại: [SỐ ĐIỆN THOẠI]</p>
+                        <p>Địa chỉ: [ĐỊA CHỈ KINH DOANH]</p>
+                    </div>
+                </div>
+
+                <div class="py-4 text-center">
+                    <p class="text-xs leading-6 text-gray-400">
+                        Caterin – An toàn cho mọi nhà
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </section>

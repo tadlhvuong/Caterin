@@ -26,7 +26,7 @@ html {
   min-height: 100%;
 }
 
-body {;
+body {
 }
 .overlay:not(.show),
 .side-overlay:not(.show) {
@@ -59,3 +59,125 @@ body {;
     #chatWidget .chat-window {
         pointer-events: auto;
     }
+
+.swal2-container {
+    z-index: 99999 !important;
+}
+
+.swal2-popup {
+    z-index: 100000 !important;
+}
+
+/*Promotion home*/
+#lifestyleSwiper {
+    overflow: visible;
+}
+
+    #lifestyleSwiper .swiper-slide {
+        height: auto;
+        flex-shrink: 0;
+    }
+
+#lifestylePagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+    #lifestylePagination .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        margin: 0;
+        opacity: 1;
+        background: #D1D5DB;
+        transition: width .3s ease, background-color .3s ease;
+    }
+
+    #lifestylePagination .swiper-pagination-bullet-active {
+        width: 24px;
+        border-radius: 999px;
+        background: #1F9345;
+    }
+
+/* Desktop: restore original grid layout */
+@media (min-width: 1024px) {
+    #lifestyleSwiper {
+        overflow: hidden;
+    }
+
+        #lifestyleSwiper .swiper-wrapper {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            grid-template-rows: 250px 250px 230px;
+            gap: 20px;
+            transform: none !important;
+        }
+
+        #lifestyleSwiper .swiper-slide {
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+        }
+
+        #lifestyleSwiper .lifestyle-slide-main {
+            grid-column: span 7;
+            grid-row: span 2;
+        }
+
+        #lifestyleSwiper .lifestyle-slide-right-one {
+            grid-column: span 5;
+            grid-row: 1;
+        }
+
+        #lifestyleSwiper .lifestyle-slide-right-two {
+            grid-column: span 5;
+            grid-row: 2;
+        }
+
+        #lifestyleSwiper .lifestyle-slide-bottom {
+            grid-column: span 12;
+            grid-row: 3;
+        }
+
+    #lifestylePagination {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #lifestyleSwiper *,
+    #lifestylePagination * {
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/*COUPON HOME*/
+
+#couponPagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+    #couponPagination .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        margin: 0;
+        opacity: 1;
+        background: #D1D5DB;
+        transition: width .3s ease, background-color .3s ease;
+    }
+
+    #couponPagination .swiper-pagination-bullet-active {
+        width: 24px;
+        border-radius: 999px;
+        background: #1F9345;
+    }
+
+@media (min-width: 1024px) {
+    #couponPagination {
+        display: none;
+    }
+}

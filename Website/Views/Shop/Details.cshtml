@@ -5,7 +5,15 @@
 @{
     var viCulture = CultureInfo.GetCultureInfo("vi-VN");
 
-    ViewData["Title"] = $"{Model.Name} | Caterin";
+    // ViewData["Title"] = $"{Model.Name} | Caterin";
+
+    ViewData["PageTitle"] = "Nước rửa chén Caterin";
+
+    ViewData["Breadcrumbs"] = new (string Text, string? Url)[]
+    {
+        ("Cửa hàng", "/shop"),
+        ("Nước rửa chén", null)
+    };
 
     var imageUrl = string.IsNullOrWhiteSpace(Model.ImageUrl)
      ? Url.Content("~/images/Default/default-product.png")
@@ -33,7 +41,8 @@
 }
 
 <!-- Breadcrumb + page heading -->
-<section class="bg-[#F5F9F2] py-6 md:py-8">
+<partial name="_PageHeader" />
+@* <section class="bg-[#F5F9F2] py-6 md:py-8">
     <div class="container mx-auto px-4">
         <nav class="flex flex-wrap items-center gap-2 text-sm text-gray-500"
              aria-label="Breadcrumb">
@@ -58,7 +67,7 @@
             </span>
         </nav>
     </div>
-</section>
+</section> *@
 
 <main>
     <!-- Product overview -->

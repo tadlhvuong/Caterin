@@ -1,292 +1,215 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-<section class="faq py-80">
+﻿
+<section class="bg-[#F5F9F2] py-12 sm:py-16 lg:py-20">
+    <div class="container mx-auto px-4">
 
-    <div class="container container-lg">
-
-        <div class="section-heading text-center mb-64">
-
-            <span class="text-main-600 text-sm font-[600]">
-
+        <!-- Heading -->
+        <div class="mx-auto mb-10 max-w-3xl text-center sm:mb-12 lg:mb-14">
+            <span class="inline-flex items-center rounded-full bg-[#E8F4E5] px-4 py-1.5 text-sm font-semibold tracking-wide text-[#1F9345]">
                 FAQ
-
             </span>
 
-            <h2 class="mt-12">
-
+            <h2 class="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
                 Câu hỏi thường gặp
-
             </h2>
 
-            <p class="text-gray-500 mx-auto"
-               style="max-width:720px;">
-
+            <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-gray-600 sm:text-base">
                 Giải đáp những thắc mắc phổ biến về sản phẩm, đặt hàng, thanh toán và chính sách của Caterin.
-
             </p>
-
         </div>
 
-        <div class="row align-items-center g-5">
+        <!-- FAQ Content -->
+        <div class="grid items-center gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-12 xl:gap-16">
 
-            <!-- Left -->
+            <!-- Image -->
+            <div class="relative mx-auto w-full max-w-xl">
+                <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-sm sm:rounded-3xl">
+                    <img src="/images/faq/faq-image.png"
+                         class="h-auto w-full rounded-xl object-cover sm:rounded-2xl"
+                         alt="Câu hỏi thường gặp về sản phẩm và dịch vụ Caterin"
+                         loading="lazy">
+                </div>
 
-            <div class="col-lg-5">
-
-                <img src="/images/faq/faq-image.png"
-                     class="img-fluid rounded-24"
-                     alt="FAQ">
-
+                <div class="absolute -bottom-4 -right-3 -z-10 h-28 w-28 rounded-full bg-[#DDEED8] blur-2xl sm:-bottom-6 sm:-right-5 sm:h-40 sm:w-40"></div>
             </div>
 
-            <!-- Right -->
+            <!-- Accordion -->
+            <div class="min-w-0">
 
-            <div class="col-lg-7">
-
-                <div class="accordion" id="homeFaq">
+                <div class="space-y-3" id="homeFaq">
 
                     <!-- Item 1 -->
-
-                    <div class="accordion-item border rounded-16 mb-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button"
-                                    type="button"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqOne">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]"
+                             open>
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Sản phẩm Caterin có an toàn cho da tay không?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqOne"
-                             class="accordion-collapse collapse show"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
                                 Các sản phẩm của Caterin được nghiên cứu với tiêu chí an toàn khi sử dụng đúng hướng dẫn. Chúng tôi luôn chú trọng đến chất lượng và trải nghiệm của người dùng.
-
-                            </div>
-
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                     <!-- Item 2 -->
-
-                    <div class="accordion-item border rounded-16 mb-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqTwo">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Bao lâu tôi sẽ nhận được hàng?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqTwo"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
                                 Thời gian giao hàng dự kiến từ 1–7 ngày làm việc tùy khu vực nhận hàng.
-
-                            </div>
-
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                     <!-- Item 3 -->
-
-                    <div class="accordion-item border rounded-16 mb-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqThree">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Caterin hỗ trợ những hình thức thanh toán nào?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqThree"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
                                 Bạn có thể thanh toán bằng COD, chuyển khoản ngân hàng hoặc thanh toán trực tuyến nếu được hỗ trợ.
-
-                            </div>
-
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                     <!-- Item 4 -->
-
-                    <div class="accordion-item border rounded-16 mb-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqFour">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Tôi có thể đổi trả sản phẩm không?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqFour"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
-                                Có. Caterin hỗ trợ đổi trả đối với sản phẩm lỗi, giao sai hoặc hư hỏng theo Chính sách đổi trả & hoàn tiền.
-
-                            </div>
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
+                                Có. Caterin hỗ trợ đổi trả đối với sản phẩm lỗi, giao sai hoặc hư hỏng theo
+                                <a asp-controller="Home"
+                                   asp-action="ReturnPolicy"
+                                   class="font-medium text-[#1F9345] underline decoration-[#B8DDBD] underline-offset-4 transition hover:text-[#176F35]">
+                                    Chính sách đổi trả &amp; hoàn tiền
+                                </a>.
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                     <!-- Item 5 -->
-
-                    <div class="accordion-item border rounded-16 mb-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqFive">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Tôi có thể đăng ký làm cộng tác viên không?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqFive"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
                                 Có. Caterin luôn chào đón cộng tác viên, đại lý và nhà phân phối trên toàn quốc.
-
-                            </div>
-
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                     <!-- Item 6 -->
-
-                    <div class="accordion-item border rounded-16">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed"
-                                    data-bs-toggle="collapse"
-                                    data-bs-target="#faqSix">
-
+                    <details class="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:border-[#B8DDBD]">
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                            <span class="text-sm font-semibold leading-6 text-gray-900 transition group-open:text-[#1F9345] sm:text-base">
                                 Tôi cần hỗ trợ thì liên hệ ở đâu?
+                            </span>
 
-                            </button>
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition group-open:rotate-180 group-open:bg-[#E8F4E5] group-open:text-[#1F9345]">
+                                <i class="ph ph-caret-down text-base"></i>
+                            </span>
+                        </summary>
 
-                        </h2>
-
-                        <div id="faqSix"
-                             class="accordion-collapse collapse"
-                             data-bs-parent="#homeFaq">
-
-                            <div class="accordion-body text-gray-600">
-
+                        <div class="border-t border-gray-100 px-4 pb-5 pt-4 sm:px-5">
+                            <p class="text-sm leading-7 text-gray-600">
                                 Bạn có thể liên hệ qua Hotline, Email hoặc Fanpage chính thức của Caterin để được hỗ trợ nhanh nhất.
-
-                            </div>
-
+                            </p>
                         </div>
-
-                    </div>
+                    </details>
 
                 </div>
 
-                <div class="mt-40">
-
+                <!-- View All -->
+                <div class="mt-7 flex justify-center lg:justify-start">
                     <a asp-controller="Home"
                        asp-action="FAQ"
-                       class="btn btn-main px-40 py-18">
-
+                       class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#1F9345] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#187A39] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#1F9345] focus:ring-offset-2">
                         Xem tất cả câu hỏi
-
+                        <i class="ph ph-arrow-right text-base"></i>
                     </a>
-
                 </div>
 
             </div>
-
         </div>
-
     </div>
-
 </section>
-<section class="py-64 bg-main-600">
 
-    <div class="container container-lg text-center text-white">
+<!-- Contact CTA -->
+<section class="bg-[#1F9345] py-12 sm:py-16 lg:py-20">
+    <div class="container mx-auto px-4 text-center">
 
-        <h2 class="text-white mb-20">
+        <div class="mx-auto max-w-3xl">
+            <span class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white">
+                <i class="ph ph-headset text-base"></i>
+                Caterin luôn sẵn sàng hỗ trợ
+            </span>
 
-            Bạn vẫn còn câu hỏi?
+            <h2 class="mt-5 text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                Bạn vẫn còn câu hỏi?
+            </h2>
 
-        </h2>
+            <p class="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/85 sm:text-base">
+                Đội ngũ Caterin luôn sẵn sàng hỗ trợ và giải đáp mọi thắc mắc của bạn về sản phẩm, đơn hàng hoặc chương trình hợp tác.
+            </p>
 
-        <p class="opacity-75 mb-40 mx-auto"
-           style="max-width:650px;">
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
 
-            Đội ngũ Caterin luôn sẵn sàng hỗ trợ và giải đáp mọi thắc mắc của bạn về sản phẩm, đơn hàng hoặc chương trình hợp tác.
+                <a asp-controller="Home"
+                   asp-action="Contact"
+                   class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 py-3 text-sm font-semibold text-[#1F9345] shadow-sm transition hover:bg-[#F5F9F2] hover:shadow-md">
+                    <i class="ph ph-chat-circle-dots text-lg"></i>
+                    Liên hệ ngay
+                </a>
 
-        </p>
+                <a asp-controller="Home"
+                   asp-action="FAQ"
+                   class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/70 bg-transparent px-7 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+                    Xem FAQ đầy đủ
+                    <i class="ph ph-arrow-right text-base"></i>
+                </a>
 
-        <div class="flex-center flex-wrap gap-16">
-
-            <a asp-controller="Home"
-               asp-action="Contact"
-               class="btn btn-white px-40 py-18">
-
-                Liên hệ ngay
-
-            </a>
-
-            <a asp-controller="Home"
-               asp-action="FAQ"
-               class="btn btn-outline-white px-40 py-18">
-
-                Xem FAQ đầy đủ
-
-            </a>
-
+            </div>
         </div>
 
     </div>
-
 </section>

@@ -1,6 +1,9 @@
-## Build
+# .NET build
 bin/
 obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
 
 ## Visual Studio
 .vs/
@@ -31,10 +34,11 @@ node_modules/
 ## Secrets (nếu có)
 appsettings.Development.json
 /Website/Logs
-/Website/wwwroot/uploads/products
-/Website/wwwroot/uploads/chat
-/Website/wwwroot/uploads/chats/2026/10
+/Website/wwwroot/uploads
 /GUIDE
-/Website/wwwroot/uploads/avatars/2026/10
-/Website/wwwroot/uploads/avatars/2026/11
 /Website/DataProtection-Keys
+
+# Environment and secrets
+.env
+.env.*
+!.env.example

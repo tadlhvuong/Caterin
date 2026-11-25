@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Shared.Configurations.JWT;
 using Shared.Data.Context;
@@ -54,8 +55,15 @@ var configuration = builder.Configuration;
 //Windows: thường sử dụng thư mục profile người dùng.
 //Linux: thường sử dụng thư mục trong $HOME/.aspnet/DataProtection-Keys.
 //Docker/container: phụ thuộc môi trường và cấu hình container.
-services.AddDataProtection().SetApplicationName("Caterin").PersistKeysToFileSystem(
-        new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys")));
+var dataProtectionPath = builder.Environment.IsProduction()
+    ? "/app/keys"
+    : Path.Combine(builder.Environment.ContentRootPath, "DataProtection-Keys");
+
+Directory.CreateDirectory(dataProtectionPath);
+
+services.AddDataProtection()
+    .SetApplicationName("Caterin")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath));
 
 // Add services to the container.
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -338,6 +346,18 @@ app.Use(async (context, next) =>
     }
 
     await next();
+});
+
+var uploadPath = "/app/uploads";
+
+Directory.CreateDirectory(uploadPath);
+
+app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadPath),
+    RequestPath = "/uploads"
 });
 
 app.MapHub<ChatHub>("/hubs/chat");

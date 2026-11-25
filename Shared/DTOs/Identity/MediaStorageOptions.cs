@@ -2,7 +2,7 @@
 {
     public class MediaStorageOptions
     {
-        public string RootPath { get; set; } = "wwwroot/uploads";
+        public string RootPath { get; set; } = "/uploads";
 
         public Dictionary<string, MediaUploadPolicy> Policies { get; set; }
             = new(StringComparer.OrdinalIgnoreCase);

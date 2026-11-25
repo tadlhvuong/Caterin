@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity;
@@ -13,12 +14,12 @@ namespace Shared.Data.Seeders
             using var scope = services.CreateScope();
 
             var serviceProvider = scope.ServiceProvider;
-            var dbContext = services.GetService<AppDbContext>();
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            var dbContext = serviceProvider.GetRequiredService<AppDbContext>();
             var moduleService = serviceProvider.GetRequiredService<IModuleService>();
             var permissionService = serviceProvider.GetRequiredService<IPermissionService>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AppRole>>();
-            if (dbContext == null) return;
 
             await SeedLanguage.SeedAsync(dbContext);
 
@@ -38,7 +39,7 @@ namespace Shared.Data.Seeders
 
             await SeedRoles.SeedAsync(roleManager);
 
-            await SeedUsers.SeedAsync(userManager);
+            await SeedUsers.SeedAsync(userManager, configuration);
 
             await SeedUserRoles.SeedAsync(userManager, roleManager);
 

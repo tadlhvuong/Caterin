@@ -437,7 +437,7 @@ namespace Shared.Services.User
 
             try
             {
-                await _levelService.EnsureCanManageRoleAsync(
+                await _levelService.EnsureCanViewRoleAsync(
                     role.Name!,
                     cancellationToken);
             }
@@ -875,7 +875,8 @@ namespace Shared.Services.User
 
             try
             {
-                await _levelService.EnsureCanManageRoleAsync(role.Name!, cancellationToken);
+                await _levelService.EnsureCanViewRoleAsync(role.Name!, cancellationToken);
+
             }
             catch (UnauthorizedAccessException)
             {

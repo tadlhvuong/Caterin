@@ -27,5 +27,8 @@ namespace Shared.UserValidation.Interface
         Task EnsureCanManageRoleLevelAsync(
     int targetRoleLevel,
     CancellationToken cancellationToken = default);
+        Task EnsureCanViewRoleAsync(
+    string roleName,
+    CancellationToken cancellationToken = default);
     }
 }

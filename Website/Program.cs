@@ -392,6 +392,17 @@ try
     Log.Information("Application starting");
     //var secret = CommonHelper.Generate();
     //Log.Information(secret);
+
+    //var hasher = new PasswordHasher<AppUser>();
+
+    //var user = new AppUser
+    //{
+    //    Id = "test"
+    //};
+
+    //var hash = hasher.HashPassword(user, "PASS_NEW_TEST");
+
+    //Console.WriteLine(hash);
     app.Run();
 }
 catch (Exception ex)

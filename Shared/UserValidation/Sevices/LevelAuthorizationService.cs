@@ -154,5 +154,52 @@ namespace Shared.UserValidation.Sevices
                 throw new UnauthorizedAccessException(
                     "Bạn không được phép thiết lập Level này.");
         }
+
+        public async Task EnsureCanViewRoleAsync(
+    string roleName,
+    CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(roleName))
+                throw new ArgumentException(
+                    "Tên vai trò không hợp lệ.",
+                    nameof(roleName));
+
+            var currentUserId = _currentUserService.UserId;
+
+            if (string.IsNullOrWhiteSpace(currentUserId))
+                throw new UnauthorizedAccessException(
+                    "Không xác định được người thao tác.");
+
+            var role = await _roleManager.FindByNameAsync(roleName.Trim());
+
+            if (role == null)
+                throw new KeyNotFoundException(
+                    $"Vai trò '{roleName}' không tồn tại.");
+
+            // Root được xem tất cả Role.
+            var isRoot = await (
+                from userRole in _dbContext.UserRoles.AsNoTracking()
+                join appRole in _dbContext.Roles.AsNoTracking()
+                    on userRole.RoleId equals appRole.Id
+                where userRole.UserId == currentUserId
+                      && appRole.NormalizedName == "SYSTEM"
+                select userRole.UserId
+            ).AnyAsync(cancellationToken);
+
+            if (isRoot)
+                return;
+
+            // User thông thường áp dụng quy tắc Level.
+            var currentLevel = await GetUserLevelAsync(
+                currentUserId,
+                cancellationToken);
+
+            if (!currentLevel.HasValue ||
+                currentLevel.Value >= role.Level)
+            {
+                throw new UnauthorizedAccessException(
+                    "Bạn không có quyền xem vai trò này.");
+            }
+        }
     }
 }

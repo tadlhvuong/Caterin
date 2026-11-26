@@ -255,6 +255,46 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         ShopPage.init();
+
+        const drawer = document.getElementById('shopFilterDrawer');
+        const openBtn = document.getElementById('openShopFilter');
+        const closeBtn = document.getElementById('closeShopFilter');
+
+        if (!drawer || !openBtn || !closeBtn) return;
+
+        const openDrawer = () => {
+            drawer.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        const closeDrawer = () => {
+            drawer.classList.remove('is-open');
+            document.body.style.overflow = '';
+        };
+
+        openBtn.addEventListener('click', openDrawer);
+        closeBtn.addEventListener('click', closeDrawer);
+
+        // Click outside sidebar
+        drawer.addEventListener('click', (event) => {
+            if (event.target === drawer) {
+                closeDrawer();
+            }
+        });
+
+        // Escape
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && drawer.classList.contains('is-open')) {
+                closeDrawer();
+            }
+        });
+
+        // Khi chuyển sang desktop
+        window.matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+            if (event.matches) {
+                closeDrawer();
+            }
+        });
     });
 
 })();

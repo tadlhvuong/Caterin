@@ -18,7 +18,12 @@
 <section class="py-10 md:py-14">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
-
+            <button type="button"
+                    id="openShopFilter"
+                    class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-[#1F9345]/20 bg-white px-4 py-2 text-sm font-semibold text-[#1F9345] shadow-sm transition hover:bg-[#eaf5eb] md:hidden">
+                <i class="ph ph-sliders-horizontal text-lg"></i>
+                Bộ lọc
+            </button>
             <!-- Sidebar -->
             <aside class="lg:col-span-3">
                 <partial name="_ShopSidebar" model="Model" />

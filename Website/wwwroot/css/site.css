@@ -10,6 +10,13 @@
 html {
   font-size: 14px;
 }
+html,
+body {
+    width: 100%;
+    min-width: 320px;
+    min-height: 100%;
+    margin: 0;
+}
 
 @media (min-width: 768px) {
   html {
@@ -17,17 +24,18 @@ html {
   }
 }
 
+body {
+    overflow-x: auto;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+    body::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Edge */
+    }
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-}
 .overlay:not(.show),
 .side-overlay:not(.show) {
     pointer-events: none;
@@ -179,5 +187,67 @@ body {
 @media (min-width: 1024px) {
     #couponPagination {
         display: none;
+    }
+}
+
+/*SHOP-SIDEBAR*/
+
+/* Mobile filter drawer */
+.shop-filter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: flex-end;
+    background: rgb(15 23 42 / 50%);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+    .shop-filter-overlay.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+.shop-filter-panel {
+    width: min(90vw, 380px);
+    height: 100%;
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    border-radius: 16px 0 0 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.shop-filter-overlay.is-open .shop-filter-panel {
+    transform: translateX(0);
+}
+
+/* Desktop: sidebar trở lại layout bình thường */
+@media (min-width: 768px) {
+    .shop-filter-overlay {
+        position: static;
+        display: block;
+        background: transparent;
+        backdrop-filter: none;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: none;
+    }
+
+    .shop-filter-panel {
+        width: 100%;
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        transform: none;
+        border-radius: 12px;
     }
 }

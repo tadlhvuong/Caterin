@@ -33,6 +33,8 @@ namespace Shared.Data.Seeders
 
             await SeedModules.SeedAsync(dbContext);
 
+            await moduleService.SyncModulesAsync();
+
             await SeedPermission.SeedAsync(dbContext);
 
             await permissionService.SyncPermissionsAsync();

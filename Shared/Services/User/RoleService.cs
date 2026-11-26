@@ -11,8 +11,6 @@ using Shared.Interfaces.Log;
 using Shared.Interfaces.User;
 using Shared.Responses;
 using Shared.UserValidation.Interface;
-using Shared.UserValidation.Sevices;
-using System.Security;
 
 
 namespace Shared.Services.User
@@ -26,10 +24,8 @@ namespace Shared.Services.User
 
         private readonly ILogSafetyService _logSafetyService;
         private readonly ILogger<RoleService> _logger;
-        public RoleService(AppDbContext dbContext, RoleManager<AppRole> roleManager,
-            ILevelAuthorizationService levelService,
-    ILogSafetyService logSafetyService,
-    ILogger<RoleService> logger)
+        public RoleService(AppDbContext dbContext, RoleManager<AppRole> roleManager, ILevelAuthorizationService levelService,
+            ILogSafetyService logSafetyService, ILogger<RoleService> logger)
         {
             _dbContext = dbContext;
             _roleManager = roleManager;

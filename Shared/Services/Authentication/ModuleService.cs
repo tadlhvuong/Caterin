@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Shared.Constants.Permission;
 using Shared.Data.Context;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Interfaces.AuthServices;
 using Shared.Interfaces.Caches;
+using System.Reflection;
 
 namespace Shared.Services.Authentication
 {
@@ -45,7 +47,7 @@ namespace Shared.Services.Authentication
                     .OfType<RouteEndpoint>()
                     .Select(e => e.Metadata.GetMetadata<ControllerActionDescriptor>())
                     .Where(x => x != null)
-                    .DistinctBy(x => x!.ControllerTypeInfo.FullName);
+                    .DistinctBy(x => x!.ControllerTypeInfo.FullName).ToList();
 
                 foreach (var controller in controllers)
                 {
@@ -54,25 +56,35 @@ namespace Shared.Services.Authentication
                             StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    var code = controller.ControllerName.ToLowerInvariant();
+                    //var code = controller.ControllerName.ToLowerInvariant();
+                    var moduleAttribute = controller.ControllerTypeInfo.GetCustomAttribute<PermissionModuleAttribute>();
 
-                    scannedCodes.Add(code);
+                    if (moduleAttribute == null)
+                        continue;
+
+                    var code = moduleAttribute.Module.Trim().ToLowerInvariant();
+                    if (!scannedCodes.Add(code))
+                    {
+                        throw new InvalidOperationException(
+                            $"Module Code '{code}' bị khai báo trùng.");
+                    }
 
                     if (!moduleLookup.TryGetValue(code, out var module))
                     {
-                        _dbContext.CMSModules.Add(new CMSModule
+                        module = new CMSModule
                         {
                             Code = code,
                             Name = controller.ControllerName,
                             IsActive = true,
                             IsSystem = false
-                        });
-
-                        continue;
+                        };
+                        _dbContext.CMSModules.Add(module);
+                        moduleLookup.Add(code, module);
                     }
-
-                    module.Name = controller.ControllerName;
-                    module.IsActive = true;
+                    else
+                    {
+                        module.IsActive = true;
+                    }
                 }
 
                 // Disable module đã bị xóa khỏi source

@@ -14,19 +14,23 @@ namespace CATERIN.Controllers
         {
             _logger = logger;
         }
-
-        [HttpGet("")]
         [HttpGet("home")]
+        public IActionResult Home()
+        {
+            return RedirectPermanent("/trang-chu");
+        }
+        [HttpGet("")]
+        [HttpGet("trang-chu")]
         public IActionResult Index()
         {
             return View();
         }
-        [HttpGet("about")]
+        [HttpGet("gioi-thieu")]
         public IActionResult About()
         {
             return View();
         }
-        [HttpGet("contact")]
+        [HttpGet("lien-he")]
         public IActionResult Contact()
         {
             return View();

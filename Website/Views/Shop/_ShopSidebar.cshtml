@@ -1,200 +1,223 @@
 ﻿@using Website.Models.Shop
 @model ShopIndexViewModel
 
-<aside class="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-    <div class="mb-5 flex items-center justify-between">
-        <h2 class="text-lg font-bold text-gray-900">Bộ lọc sản phẩm</h2>
 
-        <a asp-controller="Shop"
-           asp-action="Index"
-           data-clear-shop-filter
-           class="text-xs font-medium text-[#1F9345] hover:underline">
-            Xóa lọc
-        </a>
-    </div>
+<!-- Mobile overlay + Desktop sidebar -->
+<div id="shopFilterDrawer"
+     class="shop-filter-overlay">
 
-    <form id="shopFilterForm"
-          asp-controller="Shop"
-          asp-action="Index"
-          method="get"
-          data-ajax-filter>
-        <input type="hidden" name="sortBy" value="@Model.SortBy" />
+    <aside class="shop-filter-panel rounded-none border border-gray-100 bg-white p-5 shadow-xl sm:p-6 md:rounded-xl md:shadow-sm">
 
-        <!-- Search -->
-        <div class="mb-6">
-            <label for="shopKeyword"
-                   class="mb-2 block text-sm font-semibold text-gray-800">
-                Tìm kiếm
-            </label>
+        <!-- Header -->
+        <div class="mb-5 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="ph ph-sliders-horizontal text-xl text-[#1F9345] md:hidden"></i>
+                <h2 class="text-lg font-bold text-gray-900">Bộ lọc</h2>
+            </div>
 
-            <div class="flex overflow-hidden rounded-lg border border-gray-200 focus-within:border-[#1F9345]">
-                <input id="shopKeyword"
-                       type="search"
-                       name="keyword"
-                       value="@Model.Keyword"
-                       placeholder="Tên sản phẩm..."
-                       class="min-w-0 flex-1 px-3 py-2.5 text-sm outline-none" />
+            <div class="flex items-center gap-4">
+                <a asp-controller="Shop"
+                   asp-action="Index"
+                   data-clear-shop-filter
+                   class="text-xs font-medium text-[#1F9345] hover:underline">
+                    Xóa lọc
+                </a>
 
-                <button type="submit"
-                        class="flex w-11 shrink-0 items-center justify-center bg-[#1F9345] text-white transition hover:bg-[#18783A]"
-                        aria-label="Tìm kiếm">
-                    <i class="ph ph-magnifying-glass text-lg"></i>
+                <!-- Mobile close -->
+                <button type="button"
+                        id="closeShopFilter"
+                        aria-label="Đóng bộ lọc"
+                        class="flex size-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-red-50 hover:text-red-500 md:hidden">
+                    <i class="ph ph-x text-xl"></i>
                 </button>
             </div>
         </div>
 
-        <div class="mb-6 border-t border-gray-100 pt-5">
-            <h3 class="mb-3 text-sm font-semibold text-gray-900">
-                Danh mục sản phẩm
-            </h3>
+        <!-- GIỮ NGUYÊN FORM LỌC HIỆN TẠI CỦA BẠN -->
+        <form id="shopFilterForm"
+              asp-controller="Shop"
+              asp-action="Index"
+              method="get"
+              data-ajax-filter>
 
-            <div class="space-y-3">
-                <label class="flex cursor-pointer items-center justify-between gap-3 text-sm">
-                    <span class="flex items-center gap-2">
+            <input type="hidden" name="sortBy" value="@Model.SortBy" />
+
+            <!-- Search -->
+            <div class="mb-6">
+                <label for="shopKeyword"
+                       class="mb-2 block text-sm font-semibold text-gray-800">
+                    Tìm kiếm
+                </label>
+
+                <div class="flex overflow-hidden rounded-lg border border-gray-200 focus-within:border-[#1F9345]">
+                    <input id="shopKeyword"
+                           type="search"
+                           name="keyword"
+                           value="@Model.Keyword"
+                           placeholder="Tên sản phẩm..."
+                           class="min-w-0 flex-1 px-3 py-2.5 text-sm outline-none" />
+
+                    <button type="submit"
+                            class="flex w-11 shrink-0 items-center justify-center bg-[#1F9345] text-white transition hover:bg-[#18783A]"
+                            aria-label="Tìm kiếm">
+                        <i class="ph ph-magnifying-glass text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-6 border-t border-gray-100 pt-5">
+                <h3 class="mb-3 text-sm font-semibold text-gray-900">
+                    Danh mục sản phẩm
+                </h3>
+
+                <div class="space-y-3">
+                    <label class="flex cursor-pointer items-center gap-2 text-sm">
                         <input type="radio"
                                name="category"
                                value=""
                                checked="@(string.IsNullOrEmpty(Model.Category))"
-                               class="h-4 w-4 accent-[#1F9345]" />
+                               class="size-4 accent-[#1F9345]" />
                         Tất cả sản phẩm
-                    </span>
-                </label>
-
-                @foreach (var category in Model.Categories)
-                {
-                    <label class="flex cursor-pointer items-center justify-between gap-3 text-sm text-gray-600 transition hover:text-[#1F9345]">
-                        <span class="flex items-center gap-2">
-                            <input type="radio"
-                                   name="category"
-                                   value="@category.Slug"
-                                   checked="@(Model.Category == category.Slug)"
-                                   class="h-4 w-4 accent-[#1F9345]" />
-                            @category.Name
-                        </span>
-
-                        <span class="text-xs text-gray-400">
-                            @category.ProductCount
-                        </span>
                     </label>
-                }
-            </div>
-        </div>
 
-        <!-- Price -->
-        <div class="mb-6 border-t border-gray-100 pt-5">
-            <h3 class="mb-3 text-sm font-semibold text-gray-900">
-                Khoảng giá
-            </h3>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <label class="flex cursor-pointer items-center justify-between gap-3 text-sm text-gray-600 transition hover:text-[#1F9345]">
+                            <span class="flex items-center gap-2">
+                                <input type="radio"
+                                       name="category"
+                                       value="@category.Slug"
+                                       checked="@(Model.Category == category.Slug)"
+                                       class="size-4 accent-[#1F9345]" />
+                                @category.Name
+                            </span>
 
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label for="minPrice" class="mb-1 block text-xs text-gray-500">
-                        Từ (VNĐ)
-                    </label>
-                    <input id="minPrice"
-                           type="number"
-                           name="minPrice"
-                           min="0"
-                           value="@Model.MinPrice"
-                           placeholder="0"
-                           class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#1F9345]" />
-                </div>
-
-                <div>
-                    <label for="maxPrice" class="mb-1 block text-xs text-gray-500">
-                        Đến (VNĐ)
-                    </label>
-                    <input id="maxPrice"
-                           type="number"
-                           name="maxPrice"
-                           min="0"
-                           value="@Model.MaxPrice"
-                           placeholder="@Model.AvailableMaxPrice.ToString("0")"
-                           class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#1F9345]" />
+                            <span class="text-xs text-gray-400">
+                                @category.ProductCount
+                            </span>
+                        </label>
+                    }
                 </div>
             </div>
-        </div>
 
-        <!-- Rating -->
-        <div class="mb-6 border-t border-gray-100 pt-5">
-            <h3 class="mb-3 text-sm font-semibold text-gray-900">
-                Đánh giá
-            </h3>
+            <!-- Price -->
+            <div class="mb-6 border-t border-gray-100 pt-5">
+                <h3 class="mb-3 text-sm font-semibold text-gray-900">
+                    Khoảng giá
+                </h3>
 
-            <div class="space-y-3">
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
-                    <input type="radio"
-                           name="rating"
-                           value=""
-                           checked="@(!Model.Rating.HasValue)"
-                           class="h-4 w-4 accent-[#1F9345]" />
-                    Tất cả đánh giá
-                </label>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label for="minPrice" class="mb-1 block text-xs text-gray-500">
+                            Từ (VNĐ)
+                        </label>
+                        <input id="minPrice"
+                               type="number"
+                               name="minPrice"
+                               min="0"
+                               value="@Model.MinPrice"
+                               placeholder="0"
+                               class="w-full min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#1F9345]" />
+                    </div>
 
-                @for (var star = 5; star >= 1; star--)
-                {
+                    <div>
+                        <label for="maxPrice" class="mb-1 block text-xs text-gray-500">
+                            Đến (VNĐ)
+                        </label>
+                        <input id="maxPrice"
+                               type="number"
+                               name="maxPrice"
+                               min="0"
+                               value="@Model.MaxPrice"
+                               placeholder="@Model.AvailableMaxPrice.ToString("0")"
+                               class="w-full min-w-0 rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-[#1F9345]" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating -->
+            <div class="mb-6 border-t border-gray-100 pt-5">
+                <h3 class="mb-3 text-sm font-semibold text-gray-900">
+                    Đánh giá
+                </h3>
+
+                <div class="space-y-3">
                     <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
                         <input type="radio"
                                name="rating"
-                               value="@star"
-                               checked="@(Model.Rating == star)"
-                               class="h-4 w-4 accent-[#1F9345]" />
-
-                        <span class="flex items-center gap-0.5 text-amber-400">
-                            @for (var i = 1; i <= 5; i++)
-                            {
-                                <i class="ph-fill ph-star @(i <= star ? "" : "text-gray-300")"></i>
-                            }
-                        </span>
-
-                        <span class="text-gray-500">từ @star sao</span>
+                               value=""
+                               checked="@(!Model.Rating.HasValue)"
+                               class="size-4 accent-[#1F9345]" />
+                        Tất cả đánh giá
                     </label>
-                }
-            </div>
-        </div>
 
-        <!-- Volume -->
-        <div class="mb-6 border-t border-gray-100 pt-5">
-            <h3 class="mb-3 text-sm font-semibold text-gray-900">
-                Dung tích
-            </h3>
-
-            <div class="space-y-3">
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
-                    <input type="radio"
-                           name="volume"
-                           value=""
-                           checked="@string.IsNullOrEmpty(Model.Volume)"
-                           class="h-4 w-4 accent-[#1F9345]" />
-                    Tất cả dung tích
-                </label>
-
-                @foreach (var volume in Model.Volumes)
-                {
-                    <label class="flex cursor-pointer items-center justify-between gap-3 text-sm text-gray-600">
-                        <span class="flex items-center gap-2">
+                    @for (var star = 5; star >= 1; star--)
+                    {
+                        <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
                             <input type="radio"
-                                   name="volume"
-                                   value="@volume.Value"
-                                   checked="@(Model.Volume == volume.Value)"
-                                   class="h-4 w-4 accent-[#1F9345]" />
-                            @volume.Value
-                        </span>
+                                   name="rating"
+                                   value="@star"
+                                   checked="@(Model.Rating == star)"
+                                   class="size-4 accent-[#1F9345]" />
 
-                        <span class="text-xs text-gray-400">
-                            @volume.ProductCount
-                        </span>
-                    </label>
-                }
+                            <span class="flex items-center gap-0.5 text-amber-400">
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    <i class="ph-fill ph-star @(i <= star ? "" : "text-gray-300")"></i>
+                                }
+                            </span>
+
+                            <span class="text-gray-500">từ @star sao</span>
+                        </label>
+                    }
+                </div>
             </div>
-        </div>
 
-        <input type="hidden" name="page" value="1" />
+            <!-- Volume -->
+            <div class="mb-6 border-t border-gray-100 pt-5">
+                <h3 class="mb-3 text-sm font-semibold text-gray-900">
+                    Dung tích
+                </h3>
 
-        <button type="submit"
-                class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1F9345] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#18783A]">
-            <i class="ph ph-funnel"></i>
-            Áp dụng bộ lọc
-        </button>
-    </form>
-</aside>
+                <div class="space-y-3">
+                    <label class="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+                        <input type="radio"
+                               name="volume"
+                               value=""
+                               checked="@string.IsNullOrEmpty(Model.Volume)"
+                               class="size-4 accent-[#1F9345]" />
+                        Tất cả dung tích
+                    </label>
+
+                    @foreach (var volume in Model.Volumes)
+                    {
+                        <label class="flex cursor-pointer items-center justify-between gap-3 text-sm text-gray-600">
+                            <span class="flex items-center gap-2">
+                                <input type="radio"
+                                       name="volume"
+                                       value="@volume.Value"
+                                       checked="@(Model.Volume == volume.Value)"
+                                       class="size-4 accent-[#1F9345]" />
+                                @volume.Value
+                            </span>
+
+                            <span class="text-xs text-gray-400">
+                                @volume.ProductCount
+                            </span>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <input type="hidden" name="page" value="1" />
+
+            <button type="submit"
+                    class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#1F9345] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#18783A]">
+                <i class="ph ph-funnel"></i>
+                Áp dụng bộ lọc
+            </button>
+
+        </form>
+    </aside>
+</div>

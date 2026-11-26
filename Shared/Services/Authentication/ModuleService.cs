@@ -63,28 +63,23 @@ namespace Shared.Services.Authentication
                         continue;
 
                     var code = moduleAttribute.Module.Trim().ToLowerInvariant();
-                    if (!scannedCodes.Add(code))
-                    {
-                        throw new InvalidOperationException(
-                            $"Module Code '{code}' bị khai báo trùng.");
-                    }
+                    scannedCodes.Add(code);
 
                     if (!moduleLookup.TryGetValue(code, out var module))
                     {
-                        module = new CMSModule
+                        _dbContext.CMSModules.Add(new CMSModule
                         {
                             Code = code,
                             Name = controller.ControllerName,
                             IsActive = true,
                             IsSystem = false
-                        };
-                        _dbContext.CMSModules.Add(module);
-                        moduleLookup.Add(code, module);
+                        });
+
+                        continue;
                     }
-                    else
-                    {
-                        module.IsActive = true;
-                    }
+
+                    module.Name = controller.ControllerName;
+                    module.IsActive = true;
                 }
 
                 // Disable module đã bị xóa khỏi source

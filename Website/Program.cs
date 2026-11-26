@@ -379,6 +379,10 @@ app.Lifetime.ApplicationStarted.Register(() =>
         //await module.SyncModulesAsync();
         //var permission = scope.ServiceProvider.GetRequiredService<IPermissionService>();
         //await permission.SyncPermissionsAsync();
+        var moduleService = scope.ServiceProvider
+               .GetRequiredService<IModuleService>();
+
+        await moduleService.SyncModulesAsync();
 
         var service = scope.ServiceProvider.GetRequiredService<IRoutePermissionService>();
 

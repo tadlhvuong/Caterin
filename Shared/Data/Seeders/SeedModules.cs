@@ -36,22 +36,29 @@ public static class SeedModules
 
             new CMSModule
             {
-                Code = "permissions",
-                Name = "Permissions",
-                IsSystem = false
-            },
-
-            new CMSModule
-            {
-                Code = "modules",
-                Name = "Modules",
-                IsSystem = false
-            },
-
-            new CMSModule
-            {
                 Code = "products",
                 Name = "Products",
+                IsSystem = false
+            },
+
+            new CMSModule
+            {
+                Code = "chat",
+                Name = "chat",
+                IsSystem = false
+            },
+
+            new CMSModule
+            {
+                Code = "customer",
+                Name = "customer",
+                IsSystem = false
+            },
+
+            new CMSModule
+            {
+                Code = "order",
+                Name = "order",
                 IsSystem = false
             }
         };

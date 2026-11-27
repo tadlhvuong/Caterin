@@ -6,6 +6,7 @@ using Shared.Data.Entities.Identity;
 using Shared.Data.Entities.Identity.Core;
 using Shared.Data.Entities.Identity.Log;
 using Shared.Data.Entities.Inventory;
+using Shared.Data.Entities.Marketing;
 using Shared.Data.Entities.Media;
 using Shared.Data.Entities.Notification;
 using Shared.Data.Entities.Order;
@@ -47,6 +48,7 @@ namespace Shared.Data.Context
         public virtual DbSet<ProductMedia> ProductMedias { get; set; }
         public virtual DbSet<ProductTag> ProductTags { get; set; }
         public virtual DbSet<ProductTagMapping> ProductTagMappings { get; set; }
+
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderItem> OrderItems { get; set; }
         public virtual DbSet<OrderAddress> OrderAddresses { get; set; }
@@ -73,6 +75,8 @@ namespace Shared.Data.Context
         public virtual DbSet<NotificationDelivery> NotificationDeliveries { get; set; }
 
         public DbSet<UserSocialLink> UserSocialLinks { get; set; }
+        public virtual DbSet<Banner> Banners { get; set; }
+        public virtual DbSet<BannerMedia> BannerMedias { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

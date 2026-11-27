@@ -2,106 +2,101 @@
 'use strict';
 
 (() => {
+    //BANNER
     const initHomeBanner = () => {
         const banner = document.getElementById('homeBanner');
 
-        if (!banner || banner.dataset.initialized === 'true') return;
+        if (!banner || typeof Swiper === 'undefined') return;
 
-        const slides = [...banner.querySelectorAll('[data-banner-slide]')];
-        const dots = [...banner.querySelectorAll('[data-banner-dot]')];
-        const prev = banner.querySelector('[data-banner-prev]');
-        const next = banner.querySelector('[data-banner-next]');
+        const element = banner.querySelector('.home-banner-swiper');
 
-        if (slides.length < 2) return;
+        if (!element || element.swiper) return;
 
-        banner.dataset.initialized = 'true';
+        const slides = element.querySelectorAll('.swiper-slide');
+        const hasMultipleSlides = slides.length > 1;
 
-        let current = 0;
-        let timer = null;
-        const interval = 5500;
-        const reducedMotion = window.matchMedia(
-            '(prefers-reduced-motion: reduce)'
-        );
+        new Swiper(element, {
+            slidesPerView: 1,
+            spaceBetween: 0,
+            speed: 700,
 
-        const showSlide = (index) => {
-            current = (index + slides.length) % slides.length;
+            loop: hasMultipleSlides,
 
-            slides.forEach((slide, i) => {
-                const active = i === current;
+            grabCursor: hasMultipleSlides,
+            watchOverflow: true,
 
-                slide.classList.toggle('opacity-100', active);
-                slide.classList.toggle('translate-x-0', active);
-                slide.classList.toggle('opacity-0', !active);
-                slide.classList.toggle('translate-x-8', !active);
-                slide.classList.toggle('pointer-events-none', !active);
+            threshold: 8,
+            resistanceRatio: 0.85,
 
-                slide.setAttribute('aria-hidden', String(!active));
-            });
+            allowTouchMove: hasMultipleSlides,
+            simulateTouch: true,
 
-            dots.forEach((dot, i) => {
-                const active = i === current;
+            autoplay: hasMultipleSlides
+                ? {
+                    delay: 5500,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true
+                }
+                : false,
 
-                dot.setAttribute('aria-current', String(active));
-                dot.classList.toggle('w-8', active);
-                dot.classList.toggle('w-2.5', !active);
-                dot.classList.toggle('bg-[#1F9345]', active);
-                dot.classList.toggle('bg-gray-300', !active);
-            });
-        };
+            navigation: hasMultipleSlides
+                ? {
+                    prevEl: banner.querySelector('.home-banner-prev'),
+                    nextEl: banner.querySelector('.home-banner-next')
+                }
+                : false,
 
-        const stop = () => {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
+            pagination: hasMultipleSlides
+                ? {
+                    el: banner.querySelector('.home-banner-pagination'),
+                    clickable: true,
+                    bulletClass: 'home-banner-bullet',
+                    bulletActiveClass: 'home-banner-bullet-active',
+                    renderBullet: (index, className) => {
+                        return `<button type="button"
+                            class="${className}"
+                            aria-label="Chuyển đến banner ${index + 1}">
+                        </button>`;
+                    }
+                }
+                : false,
+
+            a11y: {
+                enabled: true,
+                prevSlideMessage: 'Banner trước',
+                nextSlideMessage: 'Banner tiếp theo'
+            },
+
+            on: {
+                init(swiper) {
+                    updateBannerHeading(swiper);
+                },
+
+                slideChange(swiper) {
+                    updateBannerHeading(swiper);
+                }
             }
-        };
-
-        const start = () => {
-            stop();
-
-            if (reducedMotion.matches || document.hidden) return;
-
-            timer = setInterval(() => {
-                showSlide(current + 1);
-            }, interval);
-        };
-
-        prev?.addEventListener('click', () => {
-            showSlide(current - 1);
-            start();
         });
+    };
 
-        next?.addEventListener('click', () => {
-            showSlide(current + 1);
-            start();
+    const updateBannerHeading = (swiper) => {
+        swiper.slides.forEach((slide, index) => {
+            const heading = slide.querySelector('h1, h2');
+
+            if (!heading) return;
+
+            if (index === swiper.activeIndex) {
+                heading.setAttribute('aria-current', 'true');
+            } else {
+                heading.removeAttribute('aria-current');
+            }
         });
-
-        dots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                showSlide(index);
-                start();
-            });
-        });
-
-        banner.addEventListener('mouseenter', stop);
-        banner.addEventListener('mouseleave', start);
-        banner.addEventListener('focusin', stop);
-        banner.addEventListener('focusout', (event) => {
-            if (!banner.contains(event.relatedTarget)) start();
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            document.hidden ? stop() : start();
-        });
-
-        reducedMotion.addEventListener?.('change', start);
-
-        showSlide(0);
-        start();
     };
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initHomeBanner);
+        document.addEventListener('DOMContentLoaded', initHomeBanner, {
+            once: true
+        });
     } else {
         initHomeBanner();
     }

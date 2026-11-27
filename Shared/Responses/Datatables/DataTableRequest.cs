@@ -1,4 +1,5 @@
-﻿using Shared.Requests.Product;
+﻿using Shared.Enums.Banner;
+using Shared.Requests.Product;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,5 +48,14 @@ namespace Shared.Responses.Datatables
         public int? OrderStatus { get; set; }
         public int? PaymentStatus { get; set; }
 
+    }
+
+    public class BannerDataTableRequest : DataTableRequest
+    {
+        public BannerStatus? Status { get; set; }
+
+        public BannerPosition? Position { get; set; }
+
+        public BannerLinkType? LinkType { get; set; }
     }
 }

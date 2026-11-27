@@ -1,0 +1,424 @@
+﻿@{
+    var bannerId = ViewData["BannerId"] as int? ?? 0;
+    var isEdit = bannerId > 0;
+
+    ViewData["Title"] = isEdit ? "Cập nhật Banner" : "Thêm Banner";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/select2/select2.css" />
+
+    <style>
+        .banner-editor .form-label {
+            font-weight: 600;
+        }
+
+        .banner-section {
+            border: 1px solid #e7e7e7;
+            border-radius: 10px;
+            padding: 20px;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .banner-section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+
+        .banner-preview {
+            position: relative;
+            overflow: hidden;
+            background: #f1f3f5;
+            border: 1px dashed #c9cdd2;
+            border-radius: 8px;
+        }
+
+        .banner-preview--desktop {
+            aspect-ratio: 16 / 7;
+            width: 100%;
+        }
+
+        .banner-preview--mobile {
+            aspect-ratio: 9 / 16;
+            width: min(100%, 220px);
+            margin: 0 auto;
+        }
+
+        .banner-preview img {
+            position: absolute;
+            display: block;
+        }
+
+        .banner-preview .preview-background {
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .banner-preview .preview-overlay {
+            position: absolute;
+            object-fit: contain;
+            height: auto;
+            pointer-events: none;
+        }
+
+        .banner-preview-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a8d91;
+            font-size: 13px;
+        }
+
+        .banner-media-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            background: #fff;
+            margin-bottom: 14px;
+        }
+
+        .banner-media-card.is-background {
+            border-left: 4px solid #8cc63f;
+        }
+
+        .banner-media-card.is-overlay {
+            border-left: 4px solid #249e63;
+        }
+
+        .banner-image-preview {
+            width: 100%;
+            height: 120px;
+            border-radius: 6px;
+            background: #f4f5f6;
+            border: 1px dashed #d5d8dc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #8a8d91;
+            font-size: 12px;
+        }
+
+        .banner-image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .banner-media-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .banner-sort-handle {
+            cursor: grab;
+            color: #999;
+        }
+
+        .banner-preview-legend {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .banner-device-title {
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .banner-upload-input {
+            font-size: 12px;
+        }
+
+        @@media (max-width: 767.98px) {
+            .banner-section {
+                padding: 14px;
+            }
+        }
+    </style>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y banner-editor">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="mb-1">@(isEdit ? "Cập nhật Banner" : "Thêm Banner")</h4>
+            <p class="text-muted mb-0">
+                Quản lý hình ảnh, vị trí hiển thị và nội dung Banner.
+            </p>
+        </div>
+
+        <a href="/admin/banner" class="btn btn-label-secondary">
+            <i class="ti ti-arrow-left me-1"></i>
+            Quay lại
+        </a>
+    </div>
+
+    <form id="bannerForm" data-banner-id="@bannerId" enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" id="BannerId" value="@bannerId" />
+
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                <!-- THÔNG TIN CHUNG -->
+                <div class="banner-section">
+                    <div class="banner-section-title">
+                        <i class="ti ti-info-circle me-1"></i>
+                        Thông tin Banner
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Title" class="form-label">
+                            Tên Banner <span class="text-danger">*</span>
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="Title"
+                               name="Title"
+                               maxlength="200"
+                               placeholder="Nhập tên Banner"
+                               required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="Position" class="form-label">
+                                Vị trí hiển thị
+                            </label>
+                            <select class="form-select"
+                                    id="Position"
+                                    name="Position"
+                                    required>
+                                <option value="">Đang tải...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="SortOrder" class="form-label">
+                                Thứ tự hiển thị
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="SortOrder"
+                                   name="SortOrder"
+                                   value="0"
+                                   min="0" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="LinkType" class="form-label">
+                                Loại liên kết
+                            </label>
+                            <select class="form-select"
+                                    id="LinkType"
+                                    name="LinkType"
+                                    required>
+                                <option value="">Đang tải...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="LinkValue" class="form-label">
+                                Đường dẫn liên kết
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="LinkValue"
+                                   name="LinkValue"
+                                   placeholder="https://... hoặc /san-pham" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THỜI GIAN -->
+                <div class="banner-section">
+                    <div class="banner-section-title">
+                        <i class="ti ti-calendar me-1"></i>
+                        Thời gian hiển thị
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="StartAt" class="form-label">
+                                Bắt đầu
+                            </label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   id="StartAt"
+                                   name="StartAt" />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="EndAt" class="form-label">
+                                Kết thúc
+                            </label>
+                            <input type="datetime-local"
+                                   class="form-control"
+                                   id="EndAt"
+                                   name="EndAt" />
+                        </div>
+                    </div>
+
+                    <div class="form-text">
+                        Để trống thời gian bắt đầu hoặc kết thúc nếu không giới hạn.
+                    </div>
+                </div>
+
+                <!-- BACKGROUND -->
+                <div class="banner-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="banner-section-title mb-0">
+                            <i class="ti ti-photo me-1"></i>
+                            Background
+                        </div>
+                        <span class="badge bg-label-success">Tối đa 1</span>
+                    </div>
+
+                    <div id="backgroundContainer"></div>
+
+                    <div class="form-text mt-2">
+                        Background là ảnh nền chính. Cần ít nhất một ảnh Desktop
+                        hoặc Mobile để xuất bản Banner.
+                    </div>
+                </div>
+
+                <!-- OVERLAY -->
+                <div class="banner-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <div class="banner-section-title mb-1">
+                                <i class="ti ti-layers-subtract me-1"></i>
+                                Overlay
+                            </div>
+                            <p class="text-muted small mb-0">
+                                Thêm các ảnh phụ hiển thị chồng lên Background.
+                            </p>
+                        </div>
+
+                        <button type="button"
+                                class="btn btn-sm btn-primary"
+                                id="btnAddOverlay">
+                            <i class="ti ti-plus me-1"></i>
+                            Thêm Overlay
+                        </button>
+                    </div>
+
+                    <div id="overlayContainer"></div>
+
+                    <div id="emptyOverlay" class="text-center text-muted py-4">
+                        Chưa có Overlay nào.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI -->
+            <div class="col-lg-4">
+
+                <!-- PREVIEW -->
+                <div class="banner-section">
+                    <div class="banner-section-title">
+                        <i class="ti ti-device-desktop me-1"></i>
+                        Xem trước Banner
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="banner-device-title">
+                            <i class="ti ti-device-desktop me-1"></i>
+                            Desktop
+                        </div>
+                        <div id="desktopPreview"
+                             class="banner-preview banner-preview--desktop">
+                            <div class="banner-preview-placeholder">
+                                Chưa có hình ảnh
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="banner-device-title">
+                            <i class="ti ti-device-mobile me-1"></i>
+                            Mobile
+                        </div>
+                        <div id="mobilePreview"
+                             class="banner-preview banner-preview--mobile">
+                            <div class="banner-preview-placeholder">
+                                Chưa có hình ảnh
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="banner-preview-legend mt-3">
+                        <span class="me-3">
+                            <i class="ti ti-square-filled text-success"></i>
+                            Background
+                        </span>
+                        <span>
+                            <i class="ti ti-square-filled text-primary"></i>
+                            Overlay
+                        </span>
+                    </div>
+                </div>
+
+                <!-- TRẠNG THÁI -->
+                <div class="banner-section">
+                    <div class="banner-section-title">
+                        <i class="ti ti-settings me-1"></i>
+                        Xuất bản
+                    </div>
+
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="IsPublished"
+                               name="IsPublished"
+                               value="true" />
+                        <label class="form-check-label fw-semibold"
+                               for="IsPublished">
+                            Xuất bản Banner
+                        </label>
+                    </div>
+
+                    <div class="form-text">
+                        Khi bật, Banner sẽ được phép hiển thị theo vị trí
+                        và thời gian đã thiết lập.
+                    </div>
+                </div>
+
+                <!-- ACTION -->
+                <div class="d-grid gap-2">
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="btnSaveBanner">
+                        <i class="ti ti-device-floppy me-1"></i>
+                        @(isEdit ? "Lưu thay đổi" : "Tạo Banner")
+                    </button>
+
+                    <a href="/admin/banner"
+                       class="btn btn-label-secondary">
+                        Hủy
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/admin/assets/js/banner/hk.banner-form.js"
+            asp-append-version="true"></script>
+}

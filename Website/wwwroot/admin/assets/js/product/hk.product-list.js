@@ -47,7 +47,7 @@ $(function () {
   // Variable declaration for table
     var dt_product_table = $('.datatables-products');
 
-    $.fn.dataTable.ext.pager.numbers_length = 7;
+    $.fn.dataTable.ext.pager.numbers_length = 5;
     if (dt_product_table.length) {
         var dt_products = dt_product_table.DataTable({
             processing: true,
@@ -321,8 +321,9 @@ $(function () {
             dom:
                 '<"card-header d-flex flex-wrap py-0 flex-column flex-sm-row pt-2"' +
                 '<f>' +
-                '<"d-flex justify-content-center justify-content-md-end align-items-baseline ms-md-auto mx-2"' +
-                '<"dt-action-buttons d-flex justify-content-center flex-md-row align-items-baseline"lB>' +
+                '<"d-flex justify-content-center justify-content-md-end align-items-baseline ms-md-auto"' +
+                '<"dt-action-buttons d-flex justify-content-center flex-md-row align-items-baseline"' + '<"mx-2"l>' +
+                '<"mx-2"B>' + '>' +
                 '>' +
                 '>' +
                 't' +
@@ -354,12 +355,12 @@ $(function () {
                         '<i class="ti ti-plus ti-xs me-0 me-sm-2"></i>' +
                         '<span class="d-none d-sm-inline-block">Thêm sản phẩm</span>',
 
-                    className: 'add-new btn btn-primary ms-2 waves-effect waves-light',
+                    className: 'add-new btn btn-primary waves-effect waves-light',
                 },
                 {
                     extend: 'print',
                     text: '<i class="ti ti-printer"></i> Print',
-                    className: 'btn btn-primary ms-2 waves-effect waves-light',
+                    className: 'btn btn-label-secondary',
                     exportOptions: {
                         rows: function (idx, data, node) {
 

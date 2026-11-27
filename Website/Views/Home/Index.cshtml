@@ -1,9 +1,13 @@
-﻿@{
+﻿@using Shared.Responses.Banner
+@model IReadOnlyList<BannerResponse>
+
+@{
     ViewData["Title"] = "Trang chủ";
 }
 
 @* Banner *@
-<partial name="_BannerHome" />
+<partial name="_BannerHome" model="Model" />
+
 @* End banner *@
 
 @* Promotional *@

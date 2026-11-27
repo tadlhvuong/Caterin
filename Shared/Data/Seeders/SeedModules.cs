@@ -44,14 +44,14 @@ public static class SeedModules
             new CMSModule
             {
                 Code = "chat",
-                Name = "chat",
+                Name = "Chat",
                 IsSystem = false
             },
 
             new CMSModule
             {
                 Code = "customer",
-                Name = "customer",
+                Name = "Customer",
                 IsSystem = false
             },
 
@@ -59,6 +59,13 @@ public static class SeedModules
             {
                 Code = "order",
                 Name = "order",
+                IsSystem = false
+            },
+
+            new CMSModule
+            {
+                Code = "banner",
+                Name = "Banner",
                 IsSystem = false
             }
         };

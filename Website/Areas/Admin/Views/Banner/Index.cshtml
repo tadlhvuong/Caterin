@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Danh sách Banner";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/admin/assets/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css" />
+
+    <link rel="stylesheet" href="~/admin/assets/css/hk.banner.css"/>
+}
+
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Bộ lọc Banner</h5>
+
+            <div class="d-flex justify-content-between align-items-center row pt-4 gap-6 gap-md-0">
+                <div class="col-md-4 banner_status"></div>
+                <div class="col-md-4 banner_position"></div>
+                <div class="col-md-4 banner_link_type"></div>
+            </div>
+        </div>
+
+        <form id="antiForgeryForm">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <div class="card-datatable table-responsive">
+            <table class="datatables-banners table">
+                <thead class="border-top">
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th>Banner</th>
+                        <th>Vị trí</th>
+                        <th>Thiết bị</th>
+                        <th>Thời gian hiển thị</th>
+                        <th>Trạng thái</th>
+                        <th>Xuất bản</th>
+                        <th>Thứ tự</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+            </table>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="~/admin/assets/js/banner/hk.banner-list.js"></script>
+
+    @if (TempData["SuccessMessage"] is string message)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: '@Html.Raw(message)',
+                    confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    }
+}

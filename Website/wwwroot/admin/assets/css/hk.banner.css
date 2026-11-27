@@ -1,0 +1,35 @@
+﻿.banner-title-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+}
+
+.banner-title-cell__image {
+    width: 80px;
+    height: 56px;
+    flex: 0 0 80px;
+    overflow: hidden;
+}
+
+.banner-title-cell__image .avatar {
+    width: 80px !important;
+    height: 56px !important;
+    flex: 0 0 80px !important;
+    overflow: hidden;
+}
+
+.banner-title-cell__image img {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+}
+
+.banner-title-cell__content {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}

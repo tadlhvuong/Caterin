@@ -15,6 +15,7 @@ using Shared.DTOs.Identity;
 using Shared.Extensions;
 using Shared.Helpers;
 using Shared.Interfaces.AuthServices;
+using Shared.Interfaces.Banner;
 using Shared.Interfaces.Caches;
 using Shared.Interfaces.Chat;
 using Shared.Interfaces.Core;
@@ -27,6 +28,7 @@ using Shared.Middlewares;
 using Shared.Resources;
 using Shared.Services;
 using Shared.Services.Authentication;
+using Shared.Services.Banner;
 using Shared.Services.Caches;
 using Shared.Services.Chat;
 using Shared.Services.Customer;
@@ -207,6 +209,8 @@ services.AddScoped<IChatAttachmentService, ChatAttachmentService>();
 
 services.AddScoped<IChatRealtimeNotifier, ChatRealtimeNotifier>();
 services.AddSingleton<IChatPresenceService, ChatPresenceService>();
+
+services.AddScoped<IBannerService, BannerService>();
 
 var useRedis = builder.Configuration.GetValue<bool>("Cache:UseRedis");
 if (useRedis)

@@ -1,17 +1,21 @@
 using CATERIN.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Interfaces.Banner;
 using System.Diagnostics;
+using System.Threading;
 
 namespace CATERIN.Controllers
 {
     [AllowAnonymous]
     public class HomeController : Controller
     {
+        private readonly IBannerService _bannerService;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IBannerService bannerService, ILogger<HomeController> logger)
         {
+            _bannerService = bannerService;
             _logger = logger;
         }
         [HttpGet("home")]
@@ -21,9 +25,10 @@ namespace CATERIN.Controllers
         }
         [HttpGet("")]
         [HttpGet("trang-chu")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            return View();
+            var banners = await _bannerService.GetHomeBannersAsync(cancellationToken);
+            return View(banners);
         }
         [HttpGet("gioi-thieu")]
         public IActionResult About()

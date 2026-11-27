@@ -1875,6 +1875,125 @@ namespace Shared.Migrations
                     b.ToTable("Warehouses", (string)null);
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Marketing.Banner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EndAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LinkType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LinkValue")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("StartAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Position", "IsPublished", "IsDeleted", "SortOrder");
+
+                    b.ToTable("banners", (string)null);
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Media.BannerMedia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AltText")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<int>("BannerId")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("DesktopMediaFileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("DesktopWidth")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("DesktopX")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("DesktopY")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<int>("MediaType")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("MobileMediaFileId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("MobileWidth")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("MobileX")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<decimal>("MobileY")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BannerId")
+                        .IsUnique()
+                        .HasFilter("\"MediaType\" = 1");
+
+                    b.HasIndex("DesktopMediaFileId");
+
+                    b.HasIndex("MobileMediaFileId");
+
+                    b.HasIndex("BannerId", "SortOrder");
+
+                    b.ToTable("banner_media", (string)null);
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaAlbum", b =>
                 {
                     b.Property<int>("Id")
@@ -3158,6 +3277,31 @@ namespace Shared.Migrations
                     b.Navigation("Warehouse");
                 });
 
+            modelBuilder.Entity("Shared.Data.Entities.Media.BannerMedia", b =>
+                {
+                    b.HasOne("Shared.Data.Entities.Marketing.Banner", "Banner")
+                        .WithMany("BannerMedias")
+                        .HasForeignKey("BannerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "DesktopMediaFile")
+                        .WithMany()
+                        .HasForeignKey("DesktopMediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Shared.Data.Entities.Media.MediaFile", "MobileMediaFile")
+                        .WithMany()
+                        .HasForeignKey("MobileMediaFileId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Banner");
+
+                    b.Navigation("DesktopMediaFile");
+
+                    b.Navigation("MobileMediaFile");
+                });
+
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaFile", b =>
                 {
                     b.HasOne("Shared.Data.Entities.Media.MediaAlbum", null)
@@ -3468,6 +3612,11 @@ namespace Shared.Migrations
                     b.Navigation("InventoryTransactions");
 
                     b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Shared.Data.Entities.Marketing.Banner", b =>
+                {
+                    b.Navigation("BannerMedias");
                 });
 
             modelBuilder.Entity("Shared.Data.Entities.Media.MediaAlbum", b =>

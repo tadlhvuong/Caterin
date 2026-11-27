@@ -45,6 +45,7 @@ namespace Shared.Data.Seeders
 
             await SeedRolePermissions.SeedAsync(dbContext, roleManager);
 
+            await SeedChatInbox.SeedAsync(dbContext);
         }
     }
 }
